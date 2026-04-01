@@ -1,5 +1,24 @@
 const drawButton = document.getElementById('draw-button');
+const themeButton = document.getElementById('theme-button');
 const numbersDisplay = document.querySelector('.numbers-display');
+
+// Initialize theme
+const currentTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', currentTheme);
+updateThemeButton(currentTheme);
+
+themeButton.addEventListener('click', () => {
+    const theme = document.documentElement.getAttribute('data-theme');
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeButton(newTheme);
+});
+
+function updateThemeButton(theme) {
+    themeButton.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
+}
 
 drawButton.addEventListener('click', () => {
     drawNumbers();

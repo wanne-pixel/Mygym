@@ -1,3 +1,19 @@
+:root {
+    --bg-color: #f0f2f5;
+    --card-bg: white;
+    --text-color: #333;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --button-gradient: linear-gradient(145deg, #6a11cb, #2575fc);
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --text-color: #f0f2f5;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --button-gradient: linear-gradient(145deg, #8e2de2, #4a00e0);
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     display: flex;
@@ -5,21 +21,40 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f2f5;
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4d4d4' fill-opacity='0.1' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+#theme-button {
+    background: var(--card-bg);
+    border: 1px solid var(--text-color);
+    color: var(--text-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .lottery-machine {
-    background: white;
+    background: var(--card-bg);
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px var(--shadow-color), 0 6px 6px rgba(0, 0, 0, 0.05);
     text-align: center;
     width: 320px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 h1 {
-    color: #333;
+    color: var(--text-color);
     margin-top: 0;
     font-size: 2.5em;
     font-weight: 700;
@@ -50,7 +85,7 @@ h1 {
 }
 
 #draw-button {
-    background: linear-gradient(145deg, #6a11cb, #2575fc);
+    background: var(--button-gradient);
     color: white;
     border: none;
     padding: 15px 30px;
@@ -58,7 +93,7 @@ h1 {
     font-size: 1.2em;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
