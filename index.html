@@ -1,20 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotto Draw</title>
+    <title>MyGym - 운동 기록</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel CDN for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
 </head>
 <body>
-    <div class="theme-toggle">
-        <button id="theme-button">Dark Mode</button>
-    </div>
-    <div class="lottery-machine">
-        <h1>Lotto Draw</h1>
-        <div class="numbers-display"></div>
-        <button id="draw-button">Draw Numbers</button>
-    </div>
-    <script src="main.js"></script>
+    <div id="root"></div>
+    <script type="text/babel" src="main.js"></script>
 </body>
 </html>

@@ -1,48 +1,32 @@
 
-# Project Blueprint
+# MyGym - 웨이트 트레이닝 기록 앱
 
-## Overview
+## 개요
+'MyGym'은 사용자가 자신의 웨이트 트레이닝 기록을 쉽고 빠르게 남길 수 있는 모바일 친화적 웹 애플리케이션입니다. React와 Tailwind CSS를 활용하여 직관적이고 세련된 UI를 제공합니다.
 
-This project is a simple, interactive web application for generating lottery numbers. It provides a user-friendly interface to simulate a lottery draw, displaying a set of unique, randomly selected numbers. The application is built using modern web standards, including HTML, CSS, and JavaScript, and leverages Web Components for a modular and maintainable structure.
+## 주요 기능 및 UI 구성
 
-## Style, Design, and Features
+### 1. 단계별 운동 선택 가이드
+사용자가 운동을 쉽게 찾을 수 있도록 3단계 계층 구조를 제공합니다.
+*   **운동 부위:** 가슴, 등, 하체, 어깨, 팔 등 주요 근육 부위 선택.
+*   **운동 종류:** 선택한 부위에 따라 프리웨이트, 머신, 케이블 등의 종류 필터링.
+*   **기구명:** 세부적인 운동 이름(예: 벤치프레스, 스쿼트 등) 선택.
 
-### Initial Version
+### 2. 세트 기록 입력
+*   **무게(kg) & 횟수(reps):** 직관적인 숫자 입력 폼을 통해 각 세트의 성과를 입력합니다.
+*   **추가 버튼:** 입력한 데이터를 즉시 오늘의 기록 리스트에 추가합니다.
 
-*   **Core Functionality:**
-    *   Generates a set of 6 unique random numbers between 1 and 45.
-    *   A "Draw Numbers" button initiates the lottery draw.
-    *   The generated numbers are displayed in a clean, easy-to-read format.
-*   **Visual Design:**
-    *   **Layout:** A centered, card-like container for the lottery machine.
-    *   **Typography:** Clear, legible fonts for the title, button, and numbers.
-    *   **Color Scheme:** A visually appealing color palette with good contrast.
-    *   **Animation:** A subtle animation effect for the numbers as they are drawn.
-*   **Technology:**
-    *   **HTML:** Structures the application.
-    *   **CSS:** Styles the application for a modern look and feel.
-    *   **JavaScript:** Implements the lottery drawing logic and handles user interaction.
+### 3. 실시간 기록 리스트
+*   오늘 수행한 운동 세트들을 역순(최신순)으로 정렬하여 리스트 형태로 보여줍니다.
+*   각 리스트 아이템은 운동 명칭, 부위, 시간, 무게, 횟수 정보를 포함합니다.
+*   삭제 기능을 통해 실수로 입력한 기록을 관리할 수 있습니다.
 
-## Current Plan
+### 4. 디자인 특징
+*   **모바일 우선 디자인:** 스마트폰에서 한 손으로 조작하기 편한 레이아웃.
+*   **반응형 UI:** 다양한 기기에서 최적화된 화면 제공.
+*   **애니메이션:** 요소 추가 및 전환 시 부드러운 애니메이션 적용 (Fade-in, Slide-up).
 
-### Create a Lottery Drawing Application
-
-1.  **Create `blueprint.md`:** Document the plan for the new feature.
-2.  **Update `index.html`:**
-    *   Change the title to "Lotto Draw".
-    *   Add a main container for the lottery machine.
-    *   Add a display area for the drawn numbers.
-    *   Add a button to trigger the lottery draw.
-3.  **Update `style.css`:**
-    *   Add styles for the lottery machine container.
-    *   Style the number display.
-    *   Style the "Draw" button.
-    *   Add some basic animations for the number drawing.
-4.  **Update `main.js`:**
-    *   Implement the lottery drawing logic.
-    *   Get the button element and add a click event listener.
-    *   When the button is clicked:
-        *   Clear any previously drawn numbers.
-        *   Generate 6 unique random numbers between 1 and 45.
-        *   Sort the numbers in ascending order.
-        *   Display the numbers one by one with a slight delay to create an animation effect.
+## 기술 스택
+*   **프레임워크:** React (v18)
+*   **스타일링:** Tailwind CSS (Play CDN)
+*   **폰트:** Inter (Google Fonts)
