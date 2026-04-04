@@ -16,9 +16,147 @@ const BackButton = ({ onClick }) => (
 );
 
 /**
- * [화면 1: 로그인 화면]
+ * [화면 1: 로그인 및 회원가입 화면]
  */
 const LoginScreen = ({ onLogin }) => {
+    const [isSignup, setIsSignup] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordConfirm, setPasswordConfirm] = useState('');
+    const [isVerified, setIsVerified] = useState(false);
+
+    // AI 코칭용 추가 정보 (선택)
+    const [age, setAge] = useState('');
+    const [gender, setGender] = useState('');
+    const [height, setHeight] = useState('');
+    const [weight, setWeight] = useState('');
+
+    const handleVerify = () => {
+        if (!email) {
+            alert('이메일을 입력해 주세요.');
+            return;
+        }
+        alert('인증 코드가 발송되었습니다.');
+        setIsVerified(true);
+    };
+
+    const handleSignupComplete = () => {
+        if (!isVerified) {
+            alert('이메일 인증이 필요합니다.');
+            return;
+        }
+        if (password !== passwordConfirm) {
+            alert('비밀번호가 일치하지 않습니다.');
+            return;
+        }
+        alert('회원가입이 완료되었습니다!');
+        setIsSignup(false);
+    };
+
+    if (isSignup) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 animate-fade-in bg-slate-950">
+                <div className="w-full max-w-md space-y-8">
+                    <div className="text-center">
+                        <h2 className="text-4xl font-black italic tracking-tighter text-white uppercase">Join MyGym</h2>
+                        <p className="mt-2 text-slate-400 font-medium">새로운 시작을 위한 정보를 입력해 주세요.</p>
+                    </div>
+
+                    <div className="space-y-6 bg-slate-900/50 p-8 rounded-3xl border border-slate-800 shadow-2xl">
+                        {/* 기본 정보 */}
+                        <div className="space-y-4">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">계정 정보 (필수)</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="email"
+                                    placeholder="아이디(이메일)"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all"
+                                />
+                                <button 
+                                    onClick={handleVerify}
+                                    className="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm transition-all whitespace-nowrap active:scale-95"
+                                >
+                                    인증하기
+                                </button>
+                            </div>
+                            <input
+                                type="password"
+                                placeholder="비밀번호"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all"
+                            />
+                            <input
+                                type="password"
+                                placeholder="비밀번호 확인"
+                                value={passwordConfirm}
+                                onChange={(e) => setPasswordConfirm(e.target.value)}
+                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all"
+                            />
+                        </div>
+
+                        {/* 추가 정보 */}
+                        <div className="space-y-4 pt-6 border-t border-slate-800">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">AI 코칭 추가 정보 (선택)</label>
+                                <p className="text-[11px] text-slate-400 mb-4">더 정확한 AI 코칭을 위해 정보를 입력해 주세요 (선택 사항)</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <input 
+                                    type="number" 
+                                    placeholder="나이" 
+                                    value={age}
+                                    onChange={(e) => setAge(e.target.value)}
+                                    className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all" 
+                                />
+                                <select 
+                                    value={gender}
+                                    onChange={(e) => setGender(e.target.value)}
+                                    className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all"
+                                >
+                                    <option value="">성별</option>
+                                    <option value="male">남성</option>
+                                    <option value="female">여성</option>
+                                </select>
+                                <input 
+                                    type="number" 
+                                    placeholder="키 (cm)" 
+                                    value={height}
+                                    onChange={(e) => setHeight(e.target.value)}
+                                    className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all" 
+                                />
+                                <input 
+                                    type="number" 
+                                    placeholder="몸무게 (kg)" 
+                                    value={weight}
+                                    onChange={(e) => setWeight(e.target.value)}
+                                    className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all" 
+                                />
+                            </div>
+                        </div>
+
+                        <div className="pt-2">
+                            <button
+                                onClick={handleSignupComplete}
+                                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all mb-4"
+                            >
+                                가입 완료
+                            </button>
+                            <button
+                                onClick={() => setIsSignup(false)}
+                                className="w-full text-sm text-slate-500 hover:text-white transition-colors py-2"
+                            >
+                                이미 계정이 있나요? 로그인하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen px-6 animate-fade-in">
             <div className="mb-12 text-center">
@@ -50,6 +188,7 @@ const LoginScreen = ({ onLogin }) => {
                         로그인
                     </button>
                     <button
+                        onClick={() => setIsSignup(true)}
                         className="flex-1 py-4 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl active:scale-95 transition-all"
                     >
                         회원가입
@@ -106,13 +245,60 @@ const WorkoutDetailScreen = ({ data, onBack }) => {
 const WorkoutSetupScreen = ({ onBack }) => {
     const [step, setStep] = useState(1);
     const [selection, setSelection] = useState({ part: '', type: '', exercise: '' });
-    const [input, setInput] = useState({ weight: '', reps: '', sets: '' });
-    const [addedSets, setAddedSets] = useState([]);
+    const [numSets, setNumSets] = useState('');
+    const [weights, setWeights] = useState([]);
+    const [reps, setReps] = useState('');
+    const [addedExercises, setAddedExercises] = useState([]);
 
-    const handleAddSet = () => {
-        if (!input.weight || !input.reps) return;
-        setAddedSets([...addedSets, { ...selection, ...input, id: Date.now() }]);
-        setInput({ ...input, weight: '', reps: '' });
+    const handleNumSetsChange = (e) => {
+        const val = parseInt(e.target.value) || 0;
+        setNumSets(e.target.value);
+        if (val > 0) {
+            // 기존 값이 있으면 유지하고, 부족하면 채우고, 넘치면 자름
+            setWeights(prevWeights => {
+                const newWeights = new Array(val).fill('');
+                for (let i = 0; i < Math.min(val, prevWeights.length); i++) {
+                    newWeights[i] = prevWeights[i];
+                }
+                return newWeights;
+            });
+        } else {
+            setWeights([]);
+        }
+    };
+
+    const handleWeightChange = (index, value) => {
+        const newWeights = [...weights];
+        newWeights[index] = value;
+        setWeights(newWeights);
+    };
+
+    const isRecordEnabled = useMemo(() => {
+        const nSets = parseInt(numSets);
+        const nReps = parseInt(reps);
+        // 모든 세트의 무게가 입력되었는지 확인 (빈 문자열이 없고, 0 이상의 숫자여야 함)
+        const allWeightsFilled = weights.length > 0 && 
+                                weights.length === nSets && 
+                                weights.every(w => w !== '' && !isNaN(parseFloat(w)) && parseFloat(w) >= 0);
+        
+        return nSets > 0 && nReps > 0 && allWeightsFilled;
+    }, [numSets, weights, reps]);
+
+    const handleAddExercise = () => {
+        if (!isRecordEnabled) return;
+        setAddedExercises([...addedExercises, { 
+            ...selection, 
+            sets: numSets, 
+            reps: reps, 
+            weights: [...weights],
+            id: Date.now() 
+        }]);
+        // Reset inputs
+        setNumSets('');
+        setWeights([]);
+        setReps('');
+        setStep(1);
+        setSelection({ part: '', type: '', exercise: '' });
     };
 
     return (
@@ -167,6 +353,7 @@ const WorkoutSetupScreen = ({ onBack }) => {
                         <div className="animate-fade-in">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Step 3. 세부 종목</label>
                             <select 
+                                value={selection.exercise}
                                 onChange={(e) => { setSelection({ ...selection, exercise: e.target.value }); setStep(4); }}
                                 className="w-full bg-slate-800 border border-slate-700 text-white p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                             >
@@ -174,40 +361,65 @@ const WorkoutSetupScreen = ({ onBack }) => {
                                 <option value="벤치프레스">벤치프레스</option>
                                 <option value="데드리프트">데드리프트</option>
                                 <option value="스쿼트">스쿼트</option>
+                                <option value="바벨 로우">바벨 로우</option>
+                                <option value="숄더 프레스">숄더 프레스</option>
                             </select>
                         </div>
                     )}
 
                     {/* 4단계: 입력 */}
                     {step >= 4 && (
-                        <div className="animate-fade-in space-y-4 bg-slate-800/30 p-6 rounded-2xl border border-slate-700">
+                        <div className="animate-fade-in space-y-6 bg-slate-800/30 p-6 rounded-2xl border border-slate-700">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block tracking-tighter">Weight (kg)</label>
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block tracking-tighter">Sets 수</label>
                                     <input 
                                         type="number" 
-                                        value={input.weight}
-                                        onChange={(e) => setInput({...input, weight: e.target.value})}
-                                        className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white text-center font-bold" 
+                                        value={numSets}
+                                        onChange={handleNumSetsChange}
+                                        className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white text-center font-bold focus:ring-2 focus:ring-blue-500 outline-none" 
                                         placeholder="0"
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block tracking-tighter">Reps</label>
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block tracking-tighter">Reps (공통)</label>
                                     <input 
                                         type="number" 
-                                        value={input.reps}
-                                        onChange={(e) => setInput({...input, reps: e.target.value})}
-                                        className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white text-center font-bold" 
+                                        value={reps}
+                                        onChange={(e) => setReps(e.target.value)}
+                                        className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white text-center font-bold focus:ring-2 focus:ring-blue-500 outline-none" 
                                         placeholder="0"
                                     />
                                 </div>
                             </div>
+
+                            {/* 동적 세트 무게 입력창 */}
+                            {weights.length > 0 && (
+                                <div className="space-y-3 animate-slide-down">
+                                    <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">세트별 무게 (KG)</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                        {weights.map((w, idx) => (
+                                            <div key={idx} className="relative">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-600">{idx + 1}</span>
+                                                <input 
+                                                    type="number" 
+                                                    value={w}
+                                                    onChange={(e) => handleWeightChange(idx, e.target.value)}
+                                                    className="w-full bg-slate-900 border border-slate-700 p-3 pl-7 rounded-xl text-white text-right font-bold focus:border-blue-500 outline-none" 
+                                                    placeholder="0"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             <button 
-                                onClick={handleAddSet}
-                                className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl italic tracking-tighter transition-all"
+                                onClick={handleAddExercise}
+                                disabled={!isRecordEnabled}
+                                className={`w-full py-4 font-black rounded-xl italic tracking-tighter transition-all ${isRecordEnabled ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}
                             >
-                                ADD SET +
+                                기록하기
                             </button>
                         </div>
                     )}
@@ -217,20 +429,33 @@ const WorkoutSetupScreen = ({ onBack }) => {
                 <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6">
                     <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                         <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                        현재 구성된 운동 ({addedSets.length})
+                        현재 구성된 운동 ({addedExercises.length})
                     </h3>
-                    <div className="space-y-3">
-                        {addedSets.length === 0 ? (
-                            <p className="text-slate-600 text-center py-12 italic text-sm">기록된 세트가 없습니다.</p>
+                    <div className="space-y-4">
+                        {addedExercises.length === 0 ? (
+                            <p className="text-slate-600 text-center py-12 italic text-sm">기록된 운동이 없습니다.</p>
                         ) : (
-                            addedSets.map((s, idx) => (
-                                <div key={s.id} className="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
-                                    <div>
-                                        <span className="text-[10px] font-bold text-blue-400 block uppercase">{s.part} / {s.type}</span>
-                                        <span className="font-bold text-white">{s.exercise}</span>
+                            addedExercises.map((ex, idx) => (
+                                <div key={ex.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <span className="text-[10px] font-bold text-blue-400 block uppercase">{ex.part} / {ex.type}</span>
+                                            <span className="font-bold text-white text-lg">{ex.exercise}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-xs font-bold text-slate-500 uppercase">Total {ex.sets} Sets</span>
+                                        </div>
                                     </div>
-                                    <div className="text-right font-black italic text-slate-300">
-                                        {s.weight}kg × {s.reps}회
+                                    <div className="flex flex-wrap gap-2">
+                                        {ex.weights.map((w, i) => (
+                                            <div key={i} className="px-3 py-1 bg-slate-900 rounded-lg border border-slate-700 text-[11px]">
+                                                <span className="text-slate-500 mr-1">{i+1}S:</span>
+                                                <span className="text-white font-bold">{w}kg</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-3 text-right">
+                                        <span className="text-xs font-medium text-slate-400">Reps: <span className="text-indigo-400 font-bold">{ex.reps}</span></span>
                                     </div>
                                 </div>
                             ))
