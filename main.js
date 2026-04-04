@@ -27,24 +27,37 @@ const exerciseData = {
 
 const App = () => {
     const [selectedBodyPart, setSelectedBodyPart] = useState('');
+    const [isCustomBodyPart, setIsCustomBodyPart] = useState(false);
+    const [customBodyPart, setCustomBodyPart] = useState('');
+
     const [selectedType, setSelectedType] = useState('');
+    const [isCustomType, setIsCustomType] = useState(false);
+    const [customType, setCustomType] = useState('');
+
     const [selectedExercise, setSelectedExercise] = useState('');
+    const [isCustomExercise, setIsCustomExercise] = useState(false);
+    const [customExercise, setCustomExercise] = useState('');
+
     const [weight, setWeight] = useState('');
     const [reps, setReps] = useState('');
     const [sets, setSets] = useState([]);
 
     const bodyParts = Object.keys(exerciseData);
-    const types = selectedBodyPart ? Object.keys(exerciseData[selectedBodyPart]) : [];
-    const exercises = (selectedBodyPart && selectedType) ? exerciseData[selectedBodyPart][selectedType] : [];
+    const types = (selectedBodyPart && !isCustomBodyPart) ? Object.keys(exerciseData[selectedBodyPart]) : [];
+    const exercises = (selectedBodyPart && !isCustomBodyPart && selectedType && !isCustomType) ? exerciseData[selectedBodyPart][selectedType] : [];
 
     const handleAddSet = (e) => {
         e.preventDefault();
-        if (!selectedExercise || !weight || !reps) return;
+        
+        const finalBodyPart = isCustomBodyPart ? customBodyPart : selectedBodyPart;
+        const finalExercise = isCustomExercise ? customExercise : selectedExercise;
+
+        if (!finalExercise || !weight || !reps) return;
 
         const newSet = {
             id: Date.now(),
-            exercise: selectedExercise,
-            bodyPart: selectedBodyPart,
+            exercise: finalExercise,
+            bodyPart: finalBodyPart,
             weight: weight,
             reps: reps,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -53,6 +66,7 @@ const App = () => {
         setSets([newSet, ...sets]);
         setWeight('');
         setReps('');
+        if (isCustomExercise) setCustomExercise('');
     };
 
     const handleDeleteSet = (id) => {
@@ -74,18 +88,21 @@ const App = () => {
                         {/* 1. 운동 부위 */}
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">운동 부위</label>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-3 gap-2 mb-2">
                                 {bodyParts.map(part => (
                                     <button
                                         key={part}
                                         type="button"
                                         onClick={() => {
                                             setSelectedBodyPart(part);
+                                            setIsCustomBodyPart(false);
                                             setSelectedType('');
+                                            setIsCustomType(false);
                                             setSelectedExercise('');
+                                            setIsCustomExercise(false);
                                         }}
                                         className={`py-2 text-sm rounded-xl transition-all ${
-                                            selectedBodyPart === part 
+                                            (selectedBodyPart === part && !isCustomBodyPart)
                                             ? 'bg-indigo-600 text-white shadow-md' 
                                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                         }`}
@@ -93,24 +110,51 @@ const App = () => {
                                         {part}
                                     </button>
                                 ))}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsCustomBodyPart(true);
+                                        setSelectedBodyPart('');
+                                        setIsCustomType(true);
+                                        setIsCustomExercise(true);
+                                    }}
+                                    className={`py-2 text-sm rounded-xl transition-all ${
+                                        isCustomBodyPart 
+                                        ? 'bg-orange-500 text-white shadow-md' 
+                                        : 'bg-orange-50 text-orange-600 border border-orange-100'
+                                    }`}
+                                >
+                                    기타
+                                </button>
                             </div>
+                            {isCustomBodyPart && (
+                                <input
+                                    type="text"
+                                    placeholder="부위 직접 입력 (예: 코어)"
+                                    value={customBodyPart}
+                                    onChange={(e) => setCustomBodyPart(e.target.value)}
+                                    className="w-full p-2 bg-orange-50 border border-orange-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-orange-500 animate-fade-in"
+                                />
+                            )}
                         </div>
 
-                        {/* 2. 종류 (부위 선택 시 표시) */}
-                        {selectedBodyPart && (
+                        {/* 2. 종류 */}
+                        {(selectedBodyPart || isCustomBodyPart) && (
                             <div className="animate-fade-in">
                                 <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">운동 종류</label>
-                                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                                    {types.map(type => (
+                                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-2">
+                                    {!isCustomBodyPart && types.map(type => (
                                         <button
                                             key={type}
                                             type="button"
                                             onClick={() => {
                                                 setSelectedType(type);
+                                                setIsCustomType(false);
                                                 setSelectedExercise('');
+                                                setIsCustomExercise(false);
                                             }}
                                             className={`px-4 py-2 text-sm whitespace-nowrap rounded-full transition-all border ${
-                                                selectedType === type 
+                                                (selectedType === type && !isCustomType)
                                                 ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-semibold' 
                                                 : 'border-gray-200 text-gray-500'
                                             }`}
@@ -118,24 +162,68 @@ const App = () => {
                                             {type}
                                         </button>
                                     ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsCustomType(true);
+                                            setSelectedType('');
+                                            setIsCustomExercise(true);
+                                        }}
+                                        className={`px-4 py-2 text-sm whitespace-nowrap rounded-full transition-all border ${
+                                            isCustomType 
+                                            ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold' 
+                                            : 'border-orange-100 text-orange-500'
+                                        }`}
+                                    >
+                                        기타
+                                    </button>
                                 </div>
+                                {isCustomType && (
+                                    <input
+                                        type="text"
+                                        placeholder="종류 직접 입력 (예: 맨몸)"
+                                        value={customType}
+                                        onChange={(e) => setCustomType(e.target.value)}
+                                        className="w-full p-2 bg-orange-50 border border-orange-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-orange-500 animate-fade-in"
+                                    />
+                                )}
                             </div>
                         )}
 
-                        {/* 3. 기구명 (종류 선택 시 표시) */}
-                        {selectedType && (
+                        {/* 3. 기구명 */}
+                        {(selectedType || isCustomType) && (
                             <div className="animate-fade-in">
                                 <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">기구명</label>
-                                <select 
-                                    value={selectedExercise}
-                                    onChange={(e) => setSelectedExercise(e.target.value)}
-                                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                >
-                                    <option value="">운동을 선택하세요</option>
-                                    {exercises.map(ex => (
-                                        <option key={ex} value={ex}>{ex}</option>
-                                    ))}
-                                </select>
+                                {!isCustomType ? (
+                                    <select 
+                                        value={isCustomExercise ? 'custom' : selectedExercise}
+                                        onChange={(e) => {
+                                            if (e.target.value === 'custom') {
+                                                setIsCustomExercise(true);
+                                                setSelectedExercise('');
+                                            } else {
+                                                setIsCustomExercise(false);
+                                                setSelectedExercise(e.target.value);
+                                            }
+                                        }}
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all mb-2"
+                                    >
+                                        <option value="">운동을 선택하세요</option>
+                                        {exercises.map(ex => (
+                                            <option key={ex} value={ex}>{ex}</option>
+                                        ))}
+                                        <option value="custom">+ 직접 입력</option>
+                                    </select>
+                                ) : null}
+                                {(isCustomExercise || isCustomType) && (
+                                    <input
+                                        type="text"
+                                        placeholder="기구/운동 이름 직접 입력"
+                                        value={customExercise}
+                                        onChange={(e) => setCustomExercise(e.target.value)}
+                                        className="w-full p-3 bg-orange-50 border border-orange-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500 animate-fade-in"
+                                    />
+                                )}
                             </div>
                         )}
 
@@ -165,9 +253,9 @@ const App = () => {
 
                         <button
                             type="submit"
-                            disabled={!selectedExercise || !weight || !reps}
+                            disabled={(!isCustomExercise && !selectedExercise) || !weight || !reps || (isCustomExercise && !customExercise)}
                             className={`w-full py-4 rounded-xl font-bold text-lg transition-all shadow-lg active:scale-95 ${
-                                !selectedExercise || !weight || !reps
+                                ((!isCustomExercise && !selectedExercise) || !weight || !reps || (isCustomExercise && !customExercise))
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-indigo-600 text-white hover:bg-indigo-700'
                             }`}
