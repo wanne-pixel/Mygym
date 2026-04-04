@@ -25,6 +25,33 @@ const exerciseData = {
     }
 };
 
+const exerciseGuide = {
+    '벤치프레스': {
+        img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=400&auto=format&fit=crop',
+        tip: '바벨을 가슴 중앙으로 내리고 팔꿈치가 너무 벌어지지 않게 주의하세요. 발바닥을 지면에 밀착시켜 몸을 고정합니다.'
+    },
+    '스쿼트': {
+        img: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=400&auto=format&fit=crop',
+        tip: '무릎이 발끝보다 너무 나가지 않게 하고, 허리를 곧게 펴세요. 뒤꿈치에 무게 중심을 둡니다.'
+    },
+    '데드리프트': {
+        img: 'https://images.unsplash.com/photo-1603287611630-d645505294ad?q=80&w=400&auto=format&fit=crop',
+        tip: '등이 굽지 않도록 척추 중립을 유지하세요. 바를 몸에 가깝게 붙여 수직으로 들어올립니다.'
+    },
+    '렛풀다운': {
+        img: 'https://images.unsplash.com/photo-1590239068512-63200218677f?q=80&w=400&auto=format&fit=crop',
+        tip: '상체를 살짝 뒤로 젖히고 쇄골 방향으로 바를 당기세요. 어깨가 들리지 않도록 견갑을 하강합니다.'
+    },
+    '사이드 레터럴 레이즈': {
+        img: 'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?q=80&w=400&auto=format&fit=crop',
+        tip: '팔을 던지듯 들어올리지 말고 어깨의 힘으로 천천히 올리세요. 손목이 팔꿈치보다 높지 않게 합니다.'
+    },
+    '레그 프레스': {
+        img: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=400&auto=format&fit=crop',
+        tip: '발판의 위치가 높을수록 둔근, 낮을수록 대퇴사두근에 집중됩니다. 무릎을 완전히 펴서 관절을 잠그지 마세요.'
+    }
+};
+
 const App = () => {
     const [selectedBodyPart, setSelectedBodyPart] = useState('');
     const [isCustomBodyPart, setIsCustomBodyPart] = useState(false);
@@ -45,6 +72,9 @@ const App = () => {
     const bodyParts = Object.keys(exerciseData);
     const types = (selectedBodyPart && !isCustomBodyPart) ? Object.keys(exerciseData[selectedBodyPart]) : [];
     const exercises = (selectedBodyPart && !isCustomBodyPart && selectedType && !isCustomType) ? exerciseData[selectedBodyPart][selectedType] : [];
+
+    // 현재 선택된 운동의 가이드 정보 가져오기
+    const currentGuide = exerciseGuide[selectedExercise];
 
     const handleAddSet = (e) => {
         e.preventDefault();
@@ -224,6 +254,25 @@ const App = () => {
                                         className="w-full p-3 bg-orange-50 border border-orange-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500 animate-fade-in"
                                     />
                                 )}
+                            </div>
+                        )}
+
+                        {/* Exercise Guide Section (Visible when an exercise with a guide is selected) */}
+                        {currentGuide && !isCustomExercise && (
+                            <div className="animate-fade-in bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                <div className="flex gap-4 items-start">
+                                    <img 
+                                        src={currentGuide.img} 
+                                        alt={selectedExercise}
+                                        className="w-24 h-24 object-cover rounded-lg shadow-sm border border-white"
+                                    />
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-bold text-indigo-800 mb-1">💡 초보자 가이드</h4>
+                                        <p className="text-xs text-indigo-600 leading-relaxed">
+                                            {currentGuide.tip}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
