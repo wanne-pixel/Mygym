@@ -489,12 +489,32 @@ const WorkoutSetupScreen = ({ onBack }) => {
                                     </div>
                                     <div className="mt-3 text-right">
                                         <span className="text-xs font-bold text-slate-500 uppercase">Total {ex.sets} Sets</span>
-1                                    </div>
+                                    </div>
                                 </div>
                             ))
                         )}
                     </div>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+/**
+ * [신규 화면: 운동 계획 (Workout Plan)]
+ */
+const WorkoutPlanScreen = ({ onBack }) => {
+    return (
+        <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in">
+            <BackButton onClick={onBack} />
+            <div className="flex flex-col items-center justify-center py-32 bg-slate-900/50 rounded-[2.5rem] border border-slate-800 border-dashed">
+                <div className="w-20 h-20 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 rotate-12">
+                    <svg className="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                </div>
+                <h2 className="text-2xl font-black italic text-white mb-2 uppercase tracking-tighter">운동 계획 준비 중</h2>
+                <p className="text-slate-400 font-medium">더 스마트한 루틴 관리 기능을 준비하고 있습니다.</p>
             </div>
         </div>
     );
@@ -622,33 +642,49 @@ const DashboardScreen = ({ onNavigate }) => {
             <div className="w-full md:w-1/2 flex flex-col h-auto md:h-screen">
                 <button 
                     onClick={() => onNavigate('workoutSetup')}
-                    className="h-[280px] md:flex-1 group relative overflow-hidden bg-slate-900 flex flex-col items-center justify-center transition-all hover:bg-slate-800"
+                    className="h-[220px] md:flex-1 group relative overflow-hidden bg-slate-900 flex flex-col items-center justify-center transition-all hover:bg-slate-800 border-b border-slate-800 md:border-b-0"
                 >
                     <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-600/30 group-hover:rotate-12 transition-transform">
-                            <svg className="w-7 h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-blue-600/30 group-hover:rotate-12 transition-transform">
+                            <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
                         </div>
-                        <span className="text-xl md:text-2xl font-black italic text-white tracking-tighter">운동 구성</span>
-                        <p className="text-slate-400 text-xs md:text-sm mt-1 uppercase">Workout Setup</p>
+                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">운동 기록</span>
+                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Workout Record</p>
+                    </div>
+                </button>
+
+                <button 
+                    onClick={() => onNavigate('workoutPlan')}
+                    className="h-[220px] md:flex-1 group relative overflow-hidden bg-indigo-950 flex flex-col items-center justify-center transition-all hover:bg-indigo-900 border-b border-slate-800 md:border-b-0"
+                >
+                    <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-indigo-600/30 group-hover:rotate-6 transition-transform">
+                            <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        </div>
+                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">운동 계획</span>
+                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Workout Plan</p>
                     </div>
                 </button>
 
                 <button 
                     onClick={() => onNavigate('aiRecommendation')}
-                    className="h-[280px] md:flex-1 group relative overflow-hidden bg-blue-700 flex flex-col items-center justify-center transition-all hover:bg-blue-600"
+                    className="h-[220px] md:flex-1 group relative overflow-hidden bg-blue-700 flex flex-col items-center justify-center transition-all hover:bg-blue-600"
                 >
                     <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-14 h-14 md:w-16 md:h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/30 group-hover:-rotate-12 transition-transform">
-                            <svg className="w-7 h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-3 border border-white/30 group-hover:-rotate-12 transition-transform">
+                            <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
-                        <span className="text-xl md:text-2xl font-black italic text-white tracking-tighter">운동 추천</span>
-                        <p className="text-blue-100 text-xs md:text-sm mt-1 uppercase">AI Recommendation</p>
+                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">운동 추천</span>
+                        <p className="text-blue-100 text-[10px] md:text-xs mt-1 uppercase">AI Recommendation</p>
                     </div>
                 </button>
             </div>
@@ -672,10 +708,12 @@ const App = () => {
             {currentScreen === 'dashboard' && <DashboardScreen onNavigate={navigate} />}
             {currentScreen === 'workoutDetail' && <WorkoutDetailScreen data={selectedData} onBack={() => navigate('dashboard')} />}
             {currentScreen === 'workoutSetup' && <WorkoutSetupScreen onBack={() => navigate('dashboard')} />}
+            {currentScreen === 'workoutPlan' && <WorkoutPlanScreen onBack={() => navigate('dashboard')} />}
             {currentScreen === 'aiRecommendation' && <AIRecommendationScreen onBack={() => navigate('dashboard')} />}
         </div>
     );
 };
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
