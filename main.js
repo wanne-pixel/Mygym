@@ -246,59 +246,77 @@ const WorkoutSetupScreen = ({ onBack }) => {
     const [step, setStep] = useState(1);
     const [selection, setSelection] = useState({ part: '', type: '', exercise: '' });
     const [numSets, setNumSets] = useState('');
-    const [weights, setWeights] = useState([]);
-    const [reps, setReps] = useState('');
+    const [setsData, setSetsData] = useState([]); // [{ weight: '', reps: '' }, ...]
     const [addedExercises, setAddedExercises] = useState([]);
+    const [editingId, setEditingId] = useState(null);
 
     const handleNumSetsChange = (e) => {
         const val = parseInt(e.target.value) || 0;
         setNumSets(e.target.value);
         if (val > 0) {
-            // 기존 값이 있으면 유지하고, 부족하면 채우고, 넘치면 자름
-            setWeights(prevWeights => {
-                const newWeights = new Array(val).fill('');
-                for (let i = 0; i < Math.min(val, prevWeights.length); i++) {
-                    newWeights[i] = prevWeights[i];
-                }
-                return newWeights;
+            setSetsData(prev => {
+                const newData = new Array(val).fill(null).map((_, i) => 
+                    prev[i] || { weight: '', reps: '' }
+                );
+                return newData;
             });
         } else {
-            setWeights([]);
+            setSetsData([]);
         }
     };
 
-    const handleWeightChange = (index, value) => {
-        const newWeights = [...weights];
-        newWeights[index] = value;
-        setWeights(newWeights);
+    const handleSetDataChange = (index, field, value) => {
+        const newData = [...setsData];
+        newData[index] = { ...newData[index], [field]: value };
+        setSetsData(newData);
     };
 
     const isRecordEnabled = useMemo(() => {
         const nSets = parseInt(numSets);
-        const nReps = parseInt(reps);
-        // 모든 세트의 무게가 입력되었는지 확인 (빈 문자열이 없고, 0 이상의 숫자여야 함)
-        const allWeightsFilled = weights.length > 0 && 
-                                weights.length === nSets && 
-                                weights.every(w => w !== '' && !isNaN(parseFloat(w)) && parseFloat(w) >= 0);
+        const allSetsFilled = setsData.length > 0 && 
+                             setsData.length === nSets && 
+                             setsData.every(s => s.weight !== '' && s.reps !== '' && parseFloat(s.weight) >= 0 && parseInt(s.reps) > 0);
         
-        return nSets > 0 && nReps > 0 && allWeightsFilled;
-    }, [numSets, weights, reps]);
+        return nSets > 0 && allSetsFilled && selection.exercise !== '';
+    }, [numSets, setsData, selection.exercise]);
 
-    const handleAddExercise = () => {
+    const handleAddOrUpdateExercise = () => {
         if (!isRecordEnabled) return;
-        setAddedExercises([...addedExercises, { 
+
+        const newEntry = { 
             ...selection, 
             sets: numSets, 
-            reps: reps, 
-            weights: [...weights],
-            id: Date.now() 
-        }]);
+            setsData: [...setsData],
+            id: editingId || Date.now() 
+        };
+
+        if (editingId) {
+            setAddedExercises(prev => prev.map(ex => ex.id === editingId ? newEntry : ex));
+            setEditingId(null);
+        } else {
+            setAddedExercises([...addedExercises, newEntry]);
+        }
+
         // Reset inputs
         setNumSets('');
-        setWeights([]);
-        setReps('');
+        setSetsData([]);
         setStep(1);
         setSelection({ part: '', type: '', exercise: '' });
+    };
+
+    const handleDelete = (id) => {
+        if (confirm('이 운동 기록을 삭제하시겠습니까?')) {
+            setAddedExercises(prev => prev.filter(ex => ex.id !== id));
+        }
+    };
+
+    const handleEdit = (ex) => {
+        setSelection({ part: ex.part, type: ex.type, exercise: ex.exercise });
+        setNumSets(ex.sets);
+        setSetsData([...ex.setsData]);
+        setEditingId(ex.id);
+        setStep(4);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     return (
@@ -307,7 +325,7 @@ const WorkoutSetupScreen = ({ onBack }) => {
 
             <div className="mb-8">
                 <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-blue-500 decoration-4 underline-offset-8">
-                    운동 구성하기
+                    운동 기록
                 </h2>
             </div>
 
@@ -370,44 +388,41 @@ const WorkoutSetupScreen = ({ onBack }) => {
                     {/* 4단계: 입력 */}
                     {step >= 4 && (
                         <div className="animate-fade-in space-y-6 bg-slate-800/30 p-6 rounded-2xl border border-slate-700">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block tracking-tighter">Sets 수</label>
-                                    <input 
-                                        type="number" 
-                                        value={numSets}
-                                        onChange={handleNumSetsChange}
-                                        className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white text-center font-bold focus:ring-2 focus:ring-blue-500 outline-none" 
-                                        placeholder="0"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block tracking-tighter">Reps (공통)</label>
-                                    <input 
-                                        type="number" 
-                                        value={reps}
-                                        onChange={(e) => setReps(e.target.value)}
-                                        className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white text-center font-bold focus:ring-2 focus:ring-blue-500 outline-none" 
-                                        placeholder="0"
-                                    />
-                                </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block tracking-tighter">SETS</label>
+                                <input 
+                                    type="number" 
+                                    value={numSets}
+                                    onChange={handleNumSetsChange}
+                                    className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white text-center font-bold focus:ring-2 focus:ring-blue-500 outline-none" 
+                                    placeholder="0"
+                                />
                             </div>
 
-                            {/* 동적 세트 무게 입력창 */}
-                            {weights.length > 0 && (
+                            {/* 동적 세트별 상세 입력창 */}
+                            {setsData.length > 0 && (
                                 <div className="space-y-3 animate-slide-down">
-                                    <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">세트별 무게 (KG)</label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                        {weights.map((w, idx) => (
-                                            <div key={idx} className="relative">
-                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-600">{idx + 1}</span>
-                                                <input 
-                                                    type="number" 
-                                                    value={w}
-                                                    onChange={(e) => handleWeightChange(idx, e.target.value)}
-                                                    className="w-full bg-slate-900 border border-slate-700 p-3 pl-7 rounded-xl text-white text-right font-bold focus:border-blue-500 outline-none" 
-                                                    placeholder="0"
-                                                />
+                                    <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">세트별 상세 기록 (KG / REPS)</label>
+                                    <div className="space-y-2">
+                                        {setsData.map((s, idx) => (
+                                            <div key={idx} className="flex items-center gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                                <span className="text-xs font-bold text-slate-600 w-8">{idx + 1}S</span>
+                                                <div className="flex-1 flex gap-2">
+                                                    <input 
+                                                        type="number" 
+                                                        value={s.weight}
+                                                        onChange={(e) => handleSetDataChange(idx, 'weight', e.target.value)}
+                                                        className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm" 
+                                                        placeholder="KG"
+                                                    />
+                                                    <input 
+                                                        type="number" 
+                                                        value={s.reps}
+                                                        onChange={(e) => handleSetDataChange(idx, 'reps', e.target.value)}
+                                                        className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-indigo-500 outline-none text-sm" 
+                                                        placeholder="REPS"
+                                                    />
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -415,11 +430,11 @@ const WorkoutSetupScreen = ({ onBack }) => {
                             )}
 
                             <button 
-                                onClick={handleAddExercise}
+                                onClick={handleAddOrUpdateExercise}
                                 disabled={!isRecordEnabled}
                                 className={`w-full py-4 font-black rounded-xl italic tracking-tighter transition-all ${isRecordEnabled ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}
                             >
-                                기록하기
+                                {editingId ? '수정 완료' : '기록하기'}
                             </button>
                         </div>
                     )}
@@ -429,34 +444,52 @@ const WorkoutSetupScreen = ({ onBack }) => {
                 <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6">
                     <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                         <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                        현재 구성된 운동 ({addedExercises.length})
+                        현재 기록된 운동 ({addedExercises.length})
                     </h3>
                     <div className="space-y-4">
                         {addedExercises.length === 0 ? (
                             <p className="text-slate-600 text-center py-12 italic text-sm">기록된 운동이 없습니다.</p>
                         ) : (
                             addedExercises.map((ex, idx) => (
-                                <div key={ex.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                                <div key={ex.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700 group relative">
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
                                             <span className="text-[10px] font-bold text-blue-400 block uppercase">{ex.part} / {ex.type}</span>
                                             <span className="font-bold text-white text-lg">{ex.exercise}</span>
                                         </div>
-                                        <div className="text-right">
-                                            <span className="text-xs font-bold text-slate-500 uppercase">Total {ex.sets} Sets</span>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => handleEdit(ex)}
+                                                className="p-2 bg-slate-700 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                                                title="수정"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDelete(ex.id)}
+                                                className="p-2 bg-slate-700 hover:bg-rose-600 text-white rounded-lg transition-colors"
+                                                title="삭제"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        {ex.weights.map((w, i) => (
-                                            <div key={i} className="px-3 py-1 bg-slate-900 rounded-lg border border-slate-700 text-[11px]">
-                                                <span className="text-slate-500 mr-1">{i+1}S:</span>
-                                                <span className="text-white font-bold">{w}kg</span>
+                                        {ex.setsData.map((s, i) => (
+                                            <div key={i} className="px-3 py-1 bg-slate-900 rounded-lg border border-slate-700 text-[11px] flex flex-col items-center min-w-[50px]">
+                                                <span className="text-slate-500 text-[9px] mb-1">{i+1}S</span>
+                                                <span className="text-white font-bold">{s.weight}kg</span>
+                                                <span className="text-indigo-400 font-medium">{s.reps}R</span>
                                             </div>
                                         ))}
                                     </div>
                                     <div className="mt-3 text-right">
-                                        <span className="text-xs font-medium text-slate-400">Reps: <span className="text-indigo-400 font-bold">{ex.reps}</span></span>
-                                    </div>
+                                        <span className="text-xs font-bold text-slate-500 uppercase">Total {ex.sets} Sets</span>
+1                                    </div>
                                 </div>
                             ))
                         )}
