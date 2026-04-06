@@ -1,5 +1,5 @@
 const { useState, useMemo, useEffect } = React;
-const { HashRouter: Router, Routes, Route, Link, useNavigate, useLocation, Navigate } = ReactRouterDOM;
+const { HashRouter, Routes, Route, Link, useNavigate, useLocation, Navigate } = ReactRouterDOM;
 
 /**
  * [공통: 뒤로가기 버튼 컴포넌트]
@@ -703,7 +703,7 @@ const DashboardScreen = () => {
 
 const App = () => {
     return (
-        <Router>
+        <HashRouter>
             <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
                 <Routes>
                     <Route path="/" element={<LoginScreen />} />
@@ -716,7 +716,7 @@ const App = () => {
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </div>
-        </Router>
+        </HashRouter>
     );
 };
 
