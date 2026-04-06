@@ -1,24 +1,29 @@
 const { useState, useMemo, useEffect } = React;
+const { HashRouter: Router, Routes, Route, Link, useNavigate, useLocation, Navigate } = ReactRouterDOM;
 
 /**
  * [공통: 뒤로가기 버튼 컴포넌트]
  */
-const BackButton = ({ onClick }) => (
-    <button 
-        onClick={onClick}
-        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group"
-    >
-        <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        <span className="font-medium">대시보드로 돌아가기</span>
-    </button>
-);
+const BackButton = () => {
+    const navigate = useNavigate();
+    return (
+        <button 
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group"
+        >
+            <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="font-medium">대시보드로 돌아가기</span>
+        </button>
+    );
+};
 
 /**
  * [화면 1: 로그인 및 회원가입 화면]
  */
-const LoginScreen = ({ onLogin }) => {
+const LoginScreen = () => {
+    const navigate = useNavigate();
     const [isSignup, setIsSignup] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -182,7 +187,7 @@ const LoginScreen = ({ onLogin }) => {
 
                 <div className="flex gap-3">
                     <button
-                        onClick={onLogin}
+                        onClick={() => navigate('/dashboard')}
                         className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
                     >
                         로그인
@@ -200,9 +205,12 @@ const LoginScreen = ({ onLogin }) => {
 };
 
 /**
- * [신규 화면: 운동 상세 기록 (Workout Detail)]
+ * [신규 화면: 루틴 상세 (Routine Detail)]
  */
-const WorkoutDetailScreen = ({ data, onBack }) => {
+const WorkoutDetailScreen = () => {
+    const location = useLocation();
+    const data = location.state?.data || { name: '?', part: '기록 없음' };
+
     const dummyRecords = [
         { name: '데드리프트', sets: 3, reps: 15, weight: 100 },
         { name: '랫풀다운', sets: 4, reps: 12, weight: 60 },
@@ -211,7 +219,7 @@ const WorkoutDetailScreen = ({ data, onBack }) => {
 
     return (
         <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in">
-            <BackButton onClick={onBack} />
+            <BackButton />
             
             <div className="mb-10">
                 <span className="px-3 py-1 bg-blue-600 text-[10px] font-bold rounded-full uppercase tracking-widest text-white mb-2 inline-block">
@@ -240,9 +248,9 @@ const WorkoutDetailScreen = ({ data, onBack }) => {
 };
 
 /**
- * [신규 화면: 운동 구성 (Workout Setup)]
+ * [신규 화면: 루틴 기록 (Routine Record)]
  */
-const WorkoutSetupScreen = ({ onBack }) => {
+const WorkoutSetupScreen = () => {
     const [step, setStep] = useState(1);
     const [selection, setSelection] = useState({ part: '', type: '', exercise: '' });
     const [numSets, setNumSets] = useState('');
@@ -305,7 +313,7 @@ const WorkoutSetupScreen = ({ onBack }) => {
     };
 
     const handleDelete = (id) => {
-        if (confirm('이 운동 기록을 삭제하시겠습니까?')) {
+        if (confirm('이 루틴 기록을 삭제하시겠습니까?')) {
             setAddedExercises(prev => prev.filter(ex => ex.id !== id));
         }
     };
@@ -321,11 +329,11 @@ const WorkoutSetupScreen = ({ onBack }) => {
 
     return (
         <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in">
-            <BackButton onClick={onBack} />
+            <BackButton />
 
             <div className="mb-8">
                 <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-blue-500 decoration-4 underline-offset-8">
-                    운동 기록
+                    루틴 기록
                 </h2>
             </div>
 
@@ -444,11 +452,11 @@ const WorkoutSetupScreen = ({ onBack }) => {
                 <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6">
                     <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                         <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                        현재 기록된 운동 ({addedExercises.length})
+                        현재 기록된 루틴 ({addedExercises.length})
                     </h3>
                     <div className="space-y-4">
                         {addedExercises.length === 0 ? (
-                            <p className="text-slate-600 text-center py-12 italic text-sm">기록된 운동이 없습니다.</p>
+                            <p className="text-slate-600 text-center py-12 italic text-sm">기록된 루틴이 없습니다.</p>
                         ) : (
                             addedExercises.map((ex, idx) => (
                                 <div key={ex.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700 group relative">
@@ -501,19 +509,19 @@ const WorkoutSetupScreen = ({ onBack }) => {
 };
 
 /**
- * [신규 화면: 운동 계획 (Workout Plan)]
+ * [신규 화면: 루틴 구성 (Routine Compose)]
  */
-const WorkoutPlanScreen = ({ onBack }) => {
+const WorkoutPlanScreen = () => {
     return (
         <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in">
-            <BackButton onClick={onBack} />
+            <BackButton />
             <div className="flex flex-col items-center justify-center py-32 bg-slate-900/50 rounded-[2.5rem] border border-slate-800 border-dashed">
                 <div className="w-20 h-20 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 rotate-12">
                     <svg className="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                 </div>
-                <h2 className="text-2xl font-black italic text-white mb-2 uppercase tracking-tighter">운동 계획 준비 중</h2>
+                <h2 className="text-2xl font-black italic text-white mb-2 uppercase tracking-tighter">루틴 구성 준비 중</h2>
                 <p className="text-slate-400 font-medium">더 스마트한 루틴 관리 기능을 준비하고 있습니다.</p>
             </div>
         </div>
@@ -521,12 +529,12 @@ const WorkoutPlanScreen = ({ onBack }) => {
 };
 
 /**
- * [신규 화면: AI 운동 추천 (AI Recommendation)]
+ * [신규 화면: Ai코치 (AI Coach)]
  */
-const AIRecommendationScreen = ({ onBack }) => {
+const AIRecommendationScreen = () => {
     return (
         <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in">
-            <BackButton onClick={onBack} />
+            <BackButton />
             
             <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/40 border border-blue-500/30 rounded-[2rem] p-8 md:p-12 relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -574,7 +582,8 @@ const AIRecommendationScreen = ({ onBack }) => {
 /**
  * [화면 2: 메인 대시보드 화면]
  */
-const DashboardScreen = ({ onNavigate }) => {
+const DashboardScreen = () => {
+    const navigate = useNavigate();
     const recentDays = useMemo(() => {
         const days = ['일', '월', '화', '수', '목', '금', '토'];
         const result = [];
@@ -602,12 +611,12 @@ const DashboardScreen = ({ onNavigate }) => {
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen animate-fade-in overflow-x-hidden">
-            {/* 좌측 영역: 최근 운동 기록 (모바일에서는 상단) */}
+            {/* 좌측 영역: 최근 루틴 기록 (모바일에서는 상단) */}
             <div className="w-full md:w-1/2 p-6 md:p-12 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950 flex flex-col justify-center">
                 <div className="mb-8 md:mb-10">
                     <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
                         <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
-                        최근 운동 기록
+                        최근 루틴 기록
                     </h2>
                     <p className="text-slate-400 text-xs md:text-sm mt-1">지난 5일간의 트레이닝 결과입니다.</p>
                 </div>
@@ -617,7 +626,7 @@ const DashboardScreen = ({ onNavigate }) => {
                         <div key={idx} className="flex flex-col items-center gap-3 md:gap-4 group">
                             <span className="text-slate-500 font-semibold text-[10px] md:text-sm">{day.name}</span>
                             <div 
-                                onClick={() => onNavigate('workoutDetail', day)}
+                                onClick={() => navigate('/routine-detail', { state: { data: day } })}
                                 className={`w-full py-2.5 md:py-3 px-1 md:px-2 rounded-lg md:rounded-xl border text-center text-[9px] md:text-xs font-bold cursor-pointer transition-all active:scale-90 hover:scale-105 ${getBadgeColor(day.part)}`}
                             >
                                 {day.part}
@@ -641,7 +650,7 @@ const DashboardScreen = ({ onNavigate }) => {
             {/* 우측 영역: 메뉴 버튼 (모바일에서는 하단에 쌓임) */}
             <div className="w-full md:w-1/2 flex flex-col h-auto md:h-screen">
                 <button 
-                    onClick={() => onNavigate('workoutSetup')}
+                    onClick={() => navigate('/routine-record')}
                     className="h-[220px] md:flex-1 group relative overflow-hidden bg-slate-900 flex flex-col items-center justify-center transition-all hover:bg-slate-800 border-b border-slate-800 md:border-b-0"
                 >
                     <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
@@ -651,13 +660,13 @@ const DashboardScreen = ({ onNavigate }) => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
                         </div>
-                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">운동 기록</span>
-                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Workout Record</p>
+                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">루틴 기록</span>
+                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Routine Record</p>
                     </div>
                 </button>
 
                 <button 
-                    onClick={() => onNavigate('workoutPlan')}
+                    onClick={() => navigate('/routine-compose')}
                     className="h-[220px] md:flex-1 group relative overflow-hidden bg-indigo-950 flex flex-col items-center justify-center transition-all hover:bg-indigo-900 border-b border-slate-800 md:border-b-0"
                 >
                     <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
@@ -667,13 +676,13 @@ const DashboardScreen = ({ onNavigate }) => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                             </svg>
                         </div>
-                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">운동 계획</span>
-                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Workout Plan</p>
+                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">루틴 구성</span>
+                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Routine Compose</p>
                     </div>
                 </button>
 
                 <button 
-                    onClick={() => onNavigate('aiRecommendation')}
+                    onClick={() => navigate('/ai-coach')}
                     className="h-[220px] md:flex-1 group relative overflow-hidden bg-blue-700 flex flex-col items-center justify-center transition-all hover:bg-blue-600"
                 >
                     <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
@@ -683,8 +692,8 @@ const DashboardScreen = ({ onNavigate }) => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
-                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">운동 추천</span>
-                        <p className="text-blue-100 text-[10px] md:text-xs mt-1 uppercase">AI Recommendation</p>
+                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">Ai코치</span>
+                        <p className="text-blue-100 text-[10px] md:text-xs mt-1 uppercase">Ai Coach</p>
                     </div>
                 </button>
             </div>
@@ -693,24 +702,21 @@ const DashboardScreen = ({ onNavigate }) => {
 };
 
 const App = () => {
-    const [currentScreen, setCurrentScreen] = useState('login'); 
-    const [selectedData, setSelectedData] = useState(null);
-
-    const navigate = (screen, data = null) => {
-        setSelectedData(data);
-        setCurrentScreen(screen);
-        window.scrollTo(0, 0);
-    };
-
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
-            {currentScreen === 'login' && <LoginScreen onLogin={() => navigate('dashboard')} />}
-            {currentScreen === 'dashboard' && <DashboardScreen onNavigate={navigate} />}
-            {currentScreen === 'workoutDetail' && <WorkoutDetailScreen data={selectedData} onBack={() => navigate('dashboard')} />}
-            {currentScreen === 'workoutSetup' && <WorkoutSetupScreen onBack={() => navigate('dashboard')} />}
-            {currentScreen === 'workoutPlan' && <WorkoutPlanScreen onBack={() => navigate('dashboard')} />}
-            {currentScreen === 'aiRecommendation' && <AIRecommendationScreen onBack={() => navigate('dashboard')} />}
-        </div>
+        <Router>
+            <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
+                <Routes>
+                    <Route path="/" element={<LoginScreen />} />
+                    <Route path="/dashboard" element={<DashboardScreen />} />
+                    <Route path="/routine-detail" element={<WorkoutDetailScreen />} />
+                    <Route path="/routine-record" element={<WorkoutSetupScreen />} />
+                    <Route path="/routine-compose" element={<WorkoutPlanScreen />} />
+                    <Route path="/ai-coach" element={<AIRecommendationScreen />} />
+                    {/* Fallback to login */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </div>
+        </Router>
     );
 };
 
