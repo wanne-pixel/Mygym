@@ -5,6 +5,37 @@ import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate 
 console.log("MyGym App Initializing...");
 
 /**
+ * [공통 데이터: 운동 종목 리스트]
+ */
+const EXERCISE_DATA = {
+    '가슴': {
+        '프리웨이트': ['벤치프레스', '인클라인 벤치프레스', '덤벨 플라이'],
+        '머신': ['체스트 프레스 머신', '펙덱 플라이'],
+        '케이블': ['케이블 크로스오버']
+    },
+    '등': {
+        '프리웨이트': ['원암 덤벨로우', '바벨로우', '데드리프트', '레트럴레이즈'],
+        '머신': ['렛풀다운', '프론트로우', '로우로우', '시티드로우'],
+        '케이블': ['암풀다운']
+    },
+    '하체': {
+        '프리웨이트': ['백 스쿼트', '런지', '루마니안 데드리프트'],
+        '머신': ['레그 프레스', '레그 익스텐션', '레그 컬'],
+        '케이블': []
+    },
+    '어깨': {
+        '프리웨이트': ['숄더 프레스', '사이드 레트럴 레이즈', '벤트오버 레트럴 레이즈'],
+        '머신': ['숄더 프레스 머신'],
+        '케이블': ['케이블 페이스 풀']
+    },
+    '팔': {
+        '프리웨이트': ['바벨 컬', '덤벨 컬', '라잉 트라이셉스 익스텐션'],
+        '머신': ['암 컬 머신'],
+        '케이블': ['푸쉬 다운']
+    }
+};
+
+/**
  * [공통: 뒤로가기 버튼 컴포넌트]
  */
 const BackButton = () => {
@@ -335,13 +366,15 @@ const WorkoutSetupScreen = () => {
                     {step >= 3 && (
                         <div className="animate-fade-in">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Step 3. 세부 종목</label>
-                            <select value={selection.exercise} onChange={(e) => { setSelection({ ...selection, exercise: e.target.value }); setStep(4); }} className="w-full bg-slate-800 border border-slate-700 text-white p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                            <select 
+                                value={selection.exercise} 
+                                onChange={(e) => { setSelection({ ...selection, exercise: e.target.value }); setStep(4); }} 
+                                className="w-full bg-slate-800 border border-slate-700 text-white p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            >
                                 <option value="">종목을 선택하세요</option>
-                                <option value="벤치프레스">벤치프레스</option>
-                                <option value="데드리프트">데드리프트</option>
-                                <option value="스쿼트">스쿼트</option>
-                                <option value="바벨 로우">바벨 로우</option>
-                                <option value="숄더 프레스">숄더 프레스</option>
+                                {(EXERCISE_DATA[selection.part]?.[selection.type] || []).map(ex => (
+                                    <option key={ex} value={ex}>{ex}</option>
+                                ))}
                             </select>
                         </div>
                     )}
@@ -409,13 +442,230 @@ const WorkoutSetupScreen = () => {
  * [신규 화면: 루틴 구성 (Routine Compose)]
  */
 const WorkoutPlanScreen = () => {
+    const [planList, setPlanList] = useState([]);
+    const [selection, setSelection] = useState({ part: '', type: '', exercise: '' });
+    const [recordingId, setRecordingId] = useState(null);
+    const [tempSets, setTempSets] = useState([{ weight: '', reps: '' }]);
+
+    const addExerciseToPlan = () => {
+        if (!selection.exercise) return;
+        const newEntry = {
+            id: Date.now(),
+            ...selection,
+            sets: [],
+            isCompleted: false
+        };
+        setPlanList([...planList, newEntry]);
+        setSelection({ ...selection, exercise: '' });
+    };
+
+    const startRecording = (id) => {
+        const item = planList.find(ex => ex.id === id);
+        setRecordingId(id);
+        setTempSets(item.sets.length > 0 ? [...item.sets] : [{ weight: '', reps: '' }]);
+    };
+
+    const handleSetChange = (index, field, value) => {
+        const nextSets = [...tempSets];
+        nextSets[index] = { ...nextSets[index], [field]: value };
+        setTempSets(nextSets);
+    };
+
+    const addSetField = () => {
+        setTempSets([...tempSets, { weight: '', reps: '' }]);
+    };
+
+    const removeSetField = (index) => {
+        setTempSets(tempSets.filter((_, i) => i !== index));
+    };
+
+    const finishRecording = () => {
+        setPlanList(prev => prev.map(ex => 
+            ex.id === recordingId 
+            ? { ...ex, sets: [...tempSets], isCompleted: true } 
+            : ex
+        ));
+        setRecordingId(null);
+    };
+
+    const deleteFromPlan = (id) => {
+        setPlanList(planList.filter(ex => ex.id !== id));
+        if (recordingId === id) setRecordingId(null);
+    };
+
     return (
-        <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in">
+        <div className="p-6 md:p-12 max-w-6xl mx-auto animate-fade-in mb-20">
             <BackButton />
-            <div className="flex flex-col items-center justify-center py-32 bg-slate-900/50 rounded-[2.5rem] border border-slate-800 border-dashed">
-                <div className="w-20 h-20 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 rotate-12"><svg className="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
-                <h2 className="text-2xl font-black italic text-white mb-2 uppercase tracking-tighter">루틴 구성 준비 중</h2>
-                <p className="text-slate-400 font-medium">더 스마트한 루틴 관리 기능을 준비하고 있습니다.</p>
+            <div className="mb-8">
+                <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-indigo-500 decoration-4 underline-offset-8">
+                    오늘의 루틴 구성
+                </h2>
+                <p className="text-slate-400 mt-2 text-sm">먼저 운동 리스트를 만들고, 훈련 중 기록을 입력하세요.</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                {/* 왼쪽: 운동 추가 영역 */}
+                <div className="lg:col-span-1 space-y-6 bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                        <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>운동 추가
+                    </h3>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">부위</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {Object.keys(EXERCISE_DATA).map(p => (
+                                    <button 
+                                        key={p} 
+                                        onClick={() => setSelection({ part: p, type: '', exercise: '' })}
+                                        className={`py-2 rounded-lg text-xs font-bold transition-all ${selection.part === p ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+                                    >
+                                        {p}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {selection.part && (
+                            <div className="animate-slide-down">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">종류</label>
+                                <div className="flex gap-2">
+                                    {Object.keys(EXERCISE_DATA[selection.part]).map(t => (
+                                        <button 
+                                            key={t} 
+                                            onClick={() => setSelection({ ...selection, type: t, exercise: '' })}
+                                            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${selection.type === t ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+                                        >
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {selection.type && (
+                            <div className="animate-slide-down">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">종목</label>
+                                <select 
+                                    value={selection.exercise}
+                                    onChange={(e) => setSelection({ ...selection, exercise: e.target.value })}
+                                    className="w-full bg-slate-800 border border-slate-700 text-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option value="">운동을 선택하세요</option>
+                                    {EXERCISE_DATA[selection.part][selection.type].map(ex => (
+                                        <option key={ex} value={ex}>{ex}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        <button 
+                            onClick={addExerciseToPlan}
+                            disabled={!selection.exercise}
+                            className={`w-full py-3 rounded-xl font-black italic uppercase tracking-tighter transition-all ${selection.exercise ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-800 text-slate-600'}`}
+                        >
+                            리스트에 추가
+                        </button>
+                    </div>
+                </div>
+
+                {/* 중앙: 오늘의 리스트 */}
+                <div className="lg:col-span-2 space-y-4">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>오늘의 리스트 ({planList.length})
+                    </h3>
+
+                    {planList.length === 0 ? (
+                        <div className="py-20 text-center bg-slate-900/30 rounded-3xl border border-slate-800 border-dashed">
+                            <p className="text-slate-500 italic text-sm">먼저 운동을 추가해 주세요.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {planList.map((item) => (
+                                <div key={item.id} className={`bg-slate-900 border transition-all rounded-2xl overflow-hidden ${recordingId === item.id ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-slate-800'}`}>
+                                    <div className="p-5 flex justify-between items-center">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-[9px] font-black px-2 py-0.5 bg-slate-800 text-slate-400 rounded uppercase">{item.part}</span>
+                                                {item.isCompleted && <span className="text-[9px] font-black px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded uppercase tracking-tighter">완료</span>}
+                                            </div>
+                                            <h4 className={`font-bold text-lg ${item.isCompleted ? 'text-slate-500' : 'text-white'}`}>{item.exercise}</h4>
+                                            {item.sets.length > 0 && (
+                                                <p className="text-[11px] text-indigo-400 font-bold mt-1 uppercase tracking-widest">{item.sets.length} Sets Completed</p>
+                                            )}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            {!item.isCompleted ? (
+                                                <button 
+                                                    onClick={() => startRecording(item.id)}
+                                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black italic rounded-lg transition-all active:scale-95"
+                                                >
+                                                    기록하기
+                                                </button>
+                                            ) : (
+                                                <button 
+                                                    onClick={() => startRecording(item.id)}
+                                                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black italic rounded-lg transition-all"
+                                                >
+                                                    수정
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={() => deleteFromPlan(item.id)}
+                                                className="p-2 text-slate-600 hover:text-rose-500 transition-colors"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* 기록용 동적 폼 */}
+                                    {recordingId === item.id && (
+                                        <div className="bg-slate-800/50 p-5 border-t border-slate-700 animate-slide-down">
+                                            <div className="space-y-3 mb-4">
+                                                {tempSets.map((s, idx) => (
+                                                    <div key={idx} className="flex items-center gap-3">
+                                                        <span className="text-[10px] font-bold text-slate-500 w-6">{idx + 1}S</span>
+                                                        <input 
+                                                            type="number" 
+                                                            placeholder="KG" 
+                                                            value={s.weight}
+                                                            onChange={(e) => handleSetChange(idx, 'weight', e.target.value)}
+                                                            className="flex-1 bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                                        />
+                                                        <input 
+                                                            type="number" 
+                                                            placeholder="REPS" 
+                                                            value={s.reps}
+                                                            onChange={(e) => handleSetChange(idx, 'reps', e.target.value)}
+                                                            className="flex-1 bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                                        />
+                                                        <button onClick={() => removeSetField(idx)} className="text-slate-600 hover:text-rose-500">
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={addSetField}
+                                                    className="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-bold rounded-lg transition-all"
+                                                >
+                                                    + 세트 추가
+                                                </button>
+                                                <button 
+                                                    onClick={finishRecording}
+                                                    className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/20"
+                                                >
+                                                    기록 완료
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
