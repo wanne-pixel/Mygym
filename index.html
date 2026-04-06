@@ -7,13 +7,22 @@
     <link rel="stylesheet" href="style.css">
     <!-- Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM CDNs -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!-- React Router DOM CDN -->
-    <script src="https://unpkg.com/react-router-dom@6.22.3/dist/umd/react-router-dom.development.js"></script>
+    
+    <!-- Import Map for ES Modules -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom": "https://esm.sh/react-dom@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "react-router-dom": "https://esm.sh/react-router-dom@6.22.3"
+      }
+    }
+    </script>
+
     <!-- Babel CDN for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body {
@@ -29,10 +38,10 @@
 <body>
     <div id="root">
         <div style="display: flex; justify-content: center; align-items: center; height: 100vh; color: #64748b;">
-            앱을 불러오는 중입니다. 화면이 나오지 않으면 개발자 도구(F12)의 Console 탭을 확인해 주세요.
+            앱을 불러오는 중입니다...
         </div>
     </div>
-    <!-- 실행 안정성을 위해 babel 설정을 명시적으로 추가할 수 있으나, 기본값으로 시도합니다. -->
-    <script type="text/babel" src="main.js"></script>
+    <!-- data-type="module" allows Babel to handle imports -->
+    <script type="text/babel" data-type="module" src="main.js"></script>
 </body>
 </html>
