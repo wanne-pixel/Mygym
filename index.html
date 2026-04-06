@@ -10,6 +10,7 @@
     <!-- React & ReactDOM CDNs -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- React Router DOM CDN -->
     <script src="https://unpkg.com/react-router-dom@6.22.3/dist/umd/react-router-dom.development.js"></script>
     <!-- Babel CDN for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -26,7 +27,12 @@
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; color: #64748b;">
+            앱을 불러오는 중입니다. 화면이 나오지 않으면 개발자 도구(F12)의 Console 탭을 확인해 주세요.
+        </div>
+    </div>
+    <!-- 실행 안정성을 위해 babel 설정을 명시적으로 추가할 수 있으나, 기본값으로 시도합니다. -->
     <script type="text/babel" src="main.js"></script>
 </body>
 </html>
