@@ -993,15 +993,17 @@ const App = () => {
     return (
         <BrowserRouter>
             <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
-                <Routes>
-                    <Route path="/" element={<LoginScreen />} />
-                    <Route path="/dashboard" element={<DashboardScreen />} />
-                    <Route path="/routine-detail" element={<WorkoutDetailScreen />} />
-                    <Route path="/routine-record" element={<WorkoutSetupScreen />} />
-                    <Route path="/routine-compose" element={<WorkoutPlanScreen />} />
-                    <Route path="/ai-coach" element={<AIRecommendationScreen />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
+                <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-white font-bold italic tracking-tighter text-2xl animate-pulse">LOADING...</div>}>
+                    <Routes>
+                        <Route path="/" element={<LoginScreen />} />
+                        <Route path="/dashboard" element={<DashboardScreen />} />
+                        <Route path="/routine-detail" element={<WorkoutDetailScreen />} />
+                        <Route path="/routine-record" element={<WorkoutSetupScreen />} />
+                        <Route path="/routine-compose" element={<WorkoutPlanScreen />} />
+                        <Route path="/ai-coach" element={<AIRecommendationScreen />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </React.Suspense>
             </div>
         </BrowserRouter>
     );
