@@ -3,50 +3,50 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './i18n';
+import { fetchExercisesByBodyPart } from './src/api/exerciseApi';
 
 console.log("MyGym App Initializing...");
 
 /**
  * [Common Data: Exercise List]
+ * Note: Now used only for UI structure labels, data is fetched from ExerciseDB
  */
 const EXERCISE_DATA = {
     'chest': {
-        'free_weights': ['bench_press', 'incline_bench_press', 'dumbbell_fly'],
-        'machine': ['chest_press_machine', 'pec_deck_fly'],
-        'cable': ['cable_crossover']
+        'free_weights': [],
+        'machine': [],
+        'cable': []
     },
     'back_part': {
-        'free_weights': [
-            { name: 'one_arm_dumbbell_row', target: 'latissimus_dorsi', equipment: 'dumbbell', gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Dumbbell+Row' },
-            { name: 'barbell_row', target: 'entire_back', equipment: 'barbell', gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Barbell+Row' },
-            { name: 'deadlift', target: 'erector_spinae', equipment: 'barbell', gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Deadlift' },
-            { name: 'lateral_raise', target: 'posterior_deltoid', equipment: 'dumbbell', gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Lateral+Raise' }
-        ],
-        'machine': [
-            { name: 'lat_pulldown', target: 'latissimus_dorsi', equipment: 'machine', gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Lat+Pulldown' },
-            { name: 'front_row', target: 'middle_back', equipment: 'machine', gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Front+Row' },
-            { name: 'low_row', target: 'lower_back', equipment: 'machine', gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Low+Row' },
-            { name: 'seated_row', target: 'entire_back', equipment: 'machine', gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Seated+Row' }
-        ],
-        'cable': [
-            { name: 'arm_pulldown', target: 'latissimus_dorsi', equipment: 'cable', gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Arm+Pulldown' }
-        ]
+        'free_weights': [],
+        'machine': [],
+        'cable': []
     },
     'legs': {
-        'free_weights': ['back_squat', 'lunge', 'romanian_deadlift'],
-        'machine': ['leg_press', 'leg_extension', 'leg_curl'],
+        'free_weights': [],
+        'machine': [],
         'cable': []
     },
     'shoulders': {
-        'free_weights': ['shoulder_press', 'side_lateral_raise', 'bent_over_lateral_raise'],
-        'machine': ['shoulder_press_machine'],
-        'cable': ['cable_face_pull']
+        'free_weights': [],
+        'machine': [],
+        'cable': []
     },
     'arms': {
-        'free_weights': ['barbell_curl', 'dumbbell_curl', 'lying_triceps_extension'],
-        'machine': ['arm_curl_machine'],
-        'cable': ['push_down']
+        'free_weights': [],
+        'machine': [],
+        'cable': []
     }
+};
+
+/**
+ * Helper to map API equipment to internal categories
+ */
+const mapEquipmentToType = (equipment) => {
+    const e = equipment.toLowerCase();
+    if (e.includes('dumbbell') || e.includes('barbell') || e.includes('kettlebell') || e.includes('body weight')) return 'free_weights';
+    if (e.includes('cable')) return 'cable';
+    return 'machine';
 };
 
 /**
@@ -56,16 +56,12 @@ const ExerciseModal = ({ exercise, onClose }) => {
     const { t } = useTranslation();
     if (!exercise) return null;
     
-    const data = typeof exercise === 'object' ? {
-        ...exercise,
-        name: t(exercise.name),
-        target: t(exercise.target),
-        equipment: t(exercise.equipment)
-    } : { 
-        name: t(exercise), 
-        target: t('default_target'), 
-        equipment: t('equipment_label'),
-        gifUrl: 'https://placehold.co/400x300/1f2937/ffffff?text=Exercise+GIF'
+    // API data already has name, target, equipment as strings
+    const data = {
+        name: exercise.name.toUpperCase(),
+        target: exercise.target,
+        equipment: exercise.equipment,
+        gifUrl: exercise.gifUrl
     };
 
     return (
@@ -114,9 +110,45 @@ const ExerciseModal = ({ exercise, onClose }) => {
 const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
     const { t } = useTranslation();
     const [modalExercise, setModalExercise] = useState(null);
+    const [apiExercises, setApiExercises] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    // Initial load for 'back' as requested
+    useEffect(() => {
+        if (!selection.part) {
+            handlePartClick('back_part');
+        } else {
+            loadExercises(selection.part);
+        }
+    }, []);
+
+    const loadExercises = async (partKey) => {
+        setLoading(true);
+        setError(null);
+        // Map UI part key to API bodyPart name
+        const bodyPartMap = {
+            'chest': 'chest',
+            'back_part': 'back',
+            'legs': 'upper legs', // or 'lower legs'
+            'shoulders': 'shoulders',
+            'arms': 'upper arms' // or 'lower arms'
+        };
+        const apiBodyPart = bodyPartMap[partKey] || 'back';
+        
+        try {
+            const data = await fetchExercisesByBodyPart(apiBodyPart);
+            setApiExercises(data);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handlePartClick = (p) => {
         setSelection({ part: p, type: '', exercise: '' });
+        loadExercises(p);
     };
 
     const handleTypeClick = (tKey) => {
@@ -127,6 +159,12 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
         setSelection({ ...selection, exercise: exName });
         if (onExerciseSelect) onExerciseSelect(exName);
     };
+
+    // Filter exercises based on selected type
+    const filteredExercises = useMemo(() => {
+        if (!selection.type) return [];
+        return apiExercises.filter(ex => mapEquipmentToType(ex.equipment) === selection.type);
+    }, [apiExercises, selection.type]);
 
     return (
         <div className="space-y-6">
@@ -149,7 +187,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                 <div className="animate-fade-in">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block px-1">{t('step2_select_type')}</label>
                     <div className="flex gap-2">
-                        {Object.keys(EXERCISE_DATA[selection.part]).map(typeKey => (
+                        {['free_weights', 'machine', 'cable'].map(typeKey => (
                             <button 
                                 key={typeKey} 
                                 onClick={() => handleTypeClick(typeKey)} 
@@ -165,36 +203,52 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             {selection.type && (
                 <div className="animate-fade-in space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2 px-1">{t('step3_select_exercise')}</label>
-                    {(EXERCISE_DATA[selection.part][selection.type] || []).map((ex, idx) => {
-                        const exKey = typeof ex === 'object' ? ex.name : ex;
-                        const exName = t(exKey);
-                        const exTarget = typeof ex === 'object' ? t(ex.target) : t('default_target');
-                        const exGif = typeof ex === 'object' ? ex.gifUrl : 'https://placehold.co/400x300/1f2937/ffffff?text=Exercise+GIF';
-                        
-                        return (
-                            <div 
-                                key={idx}
-                                onClick={() => handleExerciseClick(exKey)}
-                                className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border ${selection.exercise === exKey ? 'bg-indigo-600/20 border-indigo-500' : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'}`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <img src={exGif} className="w-12 h-12 rounded-full object-cover bg-slate-800 border border-slate-700" alt={exName} />
-                                    <div>
-                                        <p className="text-sm font-bold text-white leading-tight">{exName}</p>
-                                        <p className="text-[10px] text-slate-400 font-medium">{exTarget}</p>
-                                    </div>
-                                </div>
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); setModalExercise(ex); }}
-                                    className="p-2 text-slate-500 hover:text-white transition-colors group"
+                    
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                            <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                            <p className="text-slate-400 font-bold italic text-xs animate-pulse">데이터를 불러오는 중...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-center">
+                            <p className="text-rose-400 text-xs font-bold">{error}</p>
+                        </div>
+                    ) : filteredExercises.length === 0 ? (
+                        <div className="py-10 text-center bg-slate-800/30 rounded-2xl border border-slate-700 border-dashed">
+                            <p className="text-slate-500 italic text-sm">해당 부위와 기구에 맞는 운동이 없습니다.</p>
+                        </div>
+                    ) : (
+                        filteredExercises.map((ex, idx) => {
+                            const exKey = ex.name;
+                            const exName = ex.name.toUpperCase();
+                            const exTarget = ex.target.toUpperCase();
+                            const exGif = ex.gifUrl;
+                            
+                            return (
+                                <div 
+                                    key={idx}
+                                    onClick={() => handleExerciseClick(exKey)}
+                                    className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border ${selection.exercise === exKey ? 'bg-indigo-600/20 border-indigo-500' : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'}`}
                                 >
-                                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        );
-                    })}
+                                    <div className="flex items-center gap-3">
+                                        <img src={exGif} className="w-12 h-12 rounded-full object-cover bg-slate-800 border border-slate-700" alt={exName} />
+                                        <div>
+                                            <p className="text-sm font-bold text-white leading-tight">{exName}</p>
+                                            <p className="text-[10px] text-slate-400 font-medium">{exTarget}</p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); setModalExercise(ex); }}
+                                        className="p-2 text-slate-500 hover:text-white transition-colors group"
+                                    >
+                                        <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
             )}
             
