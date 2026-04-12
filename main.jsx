@@ -873,10 +873,170 @@ const WorkoutPlanScreen = () => {
 };
 
 const AIRecommendationScreen = () => {
+    const { t } = useTranslation();
+    const [userData, setUserData] = useState(null);
+    const [recentLogs, setRecentLogs] = useState([]);
+    const [messages, setMessages] = useState([
+        { id: 1, type: 'ai', text: '안녕하세요! 당신의 AI 코치입니다. 오늘 어떤 운동을 도와드릴까요?' }
+    ]);
+    const [inputText, setInputText] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    setUserData(user.user_metadata);
+                    
+                    // 최근 7일간의 기록 가져오기
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                    
+                    const { data: logs, error } = await supabase
+                        .from('workout_logs')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .gte('created_at', sevenDaysAgo.toISOString())
+                        .order('created_at', { ascending: false });
+                    
+                    if (error) throw error;
+                    setRecentLogs(logs || []);
+                }
+            } catch (err) {
+                console.error('Data loading error:', err);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const generateAIResponse = async (prompt) => {
+        // 실제 API 호출 뼈대 (임시 모의 로직)
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(`AI API 연동 대기 중입니다. \n\n전달받은 프롬프트: \n${prompt}`);
+            }, 2000);
+        });
+    };
+
+    const handleSendMessage = async (customText = null) => {
+        const textToSend = customText || inputText;
+        if (!textToSend.trim() || isTyping) return;
+
+        // 1. 사용자 메시지 추가
+        const userMsg = { id: Date.now(), type: 'user', text: textToSend };
+        setMessages(prev => [...prev, userMsg]);
+        setInputText('');
+        setIsTyping(true);
+
+        // 2. 프롬프트 엔지니어링
+        const logSummary = recentLogs.length > 0 
+            ? recentLogs.map(l => t(l.part)).join(', ') 
+            : '기록 없음';
+        
+        const fullPrompt = `내 정보: ${userData?.age || '?'}세 ${userData?.gender || '?'}, ${userData?.height || '?'}cm, ${userData?.weight || '?'}kg. 최근 7일간 ${logSummary} 운동을 했어. ${textToSend}`;
+        
+        console.log("Generated Prompt:", fullPrompt);
+
+        // 3. AI 응답 받기
+        const aiText = await generateAIResponse(fullPrompt);
+        
+        const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
+        setMessages(prev => [...prev, aiMsg]);
+        setIsTyping(false);
+    };
+
     return (
-        <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
-            <BackButton />
-            <div className="py-20 text-center"><p className="text-slate-500">AI 추천 화면입니다.</p></div>
+        <div className="flex flex-col h-screen bg-slate-950 animate-fade-in relative max-w-2xl mx-auto border-x border-white/5">
+            {/* Header */}
+            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+                <div className="flex items-center gap-3">
+                    <BackButton />
+                    <div className="flex items-center gap-3 ml-2">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-sm font-black text-white leading-none uppercase tracking-tighter italic">AI MyGym Coach</h2>
+                            <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 mt-1">
+                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Online
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <LanguageToggle />
+            </div>
+
+            {/* Chat Area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-32">
+                {messages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}>
+                        <div className={`max-w-[85%] p-4 rounded-[1.5rem] text-sm leading-relaxed ${
+                            msg.type === 'user' 
+                            ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-600/10' 
+                            : 'bg-slate-800 text-slate-200 rounded-tl-none border border-white/5'
+                        }`}>
+                            <p className="whitespace-pre-wrap">{msg.text}</p>
+                        </div>
+                    </div>
+                ))}
+                {isTyping && (
+                    <div className="flex justify-start">
+                        <div className="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-white/5 flex gap-1">
+                            <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></span>
+                            <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce delay-75"></span>
+                            <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce delay-150"></span>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Input Area */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent">
+                <div className="max-w-xl mx-auto space-y-3">
+                    {/* Quick Actions */}
+                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                        <button 
+                            onClick={() => handleSendMessage("내 체형에 맞는 루틴 추천해줘")}
+                            className="whitespace-nowrap px-4 py-2 bg-slate-900 border border-white/5 rounded-full text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                        >
+                            📋 루틴 추천
+                        </button>
+                        <button 
+                            onClick={() => handleSendMessage("최근 운동 평가해줘")}
+                            className="whitespace-nowrap px-4 py-2 bg-slate-900 border border-white/5 rounded-full text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                        >
+                            📊 운동 평가
+                        </button>
+                        <button 
+                            onClick={() => handleSendMessage("단백질 섭취량 계산해줘")}
+                            className="whitespace-nowrap px-4 py-2 bg-slate-900 border border-white/5 rounded-full text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                        >
+                            🍗 영양 조언
+                        </button>
+                    </div>
+
+                    <div className="relative group">
+                        <input 
+                            type="text"
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                            placeholder="코치에게 질문하기..."
+                            className="w-full bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-2xl"
+                        />
+                        <button 
+                            onClick={() => handleSendMessage()}
+                            disabled={!inputText.trim() || isTyping}
+                            className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9-2-9-18-9 18 9 2zm0 0v-8" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
@@ -1114,4 +1274,5 @@ const App = () => {
 
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);
+
 
