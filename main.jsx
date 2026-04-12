@@ -943,14 +943,26 @@ const AIRecommendationScreen = () => {
         setInputText('');
         setIsTyping(true);
 
-        // 2. 프롬프트 엔지니어링
+        // 2. 프롬프트 엔지니어링 고도화
+        const systemPrompt = `너는 상위 1% 엘리트 퍼스널 트레이너 'MyGym AI 코치'야. 일반적인 챗봇처럼 장황하게 말하지 말고, 전문가처럼 핵심만 명확하고 단호하게 말해. 다음 규칙을 무조건 지켜:
+- 사용자의 체격(키, 몸무게, 성별, 나이)을 분석하여 현실적이고 부상 위험이 없는 세트 수와 중량(kg) 가이드라인을 제안할 것.
+- 제공된 '최근 7일 운동 기록'을 반드시 분석하여, 최근에 사용한 근육군은 피하고 휴식할 수 있도록 교차 부위(분할 운동)를 추천할 것.
+- 루틴을 추천할 때는 [운동 종목명] - [세트 및 횟수] - [추천 중량] - [선정 이유]를 가독성 좋은 불릿 포인트(-) 리스트 형태로 정리할 것.`;
+
         const logSummary = recentLogs.length > 0 
-            ? recentLogs.map(l => t(l.part)).join(', ') 
-            : '기록 없음';
+            ? recentLogs.map(l => `${new Date(l.created_at).toLocaleDateString()}: ${t(l.part)}(${l.exercise})`).join('\n') 
+            : '최근 7일간 기록 없음';
+
+        const userContext = `나이: ${userData?.age || '미입력'}세
+성별: ${userData?.gender || '미입력'}
+키: ${userData?.height || '미입력'}cm
+몸무게: ${userData?.weight || '미입력'}kg
+최근 7일 운동 기록:
+${logSummary}`;
+
+        const fullPrompt = `${systemPrompt}\n\n[사용자 데이터]\n${userContext}\n\n[사용자 질문]: ${textToSend}`;
         
-        const fullPrompt = `내 정보: ${userData?.age || '미입력'}세 ${userData?.gender || '미입력'}, ${userData?.height || '미입력'}cm, ${userData?.weight || '미입력'}kg. 최근 7일간 ${logSummary} 운동을 했어. ${textToSend}`;
-        
-        console.log("Generated Prompt:", fullPrompt);
+        console.log("Structured Prompt for AI:", fullPrompt);
 
         // 3. AI 응답 받기
         const aiText = await generateAIResponse(fullPrompt);
@@ -1288,6 +1300,7 @@ const App = () => {
 
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);
+
 
 
 
