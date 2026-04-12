@@ -911,12 +911,20 @@ const AIRecommendationScreen = () => {
     }, []);
 
     const generateAIResponse = async (prompt) => {
-        // 실제 API 호출 뼈대 (임시 모의 로직)
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(`AI API 연동 대기 중입니다. \n\n전달받은 프롬프트: \n${prompt}`);
-            }, 2000);
-        });
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
+        } catch (error) {
+            console.error("AI API Error:", error);
+            return "AI 서비스에 연결할 수 없습니다. 나중에 다시 시도해 주세요.";
+        }
     };
 
     const handleSendMessage = async (customText = null) => {
@@ -934,7 +942,7 @@ const AIRecommendationScreen = () => {
             ? recentLogs.map(l => t(l.part)).join(', ') 
             : '기록 없음';
         
-        const fullPrompt = `내 정보: ${userData?.age || '?'}세 ${userData?.gender || '?'}, ${userData?.height || '?'}cm, ${userData?.weight || '?'}kg. 최근 7일간 ${logSummary} 운동을 했어. ${textToSend}`;
+        const fullPrompt = `내 정보: ${userData?.age || '미입력'}세 ${userData?.gender || '미입력'}, ${userData?.height || '미입력'}cm, ${userData?.weight || '미입력'}kg. 최근 7일간 ${logSummary} 운동을 했어. ${textToSend}`;
         
         console.log("Generated Prompt:", fullPrompt);
 
@@ -1274,5 +1282,6 @@ const App = () => {
 
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);
+
 
 
