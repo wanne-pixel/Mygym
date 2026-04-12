@@ -153,7 +153,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                         filteredExercises.map((ex) => {
                             const handleImgError = (e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=100&h=100&fit=crop';
+                                e.target.src = 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=300&fit=crop';
                             };
                             
                             return (
@@ -212,7 +212,7 @@ const BackButton = () => {
 };
 
 /**
- * [Screen 1: Login and Sign Up - 상세 가입 및 이메일 인증 기능 추가]
+ * [Screen 1: Login and Sign Up]
  */
 const LoginScreen = () => {
     const { t } = useTranslation();
@@ -295,7 +295,7 @@ const LoginScreen = () => {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 animate-fade-in bg-slate-950 relative">
                 <div className="absolute top-6 right-6"><LanguageToggle /></div>
-                <div className="w-full max-w-md space-y-8">
+                <div className="w-full max-sm space-y-8">
                     <button onClick={() => setIsSignup(false)} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4 group">
                         <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
                         <span className="font-medium">{t('back')}</span>
@@ -397,7 +397,7 @@ const LoginScreen = () => {
                 </h1>
                 <p className="mt-2 text-gray-400 font-medium tracking-wide uppercase">{t('welcome_subtitle')}</p>
             </div>
-            <div className="w-full max-w-sm space-y-4">
+            <div className="w-full max-sm space-y-4">
                 <div className="space-y-2">
                     <input
                         type="email"
@@ -437,25 +437,58 @@ const LoginScreen = () => {
 const WorkoutDetailScreen = () => {
     const { t } = useTranslation();
     const location = useLocation();
-    const data = location.state?.data || { name: '?', part: 'no_record', exercise: 'N/A' };
+    const { date, logs } = location.state || { date: '?', logs: [] };
     
     return (
-        <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
-            <div className="absolute top-6 right-6"><LanguageToggle /></div>
+        <div className="p-4 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
+            <div className="absolute top-4 right-4"><LanguageToggle /></div>
             <BackButton />
-            <div className="mb-10">
-                <span className="px-3 py-1 bg-blue-600 text-[10px] font-bold rounded-full uppercase tracking-widest text-white mb-2 inline-block">
-                    {data.name} {t('day_record')}
-                </span>
-                <h2 className="text-4xl font-black italic tracking-tighter text-white">
-                    {t(data.part)} {t('training_details')}
+            <div className="mb-6">
+                <h2 className="text-3xl font-black italic tracking-tighter text-white">
+                    {date} {t('training_details')}
                 </h2>
-                <p className="text-slate-400 mt-2">{data.exercise}</p>
             </div>
+
             <div className="space-y-4">
-                <div className="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl flex justify-between items-center group">
-                     <p className="text-slate-400">상세 기록 업데이트 예정</p>
-                </div>
+                {logs.length === 0 ? (
+                    <div className="py-20 text-center bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-800">
+                        <p className="text-slate-500 italic">기록된 데이터가 없습니다.</p>
+                    </div>
+                ) : (
+                    logs.map((log, idx) => (
+                        <div key={idx} className="bg-slate-900/40 border border-white/5 p-4 md:p-6 rounded-[1.5rem] shadow-2xl relative overflow-hidden group">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                            <div className="flex items-center justify-between mb-3">
+                                <div>
+                                    <div className="flex gap-1 mb-1">
+                                        <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest text-white">
+                                            {t(log.part)}
+                                        </span>
+                                        <span className="bg-slate-800 text-slate-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-slate-700">
+                                            {t(log.type)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <h3 className="text-lg md:text-xl font-black italic text-white uppercase tracking-tighter leading-none">{log.exercise}</h3>
+                                        <span className="text-xs font-black text-slate-500 italic uppercase leading-none">{log.sets_count} SETS</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                {log.sets_data.map((s, sIdx) => (
+                                    <div key={sIdx} className="flex items-center justify-between py-1.5 px-4 bg-slate-950/50 rounded-lg border border-white/5 transition-all hover:border-blue-500/30">
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{sIdx + 1} SET</span>
+                                        <div className="flex gap-4 items-center">
+                                            <span className="text-xs font-bold text-white w-12 text-right">{s.weight}kg</span>
+                                            <span className="text-xs font-bold text-blue-400 w-12 text-right">{s.reps} r</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );
@@ -620,10 +653,221 @@ const WorkoutSetupScreen = () => {
 };
 
 const WorkoutPlanScreen = () => {
+    const { t } = useTranslation();
+    const [selection, setSelection] = useState({ part: '', type: '', exercise: '' });
+    const [planList, setPlanList] = useState([]);
+    const [recordingIndex, setRecordingIndex] = useState(null);
+    const [numSets, setNumSets] = useState('');
+    const [setsData, setSetsData] = useState([]);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleAddToList = () => {
+        if (!selection.exercise) return;
+        const newItem = {
+            id: Date.now(),
+            part: selection.part,
+            type: selection.type,
+            exercise: selection.exercise,
+            isCompleted: false
+        };
+        setPlanList([...planList, newItem]);
+        setSelection({ part: '', type: '', exercise: '' });
+    };
+
+    const startRecording = (index) => {
+        setRecordingIndex(index);
+        setNumSets('');
+        setSetsData([]);
+    };
+
+    const handleNumSetsChange = (e) => {
+        const val = parseInt(e.target.value) || 0;
+        setNumSets(e.target.value);
+        if (val > 0) {
+            setSetsData(new Array(val).fill(null).map(() => ({ weight: '', reps: '' })));
+        } else {
+            setSetsData([]);
+        }
+    };
+
+    const handleSetDataChange = (index, field, value) => {
+        const newData = [...setsData];
+        newData[index] = { ...newData[index], [field]: value };
+        setSetsData(newData);
+    };
+
+    const handleFinishRecording = async () => {
+        if (recordingIndex === null || isSaving) return;
+        
+        const nSets = parseInt(numSets);
+        const allSetsFilled = setsData.length > 0 && setsData.length === nSets && setsData.every(s => s.weight !== '' && s.reps !== '');
+        
+        if (!allSetsFilled) {
+            alert('모든 세트의 정보를 입력해주세요.');
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('로그인이 필요합니다.');
+
+            const targetExercise = planList[recordingIndex];
+            const newLog = {
+                user_id: user.id,
+                part: targetExercise.part,
+                type: targetExercise.type,
+                exercise: targetExercise.exercise,
+                sets_count: nSets,
+                sets_data: setsData,
+                is_completed: true
+            };
+
+            const { error } = await supabase.from('workout_logs').insert([newLog]);
+            if (error) throw error;
+
+            const newPlanList = [...planList];
+            newPlanList[recordingIndex].isCompleted = true;
+            setPlanList(newPlanList);
+            setRecordingIndex(null);
+            alert('기록이 완료되었습니다!');
+        } catch (error) {
+            alert('저장 오류: ' + error.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     return (
         <div className="p-6 md:p-12 max-w-6xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
+            <div className="absolute top-6 right-6"><LanguageToggle /></div>
             <BackButton />
-            <div className="py-20 text-center"><p className="text-slate-500">루틴 구성 화면은 추후 DB 연동 예정입니다.</p></div>
+            
+            <div className="mb-8">
+                <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-indigo-500 decoration-4 underline-offset-8">
+                    {t('routine_compose_title')}
+                </h2>
+                <p className="text-slate-400 mt-2 font-medium">오늘 수행할 운동들을 미리 구성하고 기록해보세요.</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                {/* 왼쪽: 운동 추가 */}
+                <div className="space-y-6">
+                    <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                        <ExerciseSelector selection={selection} setSelection={setSelection} />
+                        {selection.exercise && (
+                            <button 
+                                onClick={handleAddToList}
+                                className="w-full mt-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl italic tracking-tighter transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
+                            >
+                                리스트에 추가하기
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* 오른쪽: 오늘 할 운동 리스트 */}
+                <div className="space-y-6">
+                    <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 min-h-[400px]">
+                        <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                            오늘의 운동 리스트 ({planList.length})
+                        </h3>
+                        
+                        <div className="space-y-4">
+                            {planList.length === 0 ? (
+                                <div className="py-20 text-center">
+                                    <p className="text-slate-600 italic">왼쪽에서 운동을 선택해 리스트를 구성하세요.</p>
+                                </div>
+                            ) : (
+                                planList.map((item, idx) => (
+                                    <div key={item.id} className={`p-5 rounded-2xl border transition-all ${item.isCompleted ? 'bg-slate-800/20 border-emerald-500/30' : 'bg-slate-800/60 border-slate-700'}`}>
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <span className="text-[10px] font-bold text-indigo-400 block uppercase mb-1">{t(item.part)} / {t(item.type)}</span>
+                                                <h4 className={`text-lg font-bold ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>{item.exercise}</h4>
+                                            </div>
+                                            {item.isCompleted ? (
+                                                <div className="flex items-center gap-2 text-emerald-400 font-black italic text-sm">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                                    COMPLETED
+                                                </div>
+                                            ) : (
+                                                <button 
+                                                    onClick={() => startRecording(idx)}
+                                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black italic rounded-lg transition-all active:scale-95"
+                                                >
+                                                    기록하기
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {/* 기록 폼 (해당 아이템을 기록 중일 때만 표시) */}
+                                        {recordingIndex === idx && (
+                                            <div className="mt-6 pt-6 border-t border-slate-700 space-y-4 animate-slide-down">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-xs font-bold text-slate-400">세트 수</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={numSets} 
+                                                        onChange={handleNumSetsChange}
+                                                        placeholder="0"
+                                                        className="w-16 bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-center font-bold outline-none focus:ring-1 focus:ring-blue-500"
+                                                    />
+                                                </div>
+
+                                                {setsData.length > 0 && (
+                                                    <div className="space-y-2">
+                                                        {setsData.map((s, sIdx) => (
+                                                            <div key={sIdx} className="flex gap-2">
+                                                                <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-lg px-3">
+                                                                    <span className="text-[10px] text-slate-500 font-bold mr-2">{sIdx + 1}S</span>
+                                                                    <input 
+                                                                        type="number" 
+                                                                        value={s.weight} 
+                                                                        onChange={(e) => handleSetDataChange(sIdx, 'weight', e.target.value)}
+                                                                        placeholder="KG" 
+                                                                        className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs"
+                                                                    />
+                                                                </div>
+                                                                <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-lg px-3">
+                                                                    <input 
+                                                                        type="number" 
+                                                                        value={s.reps} 
+                                                                        onChange={(e) => handleSetDataChange(sIdx, 'reps', e.target.value)}
+                                                                        placeholder="REPS" 
+                                                                        className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                <div className="flex gap-2">
+                                                    <button 
+                                                        onClick={() => setRecordingIndex(null)}
+                                                        className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-xl transition-all"
+                                                    >
+                                                        취소
+                                                    </button>
+                                                    <button 
+                                                        onClick={handleFinishRecording}
+                                                        disabled={isSaving}
+                                                        className="flex-[2] py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black italic rounded-xl transition-all shadow-lg shadow-emerald-600/20"
+                                                    >
+                                                        {isSaving ? '저장 중...' : '기록 완료'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
@@ -637,12 +881,14 @@ const AIRecommendationScreen = () => {
     );
 };
 
-const MonthlyCalendar = () => {
+const MonthlyCalendar = ({ workoutGroups = {} }) => {
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
+    const currentDate = today.getDate();
     
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
     const lastDateOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -652,7 +898,7 @@ const MonthlyCalendar = () => {
     for (let i = 1; i <= lastDateOfMonth; i++) calendarDays.push(i);
 
     return (
-        <div className="mt-8 md:mt-10 p-5 md:p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50">
+        <div className="mt-4 md:mt-10 p-5 md:p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-md md:text-lg font-bold text-white uppercase tracking-tighter">
                     {currentMonth + 1}{t('month_label')} {t('training_calendar')}
@@ -660,13 +906,36 @@ const MonthlyCalendar = () => {
             </div>
             <div className="grid grid-cols-7 gap-1 md:gap-2">
                 {daysOfWeek.map(day => (<div key={day} className="text-center text-[10px] md:text-xs font-black text-slate-500 py-2 uppercase">{day}</div>))}
-                {calendarDays.map((date, idx) => (
-                    <div key={idx} className="aspect-square flex items-center justify-center relative group">
-                        {date && (
-                            <span className="relative z-10 text-[11px] md:text-sm font-bold text-slate-400">{date}</span>
-                        )}
-                    </div>
-                ))}
+                {calendarDays.map((date, idx) => {
+                    const workoutInfo = date ? workoutGroups[date] : null;
+                    const isToday = date === currentDate;
+
+                    return (
+                        <div 
+                            key={idx} 
+                            onClick={() => workoutInfo && navigate('/routine-detail', { state: { date: workoutInfo.dateString, logs: workoutInfo.logs } })}
+                            className={`aspect-square flex flex-col items-center justify-center relative group ${workoutInfo ? 'cursor-pointer' : ''}`}
+                        >
+                            {date && (
+                                <>
+                                    {isToday ? (
+                                        <div className="absolute inset-1 bg-blue-600 rounded-full"></div>
+                                    ) : workoutInfo ? (
+                                        <div className="absolute inset-1 bg-transparent border-2 border-red-500 rounded-full animate-pulse"></div>
+                                    ) : null}
+                                    <span className={`relative z-10 text-[11px] md:text-sm font-bold ${isToday ? 'text-white' : (workoutInfo ? 'text-white' : 'text-slate-400')}`}>
+                                        {date}
+                                    </span>
+                                    {workoutInfo && (
+                                        <span className="relative z-10 text-[8px] text-slate-400 font-bold mt-0.5 line-clamp-1 text-center px-1">
+                                            {workoutInfo.partsDisplay}
+                                        </span>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
@@ -675,7 +944,7 @@ const MonthlyCalendar = () => {
 const DashboardScreen = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
-    const [recentRoutines, setRecentRoutines] = useState([]);
+    const [workoutGroups, setWorkoutGroups] = useState({});
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -689,23 +958,43 @@ const DashboardScreen = () => {
                     .select('*')
                     .eq('user_id', user.id)
                     .order('created_at', { ascending: false })
-                    .limit(5);
+                    .limit(200);
 
                 if (error) throw error;
 
                 if (data) {
-                    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-                    const formattedData = data.map(log => {
-                        const dateObj = new Date(log.created_at);
-                        return {
-                            id: log.id,
-                            name: days[dateObj.getDay()],
-                            part: log.part,
-                            exercise: log.exercise,
-                            originalDate: log.created_at
-                        };
+                    const days = ['일', '월', '화', '수', '목', '금', '토'];
+                    const groups = {};
+                    const today = new Date();
+                    const currentMonth = today.getMonth();
+                    const currentYear = today.getFullYear();
+
+                    data.forEach(log => {
+                        const d = new Date(log.created_at);
+                        const logMonth = d.getMonth();
+                        const logYear = d.getFullYear();
+                        const logDate = d.getDate();
+
+                        if (logMonth === currentMonth && logYear === currentYear) {
+                            if (!groups[logDate]) {
+                                const dateStr = `${logMonth + 1}/${logDate}(${days[d.getDay()]})`;
+                                groups[logDate] = {
+                                    dateString: dateStr,
+                                    parts: new Set(),
+                                    logs: []
+                                };
+                            }
+                            groups[logDate].parts.add(t(log.part));
+                            groups[logDate].logs.push(log);
+                        }
                     });
-                    setRecentRoutines(formattedData);
+
+                    // 부위 텍스트 가공
+                    Object.keys(groups).forEach(date => {
+                        groups[date].partsDisplay = Array.from(groups[date].parts).join(',');
+                    });
+
+                    setWorkoutGroups(groups);
                 }
             } catch (error) {
                 console.error("데이터 불러오기 에러:", error);
@@ -715,17 +1004,7 @@ const DashboardScreen = () => {
         };
 
         fetchRecentLogs();
-    }, []);
-
-    const getBadgeColor = (part) => {
-        switch (part) {
-            case 'chest': return 'bg-rose-500/20 text-rose-400 border-rose-500/30';
-            case 'legs': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-            case 'shoulders': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-            case 'back_part': return 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30';
-            default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
-        }
-    };
+    }, [t]);
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen animate-fade-in overflow-x-hidden relative bg-slate-950">
@@ -740,32 +1019,19 @@ const DashboardScreen = () => {
                     </span>
                 </button>
             </div>
-            <div className="w-full md:w-1/2 p-6 md:p-12 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950 flex flex-col justify-center">
-                <div className="mb-8 md:mb-10">
-                    <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white"><span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>내 최근 운동 (DB 연동됨)</h2>
-                    <p className="text-slate-400 text-xs md:text-sm mt-1">Supabase에서 불러온 실제 데이터입니다.</p>
+            <div className="w-full md:w-1/2 p-4 md:p-12 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950 flex flex-col justify-center">
+                <div className="mb-2 md:mb-6">
+                    <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
+                        <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+                        나의 운동 현황
+                    </h2>
                 </div>
                 
                 {isLoading ? (
                     <div className="text-slate-500 text-center py-4">기록을 불러오는 중...</div>
-                ) : recentRoutines.length === 0 ? (
-                    <div className="text-slate-500 text-center py-8 bg-slate-900/50 rounded-2xl border border-dashed border-slate-700">
-                        아직 기록된 운동이 없습니다.<br/>우측 메뉴에서 첫 운동을 기록해보세요!
-                    </div>
                 ) : (
-                    <div className="grid grid-cols-5 gap-2 md:gap-3">
-                        {recentRoutines.map((item) => (
-                            <div key={item.id} className="flex flex-col items-center gap-3 md:gap-4 group">
-                                <span className="text-slate-500 font-semibold text-[10px] md:text-sm">{item.name}</span>
-                                <div onClick={() => navigate('/routine-detail', { state: { data: item } })} className={`w-full py-2.5 md:py-3 px-1 md:px-2 rounded-lg md:rounded-xl border text-center text-[9px] md:text-xs font-bold cursor-pointer transition-all active:scale-90 hover:scale-105 ${getBadgeColor(item.part)}`}>
-                                    {t(item.part)}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <MonthlyCalendar workoutGroups={workoutGroups} />
                 )}
-                
-                <MonthlyCalendar />
             </div>
             <div className="w-full md:w-1/2 flex flex-col h-auto md:h-screen">
                 <button onClick={() => navigate('/routine-record')} className="h-[220px] md:flex-1 group relative overflow-hidden bg-slate-900 flex flex-col items-center justify-center transition-all hover:bg-slate-800 border-b border-slate-800 md:border-b-0">
@@ -776,7 +1042,7 @@ const DashboardScreen = () => {
                         <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Routine Record</p>
                     </div>
                 </button>
-                <button onClick={() => navigate('/routine-compose')} className="h-[220px] md:flex-1 group relative overflow-hidden bg-indigo-950 flex flex-col items-center justify-center transition-all hover:bg-indigo-950 border-b border-slate-800 md:border-b-0">
+                <button onClick={() => navigate('/routine-compose')} className="h-[220px] md:flex-1 group relative overflow-hidden bg-indigo-950 flex flex-col items-center justify-center transition-all hover:bg-indigo-900 border-b border-slate-800 md:border-b-0">
                     <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="relative z-10 flex flex-col items-center">
                         <div className="w-12 h-12 md:w-14 md:h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-indigo-600/30 group-hover:rotate-6 transition-transform"><svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
@@ -848,3 +1114,4 @@ const App = () => {
 
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);
+
