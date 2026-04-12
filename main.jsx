@@ -919,11 +919,17 @@ const AIRecommendationScreen = () => {
                     contents: [{ parts: [{ text: prompt }] }]
                 })
             });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(errText);
+            }
+
             const data = await response.json();
             return data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
         } catch (error) {
             console.error("AI API Error:", error);
-            return "AI 서비스에 연결할 수 없습니다. 나중에 다시 시도해 주세요.";
+            return `API 오류: ${error.message}`;
         }
     };
 
@@ -1282,6 +1288,7 @@ const App = () => {
 
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);
+
 
 
 
