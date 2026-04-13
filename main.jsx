@@ -178,32 +178,37 @@ const ExerciseModal = ({ exercise, onClose }) => {
  */
 const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
     const [modalExercise, setModalExercise] = useState(null);
+    const [manualName, setManualName] = useState('');
 
     const parts = [
         { key: 'chest', label: '가슴' },
+        { key: 'shoulders', label: '어깨' },
         { key: 'back_part', label: '등' },
         { key: 'legs', label: '하체' },
-        { key: 'shoulders', label: '어깨' },
-        { key: 'arms', label: '팔' }
+        { key: 'arms', label: '팔' },
+        { key: 'cardio', label: '유산소' }
     ];
 
     const handlePartClick = (p) => {
-        setSelection({ part: p, type: '', exercise: '' });
-    };
-
-    const handleTypeClick = (tKey) => {
-        setSelection({ ...selection, type: tKey, exercise: '' });
+        setSelection({ part: p, exercise: '', manualName: '' });
+        setManualName('');
     };
 
     const handleExerciseClick = (exName) => {
-        setSelection({ ...selection, exercise: exName });
-        if (onExerciseSelect) onExerciseSelect(exName);
+        const isManual = exName === '직접 입력';
+        setSelection({ ...selection, exercise: exName, manualName: isManual ? manualName : '' });
+        if (onExerciseSelect && !isManual) onExerciseSelect(exName);
+    };
+
+    const handleManualNameChange = (val) => {
+        setManualName(val);
+        setSelection({ ...selection, manualName: val });
     };
 
     const filteredExercises = useMemo(() => {
-        if (!selection.part || !selection.type) return [];
-        return CUSTOM_EXERCISES.filter(ex => ex.part === selection.part && ex.type === selection.type);
-    }, [selection.part, selection.type]);
+        if (!selection.part) return [];
+        return CUSTOM_EXERCISES.filter(ex => ex.part === selection.part);
+    }, [selection.part]);
 
     return (
         <div className="space-y-8">
@@ -223,66 +228,39 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             </div>
 
             {selection.part && (
-                <div className="animate-fade-in">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 2. 종류 선택</label>
-                    <div className="flex gap-2">
-                        {[
-                            { key: 'free_weights', label: '프리웨이트' },
-                            { key: 'machine', label: '머신' },
-                            { key: 'cable', label: '케이블' }
-                        ].map(type => (
-                            <button 
-                                key={type.key} 
-                                onClick={() => handleTypeClick(type.key)} 
-                                className={`flex-1 py-4 rounded-2xl font-black text-xs tracking-tighter transition-all duration-300 ${selection.type === type.key ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 ring-2 ring-indigo-400/50' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50'}`}
-                            >
-                                {type.label.toUpperCase()}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {selection.type && (
                 <div className="animate-fade-in space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-4 px-1">Step 3. 종목 선택</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-4 px-1">Step 2. 종목 선택</label>
                     
-                    {filteredExercises.length === 0 ? (
-                        <div className="py-16 text-center bg-slate-900/50 rounded-[2rem] border border-white/5 border-dashed">
-                            <p className="text-slate-500 italic text-sm font-medium">해당 부위와 기구에 맞는 운동이 없습니다.</p>
-                        </div>
-                    ) : (
-                        filteredExercises.map((ex) => {
-                            const handleImgError = (e) => {
-                                e.target.onerror = null;
-                                e.target.src = 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=300&fit=crop';
-                            };
-                            
-                            return (
-                                <div 
-                                    key={ex.id}
-                                    onClick={() => handleExerciseClick(ex.name)}
-                                    className={`group relative flex items-center justify-between p-4 rounded-[1.5rem] cursor-pointer transition-all duration-500 border ${selection.exercise === ex.name ? 'bg-blue-600/10 border-blue-500 ring-1 ring-blue-500/50' : 'bg-slate-800/30 border-white/5 hover:border-slate-600 hover:bg-slate-800/50'}`}
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-lg border border-white/5 group-hover:scale-105 transition-transform duration-500">
-                                            <img src={ex.imageUrl || ex.image} className="w-full h-full object-cover" alt={ex.name} referrerPolicy="no-referrer" onError={handleImgError} />
-                                            <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition-colors"></div>
-                                        </div>
-                                        <div>
-                                            <p className={`text-base font-black italic tracking-tight uppercase transition-colors ${selection.exercise === ex.name ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
-                                            <div className="flex gap-2 mt-1">
-                                                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{ex.target}</span>
-                                            </div>
+                    {filteredExercises.map((ex) => (
+                        <div key={ex.id} className="space-y-3">
+                            <div 
+                                onClick={() => handleExerciseClick(ex.name)}
+                                className={`group relative flex items-center justify-between p-4 rounded-[1.5rem] cursor-pointer transition-all duration-500 border ${selection.exercise === ex.name ? 'bg-blue-600/10 border-blue-500 ring-1 ring-blue-500/50' : 'bg-slate-800/30 border-white/5 hover:border-slate-600 hover:bg-slate-800/50'}`}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div>
+                                        <p className={`text-base font-black italic tracking-tight uppercase transition-colors ${selection.exercise === ex.name ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
+                                        <div className="flex gap-2 mt-1">
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{ex.equipment}</span>
                                         </div>
                                     </div>
-                                    <button onClick={(e) => { e.stopPropagation(); setModalExercise(ex); }} className="p-2.5 text-slate-500 hover:text-blue-400 bg-slate-900/50 rounded-xl transition-all hover:scale-110 active:scale-95">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    </button>
                                 </div>
-                            );
-                        })
-                    )}
+                            </div>
+                            
+                            {ex.name === '직접 입력' && selection.exercise === '직접 입력' && (
+                                <div className="px-2 animate-slide-down">
+                                    <input 
+                                        type="text" 
+                                        value={manualName}
+                                        onChange={(e) => handleManualNameChange(e.target.value)}
+                                        onBlur={() => { if(onExerciseSelect && manualName.trim()) onExerciseSelect('직접 입력'); }}
+                                        placeholder="운동 이름 입력"
+                                        className="w-full bg-slate-900 border border-blue-500/50 rounded-xl p-3 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    ))}
                 </div>
             )}
             
@@ -404,14 +382,14 @@ const LoginScreen = () => {
                                 placeholder="비밀번호"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all"
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                             <input
                                 type="password"
                                 placeholder="비밀번호 확인"
                                 value={passwordConfirm}
                                 onChange={(e) => setPasswordConfirm(e.target.value)}
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all"
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
 
@@ -460,7 +438,7 @@ const LoginScreen = () => {
                     <button
                         onClick={handleLogin}
                         disabled={isLoading}
-                        className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+                        className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
                     >
                         {isLoading ? '로딩중...' : '로그인'}
                     </button>
@@ -555,10 +533,10 @@ const WorkoutDetailScreen = () => {
                                 <div>
                                     <div className="flex gap-1 mb-1">
                                         <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest text-white">
-                                            {log.part === 'chest' ? '가슴' : log.part === 'back_part' ? '등' : log.part === 'legs' ? '하체' : log.part === 'shoulders' ? '어깨' : '팔'}
+                                            {log.part === 'chest' ? '가슴' : log.part === 'back_part' ? '등' : log.part === 'legs' ? '하체' : log.part === 'shoulders' ? '어깨' : log.part === 'arms' ? '팔' : '유산소'}
                                         </span>
                                         <span className="bg-slate-800 text-slate-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-slate-700">
-                                            {log.type === 'free_weights' ? '프리웨이트' : log.type === 'machine' ? '머신' : '케이블'}
+                                            {log.type}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -589,7 +567,7 @@ const WorkoutDetailScreen = () => {
 
 const WorkoutSetupScreen = () => {
     const [step, setStep] = useState(1);
-    const [selection, setSelection] = useState({ part: '', type: '', exercise: '' });
+    const [selection, setSelection] = useState({ part: '', exercise: '', manualName: '' });
     const [numSets, setNumSets] = useState('');
     const [setsData, setSetsData] = useState([]);
     const [addedExercises, setAddedExercises] = useState([]);
@@ -617,8 +595,9 @@ const WorkoutSetupScreen = () => {
     const isRecordEnabled = useMemo(() => {
         const nSets = parseInt(numSets);
         const allSetsFilled = setsData.length > 0 && setsData.length === nSets && setsData.every(s => s.weight !== '' && s.reps !== '' && parseFloat(s.weight) >= 0 && parseInt(s.reps) > 0);
-        return nSets > 0 && allSetsFilled && selection.exercise !== '';
-    }, [numSets, setsData, selection.exercise]);
+        const isExerciseReady = selection.exercise !== '' && (selection.exercise !== '직접 입력' || (selection.manualName && selection.manualName.trim() !== ''));
+        return nSets > 0 && allSetsFilled && isExerciseReady;
+    }, [numSets, setsData, selection]);
 
     const handleAddOrUpdateExercise = async () => {
         if (!isRecordEnabled || isSaving) return;
@@ -632,11 +611,14 @@ const WorkoutSetupScreen = () => {
                 return;
             }
 
+            const exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
+            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === selection.exercise && ex.part === selection.part);
+
             const newLog = {
                 user_id: user.id,
                 part: selection.part,
-                type: selection.type,
-                exercise: selection.exercise,
+                type: exInfo?.equipment || '기타',
+                exercise: exerciseName,
                 sets_count: parseInt(numSets),
                 sets_data: setsData,
                 is_completed: true
@@ -650,7 +632,7 @@ const WorkoutSetupScreen = () => {
             setNumSets('');
             setSetsData([]);
             setStep(1);
-            setSelection({ part: '', type: '', exercise: '' });
+            setSelection({ part: '', exercise: '', manualName: '' });
 
         } catch (error) {
             console.error('Error saving workout:', error);
@@ -718,7 +700,7 @@ const WorkoutSetupScreen = () => {
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
                                         <span className="text-[10px] font-bold text-blue-400 block uppercase">
-                                            {ex.part === 'chest' ? '가슴' : ex.part === 'back_part' ? '등' : ex.part === 'legs' ? '하체' : ex.part === 'shoulders' ? '어깨' : '팔'} / {ex.type === 'free_weights' ? '프리웨이트' : ex.type === 'machine' ? '머신' : '케이블'}
+                                            {ex.part === 'chest' ? '가슴' : ex.part === 'back_part' ? '등' : ex.part === 'legs' ? '하체' : ex.part === 'shoulders' ? '어깨' : ex.part === 'arms' ? '팔' : '유산소'} / {ex.type}
                                         </span>
                                         <span className="font-bold text-white text-lg">{ex.exercise}</span>
                                     </div>
@@ -746,7 +728,7 @@ const WorkoutSetupScreen = () => {
 };
 
 const WorkoutPlanScreen = () => {
-    const [selection, setSelection] = useState({ part: '', type: '', exercise: '' });
+    const [selection, setSelection] = useState({ part: '', exercise: '', manualName: '' });
     const [planList, setPlanList] = useState([]);
     const [recordingIndex, setRecordingIndex] = useState(null);
     const [numSets, setNumSets] = useState('');
@@ -754,16 +736,16 @@ const WorkoutPlanScreen = () => {
     const [isSaving, setIsSaving] = useState(false);
 
     const handleAddToList = () => {
-        if (!selection.exercise) return;
+        if (!selection.exercise || (selection.exercise === '직접 입력' && (!selection.manualName || !selection.manualName.trim()))) return;
         const newItem = {
             id: Date.now(),
             part: selection.part,
-            type: selection.type,
             exercise: selection.exercise,
+            manualName: selection.manualName,
             isCompleted: false
         };
         setPlanList([...planList, newItem]);
-        setSelection({ part: '', type: '', exercise: '' });
+        setSelection({ part: '', exercise: '', manualName: '' });
     };
 
     const startRecording = (index) => {
@@ -805,11 +787,14 @@ const WorkoutPlanScreen = () => {
             if (!user) throw new Error('로그인이 필요합니다.');
 
             const targetExercise = planList[recordingIndex];
+            const exerciseName = targetExercise.exercise === '직접 입력' ? targetExercise.manualName : targetExercise.exercise;
+            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === targetExercise.exercise && ex.part === targetExercise.part);
+
             const newLog = {
                 user_id: user.id,
                 part: targetExercise.part,
-                type: targetExercise.type,
-                exercise: targetExercise.exercise,
+                type: exInfo?.equipment || '기타',
+                exercise: exerciseName,
                 sets_count: nSets,
                 sets_data: setsData,
                 is_completed: true
@@ -846,7 +831,7 @@ const WorkoutPlanScreen = () => {
                 <div className="space-y-6">
                     <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
                         <ExerciseSelector selection={selection} setSelection={setSelection} />
-                        {selection.exercise && (
+                        {(selection.exercise && (selection.exercise !== '직접 입력' || (selection.manualName && selection.manualName.trim()))) && (
                             <button 
                                 onClick={handleAddToList}
                                 className="w-full mt-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl italic tracking-tighter transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
@@ -876,9 +861,9 @@ const WorkoutPlanScreen = () => {
                                         <div className="flex justify-between items-center">
                                             <div>
                                                 <span className="text-[10px] font-bold text-indigo-400 block uppercase mb-1">
-                                                    {item.part === 'chest' ? '가슴' : item.part === 'back_part' ? '등' : item.part === 'legs' ? '하체' : item.part === 'shoulders' ? '어깨' : '팔'} / {item.type === 'free_weights' ? '프리웨이트' : item.type === 'machine' ? '머신' : '케이블'}
+                                                    {item.part === 'chest' ? '가슴' : item.part === 'back_part' ? '등' : item.part === 'legs' ? '하체' : item.part === 'shoulders' ? '어깨' : item.part === 'arms' ? '팔' : '유산소'}
                                                 </span>
-                                                <h4 className={`text-lg font-bold ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>{item.exercise}</h4>
+                                                <h4 className={`text-lg font-bold ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>{item.exercise === '직접 입력' ? item.manualName : item.exercise}</h4>
                                             </div>
                                             {item.isCompleted ? (
                                                 <div className="flex items-center gap-2 text-emerald-400 font-black italic text-sm">
