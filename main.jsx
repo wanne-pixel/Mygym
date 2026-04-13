@@ -1397,78 +1397,122 @@ const DashboardScreen = () => {
     );
 };
 
-const App = () => {
+const AppContent = () => {
+    const navigate = useNavigate();
     const [session, setSession] = useState(null);
     const [isInitializing, setIsInitializing] = useState(true);
+    const [isTimeout, setIsTimeout] = useState(false);
 
     useEffect(() => {
-        // Initial session check
+        // 1. 초기 세션 확인
         const initializeAuth = async () => {
-            const { data: { session: initialSession } } = await supabase.auth.getSession();
-            setSession(initialSession);
-            
-            // Detect if we are in an OAuth callback flow (hash for implicit, search for PKCE)
-            const hasAccessToken = window.location.hash.includes('access_token');
-            const hasCode = window.location.search.includes('code=');
-            
-            // If NOT in OAuth flow, we can stop initializing once initial session is fetched.
-            // If YES, we wait for onAuthStateChange to trigger SIGNED_IN.
-            if (!hasAccessToken && !hasCode) {
+            try {
+                const { data: { session: initialSession } } = await supabase.auth.getSession();
+                setSession(initialSession);
+                
+                // OAuth 콜백 상태(hash/code)가 아니라면 즉시 초기화 완료
+                const isOAuthFlow = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+                if (!isOAuthFlow && !initialSession) {
+                    setIsInitializing(false);
+                }
+            } catch (err) {
+                console.error("Auth init error:", err);
                 setIsInitializing(false);
             }
         };
 
         initializeAuth();
 
+        // 2. 인증 상태 변화 감시 (OAuth 리다이렉트 대응 핵심)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
             setSession(currentSession);
             
-            // Critical events that establish a session or confirm its absence
-            if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
+            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && currentSession) {
+                // URL에서 인증 파편(#access_token 등) 제거 및 대시보드 강제 이동
+                if (window.location.hash || window.location.search.includes('code=')) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
                 setIsInitializing(false);
+                navigate('/dashboard', { replace: true });
+            } else if (event === 'SIGNED_OUT') {
+                setSession(null);
+                setIsInitializing(false);
+                navigate('/', { replace: true });
             }
         });
 
-        // Fallback: If after 6 seconds we're still initializing, let the user proceed (or fail to login)
-        const timeout = setTimeout(() => setIsInitializing(false), 6000);
+        // 3. 5초 타임아웃 예외 처리
+        const timer = setTimeout(() => {
+            if (isInitializing) {
+                setIsTimeout(true);
+            }
+        }, 5000);
 
         return () => {
             subscription.unsubscribe();
-            clearTimeout(timeout);
+            clearTimeout(timer);
         };
-    }, []);
+    }, [navigate]);
 
-    // Explicit block for OAuth callback to prevent router bounce
-    const isOAuthCallback = window.location.hash.includes('access_token') || window.location.search.includes('code=');
-
-    if (isInitializing || (isOAuthCallback && !session)) {
+    // 타임아웃 발생 시 UI
+    if (isInitializing && isTimeout) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-slate-950 text-white font-bold italic tracking-tighter text-2xl animate-pulse text-center px-6">
-                로그인 처리 중입니다...
+            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-6 text-center">
+                <div className="w-20 h-20 bg-rose-500/20 rounded-3xl flex items-center justify-center mb-6 border border-rose-500/30">
+                    <svg className="w-10 h-10 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                <h2 className="text-2xl font-black italic tracking-tighter mb-2">로그인이 지연되고 있습니다.</h2>
+                <p className="text-slate-400 mb-8 font-medium">네트워크 연결을 확인하거나 다시 시도해 주세요.</p>
+                <button 
+                    onClick={() => window.location.assign('/')}
+                    className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-xl"
+                >
+                    로그인 화면으로 돌아가기
+                </button>
             </div>
         );
     }
 
+    // 초기화 중 UI
+    if (isInitializing) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white">
+                <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
+                <div className="font-bold italic tracking-tighter text-2xl animate-pulse text-center">
+                    인증 정보 확인 중...
+                </div>
+            </div>
+        );
+    }
+
+    // 미인증 시 로그인 화면
     if (!session) {
         return <LoginScreen />;
     }
 
+    // 인증 완료 시 메인 앱 라우터
+    return (
+        <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
+            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-white font-bold italic tracking-tighter text-2xl animate-pulse">LOADING...</div>}>
+                <Routes>
+                    <Route path="/" element={<DashboardScreen />} />
+                    <Route path="/dashboard" element={<DashboardScreen />} />
+                    <Route path="/routine-detail" element={<WorkoutDetailScreen />} />
+                    <Route path="/routine-record" element={<WorkoutSetupScreen />} />
+                    <Route path="/routine-compose" element={<WorkoutPlanScreen />} />
+                    <Route path="/ai-coach" element={<AIRecommendationScreen />} />
+                    <Route path="/api-view" element={<ApiViewer />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </React.Suspense>
+        </div>
+    );
+};
+
+const App = () => {
     return (
         <BrowserRouter>
-            <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
-                <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-white font-bold italic tracking-tighter text-2xl animate-pulse">LOADING...</div>}>
-                    <Routes>
-                        <Route path="/" element={<DashboardScreen />} />
-                        <Route path="/dashboard" element={<DashboardScreen />} />
-                        <Route path="/routine-detail" element={<WorkoutDetailScreen />} />
-                        <Route path="/routine-record" element={<WorkoutSetupScreen />} />
-                        <Route path="/routine-compose" element={<WorkoutPlanScreen />} />
-                        <Route path="/ai-coach" element={<AIRecommendationScreen />} />
-                        <Route path="/api-view" element={<ApiViewer />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                </React.Suspense>
-            </div>
+            <AppContent />
         </BrowserRouter>
     );
 };
