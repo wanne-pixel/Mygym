@@ -1427,13 +1427,12 @@ const AppContent = () => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
             setSession(currentSession);
             
-            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && currentSession) {
-                // URL에서 인증 파편(#access_token 등) 제거 및 대시보드 강제 이동
-                if (window.location.hash || window.location.search.includes('code=')) {
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
+            if (currentSession) {
                 setIsInitializing(false);
-                navigate('/dashboard', { replace: true });
+                // 세션이 확인되면 대시보드로 이동 (URL 조작 없이 자연스러운 전환 유도)
+                if (window.location.pathname === '/' || window.location.pathname === '/login') {
+                    navigate('/dashboard', { replace: true });
+                }
             } else if (event === 'SIGNED_OUT') {
                 setSession(null);
                 setIsInitializing(false);
