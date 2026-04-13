@@ -1399,34 +1399,38 @@ const DashboardScreen = () => {
 
 const App = () => {
     const [session, setSession] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isInitializing, setIsInitializing] = useState(true);
 
     useEffect(() => {
-        // OAuth redirection fragment detection
-        const hasHash = window.location.hash && window.location.hash.includes('access_token');
-        
-        // 1. Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            // If there's no hash (no OAuth callback), we can end loading now.
-            // If there IS a hash, we might want to wait for onAuthStateChange to confirm session.
-            if (!hasHash) {
-                setIsLoading(false);
+        // Initial session check
+        const initializeAuth = async () => {
+            const { data: { session: initialSession } } = await supabase.auth.getSession();
+            setSession(initialSession);
+            
+            // Detect if we are in an OAuth callback flow (hash for implicit, search for PKCE)
+            const hasAccessToken = window.location.hash.includes('access_token');
+            const hasCode = window.location.search.includes('code=');
+            
+            // If NOT in OAuth flow, we can stop initializing once initial session is fetched.
+            // If YES, we wait for onAuthStateChange to trigger SIGNED_IN.
+            if (!hasAccessToken && !hasCode) {
+                setIsInitializing(false);
             }
-        });
+        };
 
-        // 2. Subscribe to auth changes (crucial for OAuth and session expiry)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            setSession(session);
+        initializeAuth();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+            setSession(currentSession);
             
             // Critical events that establish a session or confirm its absence
-            if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
-                setIsLoading(false);
+            if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
+                setIsInitializing(false);
             }
         });
 
-        // Fallback: If after 5 seconds we're still loading, something might be stuck
-        const timeout = setTimeout(() => setIsLoading(false), 5000);
+        // Fallback: If after 6 seconds we're still initializing, let the user proceed (or fail to login)
+        const timeout = setTimeout(() => setIsInitializing(false), 6000);
 
         return () => {
             subscription.unsubscribe();
@@ -1434,10 +1438,13 @@ const App = () => {
         };
     }, []);
 
-    if (isLoading) {
+    // Explicit block for OAuth callback to prevent router bounce
+    const isOAuthCallback = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+
+    if (isInitializing || (isOAuthCallback && !session)) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-slate-950 text-white font-bold italic tracking-tighter text-2xl animate-pulse">
-                인증 정보 확인 중...
+            <div className="flex items-center justify-center min-h-screen bg-slate-950 text-white font-bold italic tracking-tighter text-2xl animate-pulse text-center px-6">
+                로그인 처리 중입니다...
             </div>
         );
     }
