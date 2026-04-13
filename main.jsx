@@ -1033,3 +1033,557 @@ const WorkoutPlanScreen = () => {
         </div>
     );
 };
+
+const AIRecommendationScreen = () => {
+    const [userData, setUserData] = useState(null);
+    const [recentLogs, setRecentLogs] = useState([]);
+    const [messages, setMessages] = useState([
+        { id: 1, type: 'ai', text: '안녕하세요! 당신의 AI 코치입니다. 오늘 어떤 운동을 도와드릴까요?' }
+    ]);
+    const [inputText, setInputText] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    setUserData(user.user_metadata);
+                    
+                    // 최근 7일간의 기록 가져오기
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                    
+                    const { data: logs, error } = await supabase
+                        .from('workout_logs')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .gte('created_at', sevenDaysAgo.toISOString())
+                        .order('created_at', { ascending: false });
+                    
+                    if (error) throw error;
+                    setRecentLogs(logs || []);
+                }
+            } catch (err) {
+                console.error('Data loading error:', err);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const generateAIResponse = async (prompt) => {
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(errText);
+            }
+
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
+        } catch (error) {
+            console.error("AI API Error:", error);
+            return `API 오류: ${error.message}`;
+        }
+    };
+
+    const handleSendMessage = async (customText = null) => {
+        const textToSend = customText || inputText;
+        if (!textToSend.trim() || isTyping) return;
+
+        // 1. 사용자 메시지 추가
+        const userMsg = { id: Date.now(), type: 'user', text: textToSend };
+        setMessages(prev => [...prev, userMsg]);
+        setInputText('');
+        setIsTyping(true);
+
+        // 2. 프롬프트 엔지니어링 고도화
+        const systemPrompt = `너는 상위 1% 엘리트 퍼스널 트레이너 'MyGym AI 코치'야. 
+사용자의 '인바디 정보(골격근량, 체지방 등)'와 '상세 세트 기록'을 완벽하게 분석하여 1:1 맞춤형 피드백을 제공하는 전문가야.
+일반적인 챗봇처럼 장황하게 말하지 말고, 전문가처럼 핵심만 명확하고 단호하게 말해. 
+
+답변은 반드시 다음 순서와 형식을 엄격히 지켜서 출력해:
+1. [분석 요약]: 현재 사용자의 신체 상태(인바디)와 최근 운동 강도/상태를 전문가 수준으로 분석.
+2. [추천 루틴]: 분석을 바탕으로 오늘 수행할 최적의 루틴 제안. (종목명 - 세트/횟수 - 추천 중량 - 선정 이유 순으로 불릿 포인트 사용)
+3. [영양 및 휴식 조언]: 인바디 및 운동 강도에 따른 단백질 섭취량 및 휴식 전략 제안.`;
+
+        const logSummary = recentLogs.length > 0 
+            ? recentLogs.map(l => {
+                const setsDetail = l.sets_data.map((s, i) => `${i+1}세트(${s.weight}kg/${s.reps}회)`).join(', ');
+                return `${new Date(l.created_at).toLocaleDateString()}: ${l.part}(${l.exercise}) - ${l.sets_count}세트 [${setsDetail}]`;
+            }).join('\n') 
+            : '최근 7일간 기록 없음';
+
+        const userContext = `
+[기본 정보]
+나이: ${userData?.age || '미입력'}세, 성별: ${userData?.gender || '미입력'}, 키: ${userData?.height || '미입력'}cm, 현재 체중: ${userData?.weight || '미입력'}kg
+
+[인바디 정보]
+골격근량: ${userData?.skeletal_muscle_mass || '미입력'}kg
+체지방량: ${userData?.body_fat_mass || '미입력'}kg
+체지방률: ${userData?.body_fat_percentage || '미입력'}%
+기초대사량: ${userData?.bmr || '미입력'}kcal
+내장지방레벨: ${userData?.visceral_fat_level || '미입력'}
+
+[최근 7일 상세 운동 기록]
+${logSummary}`;
+
+        const fullPrompt = `${systemPrompt}\n\n[사용자 데이터 및 컨텍스트]\n${userContext}\n\n[사용자 질문]: ${textToSend}`;
+        
+        // 3. AI 응답 받기
+        const aiText = await generateAIResponse(fullPrompt);
+        
+        const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
+        setMessages(prev => [...prev, aiMsg]);
+        setIsTyping(false);
+    };
+
+    return (
+        <div className="flex flex-col h-screen bg-slate-950 animate-fade-in relative max-w-2xl mx-auto border-x border-white/5">
+            {/* Header */}
+            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+                <div className="flex items-center gap-3">
+                    <BackButton />
+                    <div className="flex items-center gap-3 ml-2">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-sm font-black text-white leading-none uppercase tracking-tighter italic">AI MyGym Coach</h2>
+                            <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 mt-1">
+                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Online
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Chat Area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-32">
+                {messages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}>
+                        <div className={`max-w-[85%] p-4 rounded-[1.5rem] text-sm leading-relaxed ${
+                            msg.type === 'user' 
+                            ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-600/10' 
+                            : 'bg-slate-800 text-slate-200 rounded-tl-none border border-white/5'
+                        }`}>
+                            <p className="whitespace-pre-wrap">{msg.text}</p>
+                        </div>
+                    </div>
+                ))}
+                {isTyping && (
+                    <div className="flex justify-start">
+                        <div className="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-white/5 flex gap-1">
+                            <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></span>
+                            <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce delay-75"></span>
+                            <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce delay-150"></span>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Input Area */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent">
+                <div className="max-w-xl mx-auto space-y-3">
+                    {/* Quick Actions */}
+                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                        <button 
+                            onClick={() => handleSendMessage("내 체형에 맞는 루틴 추천해줘")}
+                            className="whitespace-nowrap px-4 py-2 bg-slate-900 border border-white/5 rounded-full text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                        >
+                            📋 루틴 추천
+                        </button>
+                        <button 
+                            onClick={() => handleSendMessage("최근 운동 평가해줘")}
+                            className="whitespace-nowrap px-4 py-2 bg-slate-900 border border-white/5 rounded-full text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                        >
+                            📊 운동 평가
+                        </button>
+                        <button 
+                            onClick={() => handleSendMessage("단백질 섭취량 계산해줘")}
+                            className="whitespace-nowrap px-4 py-2 bg-slate-900 border border-white/5 rounded-full text-[11px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                        >
+                            🍗 영양 조언
+                        </button>
+                    </div>
+
+                    <div className="relative group">
+                        <input 
+                            type="text"
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                            placeholder="코치에게 질문하기..."
+                            className="w-full bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-2xl"
+                        />
+                        <button 
+                            onClick={() => handleSendMessage()}
+                            disabled={!inputText.trim() || isTyping}
+                            className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9-2-9-18-9 18 9 2zm0 0v-8" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange }) => {
+    const navigate = useNavigate();
+    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    
+    const year = currentViewDate.getFullYear();
+    const month = currentViewDate.getMonth();
+    
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+    
+    const calendarDays = [];
+    for (let i = 0; i < firstDayOfMonth; i++) calendarDays.push(null);
+    for (let i = 1; i <= lastDateOfMonth; i++) calendarDays.push(i);
+
+    const today = new Date();
+    const isToday = (date) => date === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+
+    return (
+        <div className="mt-4 md:mt-10 p-5 md:p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50">
+            <div className="flex justify-between items-center mb-6 px-2">
+                <button onClick={() => onMonthChange(-1)} className="p-2 hover:bg-slate-700 rounded-full text-white transition-colors">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <h3 className="text-md md:text-lg font-bold text-white uppercase tracking-tighter">
+                    {year}년 {month + 1}월
+                </h3>
+                <button onClick={() => onMonthChange(1)} className="p-2 hover:bg-slate-700 rounded-full text-white transition-colors">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+            <div className="grid grid-cols-7 gap-1 md:gap-2">
+                {daysOfWeek.map(day => (<div key={day} className="text-center text-[10px] md:text-xs font-black text-slate-500 py-2 uppercase">{day}</div>))}
+                {calendarDays.map((date, idx) => {
+                    const workoutInfo = date ? workoutGroups[date] : null;
+                    const todayActive = date && isToday(date);
+
+                    return (
+                        <div 
+                            key={idx} 
+                            onClick={() => {
+                                if (!date) return;
+                                const selectedDate = new Date(year, month, date);
+                                const days = ['일', '월', '화', '수', '목', '금', '토'];
+                                const dateStr = `${month + 1}/${date}(${days[selectedDate.getDay()]})`;
+                                navigate('/routine-detail', { 
+                                    state: { 
+                                        date: dateStr, 
+                                        logs: workoutInfo?.logs || [] 
+                                    } 
+                                });
+                            }}
+                            className={`aspect-square flex flex-col items-center justify-center relative group cursor-pointer hover:bg-slate-700/30 rounded-xl transition-colors`}
+                        >
+                            {date && (
+                                <>
+                                    {todayActive ? (
+                                        <div className="absolute inset-1 bg-blue-600 rounded-full"></div>
+                                    ) : workoutInfo ? (
+                                        <div className="absolute inset-1 bg-transparent border-2 border-blue-500/50 rounded-full"></div>
+                                    ) : null}
+                                    <span className={`relative z-10 text-[11px] md:text-sm font-bold ${todayActive ? 'text-white' : (workoutInfo ? 'text-blue-400' : 'text-slate-400')}`}>
+                                        {date}
+                                    </span>
+                                    {workoutInfo && (
+                                        <div className="absolute bottom-1 flex gap-0.5">
+                                            <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+const DashboardScreen = () => {
+    const navigate = useNavigate();
+    const [workoutGroups, setWorkoutGroups] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [currentViewDate, setCurrentViewDate] = useState(new Date());
+    const [userData, setUserData] = useState(null);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+    const today = new Date();
+
+    const fetchLogs = async (viewDate) => {
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            setUserData(user.user_metadata);
+
+            const year = viewDate.getFullYear();
+            const month = viewDate.getMonth();
+            const startDate = new Date(year, month, 1).toISOString();
+            const endDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
+
+            const { data, error } = await supabase
+                .from('workout_logs')
+                .select('*')
+                .eq('user_id', user.id)
+                .gte('created_at', startDate)
+                .lte('created_at', endDate)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const groups = {};
+            data.forEach(log => {
+                const d = new Date(log.created_at);
+                const logDate = d.getDate();
+                if (!groups[logDate]) {
+                    groups[logDate] = {
+                        dateString: `${month + 1}/${logDate}(${days[d.getDay()]})`,
+                        logs: []
+                    };
+                }
+                groups[logDate].logs.push(log);
+            });
+            setWorkoutGroups(groups);
+        } catch (error) {
+            console.error("데이터 불러오기 에러:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchLogs(currentViewDate);
+    }, [currentViewDate]);
+
+    const handleMonthChange = (offset) => {
+        const newDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + offset, 1);
+        const monthDiff = (newDate.getFullYear() - today.getFullYear()) * 12 + (newDate.getMonth() - today.getMonth());
+        
+        if (monthDiff < -3 || monthDiff > 3) {
+            alert('이전 3개월부터 이후 3개월까지의 기록만 확인할 수 있습니다.');
+            return;
+        }
+        setCurrentViewDate(newDate);
+    };
+
+    const handleProfileUpdate = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) setUserData(user.user_metadata);
+    };
+
+    return (
+        <div className="flex flex-col md:flex-row min-h-screen animate-fade-in overflow-x-hidden relative bg-slate-950">
+            <div className="absolute top-6 right-6 z-20 flex gap-3">
+                <button 
+                    onClick={() => setIsProfileModalOpen(true)}
+                    className="bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-full transition-all active:scale-95 flex items-center gap-2 shadow-xl backdrop-blur-md"
+                >
+                    <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    <span className="text-xs font-black text-white uppercase tracking-wider">내 정보</span>
+                </button>
+                <button 
+                    onClick={() => supabase.auth.signOut()}
+                    className="bg-slate-800/50 hover:bg-rose-500/20 border border-slate-700 px-3 py-1.5 rounded-full transition-all active:scale-95 group shadow-lg shadow-black/20"
+                >
+                    <span className="text-[10px] font-black text-slate-300 group-hover:text-rose-400 uppercase tracking-widest">
+                        LOGOUT
+                    </span>
+                </button>
+            </div>
+            
+            <div className="w-full md:w-1/2 p-4 md:p-12 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950 flex flex-col justify-center">
+                <div className="mb-2 md:mb-6">
+                    <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
+                        <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+                        나의 운동 현황
+                    </h2>
+                </div>
+                
+                {isLoading ? (
+                    <div className="min-h-[300px] flex items-center justify-center text-slate-500 italic">기록을 불러오는 중...</div>
+                ) : (
+                    <MonthlyCalendar 
+                        workoutGroups={workoutGroups} 
+                        currentViewDate={currentViewDate}
+                        onMonthChange={handleMonthChange}
+                    />
+                )}
+            </div>
+            
+            <div className="w-full md:w-1/2 flex flex-col h-auto md:h-screen">
+                <button onClick={() => navigate('/routine-record')} className="h-[220px] md:flex-1 group relative overflow-hidden bg-slate-900 flex flex-col items-center justify-center transition-all hover:bg-slate-800 border-b border-slate-800 md:border-b-0">
+                    <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-blue-600/30 group-hover:rotate-12 transition-transform"><svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg></div>
+                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">루틴 기록</span>
+                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Routine Record</p>
+                    </div>
+                </button>
+                <button onClick={() => navigate('/routine-compose')} className="h-[220px] md:flex-1 group relative overflow-hidden bg-indigo-950 flex flex-col items-center justify-center transition-all hover:bg-indigo-900 border-b border-slate-800 md:border-b-0">
+                    <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-indigo-600/30 group-hover:rotate-6 transition-transform"><svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
+                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">루틴 구성</span>
+                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Routine Compose</p>
+                    </div>
+                </button>
+                <button onClick={() => navigate('/ai-coach')} className="h-[220px] md:flex-1 group relative overflow-hidden bg-blue-700 flex flex-col items-center justify-center transition-all hover:bg-blue-600">
+                    <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-3 border border-white/30 group-hover:-rotate-12 transition-transform"><svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
+                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">Ai코치</span>
+                        <p className="text-blue-100 text-[10px] md:text-xs mt-1 uppercase">Ai Coach</p>
+                    </div>
+                </button>
+            </div>
+
+            <UserProfileModal 
+                isOpen={isProfileModalOpen} 
+                onClose={() => setIsProfileModalOpen(false)} 
+                userData={userData}
+                onUpdate={handleProfileUpdate}
+            />
+        </div>
+    );
+};
+
+const AppContent = () => {
+    const navigate = useNavigate();
+    const [session, setSession] = useState(null);
+    const [isInitializing, setIsInitializing] = useState(true);
+    const [isTimeout, setIsTimeout] = useState(false);
+
+    useEffect(() => {
+        // 1. 초기 세션 확인
+        const initializeAuth = async () => {
+            try {
+                const { data: { session: initialSession } } = await supabase.auth.getSession();
+                setSession(initialSession);
+                
+                // OAuth 콜백 상태(hash/code)가 아니라면 즉시 초기화 완료
+                const isOAuthFlow = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+                if (!isOAuthFlow && !initialSession) {
+                    setIsInitializing(false);
+                }
+            } catch (err) {
+                console.error("Auth init error:", err);
+                setIsInitializing(false);
+            }
+        };
+
+        initializeAuth();
+
+        // 2. 인증 상태 변화 감시 (OAuth 리다이렉트 대응 핵심)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+            setSession(currentSession);
+            
+            if (currentSession) {
+                setIsInitializing(false);
+                // 세션이 확인되면 대시보드로 이동 (URL 조작 없이 자연스러운 전환 유도)
+                if (window.location.pathname === '/' || window.location.pathname === '/login') {
+                    navigate('/dashboard', { replace: true });
+                }
+            } else if (event === 'SIGNED_OUT') {
+                setSession(null);
+                setIsInitializing(false);
+                navigate('/', { replace: true });
+            }
+        });
+
+        // 3. 5초 타임아웃 예외 처리
+        const timer = setTimeout(() => {
+            if (isInitializing) {
+                setIsTimeout(true);
+            }
+        }, 5000);
+
+        return () => {
+            subscription.unsubscribe();
+            clearTimeout(timer);
+        };
+    }, [navigate]);
+
+    // 타임아웃 발생 시 UI
+    if (isInitializing && isTimeout) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-6 text-center">
+                <div className="w-20 h-20 bg-rose-500/20 rounded-3xl flex items-center justify-center mb-6 border border-rose-500/30">
+                    <svg className="w-10 h-10 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                <h2 className="text-2xl font-black italic tracking-tighter mb-2">로그인이 지연되고 있습니다.</h2>
+                <p className="text-slate-400 mb-8 font-medium">네트워크 연결을 확인하거나 다시 시도해 주세요.</p>
+                <button 
+                    onClick={() => window.location.assign('/')}
+                    className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-xl"
+                >
+                    로그인 화면으로 돌아가기
+                </button>
+            </div>
+        );
+    }
+
+    // 초기화 중 UI
+    if (isInitializing) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white">
+                <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
+                <div className="font-bold italic tracking-tighter text-2xl animate-pulse text-center">
+                    인증 정보 확인 중...
+                </div>
+            </div>
+        );
+    }
+
+    // 미인증 시 로그인 화면
+    if (!session) {
+        return <LoginScreen />;
+    }
+
+    // 인증 완료 시 메인 앱 라우터
+    return (
+        <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
+            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-white font-bold italic tracking-tighter text-2xl animate-pulse">LOADING...</div>}>
+                <Routes>
+                    <Route path="/" element={<DashboardScreen />} />
+                    <Route path="/dashboard" element={<DashboardScreen />} />
+                    <Route path="/routine-detail" element={<WorkoutDetailScreen />} />
+                    <Route path="/routine-record" element={<WorkoutSetupScreen />} />
+                    <Route path="/routine-compose" element={<WorkoutPlanScreen />} />
+                    <Route path="/ai-coach" element={<AIRecommendationScreen />} />
+                    <Route path="/api-view" element={<ApiViewer />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </React.Suspense>
+        </div>
+    );
+};
+
+const App = () => {
+    return (
+        <BrowserRouter>
+            <AppContent />
+        </BrowserRouter>
+    );
+};
+
+const root = createRoot(document.getElementById('root'));
+root.render(<App />);
