@@ -1399,25 +1399,45 @@ const DashboardScreen = () => {
 
 const App = () => {
     const [session, setSession] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        // OAuth redirection fragment detection
+        const hasHash = window.location.hash && window.location.hash.includes('access_token');
+        
+        // 1. Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
-            setLoading(false);
+            // If there's no hash (no OAuth callback), we can end loading now.
+            // If there IS a hash, we might want to wait for onAuthStateChange to confirm session.
+            if (!hasHash) {
+                setIsLoading(false);
+            }
         });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        // 2. Subscribe to auth changes (crucial for OAuth and session expiry)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             setSession(session);
+            
+            // Critical events that establish a session or confirm its absence
+            if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
+                setIsLoading(false);
+            }
         });
 
-        return () => subscription.unsubscribe();
+        // Fallback: If after 5 seconds we're still loading, something might be stuck
+        const timeout = setTimeout(() => setIsLoading(false), 5000);
+
+        return () => {
+            subscription.unsubscribe();
+            clearTimeout(timeout);
+        };
     }, []);
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-slate-950 text-white font-bold italic tracking-tighter text-2xl animate-pulse">
-                INITIALIZING...
+                인증 정보 확인 중...
             </div>
         );
     }
