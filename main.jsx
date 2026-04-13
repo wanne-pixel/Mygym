@@ -180,7 +180,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
     const [modalExercise, setModalExercise] = useState(null);
     const [manualName, setManualName] = useState('');
 
-    const parts = [
+    const bodyParts = [
         { key: 'chest', label: '가슴' },
         { key: 'shoulders', label: '어깨' },
         { key: 'back_part', label: '등' },
@@ -189,8 +189,15 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
         { key: 'cardio', label: '유산소' }
     ];
 
+    const categories = ['머신', '프리웨이트', '케이블'];
+
     const handlePartClick = (p) => {
-        setSelection({ part: p, exercise: '', manualName: '' });
+        setSelection({ part: p, category: '', exercise: '', manualName: '' });
+        setManualName('');
+    };
+
+    const handleCategoryClick = (c) => {
+        setSelection({ ...selection, category: c, exercise: '', manualName: '' });
         setManualName('');
     };
 
@@ -207,15 +214,41 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
 
     const filteredExercises = useMemo(() => {
         if (!selection.part) return [];
-        return CUSTOM_EXERCISES.filter(ex => ex.part === selection.part);
-    }, [selection.part]);
+        if (selection.part === 'cardio') {
+            return CUSTOM_EXERCISES.filter(ex => ex.part === 'cardio');
+        }
+        if (!selection.category) return [];
+        return CUSTOM_EXERCISES.filter(ex => ex.part === selection.part && ex.equipment === selection.category);
+    }, [selection.part, selection.category]);
 
     return (
         <div className="space-y-8">
+            {/* Selection Summary */}
+            {(selection.part || selection.category || selection.exercise) && (
+                <div className="p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl animate-fade-in">
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                        {selection.part && <span>{bodyParts.find(p => p.key === selection.part)?.label}</span>}
+                        {selection.category && (
+                            <>
+                                <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                                <span>{selection.category}</span>
+                            </>
+                        )}
+                        {selection.exercise && (
+                            <>
+                                <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                                <span className="text-white">{selection.exercise === '직접 입력' ? (selection.manualName || '직접 입력 중...') : selection.exercise}</span>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Step 1: Body Part */}
             <div>
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 1. 부위 선택</label>
                 <div className="grid grid-cols-3 gap-2">
-                    {parts.map(p => (
+                    {bodyParts.map(p => (
                         <button 
                             key={p.key} 
                             onClick={() => handlePartClick(p.key)} 
@@ -227,9 +260,28 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                 </div>
             </div>
 
-            {selection.part && (
+            {/* Step 2: Category (Weightlifting only) */}
+            {selection.part && selection.part !== 'cardio' && (
+                <div className="animate-fade-in">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 2. 기구 분류</label>
+                    <div className="grid grid-cols-3 gap-2">
+                        {categories.map(c => (
+                            <button 
+                                key={c} 
+                                onClick={() => handleCategoryClick(c)} 
+                                className={`py-4 rounded-2xl font-black text-xs tracking-tighter transition-all duration-300 ${selection.category === c ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 ring-2 ring-indigo-400/50' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50'}`}
+                            >
+                                {c}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Step 3: Exercise Selection */}
+            {(selection.part === 'cardio' || selection.category) && (
                 <div className="animate-fade-in space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-4 px-1">Step 2. 종목 선택</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-4 px-1">Step {selection.part === 'cardio' ? '2' : '3'}. 종목 선택</label>
                     
                     {filteredExercises.map((ex) => (
                         <div key={ex.id} className="space-y-3">
@@ -574,7 +626,7 @@ const WorkoutDetailScreen = () => {
 
 const WorkoutSetupScreen = () => {
     const [step, setStep] = useState(1);
-    const [selection, setSelection] = useState({ part: '', exercise: '', manualName: '' });
+    const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
     const [numSets, setNumSets] = useState('');
     const [setsData, setSetsData] = useState([]);
     const [cardioMinutes, setCardioMinutes] = useState('');
@@ -638,7 +690,7 @@ const WorkoutSetupScreen = () => {
             const newLog = {
                 user_id: user.id,
                 part: selection.part,
-                type: exInfo?.equipment || '기타',
+                type: exInfo?.equipment || selection.category || '기타',
                 exercise: exerciseName,
                 sets_count: selection.part === 'cardio' ? 1 : parseInt(numSets),
                 sets_data: finalSetsData,
@@ -655,7 +707,7 @@ const WorkoutSetupScreen = () => {
             setCardioMinutes('');
             setCardioSeconds('');
             setStep(1);
-            setSelection({ part: '', exercise: '', manualName: '' });
+            setSelection({ part: '', category: '', exercise: '', manualName: '' });
 
         } catch (error) {
             console.error('Error saving workout:', error);
@@ -775,7 +827,7 @@ const WorkoutSetupScreen = () => {
 };
 
 const WorkoutPlanScreen = () => {
-    const [selection, setSelection] = useState({ part: '', exercise: '', manualName: '' });
+    const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
     const [planList, setPlanList] = useState([]);
     const [recordingIndex, setRecordingIndex] = useState(null);
     const [numSets, setNumSets] = useState('');
@@ -789,12 +841,13 @@ const WorkoutPlanScreen = () => {
         const newItem = {
             id: Date.now(),
             part: selection.part,
+            category: selection.category,
             exercise: selection.exercise,
             manualName: selection.manualName,
             isCompleted: false
         };
         setPlanList([...planList, newItem]);
-        setSelection({ part: '', exercise: '', manualName: '' });
+        setSelection({ part: '', category: '', exercise: '', manualName: '' });
     };
 
     const startRecording = (index) => {
@@ -859,7 +912,7 @@ const WorkoutPlanScreen = () => {
             const newLog = {
                 user_id: user.id,
                 part: targetExercise.part,
-                type: exInfo?.equipment || '기타',
+                type: exInfo?.equipment || targetExercise.category || '기타',
                 exercise: exerciseName,
                 sets_count: finalSetsCount,
                 sets_data: finalSetsData,
@@ -928,6 +981,7 @@ const WorkoutPlanScreen = () => {
                                             <div>
                                                 <span className="text-[10px] font-bold text-indigo-400 block uppercase mb-1">
                                                     {item.part === 'chest' ? '가슴' : item.part === 'back_part' ? '등' : item.part === 'legs' ? '하체' : item.part === 'shoulders' ? '어깨' : item.part === 'arms' ? '팔' : item.part === 'cardio' ? '유산소' : item.part}
+                                                    {item.category && ` / ${item.category}`}
                                                 </span>
                                                 <h4 className={`text-lg font-bold ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>{item.exercise === '직접 입력' ? item.manualName : item.exercise}</h4>
                                             </div>
