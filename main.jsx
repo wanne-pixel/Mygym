@@ -1031,23 +1031,37 @@ const AIRecommendationScreen = () => {
         setIsTyping(true);
 
         // 2. 프롬프트 엔지니어링 고도화
-        const systemPrompt = `너는 상위 1% 엘리트 퍼스널 트레이너 'MyGym AI 코치'야. 일반적인 챗봇처럼 장황하게 말하지 말고, 전문가처럼 핵심만 명확하고 단호하게 말해. 다음 규칙을 무조건 지켜:
-- 사용자의 체격(키, 몸무게, 성별, 나이)을 분석하여 현실적이고 부상 위험이 없는 세트 수와 중량(kg) 가이드라인을 제안할 것.
-- 제공된 '최근 7일 운동 기록'을 반드시 분석하여, 최근에 사용한 근육군은 피하고 휴식할 수 있도록 교차 부위(분할 운동)를 추천할 것.
-- 루틴을 추천할 때는 [운동 종목명] - [세트 및 횟수] - [추천 중량] - [선정 이유]를 가독성 좋은 불릿 포인트(-) 리스트 형태로 정리할 것.`;
+        const systemPrompt = `너는 상위 1% 엘리트 퍼스널 트레이너 'MyGym AI 코치'야. 
+사용자의 '인바디 정보(골격근량, 체지방 등)'와 '상세 세트 기록'을 완벽하게 분석하여 1:1 맞춤형 피드백을 제공하는 전문가야.
+일반적인 챗봇처럼 장황하게 말하지 말고, 전문가처럼 핵심만 명확하고 단호하게 말해. 
+
+답변은 반드시 다음 순서와 형식을 엄격히 지켜서 출력해:
+1. [분석 요약]: 현재 사용자의 신체 상태(인바디)와 최근 운동 강도/상태를 전문가 수준으로 분석.
+2. [추천 루틴]: 분석을 바탕으로 오늘 수행할 최적의 루틴 제안. (종목명 - 세트/횟수 - 추천 중량 - 선정 이유 순으로 불릿 포인트 사용)
+3. [영양 및 휴식 조언]: 인바디 및 운동 강도에 따른 단백질 섭취량 및 휴식 전략 제안.`;
 
         const logSummary = recentLogs.length > 0 
-            ? recentLogs.map(l => `${new Date(l.created_at).toLocaleDateString()}: ${l.part}(${l.exercise})`).join('\n') 
+            ? recentLogs.map(l => {
+                const setsDetail = l.sets_data.map((s, i) => `${i+1}세트(${s.weight}kg/${s.reps}회)`).join(', ');
+                return `${new Date(l.created_at).toLocaleDateString()}: ${l.part}(${l.exercise}) - ${l.sets_count}세트 [${setsDetail}]`;
+            }).join('\n') 
             : '최근 7일간 기록 없음';
 
-        const userContext = `나이: ${userData?.age || '미입력'}세
-성별: ${userData?.gender || '미입력'}
-키: ${userData?.height || '미입력'}cm
-몸무게: ${userData?.weight || '미입력'}kg
-최근 7일 운동 기록:
+        const userContext = `
+[기본 정보]
+나이: ${userData?.age || '미입력'}세, 성별: ${userData?.gender || '미입력'}, 키: ${userData?.height || '미입력'}cm, 현재 체중: ${userData?.weight || '미입력'}kg
+
+[인바디 정보]
+골격근량: ${userData?.skeletal_muscle_mass || '미입력'}kg
+체지방량: ${userData?.body_fat_mass || '미입력'}kg
+체지방률: ${userData?.body_fat_percentage || '미입력'}%
+기초대사량: ${userData?.bmr || '미입력'}kcal
+내장지방레벨: ${userData?.visceral_fat_level || '미입력'}
+
+[최근 7일 상세 운동 기록]
 ${logSummary}`;
 
-        const fullPrompt = `${systemPrompt}\n\n[사용자 데이터]\n${userContext}\n\n[사용자 질문]: ${textToSend}`;
+        const fullPrompt = `${systemPrompt}\n\n[사용자 데이터 및 컨텍스트]\n${userContext}\n\n[사용자 질문]: ${textToSend}`;
         
         // 3. AI 응답 받기
         const aiText = await generateAIResponse(fullPrompt);
