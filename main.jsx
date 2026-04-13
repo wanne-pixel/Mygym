@@ -335,7 +335,12 @@ const LoginScreen = () => {
 
     // 소셜 로그인 (Google)
     const handleGoogleLogin = async () => {
-        const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+        const { error } = await supabase.auth.signInWithOAuth({ 
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
         if (error) alert('구글 로그인 실패: ' + error.message);
     };
 
