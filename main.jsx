@@ -1426,21 +1426,21 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
     };
 
     return (
-        <div className="mt-4 md:mt-10 p-8 md:p-12 bg-slate-800/50 rounded-[3rem] border border-slate-700/50 shadow-2xl">
-            <div className="flex justify-between items-center mb-8 px-4">
-                <button onClick={() => onMonthChange(-1)} className="p-3 hover:bg-slate-700 rounded-full text-white transition-colors">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+        <div className="mt-4 md:mt-10 p-8 md:p-12 bg-slate-800/50 rounded-[3rem] border border-slate-700/50 shadow-2xl w-full">
+            <div className="flex justify-between items-center mb-10 px-4">
+                <button onClick={() => onMonthChange(-1)} className="p-4 hover:bg-slate-700 rounded-full text-white transition-colors">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h3 className="text-2xl md:text-3xl font-black text-white uppercase italic tracking-tighter">
+                <h3 className="text-2xl md:text-4xl font-black text-white uppercase italic tracking-tighter">
                     {year}년 {month + 1}월
                 </h3>
-                <button onClick={() => onMonthChange(1)} className="p-3 hover:bg-slate-700 rounded-full text-white transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
+                <button onClick={() => onMonthChange(1)} className="p-4 hover:bg-slate-700 rounded-full text-white transition-colors">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                 </button>
             </div>
-            <div className="grid grid-cols-7 gap-2 md:gap-4">
+            <div className="grid grid-cols-7 gap-4 md:gap-8">
                 {daysOfWeek.map(day => (
-                    <div key={day} className="text-center text-sm md:text-xl font-black text-slate-500 py-3 uppercase tracking-widest">
+                    <div key={day} className="text-center text-sm md:text-2xl font-black text-slate-500 py-6 uppercase tracking-widest flex items-center justify-center">
                         {day}
                     </div>
                 ))}
@@ -1471,30 +1471,30 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
                                     } 
                                 });
                             }}
-                            className={`aspect-square flex flex-col items-center justify-start py-3 relative group cursor-pointer hover:bg-slate-700/30 rounded-[2rem] transition-all duration-300 min-h-[100px] md:min-h-[140px] border border-transparent hover:border-white/5`}
+                            className={`flex flex-col items-center justify-center py-8 relative group cursor-pointer hover:bg-slate-700/30 rounded-[2.5rem] transition-all duration-300 min-h-[150px] md:min-h-[220px] border border-transparent hover:border-white/5 w-full overflow-hidden`}
                         >
                             {date && (
-                                <>
-                                    <div className="relative flex items-center justify-center w-10 h-10 md:w-16 md:h-16 mb-2">
+                                <div className="flex flex-col items-center justify-center w-full">
+                                    <div className="relative flex items-center justify-center w-12 h-12 md:w-24 md:h-20 mb-8">
                                         {todayActive && (
                                             <div className="absolute inset-0 bg-blue-600 rounded-full shadow-lg shadow-blue-600/30"></div>
                                         )}
                                         {workoutInfo && (
-                                            <div className="absolute inset-0 border-[3px] border-rose-500 rounded-full animate-pulse shadow-lg shadow-rose-500/20"></div>
+                                            <div className="absolute inset-0 border-[5px] border-rose-500 rounded-full animate-pulse shadow-lg shadow-rose-500/20"></div>
                                         )}
-                                        <span className={`relative z-10 text-xl md:text-3xl font-black italic tracking-tighter text-white`}>
+                                        <span className={`relative z-10 text-3xl md:text-6xl font-black italic tracking-tighter text-white leading-none`}>
                                             {date}
                                         </span>
                                     </div>
                                     
-                                    <div className="flex flex-wrap justify-center gap-1 max-w-full px-1 overflow-hidden">
+                                    <div className="flex flex-wrap justify-center gap-2 max-w-full px-2">
                                         {uniqueParts.map(p => (
-                                            <span key={p} className="text-[8px] md:text-[10px] font-bold text-slate-400 leading-tight uppercase tracking-tight bg-slate-800/50 px-2 py-0.5 rounded-full border border-white/5">
+                                            <span key={p} className="text-xs md:text-lg font-black text-slate-200 leading-tight uppercase tracking-tight bg-slate-800/90 px-5 py-2 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
                                                 {partLabels[p] || p}
                                             </span>
                                         ))}
                                     </div>
-                                </>
+                                </div>
                             )}
                         </div>
                     );
