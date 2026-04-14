@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
 import { CUSTOM_EXERCISES } from './src/data/customExercises';
 import ApiViewer from './src/components/ApiViewer';
 import { supabase } from './src/api/supabase';
@@ -518,8 +518,11 @@ const LoginScreen = () => {
 const WorkoutDetailScreen = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
     const { date, logs = [] } = location.state || { date: '?', logs: [] };
     const [todayWeight, setTodayWeight] = useState('');
+    
+    const queryDate = searchParams.get('date');
 
     const handleWeightSave = async () => {
         if (!todayWeight) return;
@@ -538,7 +541,7 @@ const WorkoutDetailScreen = () => {
                     {date} 트레이닝 상세
                 </h2>
                 <button 
-                    onClick={() => navigate('/routine-record')}
+                    onClick={() => navigate(`/routine-record${queryDate ? `?date=${queryDate}` : ''}`)}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all text-center"
                 >
                     운동 추가하기
@@ -625,6 +628,7 @@ const WorkoutDetailScreen = () => {
 };
 
 const WorkoutSetupScreen = () => {
+    const [searchParams] = useSearchParams();
     const [step, setStep] = useState(1);
     const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
     const [numSets, setNumSets] = useState('');
@@ -633,6 +637,8 @@ const WorkoutSetupScreen = () => {
     const [cardioSeconds, setCardioSeconds] = useState('');
     const [addedExercises, setAddedExercises] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
+
+    const queryDate = searchParams.get('date');
 
     const handleNumSetsChange = (e) => {
         const val = parseInt(e.target.value) || 0;
@@ -687,6 +693,13 @@ const WorkoutSetupScreen = () => {
                 ? [{ duration: `${cardioMinutes || 0}분 ${cardioSeconds || 0}초` }] 
                 : setsData;
 
+            // Determine target date
+            const targetDate = queryDate ? new Date(queryDate) : new Date();
+            // If it's a specific date, set it to midday to avoid edge cases with UTC
+            if (queryDate) {
+                targetDate.setHours(12, 0, 0, 0);
+            }
+
             const newLog = {
                 user_id: user.id,
                 part: selection.part,
@@ -694,7 +707,8 @@ const WorkoutSetupScreen = () => {
                 exercise: exerciseName,
                 sets_count: selection.part === 'cardio' ? 1 : parseInt(numSets),
                 sets_data: finalSetsData,
-                is_completed: true
+                is_completed: true,
+                created_at: targetDate.toISOString()
             };
 
             const { error } = await supabase.from('workout_logs').insert([newLog]);
@@ -827,6 +841,7 @@ const WorkoutSetupScreen = () => {
 };
 
 const WorkoutPlanScreen = () => {
+    const [searchParams] = useSearchParams();
     const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
     const [planList, setPlanList] = useState([]);
     const [recordingIndex, setRecordingIndex] = useState(null);
@@ -835,6 +850,8 @@ const WorkoutPlanScreen = () => {
     const [cardioMinutes, setCardioMinutes] = useState('');
     const [cardioSeconds, setCardioSeconds] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    const queryDate = searchParams.get('date');
 
     const handleAddToList = () => {
         if (!selection.exercise || (selection.exercise === '직접 입력' && (!selection.manualName || !selection.manualName.trim()))) return;
@@ -909,6 +926,12 @@ const WorkoutPlanScreen = () => {
             const exerciseName = targetExercise.exercise === '직접 입력' ? targetExercise.manualName : targetExercise.exercise;
             const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === targetExercise.exercise && ex.part === targetExercise.part);
 
+            // Determine target date
+            const targetDate = queryDate ? new Date(queryDate) : new Date();
+            if (queryDate) {
+                targetDate.setHours(12, 0, 0, 0);
+            }
+
             const newLog = {
                 user_id: user.id,
                 part: targetExercise.part,
@@ -916,7 +939,8 @@ const WorkoutPlanScreen = () => {
                 exercise: exerciseName,
                 sets_count: finalSetsCount,
                 sets_data: finalSetsData,
-                is_completed: true
+                is_completed: true,
+                created_at: targetDate.toISOString()
             };
 
             const { error } = await supabase.from('workout_logs').insert([newLog]);
@@ -1337,7 +1361,14 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
                                 const selectedDate = new Date(year, month, date);
                                 const days = ['일', '월', '화', '수', '목', '금', '토'];
                                 const dateStr = `${month + 1}/${date}(${days[selectedDate.getDay()]})`;
-                                navigate('/routine-detail', { 
+                                
+                                // Format date as YYYY-MM-DD
+                                const yyyy = selectedDate.getFullYear();
+                                const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                                const dd = String(selectedDate.getDate()).padStart(2, '0');
+                                const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+                                navigate(`/routine-detail?date=${formattedDate}`, { 
                                     state: { 
                                         date: dateStr, 
                                         logs: workoutInfo?.logs || [] 
