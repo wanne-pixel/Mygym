@@ -4,6 +4,12 @@ import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate,
 import { CUSTOM_EXERCISES } from './src/data/customExercises';
 import ApiViewer from './src/components/ApiViewer';
 import { supabase } from './src/api/supabase';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true
+});
 
 console.log("MyGym App Initializing with Custom Exercise Data...");
 
@@ -1237,30 +1243,17 @@ const AIRecommendationScreen = () => {
         fetchData();
     }, []);
 
-    const generateAIResponse = async (prompt) => {
-        const model = 'gemini-2.0-flash';
+    const generateAIResponse = async (messages) => {
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                })
+            const response = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: messages,
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
-            }
-            
-            const errText = await response.text();
-            const lastError = `Model ${model} Error (${response.status}): ${errText}`;
-            console.error(lastError);
-            return lastError;
+            return response.choices[0].message.content || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
         } catch (error) {
-            const lastError = `Network/Fetch Error with ${model}: ${error.message}`;
-            console.error(error);
-            return lastError;
+            console.error('OpenAI API Error:', error);
+            return `OpenAI Error: ${error.message}`;
         }
     };
 
@@ -1275,14 +1268,7 @@ const AIRecommendationScreen = () => {
         setIsTyping(true);
 
         // 2. 프롬프트 엔지니어링 고도화
-        const systemPrompt = `너는 상위 1% 엘리트 퍼스널 트레이너 'MyGym AI 코치'야. 
-사용자의 '인바디 정보(골격근량, 체지방 등)'와 '상세 세트 기록'을 완벽하게 분석하여 1:1 맞춤형 피드백을 제공하는 전문가야.
-일반적인 챗봇처럼 장황하게 말하지 말고, 전문가처럼 핵심만 명확하고 단호하게 말해. 
-
-답변은 반드시 다음 순서와 형식을 엄격히 지켜서 출력해:
-1. [분석 요약]: 현재 사용자의 신체 상태(인바디)와 최근 운동 강도/상태를 전문가 수준으로 분석.
-2. [추천 루틴]: 분석을 바탕으로 오늘 수행할 최적의 루틴 제안. (종목명 - 세트/횟수 - 추천 중량 - 선정 이유 순으로 불릿 포인트 사용)
-3. [영양 및 휴식 조언]: 인바디 및 운동 강도에 따른 단백질 섭취량 및 휴식 전략 제안.`;
+        const systemRole = "너는 사용자의 운동 기록을 분석해 주는 10년 차 전문 헬스 트레이너야. 친절하고 다정하게 대답하면서도, 운동의 중요성을 강조하는 전문가적인 모습을 보여줘.";
 
         const logSummary = recentLogs.length > 0 
             ? recentLogs.map(l => {
@@ -1292,7 +1278,7 @@ const AIRecommendationScreen = () => {
             : '최근 7일간 기록 없음';
 
         const userContext = `
-[기본 정보]
+[사용자 기본 정보]
 나이: ${userData?.age || '미입력'}세, 성별: ${userData?.gender || '미입력'}, 키: ${userData?.height || '미입력'}cm, 현재 체중: ${userData?.weight || '미입력'}kg
 
 [인바디 정보]
@@ -1305,10 +1291,13 @@ const AIRecommendationScreen = () => {
 [최근 7일 상세 운동 기록]
 ${logSummary}`;
 
-        const fullPrompt = `${systemPrompt}\n\n[사용자 데이터 및 컨텍스트]\n${userContext}\n\n[사용자 질문]: ${textToSend}`;
+        const apiMessages = [
+            { role: "system", content: systemRole },
+            { role: "user", content: `[사용자 데이터 및 컨텍스트]\n${userContext}\n\n[사용자 질문]: ${textToSend}` }
+        ];
         
         // 3. AI 응답 받기
-        const aiText = await generateAIResponse(fullPrompt);
+        const aiText = await generateAIResponse(apiMessages);
         
         const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
         setMessages(prev => [...prev, aiMsg]);
