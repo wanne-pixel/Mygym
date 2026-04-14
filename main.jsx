@@ -1239,6 +1239,7 @@ const AIRecommendationScreen = () => {
 
     const generateAIResponse = async (prompt) => {
         const models = ['gemini-1.5-flash-latest', 'gemini-pro'];
+        let lastError = null;
         
         for (const model of models) {
             try {
@@ -1255,12 +1256,15 @@ const AIRecommendationScreen = () => {
                     return data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
                 }
                 
-                console.warn(`Model ${model} failed with status: ${response.status}`);
+                const errText = await response.text();
+                lastError = `Model ${model} Error (${response.status}): ${errText}`;
+                console.error(lastError);
             } catch (error) {
-                console.error(`AI API Error with model ${model}:`, error);
+                lastError = `Network/Fetch Error with ${model}: ${error.message}`;
+                console.error(error);
             }
         }
-        return "모든 AI 모델 호출에 실패했습니다. 잠시 후 다시 시도해주세요.";
+        return lastError || "모든 AI 모델 호출에 실패했습니다. 상세 에러를 확인해 주세요.";
     };
 
     const handleSendMessage = async (customText = null) => {
