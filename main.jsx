@@ -178,7 +178,13 @@ const ExerciseModal = ({ exercise, onClose }) => {
  */
 const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
     const [modalExercise, setModalExercise] = useState(null);
-    const [manualName, setManualName] = useState('');
+    const [manualName, setManualName] = useState(selection.manualName || '');
+
+    useEffect(() => {
+        if (selection.manualName !== undefined && selection.manualName !== manualName) {
+            setManualName(selection.manualName);
+        }
+    }, [selection.manualName]);
 
     const bodyParts = [
         { key: 'chest', label: '가슴' },

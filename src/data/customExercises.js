@@ -5,6 +5,8 @@ export const CUSTOM_EXERCISES = [
     { id: 'c3', part: 'chest', name: '인클라인 벤치프레스', target: '가슴', equipment: '머신' },
     { id: 'c4', part: 'chest', name: '디클라인 벤치프레스', target: '가슴', equipment: '머신' },
     { id: 'c5', part: 'chest', name: '펙덱플라이', target: '가슴', equipment: '머신' },
+    { id: 'c_manual_m', part: 'chest', name: '직접 입력', target: '가슴', equipment: '머신' },
+
     { id: 'c6', part: 'chest', name: '벤치프레스(바벨)', target: '가슴', equipment: '프리웨이트' },
     { id: 'c7', part: 'chest', name: '인클라인 벤치프레스(바벨)', target: '가슴', equipment: '프리웨이트' },
     { id: 'c8', part: 'chest', name: '디클라인 벤치프레스(바벨)', target: '가슴', equipment: '프리웨이트' },
@@ -13,17 +15,21 @@ export const CUSTOM_EXERCISES = [
     { id: 'c11', part: 'chest', name: '디클라인 벤치프레스(덤벨)', target: '가슴', equipment: '프리웨이트' },
     { id: 'c12', part: 'chest', name: '덤벨플라이', target: '가슴', equipment: '프리웨이트' },
     { id: 'c13', part: 'chest', name: '풀오버', target: '가슴/등', equipment: '프리웨이트' },
+    { id: 'c_manual_f', part: 'chest', name: '직접 입력', target: '가슴', equipment: '프리웨이트' },
+
     { id: 'c14', part: 'chest', name: '케이블 크로스오버', target: '가슴', equipment: '케이블' },
     { id: 'c15', part: 'chest', name: '케이블 플라이(상->하)', target: '가슴', equipment: '케이블' },
     { id: 'c16', part: 'chest', name: '케이블 플라이(하->상)', target: '가슴', equipment: '케이블' },
     { id: 'c17', part: 'chest', name: '케이블 체스트프레스', target: '가슴', equipment: '케이블' },
     { id: 'c18', part: 'chest', name: '싱글암 케이블 프레스', target: '가슴', equipment: '케이블' },
-    { id: 'c_manual', part: 'chest', name: '직접 입력', target: '가슴', equipment: '기타' },
+    { id: 'c_manual_c', part: 'chest', name: '직접 입력', target: '가슴', equipment: '케이블' },
 
     // 어깨 (Shoulders)
     { id: 's1', part: 'shoulders', name: '숄더 프레스', target: '어깨', equipment: '머신' },
     { id: 's2', part: 'shoulders', name: '레트럴 레이즈 머신', target: '어깨', equipment: '머신' },
     { id: 's3', part: 'shoulders', name: '리어델트 머신', target: '어깨', equipment: '머신' },
+    { id: 's_manual_m', part: 'shoulders', name: '직접 입력', target: '어깨', equipment: '머신' },
+
     { id: 's4', part: 'shoulders', name: '바벨 오버헤드 프레스', target: '어깨', equipment: '프리웨이트' },
     { id: 's5', part: 'shoulders', name: '덤벨 숄더 프레스', target: '어깨', equipment: '프리웨이트' },
     { id: 's6', part: 'shoulders', name: '덤벨 사이드 레트럴 레이즈', target: '어깨', equipment: '프리웨이트' },
@@ -31,31 +37,37 @@ export const CUSTOM_EXERCISES = [
     { id: 's8', part: 'shoulders', name: '덤벨 리어델트 플라이', target: '어깨', equipment: '프리웨이트' },
     { id: 's9', part: 'shoulders', name: '아놀드 프레스', target: '어깨', equipment: '프리웨이트' },
     { id: 's10', part: 'shoulders', name: '업라이트 로우', target: '어깨', equipment: '프리웨이트' },
+    { id: 's_manual_f', part: 'shoulders', name: '직접 입력', target: '어깨', equipment: '프리웨이트' },
+
     { id: 's11', part: 'shoulders', name: '케이블 사이드 레트럴 레이즈', target: '어깨', equipment: '케이블' },
     { id: 's12', part: 'shoulders', name: '케이블 프론트 레이즈', target: '어깨', equipment: '케이블' },
     { id: 's13', part: 'shoulders', name: '케이블 리어델트 플라이', target: '어깨', equipment: '케이블' },
     { id: 's14', part: 'shoulders', name: '페이스풀', target: '어깨', equipment: '케이블' },
     { id: 's15', part: 'shoulders', name: '싱글암 레트럴 레이즈', target: '어깨', equipment: '케이블' },
-    { id: 's_manual', part: 'shoulders', name: '직접 입력', target: '어깨', equipment: '기타' },
+    { id: 's_manual_c', part: 'shoulders', name: '직접 입력', target: '어깨', equipment: '케이블' },
 
     // 등 (Back)
     { id: 'b1', part: 'back_part', name: '렛풀다운 머신', target: '등', equipment: '머신' },
     { id: 'b2', part: 'back_part', name: '시티드로우 머신', target: '등', equipment: '머신' },
     { id: 'b3', part: 'back_part', name: '플레이트 로우 머신', target: '등', equipment: '머신' },
     { id: 'b4', part: 'back_part', name: '어시스트 풀업 머신', target: '등', equipment: '머신' },
+    { id: 'b12', part: 'back_part', name: '와이드그립 렛풀다운', target: '등', equipment: '머신' },
+    { id: 'b13', part: 'back_part', name: '언더그립 렛풀다운', target: '등', equipment: '머신' },
+    { id: 'b_manual_m', part: 'back_part', name: '직접 입력', target: '등', equipment: '머신' },
+
     { id: 'b5', part: 'back_part', name: '데드리프트', target: '등', equipment: '프리웨이트' },
     { id: 'b6', part: 'back_part', name: '바벨 로우', target: '등', equipment: '프리웨이트' },
     { id: 'b7', part: 'back_part', name: '덤벨 로우', target: '등', equipment: '프리웨이트' },
     { id: 'b8', part: 'back_part', name: 'T바 로우', target: '등', equipment: '프리웨이트' },
     { id: 'b9', part: 'back_part', name: '랙풀', target: '등', equipment: '프리웨이트' },
     { id: 'b10', part: 'back_part', name: '풀오버(덤벨)', target: '등', equipment: '프리웨이트' },
+    { id: 'b_manual_f', part: 'back_part', name: '직접 입력', target: '등', equipment: '프리웨이트' },
+
     { id: 'b11', part: 'back_part', name: '렛풀다운', target: '등', equipment: '케이블' },
-    { id: 'b12', part: 'back_part', name: '와이드그립 렛풀다운', target: '등', equipment: '케이블' },
-    { id: 'b13', part: 'back_part', name: '언더그립 렛풀다운', target: '등', equipment: '케이블' },
     { id: 'b14', part: 'back_part', name: '시티드 케이블 로우', target: '등', equipment: '케이블' },
     { id: 'b15', part: 'back_part', name: '스트레이트암 풀다운', target: '등', equipment: '케이블' },
     { id: 'b16', part: 'back_part', name: '원암 케이블 로우', target: '등', equipment: '케이블' },
-    { id: 'b_manual', part: 'back_part', name: '직접 입력', target: '등', equipment: '기타' },
+    { id: 'b_manual_c', part: 'back_part', name: '직접 입력', target: '등', equipment: '케이블' },
 
     // 하체 (Legs)
     { id: 'l1', part: 'legs', name: '레그프레스', target: '하체', equipment: '머신' },
@@ -65,18 +77,22 @@ export const CUSTOM_EXERCISES = [
     { id: 'l5', part: 'legs', name: '스미스 스쿼트', target: '하체', equipment: '머신' },
     { id: 'l6', part: 'legs', name: '아웃타이', target: '하체', equipment: '머신' },
     { id: 'l7', part: 'legs', name: '이너타이', target: '하체', equipment: '머신' },
+    { id: 'l18', part: 'legs', name: '힙 어브딕션', target: '하체', equipment: '머신' },
+    { id: 'l_manual_m', part: 'legs', name: '직접 입력', target: '하체', equipment: '머신' },
+
     { id: 'l8', part: 'legs', name: '바벨 스쿼트', target: '하체', equipment: '프리웨이트' },
     { id: 'l9', part: 'legs', name: '프론트 스쿼트', target: '하체', equipment: '프리웨이트' },
     { id: 'l10', part: 'legs', name: '런지', target: '하체', equipment: '프리웨이트' },
     { id: 'l11', part: 'legs', name: '루마니안 데드리프트', target: '하체', equipment: '프리웨이트' },
     { id: 'l12', part: 'legs', name: '불가리안 스플릿 스쿼트', target: '하체', equipment: '프리웨이트' },
     { id: 'l13', part: 'legs', name: '힙쓰러스트', target: '하체', equipment: '프리웨이트' },
+    { id: 'l_manual_f', part: 'legs', name: '직접 입력', target: '하체', equipment: '프리웨이트' },
+
     { id: 'l14', part: 'legs', name: '케이블 킥백', target: '하체', equipment: '케이블' },
     { id: 'l15', part: 'legs', name: '케이블 스쿼트', target: '하체', equipment: '케이블' },
     { id: 'l16', part: 'legs', name: '케이블 풀스루', target: '하체', equipment: '케이블' },
     { id: 'l17', part: 'legs', name: '케이블 런지', target: '하체', equipment: '케이블' },
-    { id: 'l18', part: 'legs', name: '힙 어브딕션', target: '하체', equipment: '머신' },
-    { id: 'l_manual', part: 'legs', name: '직접 입력', target: '하체', equipment: '기타' },
+    { id: 'l_manual_c', part: 'legs', name: '직접 입력', target: '하체', equipment: '케이블' },
 
     // 팔 (Arms)
     { id: 'a1', part: 'arms', name: '바이셉 컬 머신', target: '팔', equipment: '머신' },
@@ -84,23 +100,27 @@ export const CUSTOM_EXERCISES = [
     { id: 'a3', part: 'arms', name: '딥 머신', target: '팔', equipment: '머신' },
     { id: 'a4', part: 'arms', name: '프리처 컬 머신', target: '팔', equipment: '머신' },
     { id: 'a5', part: 'arms', name: '암 컬 머신', target: '팔', equipment: '머신' },
+    { id: 'a_manual_m', part: 'arms', name: '직접 입력', target: '팔', equipment: '머신' },
+
     { id: 'a6', part: 'arms', name: '바벨 컬', target: '팔', equipment: '프리웨이트' },
     { id: 'a7', part: 'arms', name: '덤벨 컬', target: '팔', equipment: '프리웨이트' },
     { id: 'a8', part: 'arms', name: '해머 컬', target: '팔', equipment: '프리웨이트' },
     { id: 'a9', part: 'arms', name: '컨센트레이션 컬', target: '팔', equipment: '프리웨이트' },
     { id: 'a10', part: 'arms', name: '덤벨 트라이셉스 익스텐션', target: '팔', equipment: '프리웨이트' },
     { id: 'a11', part: 'arms', name: '클로즈그립 벤치프레스', target: '팔', equipment: '프리웨이트' },
+    { id: 'a_manual_f', part: 'arms', name: '직접 입력', target: '팔', equipment: '프리웨이트' },
+
     { id: 'a12', part: 'arms', name: '트라이셉스 푸시다운', target: '팔', equipment: '케이블' },
     { id: 'a13', part: 'arms', name: '로프 푸시다운', target: '팔', equipment: '케이블' },
     { id: 'a14', part: 'arms', name: '케이블 컬', target: '팔', equipment: '케이블' },
     { id: 'a15', part: 'arms', name: '오버헤드 트라이셉스 익스텐션', target: '팔', equipment: '케이블' },
     { id: 'a16', part: 'arms', name: '원암 케이블 컬', target: '팔', equipment: '케이블' },
-    { id: 'a_manual', part: 'arms', name: '직접 입력', target: '팔', equipment: '기타' },
+    { id: 'a_manual_c', part: 'arms', name: '직접 입력', target: '팔', equipment: '케이블' },
 
     // 유산소 (Cardio)
     { id: 'cr1', part: 'cardio', name: '런닝머신', target: '유산소', equipment: '머신' },
     { id: 'cr2', part: 'cardio', name: '트레드밀', target: '유산소', equipment: '머신' },
     { id: 'cr3', part: 'cardio', name: '실내사이클', target: '유산소', equipment: '머신' },
     { id: 'cr4', part: 'cardio', name: '스텝퍼', target: '유산소', equipment: '머신' },
-    { id: 'cr_manual', part: 'cardio', name: '직접 입력', target: '유산소', equipment: '기타' }
+    { id: 'cr_manual', part: 'cardio', name: '직접 입력', target: '유산소', equipment: '머신' }
 ];
