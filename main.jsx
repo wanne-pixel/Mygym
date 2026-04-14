@@ -1426,8 +1426,8 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
     };
 
     return (
-        <div className="mt-4 md:mt-10 p-6 md:p-8 bg-slate-800/50 rounded-[3rem] border border-slate-700/50 shadow-2xl w-full">
-            <div className="flex justify-between items-center mb-10 px-4">
+        <div className="mt-2 md:mt-6 p-4 md:p-6 bg-slate-800/50 rounded-[2.5rem] border border-slate-700/50 shadow-2xl w-full">
+            <div className="flex justify-between items-center mb-4 px-4">
                 <button onClick={() => onMonthChange(-1)} className="p-4 hover:bg-slate-700 rounded-full text-white transition-colors">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
                 </button>
@@ -1438,9 +1438,9 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                 </button>
             </div>
-            <div className="grid grid-cols-7 gap-4 md:gap-8">
+            <div className="grid grid-cols-7 gap-x-1 gap-y-1 md:gap-4">
                 {daysOfWeek.map(day => (
-                    <div key={day} className="text-center text-[10px] md:text-sm font-black text-slate-500 py-6 uppercase tracking-widest flex items-center justify-center">
+                    <div key={day} className="text-center text-[10px] md:text-sm font-black text-slate-500 py-2 uppercase tracking-widest flex items-center justify-center">
                         {day}
                     </div>
                 ))}
@@ -1471,11 +1471,12 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
                                     } 
                                 });
                             }}
-                            className={`flex flex-col items-center justify-start py-2 md:py-4 relative group cursor-pointer hover:bg-slate-700/30 rounded-[2.5rem] transition-all duration-300 min-h-[80px] md:min-h-[120px] border border-transparent hover:border-white/5 w-full overflow-hidden`}
+                            className={`flex flex-col items-center justify-start py-1 md:py-2 relative group cursor-pointer hover:bg-slate-700/30 rounded-[2.5rem] transition-all duration-300 min-h-[60px] md:min-h-[100px] border border-transparent hover:border-white/5 w-full overflow-hidden`}
+
                         >
                             {date && (
                                 <div className="flex flex-col items-center justify-center w-full">
-                                    <div className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 mb-2">
+                                    <div className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 mb-0.5">
                                         {todayActive && (
                                             <div className="absolute inset-0 bg-blue-600 rounded-full shadow-lg shadow-blue-600/30"></div>
                                         )}
@@ -1487,9 +1488,9 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
                                         </span>
                                     </div>
                                     
-                                    <div className="flex flex-wrap justify-center gap-1 max-w-full px-1 overflow-hidden">
+                                    <div className="flex flex-wrap justify-center gap-0.5 max-w-full px-1 overflow-hidden">
                                         {uniqueParts.map(p => (
-                                            <span key={p} className="text-[8px] md:text-[10px] font-black text-slate-200 leading-tight uppercase tracking-tight bg-slate-800/80 px-1.5 py-1 rounded-md border border-white/10 whitespace-nowrap">
+                                            <span key={p} className="text-[7px] md:text-[9px] font-black text-slate-300 leading-tight uppercase tracking-tight bg-slate-800/80 px-1 py-0.5 rounded-md border border-white/10 whitespace-nowrap">
                                                 {partLabels[p] || p}
                                             </span>
                                         ))}
