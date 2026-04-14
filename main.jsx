@@ -1426,20 +1426,24 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
     };
 
     return (
-        <div className="mt-4 md:mt-10 p-5 md:p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50">
-            <div className="flex justify-between items-center mb-6 px-2">
-                <button onClick={() => onMonthChange(-1)} className="p-2 hover:bg-slate-700 rounded-full text-white transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+        <div className="mt-4 md:mt-10 p-8 md:p-12 bg-slate-800/50 rounded-[3rem] border border-slate-700/50 shadow-2xl">
+            <div className="flex justify-between items-center mb-8 px-4">
+                <button onClick={() => onMonthChange(-1)} className="p-3 hover:bg-slate-700 rounded-full text-white transition-colors">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h3 className="text-md md:text-lg font-bold text-white uppercase tracking-tighter">
+                <h3 className="text-2xl md:text-3xl font-black text-white uppercase italic tracking-tighter">
                     {year}년 {month + 1}월
                 </h3>
-                <button onClick={() => onMonthChange(1)} className="p-2 hover:bg-slate-700 rounded-full text-white transition-colors">
+                <button onClick={() => onMonthChange(1)} className="p-3 hover:bg-slate-700 rounded-full text-white transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                 </button>
             </div>
-            <div className="grid grid-cols-7 gap-1 md:gap-2">
-                {daysOfWeek.map(day => (<div key={day} className="text-center text-[10px] md:text-xs font-black text-slate-500 py-2 uppercase">{day}</div>))}
+            <div className="grid grid-cols-7 gap-2 md:gap-4">
+                {daysOfWeek.map(day => (
+                    <div key={day} className="text-center text-sm md:text-xl font-black text-slate-500 py-3 uppercase tracking-widest">
+                        {day}
+                    </div>
+                ))}
                 {calendarDays.map((date, idx) => {
                     const workoutInfo = date ? workoutGroups[date] : null;
                     const todayActive = date && isToday(date);
@@ -1467,25 +1471,25 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
                                     } 
                                 });
                             }}
-                            className={`aspect-square flex flex-col items-center justify-start py-1 relative group cursor-pointer hover:bg-slate-700/30 rounded-xl transition-colors min-h-[60px]`}
+                            className={`aspect-square flex flex-col items-center justify-start py-3 relative group cursor-pointer hover:bg-slate-700/30 rounded-[2rem] transition-all duration-300 min-h-[100px] md:min-h-[140px] border border-transparent hover:border-white/5`}
                         >
                             {date && (
                                 <>
-                                    <div className="relative flex items-center justify-center w-7 h-7 mb-1">
+                                    <div className="relative flex items-center justify-center w-10 h-10 md:w-16 md:h-16 mb-2">
                                         {todayActive && (
-                                            <div className="absolute inset-0 bg-blue-600 rounded-full"></div>
+                                            <div className="absolute inset-0 bg-blue-600 rounded-full shadow-lg shadow-blue-600/30"></div>
                                         )}
                                         {workoutInfo && (
-                                            <div className="absolute inset-0 border-2 border-rose-500 rounded-full animate-pulse"></div>
+                                            <div className="absolute inset-0 border-[3px] border-rose-500 rounded-full animate-pulse shadow-lg shadow-rose-500/20"></div>
                                         )}
-                                        <span className={`relative z-10 text-[11px] md:text-sm font-bold ${todayActive ? 'text-white' : (workoutInfo ? 'text-rose-400' : 'text-slate-400')}`}>
+                                        <span className={`relative z-10 text-xl md:text-3xl font-black italic tracking-tighter text-white`}>
                                             {date}
                                         </span>
                                     </div>
                                     
-                                    <div className="flex flex-wrap justify-center gap-0.5 max-w-full px-0.5 overflow-hidden">
+                                    <div className="flex flex-wrap justify-center gap-1 max-w-full px-1 overflow-hidden">
                                         {uniqueParts.map(p => (
-                                            <span key={p} className="text-[7px] md:text-[8px] font-black text-rose-500 leading-tight">
+                                            <span key={p} className="text-[8px] md:text-[10px] font-bold text-slate-400 leading-tight uppercase tracking-tight bg-slate-800/50 px-2 py-0.5 rounded-full border border-white/5">
                                                 {partLabels[p] || p}
                                             </span>
                                         ))}
