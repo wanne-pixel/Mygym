@@ -6,6 +6,7 @@ import ApiViewer from './src/components/ApiViewer';
 import { supabase } from './src/api/supabase';
 import OpenAI from 'openai';
 
+// OpenAI 인스턴스 생성 (Vite 환경변수 사용 및 브라우저 호출 허용)
 const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true
