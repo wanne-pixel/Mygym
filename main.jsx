@@ -519,18 +519,56 @@ const WorkoutDetailScreen = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams] = useSearchParams();
-    const { date, logs = [] } = location.state || { date: '?', logs: [] };
-    const [todayWeight, setTodayWeight] = useState('');
-    
     const queryDate = searchParams.get('date');
+    const { date: dateStrFromState } = location.state || { date: '?' };
+    
+    const [logs, setLogs] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleWeightSave = async () => {
-        if (!todayWeight) return;
-        const { error } = await supabase.auth.updateUser({
-            data: { weight: parseFloat(todayWeight) }
-        });
-        if (error) alert('실패: ' + error.message);
-        else alert('오늘의 체중이 저장되었습니다.');
+    const fetchLogs = async () => {
+        if (!queryDate) return;
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const start = `${queryDate}T00:00:00`;
+            const end = `${queryDate}T23:59:59`;
+
+            const { data, error } = await supabase
+                .from('workout_logs')
+                .select('*')
+                .eq('user_id', user.id)
+                .gte('created_at', start)
+                .lte('created_at', end)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            setLogs(data || []);
+        } catch (error) {
+            console.error("Error fetching logs:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchLogs();
+    }, [queryDate]);
+
+    const handleDelete = async (id) => {
+        if (!confirm('정말 삭제하시겠습니까?')) return;
+        const { error } = await supabase.from('workout_logs').delete().eq('id', id);
+        if (error) {
+            alert('삭제 실패: ' + error.message);
+        } else {
+            alert('삭제되었습니다.');
+            fetchLogs();
+        }
+    };
+
+    const handleEdit = (log) => {
+        navigate(`/routine-record?id=${log.id}&date=${queryDate}`);
     };
     
     return (
@@ -538,7 +576,7 @@ const WorkoutDetailScreen = () => {
             <BackButton />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <h2 className="text-3xl font-black italic tracking-tighter text-white">
-                    {date} 트레이닝 상세
+                    {dateStrFromState} 트레이닝 상세
                 </h2>
                 <button 
                     onClick={() => navigate(`/routine-record${queryDate ? `?date=${queryDate}` : ''}`)}
@@ -548,41 +586,16 @@ const WorkoutDetailScreen = () => {
                 </button>
             </div>
 
-            <div className="mb-8 p-6 bg-slate-900/50 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center">
-                        <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 12h12l3-12H3z" /></svg>
-                    </div>
-                    <div>
-                        <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">오늘의 체중 입력</label>
-                        <div className="flex items-center">
-                            <input 
-                                type="number" 
-                                value={todayWeight}
-                                onChange={(e) => setTodayWeight(e.target.value)}
-                                placeholder="0.0"
-                                className="bg-transparent text-2xl font-black text-white outline-none w-20"
-                            />
-                            <span className="text-slate-400 font-bold ml-1">kg</span>
-                        </div>
-                    </div>
-                </div>
-                <button 
-                    onClick={handleWeightSave}
-                    className="w-full md:w-auto px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold rounded-xl transition-all active:scale-95"
-                >
-                    체중 저장
-                </button>
-            </div>
-
             <div className="space-y-4">
-                {logs.length === 0 ? (
+                {isLoading ? (
+                    <div className="py-20 text-center text-slate-500 italic">기록을 불러오는 중...</div>
+                ) : logs.length === 0 ? (
                     <div className="py-20 text-center bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-800">
                         <p className="text-slate-500 italic">운동 기록이 없습니다.</p>
                     </div>
                 ) : (
                     logs.map((log, idx) => (
-                        <div key={idx} className="bg-slate-900/40 border border-white/5 p-4 md:p-6 rounded-[1.5rem] shadow-2xl relative overflow-hidden group">
+                        <div key={log.id || idx} className="bg-slate-900/40 border border-white/5 p-4 md:p-6 rounded-[1.5rem] shadow-2xl relative overflow-hidden group">
                             <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
                             <div className="flex items-center justify-between mb-3">
                                 <div>
@@ -598,6 +611,20 @@ const WorkoutDetailScreen = () => {
                                         <h3 className="text-lg md:text-xl font-black italic text-white uppercase tracking-tighter leading-none">{log.exercise}</h3>
                                         {log.part !== 'cardio' && <span className="text-xs font-black text-slate-500 italic uppercase leading-none">{log.sets_count} SETS</span>}
                                     </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={() => handleEdit(log)}
+                                        className="p-2 bg-slate-800 hover:bg-blue-600 text-slate-400 hover:text-white rounded-lg transition-all"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDelete(log.id)}
+                                        className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
                                 </div>
                             </div>
 
@@ -628,6 +655,7 @@ const WorkoutDetailScreen = () => {
 };
 
 const WorkoutSetupScreen = () => {
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [step, setStep] = useState(1);
     const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
@@ -637,8 +665,53 @@ const WorkoutSetupScreen = () => {
     const [cardioSeconds, setCardioSeconds] = useState('');
     const [addedExercises, setAddedExercises] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(false);
 
     const queryDate = searchParams.get('date');
+    const editId = searchParams.get('id');
+
+    useEffect(() => {
+        const fetchExistingLog = async () => {
+            if (!editId) return;
+            setIsInitialLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('workout_logs')
+                    .select('*')
+                    .eq('id', editId)
+                    .single();
+
+                if (error) throw error;
+                if (data) {
+                    setSelection({
+                        part: data.part,
+                        category: data.type,
+                        exercise: CUSTOM_EXERCISES.find(ex => ex.name === data.exercise) ? data.exercise : '직접 입력',
+                        manualName: CUSTOM_EXERCISES.find(ex => ex.name === data.exercise) ? '' : data.exercise
+                    });
+                    
+                    if (data.part === 'cardio') {
+                        const durationMatch = data.sets_data[0]?.duration?.match(/(\d+)분 (\d+)초/);
+                        if (durationMatch) {
+                            setCardioMinutes(durationMatch[1]);
+                            setCardioSeconds(durationMatch[2]);
+                        }
+                    } else {
+                        setNumSets(data.sets_count.toString());
+                        setSetsData(data.sets_data);
+                    }
+                    setStep(4);
+                }
+            } catch (err) {
+                console.error("Error fetching log for edit:", err);
+                alert("기록을 불러오지 못했습니다.");
+            } finally {
+                setIsInitialLoading(false);
+            }
+        };
+
+        fetchExistingLog();
+    }, [editId]);
 
     const handleNumSetsChange = (e) => {
         const val = parseInt(e.target.value) || 0;
@@ -694,34 +767,43 @@ const WorkoutSetupScreen = () => {
                 : setsData;
 
             // Determine target date
-            const targetDate = queryDate ? new Date(queryDate) : new Date();
-            // If it's a specific date, set it to midday to avoid edge cases with UTC
+            let targetDate = queryDate ? new Date(queryDate) : new Date();
             if (queryDate) {
                 targetDate.setHours(12, 0, 0, 0);
             }
 
-            const newLog = {
+            const logData = {
                 user_id: user.id,
                 part: selection.part,
                 type: exInfo?.equipment || selection.category || '기타',
                 exercise: exerciseName,
                 sets_count: selection.part === 'cardio' ? 1 : parseInt(numSets),
                 sets_data: finalSetsData,
-                is_completed: true,
-                created_at: targetDate.toISOString()
+                is_completed: true
             };
 
-            const { error } = await supabase.from('workout_logs').insert([newLog]);
-            if (error) throw error;
-
-            alert('성공적으로 기록이 저장되었습니다!');
-            setAddedExercises([...addedExercises, { ...newLog, id: Date.now() }]);
-            setNumSets('');
-            setSetsData([]);
-            setCardioMinutes('');
-            setCardioSeconds('');
-            setStep(1);
-            setSelection({ part: '', category: '', exercise: '', manualName: '' });
+            if (editId) {
+                const { error } = await supabase
+                    .from('workout_logs')
+                    .update(logData)
+                    .eq('id', editId);
+                if (error) throw error;
+                alert('기록이 수정되었습니다!');
+                navigate(-1);
+            } else {
+                const { error } = await supabase
+                    .from('workout_logs')
+                    .insert([{ ...logData, created_at: targetDate.toISOString() }]);
+                if (error) throw error;
+                alert('성공적으로 기록이 저장되었습니다!');
+                setAddedExercises([...addedExercises, { ...logData, id: Date.now() }]);
+                setNumSets('');
+                setSetsData([]);
+                setCardioMinutes('');
+                setCardioSeconds('');
+                setStep(1);
+                setSelection({ part: '', category: '', exercise: '', manualName: '' });
+            }
 
         } catch (error) {
             console.error('Error saving workout:', error);
@@ -1334,6 +1416,15 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
     const today = new Date();
     const isToday = (date) => date === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
+    const partLabels = {
+        chest: '가슴',
+        shoulders: '어깨',
+        back_part: '등',
+        legs: '하체',
+        arms: '팔',
+        cardio: '유산소'
+    };
+
     return (
         <div className="mt-4 md:mt-10 p-5 md:p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50">
             <div className="flex justify-between items-center mb-6 px-2">
@@ -1353,6 +1444,9 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
                     const workoutInfo = date ? workoutGroups[date] : null;
                     const todayActive = date && isToday(date);
 
+                    // Get unique parts for this day
+                    const uniqueParts = workoutInfo ? [...new Set(workoutInfo.logs.map(l => l.part))] : [];
+
                     return (
                         <div 
                             key={idx} 
@@ -1360,9 +1454,8 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
                                 if (!date) return;
                                 const selectedDate = new Date(year, month, date);
                                 const days = ['일', '월', '화', '수', '목', '금', '토'];
-                                const dateStr = `${month + 1}/${date}(${days[selectedDate.getDay()]})`;
+                                const dateStrForDisplay = `${month + 1}/${date}(${days[selectedDate.getDay()]})`;
                                 
-                                // Format date as YYYY-MM-DD
                                 const yyyy = selectedDate.getFullYear();
                                 const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
                                 const dd = String(selectedDate.getDate()).padStart(2, '0');
@@ -1370,28 +1463,33 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
 
                                 navigate(`/routine-detail?date=${formattedDate}`, { 
                                     state: { 
-                                        date: dateStr, 
-                                        logs: workoutInfo?.logs || [] 
+                                        date: dateStrForDisplay
                                     } 
                                 });
                             }}
-                            className={`aspect-square flex flex-col items-center justify-center relative group cursor-pointer hover:bg-slate-700/30 rounded-xl transition-colors`}
+                            className={`aspect-square flex flex-col items-center justify-start py-1 relative group cursor-pointer hover:bg-slate-700/30 rounded-xl transition-colors min-h-[60px]`}
                         >
                             {date && (
                                 <>
-                                    {todayActive ? (
-                                        <div className="absolute inset-1 bg-blue-600 rounded-full"></div>
-                                    ) : workoutInfo ? (
-                                        <div className="absolute inset-1 bg-transparent border-2 border-blue-500/50 rounded-full"></div>
-                                    ) : null}
-                                    <span className={`relative z-10 text-[11px] md:text-sm font-bold ${todayActive ? 'text-white' : (workoutInfo ? 'text-blue-400' : 'text-slate-400')}`}>
-                                        {date}
-                                    </span>
-                                    {workoutInfo && (
-                                        <div className="absolute bottom-1 flex gap-0.5">
-                                            <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-                                        </div>
-                                    )}
+                                    <div className="relative flex items-center justify-center w-7 h-7 mb-1">
+                                        {todayActive && (
+                                            <div className="absolute inset-0 bg-blue-600 rounded-full"></div>
+                                        )}
+                                        {workoutInfo && (
+                                            <div className="absolute inset-0 border-2 border-rose-500 rounded-full animate-pulse"></div>
+                                        )}
+                                        <span className={`relative z-10 text-[11px] md:text-sm font-bold ${todayActive ? 'text-white' : (workoutInfo ? 'text-rose-400' : 'text-slate-400')}`}>
+                                            {date}
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="flex flex-wrap justify-center gap-0.5 max-w-full px-0.5 overflow-hidden">
+                                        {uniqueParts.map(p => (
+                                            <span key={p} className="text-[7px] md:text-[8px] font-black text-rose-500 leading-tight">
+                                                {partLabels[p] || p}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </>
                             )}
                         </div>
@@ -1421,7 +1519,9 @@ const DashboardScreen = () => {
 
             const year = viewDate.getFullYear();
             const month = viewDate.getMonth();
-            const startDate = new Date(year, month, 1).toISOString();
+            
+            // Start and End of the month
+            const startDate = new Date(year, month, 1, 0, 0, 0).toISOString();
             const endDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
 
             const { data, error } = await supabase
@@ -1434,14 +1534,12 @@ const DashboardScreen = () => {
 
             if (error) throw error;
 
-            const days = ['일', '월', '화', '수', '목', '금', '토'];
             const groups = {};
             data.forEach(log => {
                 const d = new Date(log.created_at);
                 const logDate = d.getDate();
                 if (!groups[logDate]) {
                     groups[logDate] = {
-                        dateString: `${month + 1}/${logDate}(${days[d.getDay()]})`,
                         logs: []
                     };
                 }
