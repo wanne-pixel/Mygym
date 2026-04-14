@@ -1238,33 +1238,30 @@ const AIRecommendationScreen = () => {
     }, []);
 
     const generateAIResponse = async (prompt) => {
-        const models = ['gemini-1.5-flash-latest', 'gemini-pro'];
-        let lastError = null;
-        
-        for (const model of models) {
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
-                });
+        const model = 'gemini-2.0-flash';
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
-                }
-                
-                const errText = await response.text();
-                lastError = `Model ${model} Error (${response.status}): ${errText}`;
-                console.error(lastError);
-            } catch (error) {
-                lastError = `Network/Fetch Error with ${model}: ${error.message}`;
-                console.error(error);
+            if (response.ok) {
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
             }
+            
+            const errText = await response.text();
+            const lastError = `Model ${model} Error (${response.status}): ${errText}`;
+            console.error(lastError);
+            return lastError;
+        } catch (error) {
+            const lastError = `Network/Fetch Error with ${model}: ${error.message}`;
+            console.error(error);
+            return lastError;
         }
-        return lastError || "모든 AI 모델 호출에 실패했습니다. 상세 에러를 확인해 주세요.";
     };
 
     const handleSendMessage = async (customText = null) => {
