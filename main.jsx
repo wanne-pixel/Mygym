@@ -1238,26 +1238,29 @@ const AIRecommendationScreen = () => {
     }, []);
 
     const generateAIResponse = async (prompt) => {
-        try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                })
-            });
+        const models = ['gemini-1.5-flash-latest', 'gemini-pro'];
+        
+        for (const model of models) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
 
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(errText);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
+                }
+                
+                console.warn(`Model ${model} failed with status: ${response.status}`);
+            } catch (error) {
+                console.error(`AI API Error with model ${model}:`, error);
             }
-
-            const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
-        } catch (error) {
-            console.error("AI API Error:", error);
-            return `API 오류: ${error.message}`;
         }
+        return "모든 AI 모델 호출에 실패했습니다. 잠시 후 다시 시도해주세요.";
     };
 
     const handleSendMessage = async (customText = null) => {
