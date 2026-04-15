@@ -672,8 +672,7 @@ const WorkoutSetupScreen = () => {
     const [searchParams] = useSearchParams();
     const [step, setStep] = useState(1);
     const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
-    const [numSets, setNumSets] = useState('');
-    const [setsData, setSetsData] = useState([]);
+    const [setsData, setSetsData] = useState([{ weight: '', reps: '' }]);
     const [cardioMinutes, setCardioMinutes] = useState('');
     const [cardioSeconds, setCardioSeconds] = useState('');
     const [addedExercises, setAddedExercises] = useState([]);
@@ -710,7 +709,6 @@ const WorkoutSetupScreen = () => {
                             setCardioSeconds(durationMatch[2]);
                         }
                     } else {
-                        setNumSets(data.sets_count.toString());
                         setSetsData(data.sets_data);
                     }
                     setStep(4);
@@ -726,17 +724,14 @@ const WorkoutSetupScreen = () => {
         fetchExistingLog();
     }, [editId]);
 
-    const handleNumSetsChange = (e) => {
-        const val = parseInt(e.target.value) || 0;
-        setNumSets(e.target.value);
-        if (val > 0) {
-            setSetsData(prev => {
-                const newData = new Array(val).fill(null).map((_, i) => prev[i] || { weight: '', reps: '' });
-                return newData;
-            });
-        } else {
-            setSetsData([]);
-        }
+    const handleAddSet = () => {
+        const lastSet = setsData[setsData.length - 1];
+        setSetsData([...setsData, { weight: lastSet.weight, reps: lastSet.reps }]);
+    };
+
+    const handleDeleteSet = (index) => {
+        if (setsData.length <= 1) return;
+        setSetsData(setsData.filter((_, i) => i !== index));
     };
 
     const handleSetDataChange = (index, field, value) => {
@@ -754,11 +749,10 @@ const WorkoutSetupScreen = () => {
             const secs = parseInt(cardioSeconds) || 0;
             return mins >= 0 && secs >= 0 && (mins > 0 || secs > 0);
         } else {
-            const nSets = parseInt(numSets);
-            const allSetsFilled = setsData.length > 0 && setsData.length === nSets && setsData.every(s => s.weight !== '' && s.reps !== '' && parseFloat(s.weight) >= 0 && parseInt(s.reps) > 0);
-            return nSets > 0 && allSetsFilled;
+            const allSetsFilled = setsData.length > 0 && setsData.every(s => s.weight !== '' && s.reps !== '' && parseFloat(s.weight) >= 0 && parseInt(s.reps) > 0);
+            return allSetsFilled;
         }
-    }, [numSets, setsData, selection, cardioMinutes, cardioSeconds]);
+    }, [setsData, selection, cardioMinutes, cardioSeconds]);
 
     const handleAddOrUpdateExercise = async () => {
         if (!isRecordEnabled || isSaving) return;
@@ -790,7 +784,7 @@ const WorkoutSetupScreen = () => {
                 part: selection.part,
                 type: exInfo?.equipment || selection.category || '기타',
                 exercise: exerciseName,
-                sets_count: selection.part === 'cardio' ? 1 : parseInt(numSets),
+                sets_count: selection.part === 'cardio' ? 1 : setsData.length,
                 sets_data: finalSetsData,
                 is_completed: true
             };
@@ -810,8 +804,7 @@ const WorkoutSetupScreen = () => {
                 if (error) throw error;
                 alert('성공적으로 기록이 저장되었습니다!');
                 setAddedExercises([...addedExercises, { ...logData, id: Date.now() }]);
-                setNumSets('');
-                setSetsData([]);
+                setSetsData([{ weight: '', reps: '' }]);
                 setCardioMinutes('');
                 setCardioSeconds('');
                 setStep(1);
@@ -826,7 +819,7 @@ const WorkoutSetupScreen = () => {
         }
     };
 
-    const handleDelete = (id) => {
+    const handleDeleteLog = (id) => {
         if (confirm('이 기록을 화면에서 지우시겠습니까? (DB에서는 삭제되지 않습니다)')) {
             setAddedExercises(prev => prev.filter(ex => ex.id !== id));
         }
@@ -855,34 +848,37 @@ const WorkoutSetupScreen = () => {
                                             <span className="text-slate-400 font-bold">분</span>
                                         </div>
                                         <div className="flex-1 flex items-center gap-2">
-                                            <input type="number" value={cardioSeconds} onChange={e => setCardioSeconds(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none" placeholder="0" />
+                                            <input type="number" value={cardioSeconds} onChange={e => setCardioSeconds(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none placeholder-slate-700" placeholder="0" />
                                             <span className="text-slate-400 font-bold">초</span>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
-                                <>
-                                    <div>
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block tracking-tighter">SETS</label>
-                                        <input type="number" value={numSets} onChange={handleNumSetsChange} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white text-center font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0" />
-                                    </div>
-                                    {setsData.length > 0 && (
-                                        <div className="space-y-3 animate-slide-down">
-                                            <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">세트별 상세 기록 (KG / REPS)</label>
-                                            <div className="space-y-2">
-                                                {setsData.map((s, idx) => (
-                                                    <div key={idx} className="flex items-center gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                                                        <span className="text-xs font-bold text-slate-600 w-8">{idx + 1}S</span>
-                                                        <div className="flex-1 flex gap-2">
-                                                            <input type="number" value={s.weight} onChange={(e) => handleSetDataChange(idx, 'weight', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm" placeholder="KG" />
-                                                            <input type="number" value={s.reps} onChange={(e) => handleSetDataChange(idx, 'reps', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-indigo-500 outline-none text-sm" placeholder="REPS" />
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest px-1">세트별 상세 기록 (KG / REPS)</label>
+                                    <div className="space-y-2">
+                                        {setsData.map((s, idx) => (
+                                            <div key={idx} className="flex items-center gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800 group transition-all hover:border-slate-600">
+                                                <span className="text-xs font-bold text-slate-600 w-8">{idx + 1}S</span>
+                                                <div className="flex-1 flex gap-2">
+                                                    <input type="number" value={s.weight} onChange={(e) => handleSetDataChange(idx, 'weight', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm" placeholder="KG" />
+                                                    <input type="number" value={s.reps} onChange={(e) => handleSetDataChange(idx, 'reps', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-indigo-500 outline-none text-sm" placeholder="REPS" />
+                                                </div>
+                                                {setsData.length > 1 && (
+                                                    <button onClick={() => handleDeleteSet(idx)} className="p-2 text-slate-600 hover:text-rose-500 transition-colors">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                    </button>
+                                                )}
                                             </div>
-                                        </div>
-                                    )}
-                                </>
+                                        ))}
+                                    </div>
+                                    <button 
+                                        onClick={handleAddSet}
+                                        className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs border border-white/5 transition-all active:scale-95"
+                                    >
+                                        + 세트 추가
+                                    </button>
+                                </div>
                             )}
                             <button 
                                 onClick={handleAddOrUpdateExercise} 
@@ -907,7 +903,7 @@ const WorkoutSetupScreen = () => {
                                         <span className="font-bold text-white text-lg">{ex.exercise}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <button onClick={() => handleDelete(ex.id)} className="p-2 bg-slate-700 hover:bg-rose-600 text-white rounded-lg transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                        <button onClick={() => handleDeleteLog(ex.id)} className="p-2 bg-slate-700 hover:bg-rose-600 text-white rounded-lg transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                     </div>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
@@ -943,7 +939,6 @@ const WorkoutPlanScreen = () => {
         return saved ? JSON.parse(saved) : [];
     });
     const [recordingIndex, setRecordingIndex] = useState(null);
-    const [numSets, setNumSets] = useState('');
     const [setsData, setSetsData] = useState([]);
     const [cardioMinutes, setCardioMinutes] = useState('');
     const [cardioSeconds, setCardioSeconds] = useState('');
@@ -971,20 +966,19 @@ const WorkoutPlanScreen = () => {
 
     const startRecording = (index) => {
         setRecordingIndex(index);
-        setNumSets('');
-        setSetsData([]);
+        setSetsData([{ weight: '', reps: '' }]);
         setCardioMinutes('');
         setCardioSeconds('');
     };
 
-    const handleNumSetsChange = (e) => {
-        const val = parseInt(e.target.value) || 0;
-        setNumSets(e.target.value);
-        if (val > 0) {
-            setSetsData(new Array(val).fill(null).map(() => ({ weight: '', reps: '' })));
-        } else {
-            setSetsData([]);
-        }
+    const handleAddSet = () => {
+        const lastSet = setsData[setsData.length - 1];
+        setSetsData([...setsData, { weight: lastSet.weight, reps: lastSet.reps }]);
+    };
+
+    const handleDeleteSet = (index) => {
+        if (setsData.length <= 1) return;
+        setSetsData(setsData.filter((_, i) => i !== index));
     };
 
     const handleSetDataChange = (index, field, value) => {
@@ -1010,14 +1004,13 @@ const WorkoutPlanScreen = () => {
             finalSetsData = [{ duration: `${mins}분 ${secs}초` }];
             finalSetsCount = 1;
         } else {
-            const nSets = parseInt(numSets);
-            const allSetsFilled = setsData.length > 0 && setsData.length === nSets && setsData.every(s => s.weight !== '' && s.reps !== '');
+            const allSetsFilled = setsData.length > 0 && setsData.every(s => s.weight !== '' && s.reps !== '');
             if (!allSetsFilled) {
                 alert('모든 세트의 정보를 입력해주세요.');
                 return;
             }
             finalSetsData = setsData;
-            finalSetsCount = nSets;
+            finalSetsCount = setsData.length;
         }
 
         setIsSaving(true);
@@ -1145,44 +1138,42 @@ const WorkoutPlanScreen = () => {
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <div className="flex items-center justify-between">
-                                                            <label className="text-xs font-bold text-slate-400">세트 수</label>
-                                                            <input 
-                                                                type="number" 
-                                                                value={numSets} 
-                                                                onChange={handleNumSetsChange}
-                                                                placeholder="0"
-                                                                className="w-16 bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-center font-bold outline-none focus:ring-1 focus:ring-blue-500"
-                                                            />
-                                                        </div>
-
-                                                        {setsData.length > 0 && (
-                                                            <div className="space-y-2">
-                                                                {setsData.map((s, sIdx) => (
-                                                                    <div key={sIdx} className="flex gap-2">
-                                                                        <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-lg px-3">
-                                                                            <span className="text-[10px] text-slate-500 font-bold mr-2">{sIdx + 1}S</span>
-                                                                            <input 
-                                                                                type="number" 
-                                                                                value={s.weight} 
-                                                                                onChange={(e) => handleSetDataChange(sIdx, 'weight', e.target.value)}
-                                                                                placeholder="KG" 
-                                                                                className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs"
-                                                                            />
-                                                                        </div>
-                                                                        <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-lg px-3">
-                                                                            <input 
-                                                                                type="number" 
-                                                                                value={s.reps} 
-                                                                                onChange={(e) => handleSetDataChange(sIdx, 'reps', e.target.value)}
-                                                                                placeholder="REPS" 
-                                                                                className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs"
-                                                                            />
-                                                                        </div>
+                                                        <div className="space-y-2">
+                                                            {setsData.map((s, sIdx) => (
+                                                                <div key={sIdx} className="flex gap-2 items-center">
+                                                                    <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-lg px-3">
+                                                                        <span className="text-[10px] text-slate-500 font-bold mr-2">{sIdx + 1}S</span>
+                                                                        <input 
+                                                                            type="number" 
+                                                                            value={s.weight} 
+                                                                            onChange={(e) => handleSetDataChange(sIdx, 'weight', e.target.value)}
+                                                                            placeholder="KG" 
+                                                                            className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs"
+                                                                        />
                                                                     </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
+                                                                    <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-lg px-3">
+                                                                        <input 
+                                                                            type="number" 
+                                                                            value={s.reps} 
+                                                                            onChange={(e) => handleSetDataChange(sIdx, 'reps', e.target.value)}
+                                                                            placeholder="REPS" 
+                                                                            className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs"
+                                                                        />
+                                                                    </div>
+                                                                    {setsData.length > 1 && (
+                                                                        <button onClick={() => handleDeleteSet(sIdx)} className="p-1 text-slate-600 hover:text-rose-500 transition-colors">
+                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <button 
+                                                            onClick={handleAddSet}
+                                                            className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold rounded-xl text-[10px] border border-white/5 transition-all"
+                                                        >
+                                                            + 세트 추가
+                                                        </button>
                                                     </>
                                                 )}
 
