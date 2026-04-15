@@ -1274,20 +1274,9 @@ const AIRecommendationScreen = () => {
         let textToDisplay = displayUiText || customText || inputText;
         let textForApi = customText || inputText;
 
-        // 퀵 액션 버튼 전용 가로채기 및 완벽 분리 로직
-        if (textToDisplay === "오늘의 운동루틴 추천해 줘") {
-            textForApi = "현재 나의 신체 정보와 최근 5~7일간의 운동 기록을 바탕으로 오늘 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘.";
-        }
-
         if (!textForApi.trim() || isTyping) return;
 
-        // 1. 사용자 메시지 추가 (화면에는 짧은 문장만 표시)
-        const userMsg = { id: Date.now(), type: 'user', text: textToDisplay };
-        setMessages(prev => [...prev, userMsg]);
-        setInputText('');
-        setIsTyping(true);
-
-        // 2. 프롬프트 엔지니어링 고도화 (유연한 대화 및 히스토리 반영)
+        // 1. 데이터 추출 (프롬프트 주입용)
         const logSummary = recentLogs.length > 0 
             ? recentLogs.map(l => {
                 const setsDetail = l.sets_data.map((s, i) => `${i+1}세트(${s.weight || s.duration}${s.weight ? 'kg' : ''}/${s.reps || ''}${s.reps ? '회' : ''})`).join(', ');
@@ -1303,6 +1292,18 @@ const AIRecommendationScreen = () => {
 [최근 5~7일간의 상세 운동 기록]
 ${logSummary}`;
 
+        // 퀵 액션 버튼 전용 가로채기 및 완벽 분리 로직 (실제 데이터 주입)
+        if (textToDisplay === "오늘의 운동루틴 추천해 줘") {
+            textForApi = `현재 나의 신체 정보와 다음 최근 운동 기록을 바탕으로 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘. [최근기록: ${logSummary}]`;
+        }
+
+        // 2. 사용자 메시지 추가 (화면에는 짧은 문장만 표시)
+        const userMsg = { id: Date.now(), type: 'user', text: textToDisplay };
+        setMessages(prev => [...prev, userMsg]);
+        setInputText('');
+        setIsTyping(true);
+
+        // 3. 프롬프트 엔지니어링 고도화 (유연한 대화 및 히스토리 반영)
         const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
 항상 아래의 [대화 원칙]을 엄격하게 지켜야 해:
 
@@ -1310,8 +1311,8 @@ ${logSummary}`;
 ${userContext}
 
 [대화 원칙]
-1. 루틴 추천 요청 시: 사용자가 '오늘의 운동루틴 추천해 줘'와 같이 전체 루틴을 요구할 때만 최근 기록을 분석하고 답변 마지막에 [ROUTINE_DATA: [...]] 형식을 포함해.
-2. 피드백 및 일반 대화: 추천받은 루틴에 대한 수정 요청(예: '운동 하나 더 추가해줘')이나 일반적인 헬스 질문 시에는 기록 분석을 반복하지 마. 이전 대화 문맥을 파악하여 트레이너처럼 자연스럽고 유연하게 대화만 이어가. 이때는 [ROUTINE_DATA]를 포함하지 않아도 돼.
+1. 루틴 추천 요청 시: 사용자가 '오늘의 운동루틴 추천해 줘'와 같이 전체 루틴을 요구할 때만 최근 기록을 분석하고 답변 마지막에 [ROUTINE_DATA: [{"name": "운동명", "sets": 4, "reps": 12, "weight": 0}]] 형식을 엄격히 지켜서 포함해. (반드시 'name' 키를 사용해)
+2. 피드백 및 일반 대화: 추천받은 루틴에 대한 수정 요청이나 일반적인 헬스 질문 시에는 기록 분석을 반복하지 마. 이전 대화 문맥을 파악하여 트레이너처럼 자연스럽고 유연하게 대화만 이어가. 이때는 [ROUTINE_DATA]를 포함하지 않아도 돼.
 3. 말투: 친절하고 전문적인 트레이너의 말투로 3~4문장의 간결한 대화체로 작성해. "[1단계...]" 같은 기계적인 목차나 번호 매기기는 절대 사용하지 마.`;
 
         // 이전 대화 기록 (최근 10개) 추출 및 포맷팅
@@ -1326,7 +1327,7 @@ ${userContext}
             { role: "user", content: textForApi }
         ];
         
-        // 3. AI 응답 받기
+        // 4. AI 응답 받기
         const aiText = await generateAIResponse(apiMessages);
         
         const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
