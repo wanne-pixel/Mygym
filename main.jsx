@@ -1287,20 +1287,7 @@ const AIRecommendationScreen = () => {
         setInputText('');
         setIsTyping(true);
 
-        // 2. 프롬프트 엔지니어링 고도화 (자연스러운 대화체 및 데이터 기반 전문 PT 코치)
-        const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
-답변 시 반드시 아래의 가이드를 엄격하게 따라야 해:
-
-[대화 가이드]
-- "[1단계: 최근 기록 분석]" 같은 대괄호, 목차, 번호 매기기를 절대 사용하지 마.
-- 최근 운동 분석 -> 논리적 이유 -> 오늘의 추천 흐름을 친절하고 전문적인 트레이너가 말하듯 아주 자연스럽게 하나로 이어지는 3~4문장의 간결한 대화체로 작성해.
-- 예: "최근 기록을 보니 가슴과 하체 위주로 강도 높게 진행하셨네요! 어제 데드리프트까지 하셔서 후면 피로도가 꽤 높으실 테니, 오늘은 푹 쉰 전면 상체 루틴을 구성해 보았습니다. 부상 조심해서 화이팅 해보시죠!"
-
-[추천 로직]
-- 최근 5~7일간의 기록을 분석하여 협응근, 길항근 관계와 근육 피로도를 고려해 오늘 가장 적합한 메인 타겟 부위를 정해.
-- 다관절(Compound) -> 단관절(Isolation) 순서로 루틴을 구성해.
-- 항상 답변 마지막에는 반드시 [ROUTINE_DATA: [{"name": "운동명", "sets": 4, "reps": 12, "weight": 0}]] 형태의 JSON 배열을 포함해.`;
-
+        // 2. 프롬프트 엔지니어링 고도화 (유연한 대화 및 히스토리 반영)
         const logSummary = recentLogs.length > 0 
             ? recentLogs.map(l => {
                 const setsDetail = l.sets_data.map((s, i) => `${i+1}세트(${s.weight || s.duration}${s.weight ? 'kg' : ''}/${s.reps || ''}${s.reps ? '회' : ''})`).join(', ');
@@ -1316,9 +1303,27 @@ const AIRecommendationScreen = () => {
 [최근 5~7일간의 상세 운동 기록]
 ${logSummary}`;
 
+        const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
+항상 아래의 [대화 원칙]을 엄격하게 지켜야 해:
+
+[사용자 데이터 컨텍스트]
+${userContext}
+
+[대화 원칙]
+1. 루틴 추천 요청 시: 사용자가 '오늘의 운동루틴 추천해 줘'와 같이 전체 루틴을 요구할 때만 최근 기록을 분석하고 답변 마지막에 [ROUTINE_DATA: [...]] 형식을 포함해.
+2. 피드백 및 일반 대화: 추천받은 루틴에 대한 수정 요청(예: '운동 하나 더 추가해줘')이나 일반적인 헬스 질문 시에는 기록 분석을 반복하지 마. 이전 대화 문맥을 파악하여 트레이너처럼 자연스럽고 유연하게 대화만 이어가. 이때는 [ROUTINE_DATA]를 포함하지 않아도 돼.
+3. 말투: 친절하고 전문적인 트레이너의 말투로 3~4문장의 간결한 대화체로 작성해. "[1단계...]" 같은 기계적인 목차나 번호 매기기는 절대 사용하지 마.`;
+
+        // 이전 대화 기록 (최근 10개) 추출 및 포맷팅
+        const history = messages.slice(-10).map(m => ({
+            role: m.type === 'ai' ? 'assistant' : 'user',
+            content: m.text
+        }));
+
         const apiMessages = [
             { role: "system", content: systemRole },
-            { role: "user", content: `[사용자 컨텍스트]\n${userContext}\n\n[사용자 질문]: ${textForApi}` }
+            ...history,
+            { role: "user", content: textForApi }
         ];
         
         // 3. AI 응답 받기
