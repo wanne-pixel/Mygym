@@ -1276,25 +1276,22 @@ const AIRecommendationScreen = () => {
 
         if (!textForApi.trim() || isTyping) return;
 
-        // 1. 데이터 추출 (프롬프트 주입용)
-        const logSummary = recentLogs.length > 0 
-            ? recentLogs.map(l => {
-                const setsDetail = l.sets_data.map((s, i) => `${i+1}세트(${s.weight || s.duration}${s.weight ? 'kg' : ''}/${s.reps || ''}${s.reps ? '회' : ''})`).join(', ');
-                return `${new Date(l.created_at).toLocaleDateString()}: ${l.part}(${l.exercise}) - ${l.sets_count}세트 [${setsDetail}]`;
-            }).join('\n') 
-            : '최근 운동 기록 없음';
+        // 1. 데이터 추출 및 문자열 변환 (AI가 읽기 쉬운 단순 텍스트 형식)
+        const partMap = { chest: '가슴', back_part: '등', legs: '하체', shoulders: '어깨', arms: '팔', cardio: '유산소' };
+        const formattedHistory = recentLogs.length > 0 
+            ? recentLogs.map(l => `${new Date(l.created_at).toLocaleDateString()}: ${partMap[l.part] || l.part} (${l.exercise})`).join('\n')
+            : '없음';
 
         const userContext = `
 [사용자 신체 정보]
 나이: ${userData?.age || '미입력'}세, 성별: ${userData?.gender || '미입력'}, 키: ${userData?.height || '미입력'}cm, 현재 체중: ${userData?.weight || '미입력'}kg
 골격근량: ${userData?.skeletal_muscle_mass || '미입력'}kg, 체지방률: ${userData?.body_fat_percentage || '미입력'}%
 
-[최근 5~7일간의 상세 운동 기록]
-${logSummary}`;
+[최근 7일 운동 기록 요약: ${formattedHistory}]`;
 
-        // 퀵 액션 버튼 전용 가로채기 및 완벽 분리 로직 (실제 데이터 주입)
+        // 퀵 액션 버튼 전용 가로채기 및 완벽 분리 로직 (데이터 주입 강화)
         if (textToDisplay === "오늘의 운동루틴 추천해 줘") {
-            textForApi = `현재 나의 신체 정보와 다음 최근 운동 기록을 바탕으로 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘. [최근기록: ${logSummary}]`;
+            textForApi = `현재 나의 신체 정보와 다음 최근 운동 기록을 바탕으로 오늘 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘. [최근 7일 운동 기록 요약: ${formattedHistory}] 이 기록을 바탕으로 오늘 할 부위를 정해 줘.`;
         }
 
         // 2. 사용자 메시지 추가 (화면에는 짧은 문장만 표시)
@@ -1303,7 +1300,7 @@ ${logSummary}`;
         setInputText('');
         setIsTyping(true);
 
-        // 3. 프롬프트 엔지니어링 고도화 (유연한 대화 및 히스토리 반영)
+        // 3. 프롬프트 엔지니어링 고도화
         const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
 항상 아래의 [대화 원칙]을 엄격하게 지켜야 해:
 
@@ -1327,6 +1324,8 @@ ${userContext}
             { role: "user", content: textForApi }
         ];
         
+        console.log("🔥 [OpenAI 전송 프롬프트]:", apiMessages);
+
         // 4. AI 응답 받기
         const aiText = await generateAIResponse(apiMessages);
         
