@@ -938,7 +938,10 @@ const WorkoutSetupScreen = () => {
 const WorkoutPlanScreen = () => {
     const [searchParams] = useSearchParams();
     const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
-    const [planList, setPlanList] = useState([]);
+    const [planList, setPlanList] = useState(() => {
+        const saved = localStorage.getItem('mygym_today_routine');
+        return saved ? JSON.parse(saved) : [];
+    });
     const [recordingIndex, setRecordingIndex] = useState(null);
     const [numSets, setNumSets] = useState('');
     const [setsData, setSetsData] = useState([]);
@@ -947,6 +950,10 @@ const WorkoutPlanScreen = () => {
     const [isSaving, setIsSaving] = useState(false);
 
     const queryDate = searchParams.get('date');
+
+    useEffect(() => {
+        localStorage.setItem('mygym_today_routine', JSON.stringify(planList));
+    }, [planList]);
 
     const handleAddToList = () => {
         if (!selection.exercise || (selection.exercise === '직접 입력' && (!selection.manualName || !selection.manualName.trim()))) return;
@@ -1211,7 +1218,7 @@ const AIRecommendationScreen = () => {
     const [userData, setUserData] = useState(null);
     const [recentLogs, setRecentLogs] = useState([]);
     const [messages, setMessages] = useState([
-        { id: 1, type: 'ai', text: '안녕하세요! 당신의 AI 코치입니다. 오늘 어떤 운동을 도와드릴까요?' }
+        { id: 1, type: 'ai', text: '안녕하세요! 당신의 데이터 기반 전문 PT 코치입니다. 최근 기록을 바탕으로 최적의 루틴을 제안해 드릴게요. 무엇을 도와드릴까요?' }
     ]);
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -1223,19 +1230,24 @@ const AIRecommendationScreen = () => {
                 if (user) {
                     setUserData(user.user_metadata);
                     
-                    // 최근 7일간의 기록 가져오기
-                    const sevenDaysAgo = new Date();
-                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                    
+                    // 최근 30개의 기록을 가져와서 최근 3회차(날짜) 추출
                     const { data: logs, error } = await supabase
                         .from('workout_logs')
                         .select('*')
                         .eq('user_id', user.id)
-                        .gte('created_at', sevenDaysAgo.toISOString())
-                        .order('created_at', { ascending: false });
+                        .order('created_at', { ascending: false })
+                        .limit(30);
                     
                     if (error) throw error;
-                    setRecentLogs(logs || []);
+                    
+                    if (logs && logs.length > 0) {
+                        // 날짜별로 그룹화하여 최근 3개 날짜만 선택
+                        const dates = [...new Set(logs.map(l => new Date(l.created_at).toLocaleDateString()))].slice(0, 3);
+                        const filteredLogs = logs.filter(l => dates.includes(new Date(l.created_at).toLocaleDateString()));
+                        setRecentLogs(filteredLogs);
+                    } else {
+                        setRecentLogs([]);
+                    }
                 }
             } catch (err) {
                 console.error('Data loading error:', err);
@@ -1268,33 +1280,29 @@ const AIRecommendationScreen = () => {
         setInputText('');
         setIsTyping(true);
 
-        // 2. 프롬프트 엔지니어링 고도화
-        const systemRole = "너는 사용자의 운동 기록을 분석해 주는 10년 차 전문 헬스 트레이너야. 친절하고 다정하게 대답하면서도, 운동의 중요성을 강조하는 전문가적인 모습을 보여줘.";
+        // 2. 프롬프트 엔지니어링 고도화 (데이터 기반 전문 PT 코치)
+        const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
+항상 답변 마지막에 루틴을 추천할 때는 반드시 [ROUTINE_DATA: [{"part": "부위", "exercise": "운동명", "category": "분류" }]] 형식을 포함해줘. 
+분류는 '머신', '프리웨이트', '케이블', '유산소' 중 하나로 적어줘.`;
 
         const logSummary = recentLogs.length > 0 
             ? recentLogs.map(l => {
-                const setsDetail = l.sets_data.map((s, i) => `${i+1}세트(${s.weight}kg/${s.reps}회)`).join(', ');
+                const setsDetail = l.sets_data.map((s, i) => `${i+1}세트(${s.weight || s.duration}${s.weight ? 'kg' : ''}/${s.reps || ''}${s.reps ? '회' : ''})`).join(', ');
                 return `${new Date(l.created_at).toLocaleDateString()}: ${l.part}(${l.exercise}) - ${l.sets_count}세트 [${setsDetail}]`;
             }).join('\n') 
-            : '최근 7일간 기록 없음';
+            : '최근 운동 기록 없음';
 
         const userContext = `
-[사용자 기본 정보]
+[사용자 신체 정보]
 나이: ${userData?.age || '미입력'}세, 성별: ${userData?.gender || '미입력'}, 키: ${userData?.height || '미입력'}cm, 현재 체중: ${userData?.weight || '미입력'}kg
+골격근량: ${userData?.skeletal_muscle_mass || '미입력'}kg, 체지방률: ${userData?.body_fat_percentage || '미입력'}%
 
-[인바디 정보]
-골격근량: ${userData?.skeletal_muscle_mass || '미입력'}kg
-체지방량: ${userData?.body_fat_mass || '미입력'}kg
-체지방률: ${userData?.body_fat_percentage || '미입력'}%
-기초대사량: ${userData?.bmr || '미입력'}kcal
-내장지방레벨: ${userData?.visceral_fat_level || '미입력'}
-
-[최근 7일 상세 운동 기록]
+[최근 3회차 운동 기록 상세]
 ${logSummary}`;
 
         const apiMessages = [
             { role: "system", content: systemRole },
-            { role: "user", content: `[사용자 데이터 및 컨텍스트]\n${userContext}\n\n[사용자 질문]: ${textToSend}` }
+            { role: "user", content: `[사용자 컨텍스트]\n${userContext}\n\n[사용자 질문]: ${textToSend}` }
         ];
         
         // 3. AI 응답 받기
@@ -1303,6 +1311,29 @@ ${logSummary}`;
         const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
         setMessages(prev => [...prev, aiMsg]);
         setIsTyping(false);
+    };
+
+    const handleAddRoutine = (data) => {
+        try {
+            const saved = localStorage.getItem('mygym_today_routine');
+            const currentRoutine = saved ? JSON.parse(saved) : [];
+            
+            const newItems = data.map(item => ({
+                id: Date.now() + Math.random(),
+                part: item.part,
+                category: item.category || '기타',
+                exercise: item.exercise,
+                manualName: '',
+                isCompleted: false
+            }));
+
+            const updatedRoutine = [...currentRoutine, ...newItems];
+            localStorage.setItem('mygym_today_routine', JSON.stringify(updatedRoutine));
+            alert('추천 운동이 오늘 루틴 리스트에 추가되었습니다!');
+        } catch (e) {
+            console.error("Routine add error", e);
+            alert('루틴 추가 중 오류가 발생했습니다.');
+        }
     };
 
     return (
@@ -1329,17 +1360,40 @@ ${logSummary}`;
 
             {/* Chat Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-32">
-                {messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}>
-                        <div className={`max-w-[85%] p-4 rounded-[1.5rem] text-sm leading-relaxed ${
-                            msg.type === 'user' 
-                            ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-600/10' 
-                            : 'bg-slate-800 text-slate-200 rounded-tl-none border border-white/5'
-                        }`}>
-                            <p className="whitespace-pre-wrap">{msg.text}</p>
+                {messages.map((msg) => {
+                    // [ROUTINE_DATA: ...] 추출 및 텍스트 정제
+                    const routineMatch = msg.text.match(/\[ROUTINE_DATA:\s*(.*?)\]/s);
+                    const cleanText = msg.text.replace(/\[ROUTINE_DATA:.*?\]/gs, '').trim();
+                    let routineData = null;
+                    if (routineMatch) {
+                        try {
+                            routineData = JSON.parse(routineMatch[1]);
+                        } catch (e) {
+                            console.error("Routine data parse error", e);
+                        }
+                    }
+
+                    return (
+                        <div key={msg.id} className={`flex flex-col ${msg.type === 'user' ? 'items-end' : 'items-start'} animate-slide-up`}>
+                            <div className={`max-w-[85%] p-4 rounded-[1.5rem] text-sm leading-relaxed ${
+                                msg.type === 'user' 
+                                ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-600/10' 
+                                : 'bg-slate-800 text-slate-200 rounded-tl-none border border-white/5'
+                            }`}>
+                                <p className="whitespace-pre-wrap">{cleanText}</p>
+                            </div>
+                            {routineData && msg.type === 'ai' && (
+                                <button 
+                                    onClick={() => handleAddRoutine(routineData)}
+                                    className="mt-3 ml-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-black italic rounded-xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95 flex items-center gap-2 border border-indigo-400/30"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
+                                    추천 운동을 루틴에 추가하기
+                                </button>
+                            )}
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
                 {isTyping && (
                     <div className="flex justify-start">
                         <div className="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-white/5 flex gap-1">
