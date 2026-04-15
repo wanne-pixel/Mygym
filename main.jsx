@@ -1271,37 +1271,35 @@ const AIRecommendationScreen = () => {
     };
 
     const handleSendMessage = async (customText = null, displayUiText = null) => {
-        let textToSend = customText || inputText;
-        const textToDisplay = displayUiText || textToSend;
+        let textToDisplay = displayUiText || customText || inputText;
+        let textForApi = customText || inputText;
 
-        // 퀵 액션 버튼 전용 가로채기 로직 (UI에는 짧게, API에는 길게)
+        // 퀵 액션 버튼 전용 가로채기 및 완벽 분리 로직
         if (textToDisplay === "오늘의 운동루틴 추천해 줘") {
-            textToSend = "현재 나의 신체 정보와 최근 5~7일간의 운동 기록을 바탕으로 오늘 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘.";
+            textForApi = "현재 나의 신체 정보와 최근 5~7일간의 운동 기록을 바탕으로 오늘 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘.";
         }
 
-        if (!textToSend.trim() || isTyping) return;
+        if (!textForApi.trim() || isTyping) return;
 
-        // 1. 사용자 메시지 추가 (화면에는 짧은 문장 표시 가능)
+        // 1. 사용자 메시지 추가 (화면에는 짧은 문장만 표시)
         const userMsg = { id: Date.now(), type: 'user', text: textToDisplay };
         setMessages(prev => [...prev, userMsg]);
         setInputText('');
         setIsTyping(true);
 
-        // 2. 프롬프트 엔지니어링 고도화 (3단계 논리 구조 및 데이터 기반 전문 PT 코치)
+        // 2. 프롬프트 엔지니어링 고도화 (자연스러운 대화체 및 데이터 기반 전문 PT 코치)
         const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
-답변 시 반드시 아래의 3단계 논리 구조를 엄격하게 따라야 해:
+답변 시 반드시 아래의 가이드를 엄격하게 따라야 해:
 
-[1단계: 최근 기록 분석]
-최근 5~7일간의 기록을 바탕으로 어떤 운동을 얼마나 수행했는지 간략하게 요약 및 브리핑해 줘.
+[대화 가이드]
+- "[1단계: 최근 기록 분석]" 같은 대괄호, 목차, 번호 매기기를 절대 사용하지 마.
+- 최근 운동 분석 -> 논리적 이유 -> 오늘의 추천 흐름을 친절하고 전문적인 트레이너가 말하듯 아주 자연스럽게 하나로 이어지는 3~4문장의 간결한 대화체로 작성해.
+- 예: "최근 기록을 보니 가슴과 하체 위주로 강도 높게 진행하셨네요! 어제 데드리프트까지 하셔서 후면 피로도가 꽤 높으실 테니, 오늘은 푹 쉰 전면 상체 루틴을 구성해 보았습니다. 부상 조심해서 화이팅 해보시죠!"
 
-[2단계: 논리적 이유]
-사용자의 현재 신체 정보와 이전 운동 기록을 대조하여, 근육의 피로도, 협응근 및 길항근의 관계를 고려한 전문적인 분석을 제공해. (예: 어제 가슴을 했으니 오늘은 삼두가 피로할 수 있다는 점 등)
-
-[3단계: 오늘의 추천]
-분석 결과를 바탕으로 오늘 가장 적합한 '메인 타겟 부위'를 하나 확실히 정하고, 명확한 이유와 함께 운동 루틴을 추천해 줘.
-
-운동 루틴은 헬스장의 실제 동선을 고려하고 다관절(Compound) -> 단관절(Isolation) 순서로 구성해.
-항상 답변 마지막에는 반드시 [ROUTINE_DATA: [{"name": "운동명", "sets": 4, "reps": 12, "weight": 0}]] 형태의 JSON 배열을 포함해줘.`;
+[추천 로직]
+- 최근 5~7일간의 기록을 분석하여 협응근, 길항근 관계와 근육 피로도를 고려해 오늘 가장 적합한 메인 타겟 부위를 정해.
+- 다관절(Compound) -> 단관절(Isolation) 순서로 루틴을 구성해.
+- 항상 답변 마지막에는 반드시 [ROUTINE_DATA: [{"name": "운동명", "sets": 4, "reps": 12, "weight": 0}]] 형태의 JSON 배열을 포함해.`;
 
         const logSummary = recentLogs.length > 0 
             ? recentLogs.map(l => {
@@ -1320,7 +1318,7 @@ ${logSummary}`;
 
         const apiMessages = [
             { role: "system", content: systemRole },
-            { role: "user", content: `[사용자 컨텍스트]\n${userContext}\n\n[사용자 질문]: ${textToSend}` }
+            { role: "user", content: `[사용자 컨텍스트]\n${userContext}\n\n[사용자 질문]: ${textForApi}` }
         ];
         
         // 3. AI 응답 받기
@@ -1490,7 +1488,7 @@ ${logSummary}`;
                     {/* Quick Actions */}
                     <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                         <button 
-                            onClick={() => handleSendMessage("오늘 내 신체 정보와 이전 기록을 바탕으로 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘.")}
+                            onClick={() => handleSendMessage("오늘의 운동루틴 추천해 줘")}
                             className="whitespace-nowrap px-5 py-2.5 bg-slate-900 border border-white/10 hover:border-indigo-500/50 rounded-full text-[11px] font-black text-slate-300 hover:text-white transition-all shadow-xl active:scale-95 flex items-center gap-2 group"
                         >
                             <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse group-hover:bg-indigo-400"></span>
