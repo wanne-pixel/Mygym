@@ -678,9 +678,49 @@ const WorkoutSetupScreen = () => {
     const [addedExercises, setAddedExercises] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(false);
+    const [lastRecord, setLastRecord] = useState(null);
 
     const queryDate = searchParams.get('date');
     const editId = searchParams.get('id');
+
+    // Fetch last record when exercise is selected
+    useEffect(() => {
+        const fetchLastRecord = async () => {
+            const exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
+            if (!exerciseName) {
+                setLastRecord(null);
+                return;
+            }
+
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
+                const { data, error } = await supabase
+                    .from('workout_logs')
+                    .select('sets_data')
+                    .eq('user_id', user.id)
+                    .eq('exercise', exerciseName)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (error) throw error;
+                if (data && data.length > 0) {
+                    const lastSets = data[0].sets_data;
+                    if (lastSets && lastSets.length > 0) {
+                        // Use the first set of the last session as a representative record
+                        setLastRecord(lastSets[0]);
+                    }
+                } else {
+                    setLastRecord(null);
+                }
+            } catch (err) {
+                console.error("Error fetching last record:", err);
+            }
+        };
+
+        fetchLastRecord();
+    }, [selection.exercise, selection.manualName]);
 
     useEffect(() => {
         const fetchExistingLog = async () => {
@@ -737,6 +777,15 @@ const WorkoutSetupScreen = () => {
     const handleSetDataChange = (index, field, value) => {
         const newData = [...setsData];
         newData[index] = { ...newData[index], [field]: value };
+        setSetsData(newData);
+    };
+
+    const handleLoadLastRecord = () => {
+        if (!lastRecord) return;
+        const newData = setsData.map(s => ({
+            weight: lastRecord.weight || '',
+            reps: lastRecord.reps || ''
+        }));
         setSetsData(newData);
     };
 
@@ -855,14 +904,26 @@ const WorkoutSetupScreen = () => {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest px-1">세트별 상세 기록 (KG / REPS)</label>
+                                    <div className="flex justify-between items-end px-1">
+                                        <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">세트별 상세 기록 (KG / REPS)</label>
+                                        {lastRecord && (
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-[9px] font-black text-slate-500 uppercase italic">Last: {lastRecord.weight}kg x {lastRecord.reps}회</span>
+                                                <button onClick={handleLoadLastRecord} className="text-[9px] font-black text-blue-400 uppercase hover:underline">기록 불러오기</button>
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="space-y-2">
                                         {setsData.map((s, idx) => (
                                             <div key={idx} className="flex items-center gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800 group transition-all hover:border-slate-600">
                                                 <span className="text-xs font-bold text-slate-600 w-8">{idx + 1}S</span>
                                                 <div className="flex-1 flex gap-2">
-                                                    <input type="number" value={s.weight} onChange={(e) => handleSetDataChange(idx, 'weight', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm" placeholder="KG" />
-                                                    <input type="number" value={s.reps} onChange={(e) => handleSetDataChange(idx, 'reps', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-indigo-500 outline-none text-sm" placeholder="REPS" />
+                                                    <div className="flex-1 relative">
+                                                        <input type="number" value={s.weight} onChange={(e) => handleSetDataChange(idx, 'weight', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm placeholder:text-slate-800" placeholder={lastRecord?.weight || "KG"} />
+                                                    </div>
+                                                    <div className="flex-1 relative">
+                                                        <input type="number" value={s.reps} onChange={(e) => handleSetDataChange(idx, 'reps', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm placeholder:text-slate-800" placeholder={lastRecord?.reps || "REPS"} />
+                                                    </div>
                                                 </div>
                                                 {setsData.length > 1 && (
                                                     <button onClick={() => handleDeleteSet(idx)} className="p-2 text-slate-600 hover:text-rose-500 transition-colors">
@@ -943,6 +1004,7 @@ const WorkoutPlanScreen = () => {
     const [cardioMinutes, setCardioMinutes] = useState('');
     const [cardioSeconds, setCardioSeconds] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [lastRecord, setLastRecord] = useState(null);
 
     const queryDate = searchParams.get('date');
 
@@ -964,11 +1026,39 @@ const WorkoutPlanScreen = () => {
         setSelection({ part: '', category: '', exercise: '', manualName: '' });
     };
 
-    const startRecording = (index) => {
+    const startRecording = async (index) => {
+        const item = planList[index];
+        const exerciseName = item.exercise === '직접 입력' ? item.manualName : item.exercise;
+        
         setRecordingIndex(index);
-        setSetsData([{ weight: '', reps: '' }]);
         setCardioMinutes('');
         setCardioSeconds('');
+        setLastRecord(null);
+
+        // Fetch last record
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data, error } = await supabase
+                    .from('workout_logs')
+                    .select('sets_data')
+                    .eq('user_id', user.id)
+                    .eq('exercise', exerciseName)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (!error && data && data.length > 0) {
+                    setLastRecord(data[0].sets_data[0]);
+                }
+            }
+        } catch (e) { console.error(e); }
+
+        // Use AI suggested values if available, otherwise fetch last record or default
+        if (item.suggestedWeight !== undefined || item.suggestedReps !== undefined) {
+            setSetsData([{ weight: item.suggestedWeight || '', reps: item.suggestedReps || '' }]);
+        } else {
+            setSetsData([{ weight: '', reps: '' }]);
+        }
     };
 
     const handleAddSet = () => {
@@ -984,6 +1074,15 @@ const WorkoutPlanScreen = () => {
     const handleSetDataChange = (index, field, value) => {
         const newData = [...setsData];
         newData[index] = { ...newData[index], [field]: value };
+        setSetsData(newData);
+    };
+
+    const handleLoadLastRecord = () => {
+        if (!lastRecord) return;
+        const newData = setsData.map(s => ({
+            weight: lastRecord.weight || '',
+            reps: lastRecord.reps || ''
+        }));
         setSetsData(newData);
     };
 
@@ -1138,6 +1237,12 @@ const WorkoutPlanScreen = () => {
                                                     </div>
                                                 ) : (
                                                     <>
+                                                        <div className="flex justify-between items-end mb-2">
+                                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">상세 기록</label>
+                                                            {lastRecord && (
+                                                                <button onClick={handleLoadLastRecord} className="text-[9px] font-black text-blue-400 uppercase hover:underline">기록 불러오기 ({lastRecord.weight}kg x {lastRecord.reps})</button>
+                                                            )}
+                                                        </div>
                                                         <div className="space-y-2">
                                                             {setsData.map((s, sIdx) => (
                                                                 <div key={sIdx} className="flex gap-2 items-center">
@@ -1147,7 +1252,7 @@ const WorkoutPlanScreen = () => {
                                                                             type="number" 
                                                                             value={s.weight} 
                                                                             onChange={(e) => handleSetDataChange(sIdx, 'weight', e.target.value)}
-                                                                            placeholder="KG" 
+                                                                            placeholder={lastRecord?.weight || "KG"} 
                                                                             className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs"
                                                                         />
                                                                     </div>
@@ -1156,7 +1261,7 @@ const WorkoutPlanScreen = () => {
                                                                             type="number" 
                                                                             value={s.reps} 
                                                                             onChange={(e) => handleSetDataChange(sIdx, 'reps', e.target.value)}
-                                                                            placeholder="REPS" 
+                                                                            placeholder={lastRecord?.reps || "REPS"} 
                                                                             className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs"
                                                                         />
                                                                     </div>
@@ -1284,6 +1389,10 @@ const AIRecommendationScreen = () => {
         // 퀵 액션 버튼 전용 가로채기 및 완벽 분리 로직 (데이터 주입 강화)
         if (textToDisplay === "오늘의 운동루틴 추천해 줘") {
             textForApi = `현재 나의 신체 정보와 다음 최근 운동 기록을 바탕으로 오늘 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘. [최근 7일 운동 기록 요약: ${formattedHistory}] 이 기록을 바탕으로 오늘 할 부위를 정해 줘.`;
+        }
+
+        if (textToDisplay === "⚡ 하드모드 (점진적 과부하)") {
+            textForApi = `사용자의 최근 최고 기록보다 중량을 약 2.5~5kg 높이거나, 중량이 같다면 횟수를 1~2회 더 많이 수행하도록 설정된 '고학년용 하드모드 루틴'을 짜줘. 답변 시 반드시 증량의 근거를 설명하고, [ROUTINE_DATA] 태그 안의 무게와 횟수 수치에도 이 증량된 목표값을 직접 반영해서 보내줘. [최근 7일 운동 기록 요약: ${formattedHistory}]`;
         }
 
         // 2. 사용자 메시지 추가 (화면에는 짧은 문장만 표시)
@@ -1493,6 +1602,12 @@ ${userContext}
                         >
                             <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse group-hover:bg-indigo-400"></span>
                             🔥 오늘의 운동루틴
+                        </button>
+                        <button 
+                            onClick={() => handleSendMessage("⚡ 하드모드 (점진적 과부하)")}
+                            className="whitespace-nowrap px-5 py-2.5 bg-gradient-to-r from-orange-600 to-rose-600 border border-white/10 rounded-full text-[11px] font-black text-white transition-all shadow-xl active:scale-95 flex items-center gap-2 group"
+                        >
+                            ⚡ 하드모드 (점진적 과부하)
                         </button>
                     </div>
 
