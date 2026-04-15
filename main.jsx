@@ -1252,6 +1252,7 @@ const AIRecommendationScreen = () => {
             const response = await openai.chat.completions.create({
                 model: 'gpt-4o-mini',
                 messages: messages,
+                temperature: 0
             });
 
             return response.choices[0].message.content || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
@@ -1293,6 +1294,9 @@ const AIRecommendationScreen = () => {
 
         // 3. 프롬프트 엔지니어링 고도화
         const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
+너는 일관성이 가장 중요한 코치다. 동일한 과거 운동 기록이 주어지면 100번을 물어봐도 반드시 동일한 부위를 추천해야 한다. 
+타겟 부위를 선정하는 제1원칙은 '기록상 가장 오랫동안 운동하지 않은 대근육(가슴, 등, 하체, 어깨 중 하나)'을 무조건 우선순위로 두는 것이다.
+
 항상 아래의 [대화 원칙]을 엄격하게 지켜야 해:
 
 [사용자 데이터 컨텍스트]
