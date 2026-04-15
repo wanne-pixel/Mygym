@@ -1282,8 +1282,9 @@ const AIRecommendationScreen = () => {
 
         // 2. 프롬프트 엔지니어링 고도화 (데이터 기반 전문 PT 코치)
         const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
-항상 답변 마지막에 루틴을 추천할 때는 반드시 [ROUTINE_DATA: [{"part": "부위", "exercise": "운동명", "category": "분류" }]] 형식을 포함해줘. 
-분류는 '머신', '프리웨이트', '케이블', '유산소' 중 하나로 적어줘.`;
+운동 추천 시에는 사용자의 이전 기록을 분석하여 오늘 집중해야 할 '메인 타겟 부위(예: 등/이두, 가슴/삼두, 하체 등)'를 하나 확실히 정하고, 헬스장의 실제 동선과 운동 순서(다관절 -> 단관절)에 맞게 리스트를 구성해 줘. 
+서로 무관한 부위가 무분별하게 섞이지 않도록 해.
+항상 답변 마지막에는 반드시 [ROUTINE_DATA: [{"name": "운동명", "sets": 4, "reps": 12, "weight": 0}]] 형태의 JSON 배열을 포함해줘.`;
 
         const logSummary = recentLogs.length > 0 
             ? recentLogs.map(l => {
@@ -1313,35 +1314,28 @@ ${logSummary}`;
         setIsTyping(false);
     };
 
-    const handleAddRoutine = (data) => {
+    const handleAddRoutineItem = (item) => {
         try {
             const saved = localStorage.getItem('mygym_today_routine');
             const currentRoutine = saved ? JSON.parse(saved) : [];
             
-            // 데이터가 배열이 아닐 경우 배열로 변환 (단일 항목 대응)
-            const dataArray = Array.isArray(data) ? data : [data];
+            // 기존 커스텀 운동 데이터에서 부위와 카테고리 정보 찾기
+            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(item.name?.toLowerCase() || ''));
+            
+            const newItem = {
+                id: Date.now() + Math.random(),
+                part: exInfo?.part || 'etc',
+                category: exInfo?.equipment || '기타',
+                exercise: item.name || '알 수 없는 운동',
+                manualName: '',
+                isCompleted: false,
+                suggestedSets: item.sets,
+                suggestedReps: item.reps,
+                suggestedWeight: item.weight
+            };
 
-            const newItems = dataArray.map(item => {
-                // 기존 커스텀 운동 데이터에서 부위와 카테고리 정보 찾기 (최대한 매칭)
-                const exInfo = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(item.exerciseName?.toLowerCase() || ''));
-                
-                return {
-                    id: Date.now() + Math.random(),
-                    part: exInfo?.part || 'etc',
-                    category: exInfo?.equipment || item.category || '기타',
-                    exercise: item.exerciseName || '알 수 없는 운동',
-                    manualName: '',
-                    isCompleted: false,
-                    // 추천된 세트/횟수/중량 정보도 참고용으로 저장 (선택 사항)
-                    suggestedSets: item.sets,
-                    suggestedReps: item.reps,
-                    suggestedWeight: item.weight
-                };
-            });
-
-            const updatedRoutine = [...currentRoutine, ...newItems];
+            const updatedRoutine = [...currentRoutine, newItem];
             localStorage.setItem('mygym_today_routine', JSON.stringify(updatedRoutine));
-            // 로컬 스토리지 변경을 알리기 위해 커스텀 이벤트 발생 (필요시)
             window.dispatchEvent(new Event('storage'));
             return true;
         } catch (e) {
@@ -1351,26 +1345,23 @@ ${logSummary}`;
     };
 
     const MessageBubble = ({ msg }) => {
-        const [addedExercises, setAddedExercises] = useState([]);
+        const [addedItems, setAddedItems] = useState([]);
 
-        // ROUTINE_DATA 태그를 찾기 위한 정규식
-        const routineRegex = /\[ROUTINE_DATA:\s*({.*?})\]/gs;
+        // ROUTINE_DATA 태그를 찾기 위한 정규식 (배열 형태)
+        const routineRegex = /\[ROUTINE_DATA:\s*(\[.*?\])\]/gs;
         
-        // 메시지 텍스트 분할 및 파싱
         const parts = [];
         let lastIndex = 0;
         let match;
 
         while ((match = routineRegex.exec(msg.text)) !== null) {
-            // 태그 이전의 텍스트 추가
             if (match.index > lastIndex) {
                 parts.push({ type: 'text', content: msg.text.substring(lastIndex, match.index) });
             }
 
-            // 루틴 데이터 파싱 및 버튼 추가
             try {
                 const data = JSON.parse(match[1]);
-                parts.push({ type: 'button', data: data, raw: match[0] });
+                parts.push({ type: 'routine_list', data: data });
             } catch (e) {
                 console.error("JSON parse error in message bubble", e);
                 parts.push({ type: 'text', content: match[0] });
@@ -1379,21 +1370,20 @@ ${logSummary}`;
             lastIndex = routineRegex.lastIndex;
         }
 
-        // 남은 텍스트 추가
         if (lastIndex < msg.text.length) {
             parts.push({ type: 'text', content: msg.text.substring(lastIndex) });
         }
 
-        const onAddClick = (data, identifier) => {
-            const success = handleAddRoutine(data);
+        const onAddItem = (item, itemIdx) => {
+            const success = handleAddRoutineItem(item);
             if (success) {
-                setAddedExercises(prev => [...prev, identifier]);
+                setAddedItems(prev => [...prev, itemIdx]);
             }
         };
 
         return (
             <div className={`flex flex-col ${msg.type === 'user' ? 'items-end' : 'items-start'} animate-slide-up`}>
-                <div className={`max-w-[85%] p-4 rounded-[1.5rem] text-sm leading-relaxed ${
+                <div className={`max-w-[90%] p-4 rounded-[1.5rem] text-sm leading-relaxed ${
                     msg.type === 'user' 
                     ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-600/10' 
                     : 'bg-slate-800 text-slate-200 rounded-tl-none border border-white/5'
@@ -1402,29 +1392,35 @@ ${logSummary}`;
                         if (part.type === 'text') {
                             return <span key={idx} className="whitespace-pre-wrap">{part.content}</span>;
                         } else {
-                            const isAdded = addedExercises.includes(part.raw);
                             return (
-                                <button 
-                                    key={idx}
-                                    onClick={() => !isAdded && onAddClick(part.data, part.raw)}
-                                    className={`my-2 block w-full text-left px-4 py-3 rounded-xl transition-all duration-300 border flex items-center gap-2 font-bold italic tracking-tighter ${
-                                        isAdded 
-                                        ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 cursor-default' 
-                                        : 'bg-indigo-600 hover:bg-indigo-500 border-indigo-400/30 text-white shadow-lg shadow-indigo-600/20 active:scale-95'
-                                    }`}
-                                >
-                                    {isAdded ? (
-                                        <>
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-                                            추가 완료
-                                        </>
-                                    ) : (
-                                        <>
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
-                                            ➕ [{part.data.exerciseName}] 루틴에 추가하기
-                                        </>
-                                    )}
-                                </button>
+                                <div key={idx} className="mt-4 space-y-2 bg-slate-900/50 p-3 rounded-2xl border border-white/5">
+                                    <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 px-1">추천 루틴 리스트</div>
+                                    {part.data.map((item, itemIdx) => {
+                                        const isAdded = addedItems.includes(itemIdx);
+                                        return (
+                                            <div key={itemIdx} className="flex justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-white/5 group transition-all hover:border-indigo-500/30">
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-white text-sm">{item.name}</span>
+                                                    <span className="text-[10px] text-slate-500 font-medium">{item.sets}세트 × {item.reps}회 {item.weight > 0 ? `(${item.weight}kg)` : ''}</span>
+                                                </div>
+                                                <button 
+                                                    onClick={() => !isAdded && onAddItem(item, itemIdx)}
+                                                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                                        isAdded 
+                                                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+                                                        : 'bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white active:scale-90 shadow-lg shadow-black/20'
+                                                    }`}
+                                                >
+                                                    {isAdded ? (
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                                    ) : (
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             );
                         }
                     })}
@@ -1477,9 +1473,10 @@ ${logSummary}`;
                     {/* Quick Actions */}
                     <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                         <button 
-                            onClick={() => handleSendMessage("현재 저장된 나의 신체 정보와 이전 운동 기록을 바탕으로 오늘 하기 좋은 운동 루틴을 추천해 줘. 답변 시, 내가 바로 루틴에 추가할 수 있도록 각 운동 항목의 끝에 반드시 [ROUTINE_DATA: {\"exerciseName\": \"운동명\", \"sets\": 4, \"reps\": 12, \"weight\": \"0\"}] 형태의 숨겨진 데이터 태그를 포함해서 작성해.")}
-                            className="whitespace-nowrap px-6 py-3 bg-gradient-to-r from-orange-600 to-rose-600 border border-white/10 rounded-full text-xs font-black text-white hover:from-orange-500 hover:to-rose-500 transition-all shadow-lg shadow-orange-600/20 active:scale-95 flex items-center gap-2"
+                            onClick={() => handleSendMessage("오늘 내 신체 정보와 이전 기록을 바탕으로 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘.")}
+                            className="whitespace-nowrap px-5 py-2.5 bg-slate-900 border border-white/10 hover:border-indigo-500/50 rounded-full text-[11px] font-black text-slate-300 hover:text-white transition-all shadow-xl active:scale-95 flex items-center gap-2 group"
                         >
+                            <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse group-hover:bg-indigo-400"></span>
                             🔥 오늘의 운동루틴
                         </button>
                     </div>
