@@ -1152,6 +1152,63 @@ const WorkoutPlanScreen = () => {
         }
     };
 
+    const handleDeleteFromList = (id) => {
+        if (!confirm('이 운동을 리스트에서 삭제하시겠습니까?')) return;
+        setPlanList(prev => prev.filter(item => item.id !== id));
+    };
+
+    // Helper component to fetch and display PR for an exercise
+    const PersonalRecordDisplay = ({ exerciseName }) => {
+        const [pr, setPr] = useState(null);
+
+        useEffect(() => {
+            const fetchPR = async () => {
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+
+                    const { data, error } = await supabase
+                        .from('workout_logs')
+                        .select('sets_data')
+                        .eq('user_id', user.id)
+                        .eq('exercise', exerciseName);
+
+                    if (error) throw error;
+                    
+                    if (data && data.length > 0) {
+                        let maxWeight = 0;
+                        let maxReps = 0;
+                        
+                        data.forEach(log => {
+                            log.sets_data.forEach(set => {
+                                const w = parseFloat(set.weight) || 0;
+                                const r = parseInt(set.reps) || 0;
+                                if (w > maxWeight || (w === maxWeight && r > maxReps)) {
+                                    maxWeight = w;
+                                    maxReps = r;
+                                }
+                            });
+                        });
+                        
+                        if (maxWeight > 0) {
+                            setPr({ weight: maxWeight, reps: maxReps });
+                        }
+                    }
+                } catch (e) {
+                    console.error("PR fetch error", e);
+                }
+            };
+            fetchPR();
+        }, [exerciseName]);
+
+        if (!pr) return null;
+        return (
+            <span className="text-[10px] font-black text-slate-500 ml-2 italic lowercase opacity-80">
+                (best: {pr.weight}kg x {pr.reps}회)
+            </span>
+        );
+    };
+
     return (
         <div className="p-6 md:p-12 max-w-6xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
             <BackButton />
@@ -1194,28 +1251,41 @@ const WorkoutPlanScreen = () => {
                                 </div>
                             ) : (
                                 planList.map((item, idx) => (
-                                    <div key={item.id} className={`p-5 rounded-2xl border transition-all ${item.isCompleted ? 'bg-slate-800/20 border-emerald-500/30' : 'bg-slate-800/60 border-slate-700'}`}>
-                                        <div className="flex justify-between items-center">
-                                            <div>
+                                    <div key={item.id} className={`p-5 rounded-2xl border transition-all ${item.isCompleted ? 'bg-slate-800/20 border-emerald-500/30' : 'bg-slate-800/60 border-slate-700 hover:border-slate-500'}`}>
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
                                                 <span className="text-[10px] font-bold text-indigo-400 block uppercase mb-1">
                                                     {item.part === 'chest' ? '가슴' : item.part === 'back_part' ? '등' : item.part === 'legs' ? '하체' : item.part === 'shoulders' ? '어깨' : item.part === 'arms' ? '팔' : item.part === 'cardio' ? '유산소' : item.part}
                                                     {item.category && ` / ${item.category}`}
                                                 </span>
-                                                <h4 className={`text-lg font-bold ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>{item.exercise === '직접 입력' ? item.manualName : item.exercise}</h4>
+                                                <h4 className={`text-lg font-bold flex items-center flex-wrap ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>
+                                                    {item.exercise === '직접 입력' ? item.manualName : item.exercise}
+                                                    {item.part !== 'cardio' && <PersonalRecordDisplay exerciseName={item.exercise === '직접 입력' ? item.manualName : item.exercise} />}
+                                                </h4>
                                             </div>
-                                            {item.isCompleted ? (
-                                                <div className="flex items-center gap-2 text-emerald-400 font-black italic text-sm">
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-                                                    COMPLETED
-                                                </div>
-                                            ) : (
-                                                <button 
-                                                    onClick={() => startRecording(idx)}
-                                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black italic rounded-lg transition-all active:scale-95"
-                                                >
-                                                    기록하기
-                                                </button>
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                {item.isCompleted ? (
+                                                    <div className="flex items-center gap-2 text-emerald-400 font-black italic text-sm">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                                        COMPLETED
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2">
+                                                        <button 
+                                                            onClick={() => startRecording(idx)}
+                                                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black italic rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+                                                        >
+                                                            기록하기
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteFromList(item.id)}
+                                                            className="p-2 bg-slate-700/50 hover:bg-rose-600/80 text-slate-400 hover:text-white rounded-lg transition-all active:scale-90 border border-white/5"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
 
                                         {/* 기록 폼 (해당 아이템을 기록 중일 때만 표시) */}
@@ -1373,7 +1443,7 @@ const AIRecommendationScreen = () => {
 
         if (!textForApi.trim() || isTyping) return;
 
-        // 1. 데이터 추출 및 문자열 변환 (AI가 읽기 쉬운 단순 텍스트 형식)
+        // 1. 데이터 추출 및 문자열 변환
         const partMap = { chest: '가슴', back_part: '등', legs: '하체', shoulders: '어깨', arms: '팔', cardio: '유산소' };
         const formattedHistory = recentLogs.length > 0 
             ? recentLogs.map(l => `${new Date(l.created_at).toLocaleDateString()}: ${partMap[l.part] || l.part} (${l.exercise})`).join('\n')
@@ -1384,43 +1454,43 @@ const AIRecommendationScreen = () => {
 나이: ${userData?.age || '미입력'}세, 성별: ${userData?.gender || '미입력'}, 키: ${userData?.height || '미입력'}cm, 현재 체중: ${userData?.weight || '미입력'}kg
 골격근량: ${userData?.skeletal_muscle_mass || '미입력'}kg, 체지방률: ${userData?.body_fat_percentage || '미입력'}%
 
-[최근 7일 운동 기록 요약: ${formattedHistory}]`;
+[최근 운동 기록 요약]
+${formattedHistory}`;
 
-        // 퀵 액션 버튼 전용 가로채기 및 완벽 분리 로직 (데이터 주입 강화)
+        // 모든 모드 공유 타겟 분석 로직
+        const TARGET_SELECTION_RULE = "제1원칙(타겟 선정): 제공된 최근 운동 기록을 분석하여, 가장 오랫동안 운동하지 않은 대근육(가슴, 등, 하체 중 택 1)을 오늘 운동할 '단일 타겟 부위'로 무조건 선정해. 어떤 모드든 이 분석 결과는 항상 100% 동일해야 해.";
+
+        // 퀵 액션 버튼 처리
         if (textToDisplay === "오늘의 운동루틴 추천해 줘") {
-            textForApi = `현재 나의 신체 정보와 다음 최근 운동 기록을 바탕으로 오늘 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘. [최근 7일 운동 기록 요약: ${formattedHistory}] 이 기록을 바탕으로 오늘 할 부위를 정해 줘.`;
+            textForApi = `${TARGET_SELECTION_RULE} 위 원칙으로 분석된 타겟 부위를 위해 반드시 4~5개 종목의 '전체 루틴'을 구성해서 [ROUTINE_DATA] 배열에 담아줘. 절대 1개만 주지 마.`;
         }
 
         if (textToDisplay === "⚡ 하드모드") {
-            textForApi = `오늘은 한 단계 성장하는 날입니다! 지정된 무게와 횟수를 달성하여 점진적 과부하에 도전하세요! 할 수 있습니다! 
-현재 나의 신체 정보와 다음 최근 운동 기록을 바탕으로 오늘 집중할 부위를 '딱 하나' 정해서 운동 루틴을 추천해 줘. 
-사용자의 최근 최고 기록보다 중량을 약 2.5~5kg 높이거나, 중량이 같다면 횟수를 1~2회 더 많이 수행하도록 설정해 줘. 
-답변 시 지루한 설명은 생략하고 증량 수치에 대한 강력한 동기부여와 근거만 짧게 설명해.
-마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함하고, 여기에 증량된 목표값을 직접 반영해 줘. [최근 7일 운동 기록 요약: ${formattedHistory}]`;
+            textForApi = `${TARGET_SELECTION_RULE} 지금은 '하드모드 1단계: 질문 단계'야. 분석된 타겟 부위를 말하며 '1. 볼륨업(종목 추가)' 또는 '2. 강도업(드롭세트)' 중 선택하라고 파이팅 넘치게 물어봐. 절대 [ROUTINE_DATA]를 출력하지 마.`;
         }
 
-        // 2. 사용자 메시지 추가 (화면에는 짧은 문장만 표시)
+        // 사용자 메시지 추가
         const userMsg = { id: Date.now(), type: 'user', text: textToDisplay };
         setMessages(prev => [...prev, userMsg]);
         setInputText('');
         setIsTyping(true);
 
-        // 3. 프롬프트 엔지니어링 고도화
-        const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
-너는 일관성이 가장 중요한 코치다. 동일한 과거 운동 기록이 주어지면 100번을 물어봐도 반드시 동일한 부위를 추천해야 한다. 
-타겟 부위를 선정하는 제1원칙은 '기록상 가장 오랫동안 운동하지 않은 대근육(가슴, 등, 하체, 어깨 중 하나)'을 무조건 우선순위로 두는 것이다.
+        // 시스템 프롬프트
+        const systemRole = `너는 데이터 기반 전문 PT 코치야. 
 
-항상 아래의 [대화 원칙]을 엄격하게 지켜야 해:
-
-[사용자 데이터 컨텍스트]
-${userContext}
+[하드모드 2단계: 루틴 제공 규칙]
+사용자가 1단계 질문에 대해 답변(볼륨업/강도업/1번 등)을 하면 루틴을 제공해:
+1. 타겟 고정: 이전 대화에서 코치가 분석했던 그 타겟 부위를 2단계 루틴에서도 무조건 유지해.
+2. 루틴 구성: 반드시 해당 부위를 타겟으로 하는 4~6개의 다양한 종목으로 리스트를 짜. (절대 운동 1~2개만 주지 마)
+   - '볼륨업' 선택 시: 5~6개 종목 구성.
+   - '강도업' 선택 시: 4~5개 종목 구성하되 마지막 1~2개 이름 뒤에 "(드롭)" 추가.
+3. 중량 설정: 모든 하드모드 루틴은 이전 기록보다 중량을 2.5~5kg 높인 도전적인 목표치를 [ROUTINE_DATA]에 반영해.
+4. 출력: 반드시 [ROUTINE_DATA: [{"name": "...", "sets": 4, "reps": 12, "weight": 증가된무게}, ...]] 형식을 마지막에 포함해.
 
 [대화 원칙]
-1. 루틴 추천 요청 시: 사용자가 '오늘의 운동루틴 추천해 줘'와 같이 전체 루틴을 요구할 때만 최근 기록을 분석하고 답변 마지막에 [ROUTINE_DATA: [{"name": "운동명", "sets": 4, "reps": 12, "weight": 0}]] 형식을 엄격히 지켜서 포함해. (반드시 'name' 키를 사용해)
-2. 피드백 및 일반 대화: 추천받은 루틴에 대한 수정 요청이나 일반적인 헬스 질문 시에는 기록 분석을 반복하지 마. 이전 대화 문맥을 파악하여 트레이너처럼 자연스럽고 유연하게 대화만 이어가. 이때는 [ROUTINE_DATA]를 포함하지 않아도 돼.
-3. 말투: 친절하고 전문적인 트레이너의 말투로 3~4문장의 간결한 대화체로 작성해. "[1단계...]" 같은 기계적인 목차나 번호 매기기는 절대 사용하지 마.`;
+- 말투: 3~4문장의 간결하고 전문적인 말투. 번호 매기기 금지.
+- 컨텍스트: ${userContext}`;
 
-        // 이전 대화 기록 (최근 10개) 추출 및 포맷팅
         const history = messages.slice(-10).map(m => ({
             role: m.type === 'ai' ? 'assistant' : 'user',
             content: m.text
@@ -1434,9 +1504,7 @@ ${userContext}
         
         console.log("🔥 [OpenAI 전송 프롬프트]:", apiMessages);
 
-        // 4. AI 응답 받기
         const aiText = await generateAIResponse(apiMessages);
-        
         const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
         setMessages(prev => [...prev, aiMsg]);
         setIsTyping(false);
