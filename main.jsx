@@ -1271,8 +1271,14 @@ const AIRecommendationScreen = () => {
     };
 
     const handleSendMessage = async (customText = null, displayUiText = null) => {
-        const textToSend = customText || inputText;
+        let textToSend = customText || inputText;
         const textToDisplay = displayUiText || textToSend;
+
+        // 퀵 액션 버튼 전용 가로채기 로직 (UI에는 짧게, API에는 길게)
+        if (textToDisplay === "오늘의 운동루틴 추천해 줘") {
+            textToSend = "현재 나의 신체 정보와 최근 5~7일간의 운동 기록을 바탕으로 오늘 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘.";
+        }
+
         if (!textToSend.trim() || isTyping) return;
 
         // 1. 사용자 메시지 추가 (화면에는 짧은 문장 표시 가능)
