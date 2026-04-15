@@ -1270,20 +1270,31 @@ const AIRecommendationScreen = () => {
         }
     };
 
-    const handleSendMessage = async (customText = null) => {
+    const handleSendMessage = async (customText = null, displayUiText = null) => {
         const textToSend = customText || inputText;
+        const textToDisplay = displayUiText || textToSend;
         if (!textToSend.trim() || isTyping) return;
 
-        // 1. 사용자 메시지 추가
-        const userMsg = { id: Date.now(), type: 'user', text: textToSend };
+        // 1. 사용자 메시지 추가 (화면에는 짧은 문장 표시 가능)
+        const userMsg = { id: Date.now(), type: 'user', text: textToDisplay };
         setMessages(prev => [...prev, userMsg]);
         setInputText('');
         setIsTyping(true);
 
-        // 2. 프롬프트 엔지니어링 고도화 (데이터 기반 전문 PT 코치)
+        // 2. 프롬프트 엔지니어링 고도화 (3단계 논리 구조 및 데이터 기반 전문 PT 코치)
         const systemRole = `너는 사용자의 신체 데이터와 실제 운동 기록을 정밀하게 분석하여 솔루션을 제공하는 '데이터 기반 전문 PT 코치'야. 
-운동 추천 시에는 사용자의 이전 기록을 분석하여 오늘 집중해야 할 '메인 타겟 부위(예: 등/이두, 가슴/삼두, 하체 등)'를 하나 확실히 정하고, 헬스장의 실제 동선과 운동 순서(다관절 -> 단관절)에 맞게 리스트를 구성해 줘. 
-서로 무관한 부위가 무분별하게 섞이지 않도록 해.
+답변 시 반드시 아래의 3단계 논리 구조를 엄격하게 따라야 해:
+
+[1단계: 최근 기록 분석]
+최근 5~7일간의 기록을 바탕으로 어떤 운동을 얼마나 수행했는지 간략하게 요약 및 브리핑해 줘.
+
+[2단계: 논리적 이유]
+사용자의 현재 신체 정보와 이전 운동 기록을 대조하여, 근육의 피로도, 협응근 및 길항근의 관계를 고려한 전문적인 분석을 제공해. (예: 어제 가슴을 했으니 오늘은 삼두가 피로할 수 있다는 점 등)
+
+[3단계: 오늘의 추천]
+분석 결과를 바탕으로 오늘 가장 적합한 '메인 타겟 부위'를 하나 확실히 정하고, 명확한 이유와 함께 운동 루틴을 추천해 줘.
+
+운동 루틴은 헬스장의 실제 동선을 고려하고 다관절(Compound) -> 단관절(Isolation) 순서로 구성해.
 항상 답변 마지막에는 반드시 [ROUTINE_DATA: [{"name": "운동명", "sets": 4, "reps": 12, "weight": 0}]] 형태의 JSON 배열을 포함해줘.`;
 
         const logSummary = recentLogs.length > 0 
@@ -1298,7 +1309,7 @@ const AIRecommendationScreen = () => {
 나이: ${userData?.age || '미입력'}세, 성별: ${userData?.gender || '미입력'}, 키: ${userData?.height || '미입력'}cm, 현재 체중: ${userData?.weight || '미입력'}kg
 골격근량: ${userData?.skeletal_muscle_mass || '미입력'}kg, 체지방률: ${userData?.body_fat_percentage || '미입력'}%
 
-[최근 3회차 운동 기록 상세]
+[최근 5~7일간의 상세 운동 기록]
 ${logSummary}`;
 
         const apiMessages = [
