@@ -1391,8 +1391,12 @@ const AIRecommendationScreen = () => {
             textForApi = `현재 나의 신체 정보와 다음 최근 운동 기록을 바탕으로 오늘 집중할 부위를 하나 정해서 운동 루틴을 추천해 줘. 동선과 운동 순서를 고려해 주고, 마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함해 줘. [최근 7일 운동 기록 요약: ${formattedHistory}] 이 기록을 바탕으로 오늘 할 부위를 정해 줘.`;
         }
 
-        if (textToDisplay === "⚡ 하드모드 (점진적 과부하)") {
-            textForApi = `사용자의 최근 최고 기록보다 중량을 약 2.5~5kg 높이거나, 중량이 같다면 횟수를 1~2회 더 많이 수행하도록 설정된 '고학년용 하드모드 루틴'을 짜줘. 답변 시 반드시 증량의 근거를 설명하고, [ROUTINE_DATA] 태그 안의 무게와 횟수 수치에도 이 증량된 목표값을 직접 반영해서 보내줘. [최근 7일 운동 기록 요약: ${formattedHistory}]`;
+        if (textToDisplay === "⚡ 하드모드") {
+            textForApi = `오늘은 한 단계 성장하는 날입니다! 지정된 무게와 횟수를 달성하여 점진적 과부하에 도전하세요! 할 수 있습니다! 
+현재 나의 신체 정보와 다음 최근 운동 기록을 바탕으로 오늘 집중할 부위를 '딱 하나' 정해서 운동 루틴을 추천해 줘. 
+사용자의 최근 최고 기록보다 중량을 약 2.5~5kg 높이거나, 중량이 같다면 횟수를 1~2회 더 많이 수행하도록 설정해 줘. 
+답변 시 지루한 설명은 생략하고 증량 수치에 대한 강력한 동기부여와 근거만 짧게 설명해.
+마지막엔 [ROUTINE_DATA: [...]] 형식을 꼭 포함하고, 여기에 증량된 목표값을 직접 반영해 줘. [최근 7일 운동 기록 요약: ${formattedHistory}]`;
         }
 
         // 2. 사용자 메시지 추가 (화면에는 짧은 문장만 표시)
@@ -1604,10 +1608,10 @@ ${userContext}
                             🔥 오늘의 운동루틴
                         </button>
                         <button 
-                            onClick={() => handleSendMessage("⚡ 하드모드 (점진적 과부하)")}
+                            onClick={() => handleSendMessage("⚡ 하드모드")}
                             className="whitespace-nowrap px-5 py-2.5 bg-gradient-to-r from-orange-600 to-rose-600 border border-white/10 rounded-full text-[11px] font-black text-white transition-all shadow-xl active:scale-95 flex items-center gap-2 group"
                         >
-                            ⚡ 하드모드 (점진적 과부하)
+                            ⚡ 하드모드
                         </button>
                     </div>
 
