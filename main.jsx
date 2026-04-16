@@ -1619,10 +1619,10 @@ ${formattedHistory}`;
                                             <div key={itemIdx} className="flex justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-white/5 group transition-all hover:border-indigo-500/30">
                                                 <div className="flex flex-col">
                                                     <span className="text-white font-black italic uppercase tracking-tighter text-base mb-1">
-                                                        {item.name || item.exercise || '추천 운동'}
+                                                        {item.name}
                                                     </span>
                                                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                                        {item.sets}세트 × {item.reps}회 {item.weight > 0 ? `(${item.weight}kg)` : ''}
+                                                        {item.sets}세트 x {item.reps}회 {item.weight > 0 ? `(${item.weight}kg)` : ''}
                                                     </span>
                                                 </div>
                                                 <button 
