@@ -1519,6 +1519,7 @@ ${formattedHistory}`;
    - '강도업' 선택 시: 4~5개 종목 구성, 마지막 1~2개 종목명에 '(드롭)' 포함.
 3. 중량: 이전 기록보다 2.5~5kg 증량 제안 (기록 없으면 0). JSON 'weight'는 숫자만 허용.
 4. 형식: 마지막에 [ROUTINE_DATA: [...]] JSON 배열 포함.
+5. 필수 규칙: 절대 운동 이름만 있는 문자열 배열(예: ['운동1', '운동2'])을 출력하지 마라. 반드시 각 운동의 상세 정보를 포함한 '객체(Object)의 배열' 형태로 출력해야 한다. 필수 키값: name (문자열), sets (숫자), reps (숫자), weight (숫자).
 
 [대화 원칙]
 - 말투: 3~4문장의 간결한 전문 말투. 번호 매기기 금지.
@@ -1607,12 +1608,19 @@ ${formattedHistory}`;
                 }
                 
                 // 3. 평탄화 및 키(Key) 강제 매핑 (궁극의 데이터 정제)
-                const safeRoutineData = parsed.flat(Infinity).map(item => ({
-                    name: item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동",
-                    sets: item.sets || item.Sets || item.세트 || 0,
-                    reps: item.reps || item.Reps || item.횟수 || item.반복수 || 0,
-                    weight: item.weight || item.Weight || item.무게 || item.중량 || 0
-                }));
+                const safeRoutineData = parsed.flat(Infinity).map(item => {
+                    // AI가 텍스트만 덜렁 던진 경우 (문자열 방어)
+                    if (typeof item === 'string') {
+                        return { name: item, sets: 4, reps: 12, weight: 0 };
+                    }
+                    // 정상적으로 객체가 들어온 경우
+                    return {
+                        name: item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동",
+                        sets: item.sets || item.Sets || item.세트 || 0,
+                        reps: item.reps || item.Reps || item.횟수 || item.반복수 || 0,
+                        weight: item.weight || item.Weight || item.무게 || item.중량 || 0
+                    };
+                });
 
                 console.log("🔥 [3] 정제 및 매핑 완료된 최종 데이터:", safeRoutineData);
                 parts.push({ type: 'routine_list', data: safeRoutineData });
