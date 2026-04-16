@@ -45,6 +45,8 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
         if (error) {
             alert('저장 실패: ' + error.message);
         } else {
+            // 로컬 스토리지에도 최신 정보 저장
+            localStorage.setItem(STORAGE_KEYS.USER_BODY_INFO, JSON.stringify(profile));
             alert('저장되었습니다.');
             onUpdate();
             onClose();
@@ -1413,7 +1415,10 @@ const WorkoutPlanScreen = () => {
 };
 
 const AIRecommendationScreen = () => {
-    const [userData, setUserData] = useState(null);
+    const [userData, setUserData] = useState(() => {
+        const saved = localStorage.getItem(STORAGE_KEYS.USER_BODY_INFO);
+        return saved ? JSON.parse(saved) : null;
+    });
     const [recentLogs, setRecentLogs] = useState([]);
     const [messages, setMessages] = useState(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY);
@@ -1433,7 +1438,10 @@ const AIRecommendationScreen = () => {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
-                    setUserData(user.user_metadata);
+                    // Supabase 최신 데이터로 상태 업데이트 및 로컬 스토리지 동기화
+                    const metadata = user.user_metadata;
+                    setUserData(metadata);
+                    localStorage.setItem(STORAGE_KEYS.USER_BODY_INFO, JSON.stringify(metadata));
                     
                     // 정교한 분석을 위해 최근 50개의 기록을 가져옴
                     const { data: logs, error } = await supabase
@@ -1483,6 +1491,9 @@ const AIRecommendationScreen = () => {
 
         if (!textForApi.trim() || isTyping) return;
 
+        // 최신 신체 데이터 로컬 스토리지에서 다시 불러오기 (동적 주입)
+        const latestBodyInfo = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_BODY_INFO) || '{}');
+
         // 1. 데이터 가공 (전체 기록 기반 부위별 최근 수행일 분석)
         
         // 부위별 마지막 운동일 추출
@@ -1501,9 +1512,9 @@ const AIRecommendationScreen = () => {
 [오늘 날짜]
 ${new Date().toLocaleString()}
 
-[사용자 신체 정보]
-나이: ${userData?.age || '미입력'}세, 성별: ${userData?.gender || '미입력'}, 키: ${userData?.height || '미입력'}cm, 현재 체중: ${userData?.weight || '미입력'}kg
-골격근량: ${userData?.skeletal_muscle_mass || '미입력'}kg, 체지방률: ${userData?.body_fat_percentage || '미입력'}%
+[사용자 신체 정보 (로컬 데이터)]
+나이: ${latestBodyInfo?.age || '미입력'}세, 성별: ${latestBodyInfo?.gender || '미입력'}, 키: ${latestBodyInfo?.height || '미입력'}cm, 현재 체중: ${latestBodyInfo?.weight || '미입력'}kg
+골격근량: ${latestBodyInfo?.skeletal_muscle_mass || '미입력'}kg, 체지방률: ${latestBodyInfo?.body_fat_percentage || '미입력'}%
 
 [부위별 마지막 운동 일시 (전수 조사 결과)]
 가슴: ${lastTrained['chest'] || '기록 없음'}
@@ -1540,21 +1551,29 @@ ${formattedHistory}`;
         setInputText('');
         setIsTyping(true);
 
-        const systemRole = `너는 데이터 기반 전문 PT 코치야.
+        const systemRole = `너는 데이터 기반 전문 PT 코치야. 사용자의 신체 정보를 바탕으로 수준과 목적을 판단하고 맞춤형 코칭을 제공하라.
 
-        [하드모드 2단계 규칙]
-        사용자가 1단계 질문에 답변하면 루틴을 제공하라:
-        1. 타겟 고정: 이전 단계에서 분석한 타겟 부위를 절대 변경하지 마라.
-        2. 루틴 구성: 반드시 4~6개 종목으로 구성하라.
-        - '볼륨업' 선택 시: 5~6개 종목.
-        - '강도업' 선택 시: 4~5개 종목 구성, 마지막 1~2개 종목 데이터 객체에 "isDropSet": true 를 포함하라. (이름 뒤에 (드롭)을 붙이지 마라)
-        3. 중량: 이전 기록보다 2.5~5kg 증량 제안 (기록 없으면 0). JSON 'weight'는 숫자만 허용.
-        4. 형식: 마지막에 [ROUTINE_DATA: [...]] JSON 배열 포함.
-        5. 필수 규칙: 절대 운동 이름만 있는 문자열 배열(예: ['운동1', '운동2'])을 출력하지 마라. 반드시 각 운동의 상세 정보를 포함한 '객체(Object)의 배열' 형태로 출력해야 한다. 필수 키값: name (문자열), sets (숫자), reps (숫자), weight (숫자), isDropSet (불리언, 해당 시에만 true).
+        [코칭 분석 및 개인화 로직]
+        1. 수준 및 목적 판단: 제공된 '사용자 신체 정보'와 '최근 운동 로그'를 분석하여 초보/중급/고급 여부와 다이어트/벌크업/스트렝스 목적을 스스로 판단하라.
+        2. 데이터 기반 루틴 조정:
+           - 체지방률(body_fat_percentage)이 높을 경우: 심폐 지구력과 칼로리 소모 극대화를 위해 세트 간 휴식 시간을 줄이고 반복 횟수(15~20회)를 높이는 루틴을 제안하라.
+           - 골격근량(skeletal_muscle_mass)이 적을 경우: 근신경계 발달과 기본 근력 향상을 위해 스쿼트, 데드리프트, 벤치프레스 등 기초적인 다관절 운동 위주로 세트를 구성하라.
+        
+        [답변 및 동기부여 규칙 - 필수 수행]
+        1. 긍정적 오프닝: 모든 답변의 첫 문장은 사용자를 격려하고 동기부여를 주는 따뜻하고 긍정적인 멘트로 시작하라.
+        2. 숫자 노출 금지: 답변 텍스트(멘트) 내에 체지방률, 몸무게 등 민감한 숫자를 직접 언급하지 마라. 대신 "신체 밸런스가 좋습니다", "에너지를 태우기 최적의 상태입니다"와 같은 전문적이고 긍정적인 표현을 사용하라. (단, [ROUTINE_DATA] JSON 내의 숫자는 허용)
+        3. 전문적 톤앤매너: 따뜻하지만 전문 지식이 느껴지는 용어를 사용하여 신뢰감을 주어라.
+
+        [하드모드 및 루틴 구성 규칙]
+        1. 루틴 구성: 반드시 4~6개 종목으로 구성하라.
+        2. 중량: 이전 기록보다 2.5~5kg 증량 제안 (기록 없으면 0). JSON 'weight'는 숫자만 허용.
+        3. 형식: 마지막에 [ROUTINE_DATA: [...]] JSON 배열 포함.
+        4. 필수 키값: name (문자열), sets (숫자), reps (숫자), weight (숫자), isDropSet (불리언).
 
         [대화 원칙]
-        - 말투: 3~4문장의 간결한 전문 말투. 번호 매기기 금지.
+        - 말투: 3~5문장의 간결하고 파이팅 넘치는 말투. 번호 매기기 금지.
         - 컨텍스트: ${userContext}`;
+
         const history = messages.slice(-6).map(m => ({
             role: m.type === 'ai' ? 'assistant' : 'user',
             content: m.text

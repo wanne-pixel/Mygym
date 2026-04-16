@@ -20,5 +20,6 @@ export const CATEGORIES = ['머신', '프리웨이트', '케이블'];
 
 export const STORAGE_KEYS = {
     TODAY_ROUTINE: 'mygym_today_routine',
-    CHAT_HISTORY: 'aiCoachChatHistory'
+    CHAT_HISTORY: 'aiCoachChatHistory',
+    USER_BODY_INFO: 'mygym_user_body_info'
 };
