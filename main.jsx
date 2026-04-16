@@ -1421,6 +1421,15 @@ const AIRecommendationScreen = () => {
         fetchData();
     }, []);
 
+    const handleClearHistory = () => {
+        if (confirm('대화 내역을 모두 초기화하시겠습니까?')) {
+            localStorage.removeItem('aiCoachChatHistory');
+            setMessages([
+                { id: 1, type: 'ai', text: '안녕하세요! 당신의 데이터 기반 전문 PT 코치입니다. 최근 기록을 바탕으로 최적의 루틴을 제안해 드릴게요. 무엇을 도와드릴까요?' }
+            ]);
+        }
+    };
+
     const generateAIResponse = async (messages) => {
         try {
             const response = await openai.chat.completions.create({
@@ -1619,10 +1628,10 @@ ${formattedHistory}`;
                                             <div key={itemIdx} className="flex justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-white/5 group transition-all hover:border-indigo-500/30">
                                                 <div className="flex flex-col">
                                                     <span className="text-white font-black italic uppercase tracking-tighter text-base mb-1">
-                                                        {item.name}
+                                                        {item.name || "운동명 누락"}
                                                     </span>
                                                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                                        {item.sets}세트 x {item.reps}회 {item.weight > 0 ? `(${item.weight}kg)` : ''}
+                                                        {item.sets || 0}세트 x {item.reps || 0}회 {item.weight ? `${item.weight}kg` : ''}
                                                     </span>
                                                 </div>
                                                 <button 
@@ -1671,6 +1680,13 @@ ${formattedHistory}`;
                         </div>
                     </div>
                 </div>
+                
+                <button 
+                    onClick={handleClearHistory}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-[10px] font-black uppercase rounded-lg border border-white/5 transition-all active:scale-95"
+                >
+                    대화 초기화
+                </button>
             </div>
 
             {/* Chat Area */}
