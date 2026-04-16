@@ -709,7 +709,8 @@ const WorkoutSetupScreen = () => {
         }
     }, [setsData, selection, cardioMinutes, cardioSeconds]);
 
-    const handleAddOrUpdateExercise = async () => {
+    const handleAddOrUpdateExercise = async (e) => {
+        if (e) e.preventDefault();
         if (!isRecordEnabled || isSaving) return;
         setIsSaving(true);
 
@@ -758,6 +759,12 @@ const WorkoutSetupScreen = () => {
                     .insert([{ ...logData, created_at: targetDate.toISOString() }]);
                 if (error) throw error;
                 alert('성공적으로 기록이 저장되었습니다!');
+            }
+
+            // Redirect back to detail view if date exists
+            if (queryDate) {
+                navigate(`/routine-detail?date=${queryDate}`);
+            } else {
                 setAddedExercises([...addedExercises, { ...logData, id: Date.now() }]);
                 setSetsData([{ weight: '', reps: '' }]);
                 setCardioMinutes('');
@@ -1802,7 +1809,12 @@ const CalendarScreen = () => {
 };
 
 const MainAppLayout = () => {
-    const [activeTab, setActiveTab] = useState('달력');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || '달력';
+
+    const setActiveTab = (tab) => {
+        setSearchParams({ tab });
+    };
 
     const renderContent = () => {
         switch (activeTab) {
