@@ -721,7 +721,8 @@ const WorkoutSetupScreen = () => {
                 return;
             }
 
-            const exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
+            let exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
+            exerciseName = exerciseName.replace('(드롭)', '').trim();
             const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === selection.exercise && ex.part === selection.part);
 
             const finalSetsData = selection.part === 'cardio' 
@@ -820,7 +821,10 @@ const WorkoutSetupScreen = () => {
                                     <div className="space-y-2">
                                         {setsData.map((s, idx) => (
                                             <div key={idx} className="flex items-center gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800 group transition-all hover:border-slate-600">
-                                                <span className="text-xs font-bold text-slate-600 w-8">{idx + 1}S</span>
+                                                <div className="flex flex-col items-center w-8">
+                                                    <span className="text-xs font-bold text-slate-600">{idx + 1}S</span>
+                                                    {s.isDropSet && <span className="text-[8px] font-black text-rose-500 bg-rose-500/10 px-1 rounded mt-0.5 animate-pulse">DROP</span>}
+                                                </div>
                                                 <div className="flex-1 flex gap-2">
                                                     <div className="flex-1 relative">
                                                         <input type="number" value={s.weight} onChange={(e) => handleSetDataChange(idx, 'weight', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm placeholder:text-slate-800" placeholder={lastRecord?.weight || "KG"} />
@@ -829,11 +833,24 @@ const WorkoutSetupScreen = () => {
                                                         <input type="number" value={s.reps} onChange={(e) => handleSetDataChange(idx, 'reps', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm placeholder:text-slate-800" placeholder={lastRecord?.reps || "REPS"} />
                                                     </div>
                                                 </div>
-                                                {setsData.length > 1 && (
-                                                    <button onClick={() => handleDeleteSet(idx)} className="p-2 text-slate-600 hover:text-rose-500 transition-colors">
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                    </button>
-                                                )}
+                                                <div className="flex items-center gap-2">
+                                                    <label className="flex items-center cursor-pointer group/cb">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={s.isDropSet || false} 
+                                                            onChange={(e) => handleSetDataChange(idx, 'isDropSet', e.target.checked)}
+                                                            className="hidden" 
+                                                        />
+                                                        <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500 shadow-lg shadow-rose-600/20' : 'border-slate-700 bg-slate-800 group-hover/cb:border-slate-500'}`}>
+                                                            {s.isDropSet && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
+                                                        </div>
+                                                    </label>
+                                                    {setsData.length > 1 && (
+                                                        <button onClick={() => handleDeleteSet(idx)} className="p-2 text-slate-600 hover:text-rose-500 transition-colors">
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -950,9 +967,9 @@ const WorkoutPlanScreen = () => {
 
         // Use AI suggested values if available, otherwise fetch last record or default
         if (item.suggestedWeight !== undefined || item.suggestedReps !== undefined) {
-            setSetsData([{ weight: item.suggestedWeight || '', reps: item.suggestedReps || '' }]);
+            setSetsData([{ weight: item.suggestedWeight || '', reps: item.suggestedReps || '', isDropSet: item.isDropSet || false }]);
         } else {
-            setSetsData([{ weight: '', reps: '' }]);
+            setSetsData([{ weight: '', reps: '', isDropSet: false }]);
         }
     };
 
@@ -1012,7 +1029,8 @@ const WorkoutPlanScreen = () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('로그인이 필요합니다.');
 
-            const exerciseName = targetExercise.exercise === '직접 입력' ? targetExercise.manualName : targetExercise.exercise;
+            let exerciseName = targetExercise.exercise === '직접 입력' ? targetExercise.manualName : targetExercise.exercise;
+            exerciseName = exerciseName.replace('(드롭)', '').trim();
             const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === targetExercise.exercise && ex.part === targetExercise.part);
 
             // Determine target date
@@ -1210,7 +1228,7 @@ const WorkoutPlanScreen = () => {
                                                             {setsData.map((s, sIdx) => (
                                                                 <div key={sIdx} className="flex gap-2 items-center">
                                                                     <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-lg px-3">
-                                                                        <span className="text-[10px] text-slate-500 font-bold mr-2">{sIdx + 1}S</span>
+                                                                        <span className="text-[10px] text-slate-500 font-bold mr-2">{sIdx + 1}S{s.isDropSet && <span className="ml-1 text-rose-500">D</span>}</span>
                                                                         <input 
                                                                             type="number" 
                                                                             value={s.weight} 
@@ -1228,6 +1246,12 @@ const WorkoutPlanScreen = () => {
                                                                             className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs"
                                                                         />
                                                                     </div>
+                                                                    <label className="flex items-center cursor-pointer px-1">
+                                                                        <input type="checkbox" checked={s.isDropSet || false} onChange={(e) => handleSetDataChange(sIdx, 'isDropSet', e.target.checked)} className="hidden" />
+                                                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500' : 'border-slate-700 bg-slate-800'}`}>
+                                                                            {s.isDropSet && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
+                                                                        </div>
+                                                                    </label>
                                                                     {setsData.length > 1 && (
                                                                         <button onClick={() => handleDeleteSet(sIdx)} className="p-1 text-slate-600 hover:text-rose-500 transition-colors">
                                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -1401,22 +1425,21 @@ ${formattedHistory}`;
         setInputText('');
         setIsTyping(true);
 
-        const systemRole = `너는 데이터 기반 전문 PT 코치야. 
+        const systemRole = `너는 데이터 기반 전문 PT 코치야.
 
-[하드모드 2단계 규칙]
-사용자가 1단계 질문에 답변하면 루틴을 제공하라:
-1. 타겟 고정: 이전 단계에서 분석한 타겟 부위를 절대 변경하지 마라.
-2. 루틴 구성: 반드시 4~6개 종목으로 구성하라.
-   - '볼륨업' 선택 시: 5~6개 종목.
-   - '강도업' 선택 시: 4~5개 종목 구성, 마지막 1~2개 종목명에 '(드롭)' 포함.
-3. 중량: 이전 기록보다 2.5~5kg 증량 제안 (기록 없으면 0). JSON 'weight'는 숫자만 허용.
-4. 형식: 마지막에 [ROUTINE_DATA: [...]] JSON 배열 포함.
-5. 필수 규칙: 절대 운동 이름만 있는 문자열 배열(예: ['운동1', '운동2'])을 출력하지 마라. 반드시 각 운동의 상세 정보를 포함한 '객체(Object)의 배열' 형태로 출력해야 한다. 필수 키값: name (문자열), sets (숫자), reps (숫자), weight (숫자).
+        [하드모드 2단계 규칙]
+        사용자가 1단계 질문에 답변하면 루틴을 제공하라:
+        1. 타겟 고정: 이전 단계에서 분석한 타겟 부위를 절대 변경하지 마라.
+        2. 루틴 구성: 반드시 4~6개 종목으로 구성하라.
+        - '볼륨업' 선택 시: 5~6개 종목.
+        - '강도업' 선택 시: 4~5개 종목 구성, 마지막 1~2개 종목 데이터 객체에 "isDropSet": true 를 포함하라. (이름 뒤에 (드롭)을 붙이지 마라)
+        3. 중량: 이전 기록보다 2.5~5kg 증량 제안 (기록 없으면 0). JSON 'weight'는 숫자만 허용.
+        4. 형식: 마지막에 [ROUTINE_DATA: [...]] JSON 배열 포함.
+        5. 필수 규칙: 절대 운동 이름만 있는 문자열 배열(예: ['운동1', '운동2'])을 출력하지 마라. 반드시 각 운동의 상세 정보를 포함한 '객체(Object)의 배열' 형태로 출력해야 한다. 필수 키값: name (문자열), sets (숫자), reps (숫자), weight (숫자), isDropSet (불리언, 해당 시에만 true).
 
-[대화 원칙]
-- 말투: 3~4문장의 간결한 전문 말투. 번호 매기기 금지.
-- 컨텍스트: ${userContext}`;
-
+        [대화 원칙]
+        - 말투: 3~4문장의 간결한 전문 말투. 번호 매기기 금지.
+        - 컨텍스트: ${userContext}`;
         const history = messages.slice(-6).map(m => ({
             role: m.type === 'ai' ? 'assistant' : 'user',
             content: m.text
@@ -1444,6 +1467,7 @@ ${formattedHistory}`;
             const sets = item.sets || item.Sets || item.세트 || 0;
             const reps = item.reps || item.Reps || item.횟수 || item.반복수 || 0;
             const weight = item.weight || item.Weight || item.무게 || item.중량 || 0;
+            const isDropSet = item.isDropSet || false;
 
             // 기존 커스텀 운동 데이터에서 부위와 카테고리 정보 찾기
             const exInfo = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(name.toLowerCase()));
@@ -1457,7 +1481,8 @@ ${formattedHistory}`;
                 isCompleted: false,
                 suggestedSets: sets,
                 suggestedReps: reps,
-                suggestedWeight: weight
+                suggestedWeight: weight,
+                isDropSet: isDropSet
             };
 
             const updatedRoutine = [...currentRoutine, newItem];

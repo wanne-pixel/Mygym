@@ -28,13 +28,29 @@ const ChatMessage = ({ msg, onAddRoutineItem }) => {
             // 3. 평탄화 및 키(Key) 강제 매핑 (궁극의 데이터 정제)
             const safeRoutineData = parsed.flat(Infinity).map(item => {
                 if (typeof item === 'string') {
-                    return { name: item, sets: 4, reps: 12, weight: 0 };
+                    let name = item;
+                    let isDropSet = false;
+                    if (name.includes('(드롭)')) {
+                        name = name.replace('(드롭)', '').trim();
+                        isDropSet = true;
+                    }
+                    return { name, sets: 4, reps: 12, weight: 0, isDropSet };
                 }
+                
+                let name = item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동";
+                let isDropSet = item.isDropSet || false;
+                
+                if (name.includes('(드롭)')) {
+                    name = name.replace('(드롭)', '').trim();
+                    isDropSet = true;
+                }
+
                 return {
-                    name: item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동",
+                    name,
                     sets: item.sets || item.Sets || item.세트 || 0,
                     reps: item.reps || item.Reps || item.횟수 || item.반복수 || 0,
-                    weight: item.weight || item.Weight || item.무게 || item.중량 || 0
+                    weight: item.weight || item.Weight || item.무게 || item.중량 || 0,
+                    isDropSet
                 };
             });
 

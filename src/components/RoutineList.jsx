@@ -21,9 +21,14 @@ const RoutineList = ({ data, onAddItem }) => {
                 return (
                     <div key={itemIdx} className="flex justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-white/5 group transition-all hover:border-indigo-500/30">
                         <div className="flex flex-col">
-                            <span className="text-white font-black italic uppercase tracking-tighter text-base mb-1">
-                                {item.name}
-                            </span>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="text-white font-black italic uppercase tracking-tighter text-base">
+                                    {item.name}
+                                </span>
+                                {item.isDropSet && (
+                                    <span className="bg-rose-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded italic animate-pulse">D</span>
+                                )}
+                            </div>
                             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
                                 {item.sets}세트 x {item.reps}회 {item.weight > 0 ? `(${item.weight}kg)` : ''}
                             </span>
