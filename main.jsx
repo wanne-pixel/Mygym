@@ -1383,11 +1383,18 @@ const WorkoutPlanScreen = () => {
 const AIRecommendationScreen = () => {
     const [userData, setUserData] = useState(null);
     const [recentLogs, setRecentLogs] = useState([]);
-    const [messages, setMessages] = useState([
-        { id: 1, type: 'ai', text: '안녕하세요! 당신의 데이터 기반 전문 PT 코치입니다. 최근 기록을 바탕으로 최적의 루틴을 제안해 드릴게요. 무엇을 도와드릴까요?' }
-    ]);
+    const [messages, setMessages] = useState(() => {
+        const saved = localStorage.getItem('aiCoachChatHistory');
+        return saved ? JSON.parse(saved) : [
+            { id: 1, type: 'ai', text: '안녕하세요! 당신의 데이터 기반 전문 PT 코치입니다. 최근 기록을 바탕으로 최적의 루틴을 제안해 드릴게요. 무엇을 도와드릴까요?' }
+        ];
+    });
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+
+    useEffect(() => {
+        localStorage.setItem('aiCoachChatHistory', JSON.stringify(messages));
+    }, [messages]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -1396,24 +1403,16 @@ const AIRecommendationScreen = () => {
                 if (user) {
                     setUserData(user.user_metadata);
                     
-                    // 최근 30개의 기록을 가져와서 최근 3회차(날짜) 추출
+                    // 정교한 분석을 위해 최근 50개의 기록을 가져옴
                     const { data: logs, error } = await supabase
                         .from('workout_logs')
                         .select('*')
                         .eq('user_id', user.id)
                         .order('created_at', { ascending: false })
-                        .limit(30);
+                        .limit(50);
                     
                     if (error) throw error;
-                    
-                    if (logs && logs.length > 0) {
-                        // 날짜별로 그룹화하여 최근 3개 날짜만 선택
-                        const dates = [...new Set(logs.map(l => new Date(l.created_at).toLocaleDateString()))].slice(0, 3);
-                        const filteredLogs = logs.filter(l => dates.includes(new Date(l.created_at).toLocaleDateString()));
-                        setRecentLogs(filteredLogs);
-                    } else {
-                        setRecentLogs([]);
-                    }
+                    setRecentLogs(logs || []);
                 }
             } catch (err) {
                 console.error('Data loading error:', err);
@@ -1443,30 +1442,56 @@ const AIRecommendationScreen = () => {
 
         if (!textForApi.trim() || isTyping) return;
 
-        // 1. 데이터 추출 및 문자열 변환
+        // 1. 데이터 가공 (전체 기록 기반 부위별 최근 수행일 분석)
         const partMap = { chest: '가슴', back_part: '등', legs: '하체', shoulders: '어깨', arms: '팔', cardio: '유산소' };
+        
+        // 부위별 마지막 운동일 추출
+        const lastTrained = {};
+        recentLogs.forEach(l => {
+            if (!lastTrained[l.part]) {
+                lastTrained[l.part] = new Date(l.created_at).toLocaleString();
+            }
+        });
+
         const formattedHistory = recentLogs.length > 0 
-            ? recentLogs.map(l => `${new Date(l.created_at).toLocaleDateString()}: ${partMap[l.part] || l.part} (${l.exercise})`).join('\n')
+            ? recentLogs.slice(0, 15).map(l => `${new Date(l.created_at).toLocaleDateString()}: ${partMap[l.part] || l.part} (${l.exercise})`).join('\n')
             : '없음';
 
         const userContext = `
+[오늘 날짜]
+${new Date().toLocaleString()}
+
 [사용자 신체 정보]
 나이: ${userData?.age || '미입력'}세, 성별: ${userData?.gender || '미입력'}, 키: ${userData?.height || '미입력'}cm, 현재 체중: ${userData?.weight || '미입력'}kg
 골격근량: ${userData?.skeletal_muscle_mass || '미입력'}kg, 체지방률: ${userData?.body_fat_percentage || '미입력'}%
 
-[최근 운동 기록 요약]
+[부위별 마지막 운동 일시 (전수 조사 결과)]
+가슴: ${lastTrained['chest'] || '기록 없음'}
+등: ${lastTrained['back_part'] || '기록 없음'}
+하체: ${lastTrained['legs'] || '기록 없음'}
+어깨: ${lastTrained['shoulders'] || '기록 없음'}
+팔: ${lastTrained['arms'] || '기록 없음'}
+
+[최근 운동 로그]
 ${formattedHistory}`;
 
-        // 모든 모드 공유 타겟 분석 로직
-        const TARGET_SELECTION_RULE = "제1원칙(타겟 선정): 제공된 최근 운동 기록을 분석하여, 가장 오랫동안 운동하지 않은 대근육(가슴, 등, 하체 중 택 1)을 오늘 운동할 '단일 타겟 부위'로 무조건 선정해. 어떤 모드든 이 분석 결과는 항상 100% 동일해야 해.";
+        // 타겟 선정 로직 강화 (날짜 기반 정교화)
+        const TARGET_SELECTION_RULE = `
+[타겟 부위 선정 로직]
+1. 사용자의 전체 운동 기록을 전수 조사하여 가슴, 등, 하체 부위별로 '가장 최근에 운동한 날짜'와 오늘 날짜의 차이(휴식 일수)를 계산하라.
+2. 어제(또는 24시간 이내) 운동한 부위는 오늘 추천 목록에서 절대적으로 제외하라.
+3. 기록이 아예 없는 부위가 있다면 휴식 일수를 '무한대'로 간주하여 최우선으로 추천하라.
+4. 가슴, 등, 하체 중 위 로직을 거쳐 휴식 일수가 가장 긴 단 하나의 타겟 부위를 선정하라.
+5. '오늘의 운동루틴'과 '하드모드' 모두 반드시 이 동일한 분석 로직을 거쳐 동일한 타겟 부위를 선정해야 한다.`;
 
-        // 퀵 액션 버튼 처리
         if (textToDisplay === "오늘의 운동루틴 추천해 줘") {
-            textForApi = `${TARGET_SELECTION_RULE} 위 원칙으로 분석된 타겟 부위를 위해 반드시 4~5개 종목의 '전체 루틴'을 구성해서 [ROUTINE_DATA] 배열에 담아줘. 절대 1개만 주지 마.`;
+            textForApi = `${TARGET_SELECTION_RULE} 
+위 원칙으로 선정된 타겟 부위를 위해 반드시 4~5개 종목의 전체 루틴을 [ROUTINE_DATA] 배열에 담아줘.`;
         }
 
         if (textToDisplay === "⚡ 하드모드") {
-            textForApi = `${TARGET_SELECTION_RULE} 지금은 '하드모드 1단계: 질문 단계'야. 분석된 타겟 부위를 말하며 '1. 볼륨업(종목 추가)' 또는 '2. 강도업(드롭세트)' 중 선택하라고 파이팅 넘치게 물어봐. 절대 [ROUTINE_DATA]를 출력하지 마.`;
+            textForApi = `${TARGET_SELECTION_RULE} 
+지금은 하드모드 1단계 질문이야. 분석된 타겟 부위를 말하며 '1. 볼륨업' 또는 '2. 강도업' 중 선택하라고 파이팅 넘치게 물어봐. 절대 [ROUTINE_DATA]를 출력하지 마.`;
         }
 
         // 사용자 메시지 추가
@@ -1475,24 +1500,22 @@ ${formattedHistory}`;
         setInputText('');
         setIsTyping(true);
 
-        // 3. 시스템 프롬프트 엔지니어링
         const systemRole = `너는 데이터 기반 전문 PT 코치야. 
 
-[하드모드 2단계: 루틴 제공 규칙]
-사용자가 1단계 질문에 대해 답변(볼륨업/강도업/1번 등)을 하면 루틴을 제공해:
-1. 타겟 고정: 이전 대화에서 코치가 분석했던 그 타겟 부위를 2단계 루틴에서도 무조건 유지해.
-2. 루틴 구성: 반드시 해당 부위를 타겟으로 하는 4~6개의 다양한 종목으로 리스트를 짜. (절대 운동 1~2개만 주지 마)
-   - '볼륨업' 선택 시: 5~6개 종목 구성.
-   - '강도업' 선택 시: 4~5개 종목 구성하되, 마지막 1~2개 종목은 반드시 JSON 배열 안의 'name' 속성 값 자체에 '(드롭)'을 포함시켜라 (예: "바벨 로우 (드롭)").
-3. 중량 설정: 모든 하드모드 루틴은 이전 기록보다 중량을 2.5~5kg 높인 구체적인 목표치를 제안해. 
-   - **중요**: JSON의 'weight' 값은 반드시 실제 숫자(Number, 예: 65, 82.5)만 들어가야 하며, 절대 "증가된무게" 같은 한글이나 텍스트를 넣지 마. 기록이 없다면 0을 넣어.
-4. 출력 형식: 답변 마지막에 반드시 [ROUTINE_DATA: [{"name": "...", "sets": 4, "reps": 12, "weight": 70}, ...]] 형식을 포함해. (객체마다 대괄호 금지, 단일 배열 유지)
+[하드모드 2단계 규칙]
+사용자가 1단계 질문에 답변하면 루틴을 제공하라:
+1. 타겟 고정: 이전 단계에서 분석한 타겟 부위를 절대 변경하지 마라.
+2. 루틴 구성: 반드시 4~6개 종목으로 구성하라.
+   - '볼륨업' 선택 시: 5~6개 종목.
+   - '강도업' 선택 시: 4~5개 종목 구성, 마지막 1~2개 종목명에 '(드롭)' 포함.
+3. 중량: 이전 기록보다 2.5~5kg 증량 제안 (기록 없으면 0). JSON 'weight'는 숫자만 허용.
+4. 형식: 마지막에 [ROUTINE_DATA: [...]] JSON 배열 포함.
 
 [대화 원칙]
-- 말투: 3~4문장의 간결하고 전문적인 말투. 번호 매기기 금지.
+- 말투: 3~4문장의 간결한 전문 말투. 번호 매기기 금지.
 - 컨텍스트: ${userContext}`;
 
-        const history = messages.slice(-10).map(m => ({
+        const history = messages.slice(-6).map(m => ({
             role: m.type === 'ai' ? 'assistant' : 'user',
             content: m.text
         }));
@@ -1503,8 +1526,6 @@ ${formattedHistory}`;
             { role: "user", content: textForApi }
         ];
         
-        console.log("🔥 [OpenAI 전송 프롬프트]:", apiMessages);
-
         const aiText = await generateAIResponse(apiMessages);
         const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
         setMessages(prev => [...prev, aiMsg]);
