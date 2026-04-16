@@ -8,6 +8,7 @@ import OpenAI from 'openai';
 import ChatMessage from './src/components/ChatMessage';
 import { BODY_PARTS, PART_MAP, CATEGORIES, STORAGE_KEYS } from './src/constants/exerciseConstants';
 import { fetchLastExerciseRecord } from './src/api/workoutApi';
+import BottomNav from './src/components/BottomNav';
 
 // OpenAI 인스턴스 생성 (Vite 환경변수 사용 및 브라우저 호출 허용)
 const openai = new OpenAI({
@@ -512,7 +513,7 @@ const WorkoutDetailScreen = () => {
     };
     
     return (
-        <div className="p-4 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
+        <div className="p-4 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24">
             <BackButton />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <h2 className="text-3xl font-black italic tracking-tighter text-white">
@@ -595,7 +596,6 @@ const WorkoutDetailScreen = () => {
 };
 
 const WorkoutSetupScreen = () => {
-    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [step, setStep] = useState(1);
     const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
@@ -611,7 +611,7 @@ const WorkoutSetupScreen = () => {
 
     // Fetch last record when exercise is selected
     useEffect(() => {
-        const fetchLastRecord = async () => {
+        const fetchLast = async () => {
             const exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
             if (!exerciseName) {
                 setLastRecord(null);
@@ -621,31 +621,14 @@ const WorkoutSetupScreen = () => {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
-
-                const { data, error } = await supabase
-                    .from('workout_logs')
-                    .select('sets_data')
-                    .eq('user_id', user.id)
-                    .eq('exercise', exerciseName)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-
-                if (error) throw error;
-                if (data && data.length > 0) {
-                    const lastSets = data[0].sets_data;
-                    if (lastSets && lastSets.length > 0) {
-                        // Use the first set of the last session as a representative record
-                        setLastRecord(lastSets[0]);
-                    }
-                } else {
-                    setLastRecord(null);
-                }
+                const record = await fetchLastExerciseRecord(user.id, exerciseName);
+                setLastRecord(record);
             } catch (err) {
                 console.error("Error fetching last record:", err);
             }
         };
 
-        fetchLastRecord();
+        fetchLast();
     }, [selection.exercise, selection.manualName]);
 
     useEffect(() => {
@@ -768,7 +751,6 @@ const WorkoutSetupScreen = () => {
                     .eq('id', editId);
                 if (error) throw error;
                 alert('기록이 수정되었습니다!');
-                navigate(-1);
             } else {
                 const { error } = await supabase
                     .from('workout_logs')
@@ -798,8 +780,7 @@ const WorkoutSetupScreen = () => {
     };
 
     return (
-        <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
-            <BackButton />
+        <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24">
             <div className="mb-8">
                 <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-blue-500 decoration-4 underline-offset-8">
                     루틴 기록
@@ -962,17 +943,8 @@ const WorkoutPlanScreen = () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                const { data, error } = await supabase
-                    .from('workout_logs')
-                    .select('sets_data')
-                    .eq('user_id', user.id)
-                    .eq('exercise', exerciseName)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-
-                if (!error && data && data.length > 0) {
-                    setLastRecord(data[0].sets_data[0]);
-                }
+                const record = await fetchLastExerciseRecord(user.id, exerciseName);
+                setLastRecord(record);
             }
         } catch (e) { console.error(e); }
 
@@ -1133,9 +1105,7 @@ const WorkoutPlanScreen = () => {
     };
 
     return (
-        <div className="p-6 md:p-12 max-6xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
-            <BackButton />
-            
+        <div className="p-6 md:p-12 max-6xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24">
             <div className="mb-8">
                 <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-indigo-500 decoration-4 underline-offset-8">
                     루틴 구성
@@ -1501,11 +1471,10 @@ ${formattedHistory}`;
     };
 
     return (
-        <div className="flex flex-col h-screen bg-slate-950 animate-fade-in relative max-w-2xl mx-auto border-x border-white/5">
+        <div className="flex flex-col h-screen bg-slate-950 animate-fade-in relative max-w-2xl mx-auto border-x border-white/5 pb-20">
             {/* Header */}
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
                 <div className="flex items-center gap-3">
-                    <BackButton />
                     <div className="flex items-center gap-3 ml-2">
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1546,7 +1515,7 @@ ${formattedHistory}`;
             </div>
 
             {/* Input Area */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent">
+            <div className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent">
                 <div className="max-w-xl mx-auto space-y-3">
                     {/* Quick Actions */}
                     <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
@@ -1686,8 +1655,7 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
 };
 
 
-const DashboardScreen = () => {
-    const navigate = useNavigate();
+const CalendarScreen = () => {
     const [workoutGroups, setWorkoutGroups] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
@@ -1760,7 +1728,7 @@ const DashboardScreen = () => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row min-h-screen animate-fade-in overflow-x-hidden relative bg-slate-950">
+        <div className="flex flex-col min-h-screen animate-fade-in overflow-x-hidden relative bg-slate-950 pb-24">
             <div className="absolute top-6 right-6 z-20 flex gap-3">
                 <button 
                     onClick={() => setIsProfileModalOpen(true)}
@@ -1779,7 +1747,7 @@ const DashboardScreen = () => {
                 </button>
             </div>
             
-            <div className="w-full md:w-1/2 p-4 md:p-12 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950 flex flex-col justify-center">
+            <div className="w-full p-4 md:p-12 flex flex-col justify-center">
                 <div className="mb-2 md:mb-6">
                     <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
                         <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
@@ -1797,33 +1765,6 @@ const DashboardScreen = () => {
                     />
                 )}
             </div>
-            
-            <div className="w-full md:w-1/2 flex flex-col h-auto md:h-screen">
-                <button onClick={() => navigate('/routine-record')} className="h-[220px] md:flex-1 group relative overflow-hidden bg-slate-900 flex flex-col items-center justify-center transition-all hover:bg-slate-800 border-b border-slate-800 md:border-b-0">
-                    <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-blue-600/30 group-hover:rotate-12 transition-transform"><svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg></div>
-                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">루틴 기록</span>
-                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Routine Record</p>
-                    </div>
-                </button>
-                <button onClick={() => navigate('/routine-compose')} className="h-[220px] md:flex-1 group relative overflow-hidden bg-indigo-950 flex flex-col items-center justify-center transition-all hover:bg-indigo-900 border-b border-slate-800 md:border-b-0">
-                    <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-12 h-12 md:w-14 md:h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-indigo-600/30 group-hover:rotate-6 transition-transform"><svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
-                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">루틴 구성</span>
-                        <p className="text-slate-400 text-[10px] md:text-xs mt-1 uppercase">Routine Compose</p>
-                    </div>
-                </button>
-                <button onClick={() => navigate('/ai-coach')} className="h-[220px] md:flex-1 group relative overflow-hidden bg-blue-700 flex flex-col items-center justify-center transition-all hover:bg-blue-600">
-                    <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-12 h-12 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-3 border border-white/30 group-hover:-rotate-12 transition-transform"><svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
-                        <span className="text-lg md:text-xl font-black italic text-white tracking-tighter">Ai코치</span>
-                        <p className="text-blue-100 text-[10px] md:text-xs mt-1 uppercase">Ai Coach</p>
-                    </div>
-                </button>
-            </div>
 
             <UserProfileModal 
                 isOpen={isProfileModalOpen} 
@@ -1831,6 +1772,34 @@ const DashboardScreen = () => {
                 userData={userData}
                 onUpdate={handleProfileUpdate}
             />
+        </div>
+    );
+};
+
+const MainAppLayout = () => {
+    const [activeTab, setActiveTab] = useState('달력');
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case '달력':
+                return <CalendarScreen />;
+            case '루틴기록':
+                return <WorkoutSetupScreen />;
+            case '루틴구성':
+                return <WorkoutPlanScreen />;
+            case 'AI코치':
+                return <AIRecommendationScreen />;
+            default:
+                return <CalendarScreen />;
+        }
+    };
+
+    return (
+        <div className="relative min-h-screen bg-slate-950">
+            <main className="w-full">
+                {renderContent()}
+            </main>
+            <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
     );
 };
@@ -1867,9 +1836,9 @@ const AppContent = () => {
             
             if (currentSession) {
                 setIsInitializing(false);
-                // 세션이 확인되면 대시보드로 이동 (URL 조작 없이 자연스러운 전환 유도)
+                // 세션이 확인되면 메인 앱으로 이동
                 if (window.location.pathname === '/' || window.location.pathname === '/login') {
-                    navigate('/dashboard', { replace: true });
+                    navigate('/app', { replace: true });
                 }
             } else if (event === 'SIGNED_OUT') {
                 setSession(null);
@@ -1932,12 +1901,9 @@ const AppContent = () => {
         <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
             <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-white font-bold italic tracking-tighter text-2xl animate-pulse">LOADING...</div>}>
                 <Routes>
-                    <Route path="/" element={<DashboardScreen />} />
-                    <Route path="/dashboard" element={<DashboardScreen />} />
+                    <Route path="/" element={<MainAppLayout />} />
+                    <Route path="/app" element={<MainAppLayout />} />
                     <Route path="/routine-detail" element={<WorkoutDetailScreen />} />
-                    <Route path="/routine-record" element={<WorkoutSetupScreen />} />
-                    <Route path="/routine-compose" element={<WorkoutPlanScreen />} />
-                    <Route path="/ai-coach" element={<AIRecommendationScreen />} />
                     <Route path="/api-view" element={<ApiViewer />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
