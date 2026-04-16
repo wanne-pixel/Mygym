@@ -1529,7 +1529,7 @@ const WorkoutPlanScreen = () => {
 const AIRecommendationScreen = () => {
         const saved = localStorage.getItem(STORAGE_KEYS.USER_BODY_INFO);
         return saved ? JSON.parse(saved) : null;
-    });
+    };
     const [recentLogs, setRecentLogs] = useState([]);
     const [messages, setMessages] = useState(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY);
