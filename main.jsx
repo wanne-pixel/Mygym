@@ -1546,19 +1546,25 @@ ${formattedHistory}`;
             const saved = localStorage.getItem('mygym_today_routine');
             const currentRoutine = saved ? JSON.parse(saved) : [];
             
+            // 데이터 키 유연성 보정
+            const name = item.name || item.Name || item.exercise || item.운동명 || "알 수 없는 운동";
+            const sets = item.sets || item.Sets || item.세트 || 0;
+            const reps = item.reps || item.Reps || item.횟수 || 0;
+            const weight = item.weight || item.Weight || item.무게 || 0;
+
             // 기존 커스텀 운동 데이터에서 부위와 카테고리 정보 찾기
-            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(item.name?.toLowerCase() || ''));
+            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(name.toLowerCase()));
             
             const newItem = {
                 id: Date.now() + Math.random(),
                 part: exInfo?.part || 'etc',
                 category: exInfo?.equipment || '기타',
-                exercise: item.name || '알 수 없는 운동',
+                exercise: name,
                 manualName: '',
                 isCompleted: false,
-                suggestedSets: item.sets,
-                suggestedReps: item.reps,
-                suggestedWeight: item.weight
+                suggestedSets: sets,
+                suggestedReps: reps,
+                suggestedWeight: weight
             };
 
             const updatedRoutine = [...currentRoutine, newItem];
@@ -1587,7 +1593,8 @@ ${formattedHistory}`;
             }
 
             try {
-                const data = JSON.parse(match[1]);
+                // 평탄화 처리 (flat(Infinity)) 로 다중 배열 대응
+                const data = JSON.parse(match[1]).flat(Infinity);
                 parts.push({ type: 'routine_list', data: data });
             } catch (e) {
                 console.error("JSON parse error in message bubble", e);
@@ -1624,14 +1631,21 @@ ${formattedHistory}`;
                                     <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 px-1">추천 루틴 리스트</div>
                                     {part.data.map((item, itemIdx) => {
                                         const isAdded = addedItems.includes(itemIdx);
+                                        
+                                        // 데이터 키 유연성 보정 (방어 코드)
+                                        const safeName = item.name || item.Name || item.exercise || item.운동명 || "운동명 누락";
+                                        const safeSets = item.sets || item.Sets || item.세트 || 0;
+                                        const safeReps = item.reps || item.Reps || item.횟수 || 0;
+                                        const safeWeight = item.weight || item.Weight || item.무게 || 0;
+
                                         return (
                                             <div key={itemIdx} className="flex justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-white/5 group transition-all hover:border-indigo-500/30">
                                                 <div className="flex flex-col">
                                                     <span className="text-white font-black italic uppercase tracking-tighter text-base mb-1">
-                                                        {item.name || "운동명 누락"}
+                                                        {safeName}
                                                     </span>
                                                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                                        {item.sets || 0}세트 x {item.reps || 0}회 {item.weight ? `${item.weight}kg` : ''}
+                                                        {safeSets}세트 x {safeReps}회 {safeWeight > 0 ? `(${safeWeight}kg)` : ''}
                                                     </span>
                                                 </div>
                                                 <button 
