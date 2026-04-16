@@ -1589,105 +1589,11 @@ ${formattedHistory}`;
     );
 };
 
-const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange }) => {
-    const navigate = useNavigate();
-    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-    
-    const year = currentViewDate.getFullYear();
-    const month = currentViewDate.getMonth();
-    
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
-    
-    const calendarDays = [];
-    for (let i = 0; i < firstDayOfMonth; i++) calendarDays.push(null);
-    for (let i = 1; i <= lastDateOfMonth; i++) calendarDays.push(i);
-
-    const today = new Date();
-    const isToday = (date) => date === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-
-    return (
-        <div className="mt-2 md:mt-6 p-4 md:p-6 bg-slate-800/50 rounded-[2.5rem] border border-slate-700/50 shadow-2xl w-full">
-            <div className="flex justify-between items-center mb-4 px-4">
-                <button onClick={() => onMonthChange(-1)} className="p-4 hover:bg-slate-700 rounded-full text-white transition-colors">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <h3 className="text-xl md:text-3xl font-black text-white uppercase italic tracking-tighter">
-                    {year}년 {month + 1}월
-                </h3>
-                <button onClick={() => onMonthChange(1)} className="p-4 hover:bg-slate-700 rounded-full text-white transition-colors">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
-                </button>
-            </div>
-            <div className="grid grid-cols-7 gap-x-1 gap-y-1 md:gap-4">
-                {daysOfWeek.map(day => (
-                    <div key={day} className="text-center text-[10px] md:text-sm font-black text-slate-500 py-2 uppercase tracking-widest flex items-center justify-center">
-                        {day}
-                    </div>
-                ))}
-                {calendarDays.map((date, idx) => {
-                    const workoutInfo = date ? workoutGroups[date] : null;
-                    const todayActive = date && isToday(date);
-
-                    // Get unique parts for this day
-                    const uniqueParts = workoutInfo ? [...new Set(workoutInfo.logs.map(l => l.part))] : [];
-
-                    return (
-                        <div 
-                            key={idx} 
-                            onClick={() => {
-                                if (!date) return;
-                                const selectedDate = new Date(year, month, date);
-                                const days = ['일', '월', '화', '수', '목', '금', '토'];
-                                const dateStrForDisplay = `${month + 1}/${date}(${days[selectedDate.getDay()]})`;
-                                
-                                const yyyy = selectedDate.getFullYear();
-                                const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                                const dd = String(selectedDate.getDate()).padStart(2, '0');
-                                const formattedDate = `${yyyy}-${mm}-${dd}`;
-
-                                navigate(`/routine-detail?date=${formattedDate}`, { 
-                                    state: { 
-                                        date: dateStrForDisplay
-                                    } 
-                                });
-                            }}
-                            className={`flex flex-col items-center justify-start py-1 md:py-2 relative group cursor-pointer hover:bg-slate-700/30 rounded-[2.5rem] transition-all duration-300 min-h-[60px] md:min-h-[100px] border border-transparent hover:border-white/5 w-full overflow-hidden`}
-
-                        >
-                            {date && (
-                                <div className="flex flex-col items-center justify-center w-full">
-                                    <div className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 mb-0.5">
-                                        {todayActive && (
-                                            <div className="absolute inset-0 bg-blue-600 rounded-full shadow-lg shadow-blue-600/30"></div>
-                                        )}
-                                        {workoutInfo && (
-                                            <div className="absolute inset-0 border-2 md:border-[3px] border-rose-500 rounded-full animate-pulse shadow-lg shadow-rose-500/20"></div>
-                                        )}
-                                        <span className={`relative z-10 text-sm md:text-lg font-black italic tracking-tighter text-white leading-none`}>
-                                            {date}
-                                        </span>
-                                    </div>
-                                    
-                                    <div className="flex flex-wrap justify-center gap-0.5 max-w-full px-1 overflow-hidden">
-                                        {uniqueParts.map(p => (
-                                            <span key={p} className="text-[7px] md:text-[9px] font-black text-slate-300 leading-tight uppercase tracking-tight bg-slate-800/80 px-1 py-0.5 rounded-md border border-white/10 whitespace-nowrap">
-                                                {PART_MAP[p] || p}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-};
-
-
 const CalendarScreen = () => {
+    const [viewMode, setViewMode] = useState('LIST'); // 'LIST', 'DETAIL', 'ADD', 'EDIT'
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [editLog, setEditLog] = useState(null);
+    
     const [workoutGroups, setWorkoutGroups] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
@@ -1706,7 +1612,6 @@ const CalendarScreen = () => {
             const year = viewDate.getFullYear();
             const month = viewDate.getMonth();
             
-            // Start and End of the month
             const startDate = new Date(year, month, 1, 0, 0, 0).toISOString();
             const endDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
 
@@ -1725,9 +1630,7 @@ const CalendarScreen = () => {
                 const d = new Date(log.created_at);
                 const logDate = d.getDate();
                 if (!groups[logDate]) {
-                    groups[logDate] = {
-                        logs: []
-                    };
+                    groups[logDate] = { logs: [] };
                 }
                 groups[logDate].logs.push(log);
             });
@@ -1754,56 +1657,494 @@ const CalendarScreen = () => {
         setCurrentViewDate(newDate);
     };
 
-    const handleProfileUpdate = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) setUserData(user.user_metadata);
+    const handleDayClick = (date, formattedDate, displayStr) => {
+        setSelectedDate({ date, formattedDate, displayStr });
+        setViewMode('DETAIL');
+    };
+
+    const handleBackToList = (e) => {
+        if (e) e.preventDefault();
+        setViewMode('LIST');
+        setEditLog(null);
+        fetchLogs(currentViewDate);
+    };
+
+    const handleOpenAdd = (e) => {
+        if (e) e.preventDefault();
+        setEditLog(null);
+        setViewMode('ADD');
+    };
+
+    const handleOpenEdit = (log) => {
+        setEditLog(log);
+        setViewMode('EDIT');
+    };
+
+    const handleSaveSuccess = () => {
+        // 운동 저장 성공 후 DETAIL로 복귀하여 해당 날짜의 기록을 계속 보여줌
+        setViewMode('DETAIL');
+        setEditLog(null);
+        fetchLogs(currentViewDate); // 기록 갱신
+    };
+
+    // Sub-components within CalendarScreen context to maintain state
+    const renderSubView = () => {
+        switch (viewMode) {
+            case 'DETAIL':
+                return (
+                    <WorkoutDetailView 
+                        selectedDate={selectedDate} 
+                        onBack={handleBackToList} 
+                        onAdd={handleOpenAdd}
+                        onEdit={handleOpenEdit}
+                        onRefresh={() => fetchLogs(currentViewDate)}
+                    />
+                );
+            case 'ADD':
+            case 'EDIT':
+                return (
+                    <WorkoutSetupView 
+                        selectedDate={selectedDate} 
+                        editLog={editLog}
+                        onBack={() => setViewMode('DETAIL')} 
+                        onSuccess={handleSaveSuccess}
+                    />
+                );
+            default:
+                return (
+                    <div className="w-full p-4 md:p-12 flex flex-col justify-center">
+                        <div className="mb-2 md:mb-6">
+                            <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
+                                <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+                                나의 운동 현황
+                            </h2>
+                        </div>
+                        {isLoading ? (
+                            <div className="min-h-[300px] flex items-center justify-center text-slate-500 italic">기록을 불러오는 중...</div>
+                        ) : (
+                            <MonthlyCalendar 
+                                workoutGroups={workoutGroups} 
+                                currentViewDate={currentViewDate}
+                                onMonthChange={handleMonthChange}
+                                onDayClick={handleDayClick}
+                            />
+                        )}
+                    </div>
+                );
+        }
     };
 
     return (
         <div className="flex flex-col min-h-screen animate-fade-in overflow-x-hidden relative bg-slate-950 pb-24">
-            <div className="absolute top-6 right-6 z-20 flex gap-3">
-                <button 
-                    onClick={() => setIsProfileModalOpen(true)}
-                    className="bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-full transition-all active:scale-95 flex items-center gap-2 shadow-xl backdrop-blur-md"
-                >
-                    <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                    <span className="text-xs font-black text-white uppercase tracking-wider">내 정보</span>
-                </button>
-                <button 
-                    onClick={() => supabase.auth.signOut()}
-                    className="bg-slate-800/50 hover:bg-rose-500/20 border border-slate-700 px-3 py-1.5 rounded-full transition-all active:scale-95 group shadow-lg shadow-black/20"
-                >
-                    <span className="text-[10px] font-black text-slate-300 group-hover:text-rose-400 uppercase tracking-widest">
-                        LOGOUT
-                    </span>
-                </button>
-            </div>
-            
-            <div className="w-full p-4 md:p-12 flex flex-col justify-center">
-                <div className="mb-2 md:mb-6">
-                    <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
-                        <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
-                        나의 운동 현황
-                    </h2>
+            {viewMode === 'LIST' && (
+                <div className="absolute top-6 right-6 z-20 flex gap-3">
+                    <button 
+                        onClick={(e) => { e.preventDefault(); setIsProfileModalOpen(true); }}
+                        className="bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-full transition-all active:scale-95 flex items-center gap-2 shadow-xl backdrop-blur-md"
+                    >
+                        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        <span className="text-xs font-black text-white uppercase tracking-wider">내 정보</span>
+                    </button>
+                    <button 
+                        onClick={(e) => { e.preventDefault(); supabase.auth.signOut(); }}
+                        className="bg-slate-800/50 hover:bg-rose-500/20 border border-slate-700 px-3 py-1.5 rounded-full transition-all active:scale-95 group shadow-lg shadow-black/20"
+                    >
+                        <span className="text-[10px] font-black text-slate-300 group-hover:text-rose-400 uppercase tracking-widest">
+                            LOGOUT
+                        </span>
+                    </button>
                 </div>
-                
-                {isLoading ? (
-                    <div className="min-h-[300px] flex items-center justify-center text-slate-500 italic">기록을 불러오는 중...</div>
-                ) : (
-                    <MonthlyCalendar 
-                        workoutGroups={workoutGroups} 
-                        currentViewDate={currentViewDate}
-                        onMonthChange={handleMonthChange}
-                    />
-                )}
-            </div>
+            )}
+            
+            {renderSubView()}
 
             <UserProfileModal 
                 isOpen={isProfileModalOpen} 
                 onClose={() => setIsProfileModalOpen(false)} 
                 userData={userData}
-                onUpdate={handleProfileUpdate}
+                onUpdate={() => fetchLogs(currentViewDate)}
             />
+        </div>
+    );
+};
+
+/**
+ * [Sub-component for CalendarScreen: Detail View]
+ */
+const WorkoutDetailView = ({ selectedDate, onBack, onAdd, onEdit, onRefresh }) => {
+    const [logs, setLogs] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchLogs = async () => {
+        if (!selectedDate) return;
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const dateStr = selectedDate.formattedDate;
+            const start = `${dateStr}T00:00:00`;
+            const end = `${dateStr}T23:59:59`;
+
+            const { data, error } = await supabase
+                .from('workout_logs')
+                .select('*')
+                .eq('user_id', user.id)
+                .gte('created_at', start)
+                .lte('created_at', end)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            setLogs(data || []);
+        } catch (error) {
+            console.error("Error fetching logs:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchLogs();
+    }, [selectedDate]);
+
+    const handleDelete = async (e, id) => {
+        if (e) e.preventDefault();
+        if (!confirm('정말 삭제하시겠습니까?')) return;
+        const { error } = await supabase.from('workout_logs').delete().eq('id', id);
+        if (error) {
+            alert('삭제 실패: ' + error.message);
+        } else {
+            alert('삭제되었습니다.');
+            fetchLogs();
+            if (onRefresh) onRefresh();
+        }
+    };
+
+    return (
+        <div className="p-4 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24 w-full">
+            <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group">
+                <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+                <span className="font-medium">달력으로 돌아가기</span>
+            </button>
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <h2 className="text-3xl font-black italic tracking-tighter text-white">
+                    {selectedDate?.displayStr} 트레이닝 상세
+                </h2>
+                <button 
+                    onClick={onAdd}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all text-center"
+                >
+                    운동 추가하기
+                </button>
+            </div>
+
+            <div className="space-y-4">
+                {isLoading ? (
+                    <div className="py-20 text-center text-slate-500 italic">기록을 불러오는 중...</div>
+                ) : logs.length === 0 ? (
+                    <div className="py-20 text-center bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-800">
+                        <p className="text-slate-500 italic">운동 기록이 없습니다.</p>
+                    </div>
+                ) : (
+                    logs.map((log, idx) => (
+                        <div key={log.id || idx} className="bg-slate-900/40 border border-white/5 p-4 md:p-6 rounded-[1.5rem] shadow-2xl relative overflow-hidden group">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                            <div className="flex items-center justify-between mb-3">
+                                <div>
+                                    <div className="flex gap-1 mb-1">
+                                        <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest text-white">
+                                            {PART_MAP[log.part] || log.part}
+                                        </span>
+                                        <span className="bg-slate-800 text-slate-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-slate-700">
+                                            {log.type}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <h3 className="text-lg md:text-xl font-black italic text-white uppercase tracking-tighter leading-none">{log.exercise}</h3>
+                                        {log.part !== 'cardio' && <span className="text-xs font-black text-slate-500 italic uppercase leading-none">{log.sets_count} SETS</span>}
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={(e) => { e.preventDefault(); onEdit(log); }}
+                                        className="p-2 bg-slate-800 hover:bg-blue-600 text-slate-400 hover:text-white rounded-lg transition-all"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    </button>
+                                    <button 
+                                        onClick={(e) => handleDelete(e, log.id)}
+                                        className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                {log.part === 'cardio' ? (
+                                    <div className="flex items-center justify-between py-3 px-4 bg-slate-950/50 rounded-lg border border-white/5 transition-all hover:border-blue-500/30">
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DURATION</span>
+                                        <span className="text-base font-black text-blue-400 italic">{log.sets_data[0]?.duration || '0분 0초'}</span>
+                                    </div>
+                                ) : (
+                                    log.sets_data.map((s, sIdx) => (
+                                        <div key={sIdx} className="flex items-center justify-between py-1.5 px-4 bg-slate-950/50 rounded-lg border border-white/5 transition-all hover:border-blue-500/30">
+                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{sIdx + 1} SET {s.isDropSet && <span className="ml-1 text-rose-500 text-[8px] font-black">D</span>}</span>
+                                            <div className="flex gap-4 items-center">
+                                                <span className="text-xs font-bold text-white w-12 text-right">{s.weight}kg</span>
+                                                <span className="text-xs font-bold text-blue-400 w-12 text-right">{s.reps} r</span>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+        </div>
+    );
+};
+
+/**
+ * [Sub-component for CalendarScreen: Add/Edit Form View]
+ */
+const WorkoutSetupView = ({ selectedDate, editLog, onBack, onSuccess }) => {
+    const [step, setStep] = useState(editLog ? 4 : 1);
+    const [selection, setSelection] = useState({ 
+        part: editLog?.part || '', 
+        category: editLog?.type || '', 
+        exercise: editLog ? (CUSTOM_EXERCISES.find(ex => ex.name === editLog.exercise) ? editLog.exercise : '직접 입력') : '', 
+        manualName: editLog ? (CUSTOM_EXERCISES.find(ex => ex.name === editLog.exercise) ? '' : editLog.exercise) : '' 
+    });
+    const [setsData, setSetsData] = useState(editLog?.part !== 'cardio' ? (editLog?.sets_data || [{ weight: '', reps: '' }]) : [{ weight: '', reps: '' }]);
+    const [cardioMinutes, setCardioMinutes] = useState('');
+    const [cardioSeconds, setCardioSeconds] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+    const [lastRecord, setLastRecord] = useState(null);
+
+    useEffect(() => {
+        if (editLog && editLog.part === 'cardio') {
+            const durationMatch = editLog.sets_data[0]?.duration?.match(/(\d+)분 (\d+)초/);
+            if (durationMatch) {
+                setCardioMinutes(durationMatch[1]);
+                setCardioSeconds(durationMatch[2]);
+            }
+        }
+    }, [editLog]);
+
+    useEffect(() => {
+        const fetchLast = async () => {
+            const exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
+            if (!exerciseName) return;
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const record = await fetchLastExerciseRecord(user.id, exerciseName);
+                setLastRecord(record);
+            }
+        };
+        if (selection.exercise) fetchLast();
+    }, [selection.exercise, selection.manualName]);
+
+    const handleAddOrUpdate = async (e) => {
+        if (e) e.preventDefault();
+        if (isSaving) return;
+        setIsSaving(true);
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('로그인이 필요합니다.');
+
+            let exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
+            exerciseName = exerciseName.replace('(드롭)', '').trim();
+            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === selection.exercise && ex.part === selection.part);
+
+            const finalSetsData = selection.part === 'cardio' 
+                ? [{ duration: `${cardioMinutes || 0}분 ${cardioSeconds || 0}초` }] 
+                : setsData;
+
+            const logData = {
+                user_id: user.id,
+                part: selection.part,
+                type: exInfo?.equipment || selection.category || '기타',
+                exercise: exerciseName,
+                sets_count: selection.part === 'cardio' ? 1 : setsData.length,
+                sets_data: finalSetsData,
+                is_completed: true
+            };
+
+            if (editLog) {
+                const { error } = await supabase.from('workout_logs').update(logData).eq('id', editLog.id);
+                if (error) throw error;
+                alert('기록이 수정되었습니다!');
+            } else {
+                let targetDate = selectedDate ? new Date(selectedDate.formattedDate) : new Date();
+                targetDate.setHours(12, 0, 0, 0);
+                const { error } = await supabase.from('workout_logs').insert([{ ...logData, created_at: targetDate.toISOString() }]);
+                if (error) throw error;
+                alert('성공적으로 기록이 저장되었습니다!');
+            }
+
+            if (onSuccess) onSuccess();
+        } catch (error) {
+            alert('저장 오류: ' + error.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24 w-full">
+            <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group">
+                <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+                <span className="font-medium">상세 화면으로 돌아가기</span>
+            </button>
+
+            <div className="mb-8">
+                <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-blue-500 decoration-4 underline-offset-8">
+                    {editLog ? '기록 수정' : '기록 추가'} ({selectedDate?.displayStr})
+                </h2>
+            </div>
+
+            <div className="space-y-6">
+                <ExerciseSelector selection={selection} setSelection={setSelection} onExerciseSelect={() => setStep(4)} />
+                
+                {step >= 4 && (
+                    <div className="animate-fade-in space-y-6 bg-slate-800/30 p-6 rounded-2xl border border-slate-700">
+                        {selection.part === 'cardio' ? (
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">운동 시간 입력</label>
+                                <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                                    <div className="flex-1 flex items-center gap-2">
+                                        <input type="number" value={cardioMinutes} onChange={e => setCardioMinutes(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none" placeholder="0" />
+                                        <span className="text-slate-400 font-bold">분</span>
+                                    </div>
+                                    <div className="flex-1 flex items-center gap-2">
+                                        <input type="number" value={cardioSeconds} onChange={e => setCardioSeconds(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none" placeholder="0" />
+                                        <span className="text-slate-400 font-bold">초</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-end px-1">
+                                    <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">세트별 상세 기록</label>
+                                    {lastRecord && (
+                                        <button onClick={() => setSetsData(setsData.map(() => ({ weight: lastRecord.weight, reps: lastRecord.reps })))} className="text-[9px] font-black text-blue-400 uppercase hover:underline">마지막 기록 불러오기</button>
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    {setsData.map((s, idx) => (
+                                        <div key={idx} className="flex items-center gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                            <span className="w-8 text-xs font-bold text-slate-600 text-center">{idx + 1}S</span>
+                                            <input type="number" value={s.weight} onChange={(e) => {
+                                                const nd = [...setsData]; nd[idx].weight = e.target.value; setSetsData(nd);
+                                            }} className="flex-1 bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right text-sm" placeholder="KG" />
+                                            <input type="number" value={s.reps} onChange={(e) => {
+                                                const nd = [...setsData]; nd[idx].reps = e.target.value; setSetsData(nd);
+                                            }} className="flex-1 bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right text-sm" placeholder="REPS" />
+                                            <label className="flex items-center cursor-pointer">
+                                                <input type="checkbox" checked={s.isDropSet || false} onChange={(e) => {
+                                                    const nd = [...setsData]; nd[idx].isDropSet = e.target.checked; setSetsData(nd);
+                                                }} className="hidden" />
+                                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500' : 'border-slate-700 bg-slate-800'}`}>
+                                                    {s.isDropSet && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
+                                                </div>
+                                            </label>
+                                            {setsData.length > 1 && (
+                                                <button onClick={() => setSetsData(setsData.filter((_, i) => i !== idx))} className="p-2 text-slate-600 hover:text-rose-500">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={() => setSetsData([...setsData, { weight: setsData[setsData.length-1].weight, reps: setsData[setsData.length-1].reps }])} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition-all">+ 세트 추가</button>
+                            </div>
+                        )}
+                        <button onClick={handleAddOrUpdate} disabled={isSaving} className={`w-full py-4 font-black rounded-xl italic tracking-tighter transition-all ${isSaving ? 'bg-slate-700 text-slate-500' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20'}`}>
+                            {isSaving ? '저장 중...' : '기록 저장하기'}
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange, onDayClick }) => {
+    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const year = currentViewDate.getFullYear();
+    const month = currentViewDate.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+    
+    const calendarDays = [];
+    for (let i = 0; i < firstDayOfMonth; i++) calendarDays.push(null);
+    for (let i = 1; i <= lastDateOfMonth; i++) calendarDays.push(i);
+
+    const today = new Date();
+    const isToday = (date) => date === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+
+    return (
+        <div className="mt-2 md:mt-6 p-4 md:p-6 bg-slate-800/50 rounded-[2.5rem] border border-slate-700/50 shadow-2xl w-full">
+            <div className="flex justify-between items-center mb-4 px-4">
+                <button onClick={(e) => { e.preventDefault(); onMonthChange(-1); }} className="p-4 hover:bg-slate-700 rounded-full text-white transition-colors">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <h3 className="text-xl md:text-3xl font-black text-white uppercase italic tracking-tighter">
+                    {year}년 {month + 1}월
+                </h3>
+                <button onClick={(e) => { e.preventDefault(); onMonthChange(1); }} className="p-4 hover:bg-slate-700 rounded-full text-white transition-colors">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+            <div className="grid grid-cols-7 gap-x-1 gap-y-1 md:gap-4">
+                {daysOfWeek.map(day => (
+                    <div key={day} className="text-center text-[10px] md:text-sm font-black text-slate-500 py-2 uppercase tracking-widest flex items-center justify-center">
+                        {day}
+                    </div>
+                ))}
+                {calendarDays.map((date, idx) => {
+                    const workoutInfo = date ? workoutGroups[date] : null;
+                    const todayActive = date && isToday(date);
+                    const uniqueParts = workoutInfo ? [...new Set(workoutInfo.logs.map(l => l.part))] : [];
+
+                    return (
+                        <div 
+                            key={idx} 
+                            onClick={(e) => {
+                                if (!date) return;
+                                e.preventDefault();
+                                const selDate = new Date(year, month, date);
+                                const days = ['일', '월', '화', '수', '목', '금', '토'];
+                                const displayStr = `${month + 1}/${date}(${days[selDate.getDay()]})`;
+                                const yyyy = selDate.getFullYear();
+                                const mm = String(selDate.getMonth() + 1).padStart(2, '0');
+                                const dd = String(selDate.getDate()).padStart(2, '0');
+                                onDayClick(date, `${yyyy}-${mm}-${dd}`, displayStr);
+                            }}
+                            className={`flex flex-col items-center justify-start py-1 md:py-2 relative group cursor-pointer hover:bg-slate-700/30 rounded-[2.5rem] transition-all duration-300 min-h-[60px] md:min-h-[100px] border border-transparent hover:border-white/5 w-full overflow-hidden`}
+                        >
+                            {date && (
+                                <div className="flex flex-col items-center justify-center w-full">
+                                    <div className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 mb-0.5">
+                                        {todayActive && <div className="absolute inset-0 bg-blue-600 rounded-full shadow-lg shadow-blue-600/30"></div>}
+                                        {workoutInfo && <div className="absolute inset-0 border-2 md:border-[3px] border-rose-500 rounded-full animate-pulse shadow-lg shadow-rose-500/20"></div>}
+                                        <span className="relative z-10 text-sm md:text-lg font-black italic tracking-tighter text-white leading-none">{date}</span>
+                                    </div>
+                                    <div className="flex flex-wrap justify-center gap-0.5 max-w-full px-1 overflow-hidden">
+                                        {uniqueParts.map(p => (
+                                            <span key={p} className="text-[7px] md:text-[9px] font-black text-slate-300 leading-tight uppercase tracking-tight bg-slate-800/80 px-1 py-0.5 rounded-md border border-white/10 whitespace-nowrap">{PART_MAP[p] || p}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 };
