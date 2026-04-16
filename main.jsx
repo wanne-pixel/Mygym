@@ -826,40 +826,94 @@ const WorkoutSetupScreen = () => {
                                         )}
                                     </div>
                                     <div className="space-y-2">
-                                        {setsData.map((s, idx) => (
-                                            <div key={idx} className="flex items-center gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800 group transition-all hover:border-slate-600">
-                                                <div className="flex flex-col items-center w-8">
-                                                    <span className="text-xs font-bold text-slate-600">{idx + 1}S</span>
-                                                    {s.isDropSet && <span className="text-[8px] font-black text-rose-500 bg-rose-500/10 px-1 rounded mt-0.5 animate-pulse">DROP</span>}
-                                                </div>
-                                                <div className="flex-1 flex gap-2">
-                                                    <div className="flex-1 relative">
-                                                        <input type="number" value={s.weight} onChange={(e) => handleSetDataChange(idx, 'weight', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm placeholder:text-slate-800" placeholder={lastRecord?.weight || "KG"} />
+                                        {setsData.map((s, idx) => {
+                                            const weights = s.isDropSet && typeof s.weight === 'string' ? s.weight.split('/') : [s.weight];
+                                            if (s.isDropSet && weights.length < 3) while(weights.length < 3) weights.push('');
+
+                                            const updateWeight = (val, wIdx) => {
+                                                const nd = [...setsData];
+                                                if (s.isDropSet) {
+                                                    const newWeights = [...weights];
+                                                    newWeights[wIdx] = val;
+                                                    nd[idx].weight = newWeights.join('/');
+                                                } else {
+                                                    nd[idx].weight = val;
+                                                }
+                                                setSetsData(nd);
+                                            };
+
+                                            return (
+                                                <div key={idx} className="flex flex-row flex-nowrap items-center gap-1.5 sm:gap-2 bg-slate-900/50 p-2 sm:p-3 rounded-xl border border-slate-800 group transition-all hover:border-slate-600">
+                                                    <div className="flex flex-col items-center w-6 sm:w-8 shrink-0">
+                                                        <span className="text-[10px] sm:text-xs font-bold text-slate-600">{idx + 1}S</span>
                                                     </div>
-                                                    <div className="flex-1 relative">
-                                                        <input type="number" value={s.reps} onChange={(e) => handleSetDataChange(idx, 'reps', e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none text-sm placeholder:text-slate-800" placeholder={lastRecord?.reps || "REPS"} />
+                                                    
+                                                    <div className="flex-[2.5] min-w-0 flex items-center gap-1">
+                                                        {s.isDropSet ? (
+                                                            <div className="flex gap-1 flex-1 min-w-0">
+                                                                {weights.slice(0, 3).map((w, wIdx) => (
+                                                                    <input 
+                                                                        key={wIdx}
+                                                                        type="number" 
+                                                                        value={w} 
+                                                                        onChange={(e) => updateWeight(e.target.value, wIdx)}
+                                                                        className="w-full bg-slate-950 border border-slate-700 p-1 rounded text-white text-center text-[10px] focus:border-rose-500 outline-none" 
+                                                                        placeholder={`${wIdx+1}`}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <input 
+                                                                type="number" 
+                                                                value={s.weight} 
+                                                                onChange={(e) => updateWeight(e.target.value)}
+                                                                className="flex-1 min-w-0 bg-slate-950 border border-slate-700 p-1.5 rounded text-white text-right text-xs focus:border-blue-500 outline-none" 
+                                                                placeholder="0" 
+                                                            />
+                                                        )}
+                                                        <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap uppercase tracking-tighter">KG</span>
                                                     </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <label className="flex items-center cursor-pointer group/cb">
+
+                                                    <div className="flex-1 min-w-0 flex items-center gap-1 border-l border-slate-800 pl-1 sm:pl-2">
                                                         <input 
-                                                            type="checkbox" 
-                                                            checked={s.isDropSet || false} 
-                                                            onChange={(e) => handleSetDataChange(idx, 'isDropSet', e.target.checked)}
-                                                            className="hidden" 
+                                                            type="number" 
+                                                            value={s.reps} 
+                                                            onChange={(e) => handleSetDataChange(idx, 'reps', e.target.value)}
+                                                            className="flex-1 min-w-0 bg-slate-950 border border-slate-700 p-1.5 rounded text-white text-right text-xs focus:border-blue-500 outline-none" 
+                                                            placeholder="0" 
                                                         />
-                                                        <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500 shadow-lg shadow-rose-600/20' : 'border-slate-700 bg-slate-800 group-hover/cb:border-slate-500'}`}>
-                                                            {s.isDropSet && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
-                                                        </div>
-                                                    </label>
-                                                    {setsData.length > 1 && (
-                                                        <button onClick={() => handleDeleteSet(idx)} className="p-2 text-slate-600 hover:text-rose-500 transition-colors">
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                        </button>
-                                                    )}
+                                                        <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap">회</span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1 sm:gap-2 shrink-0 border-l border-slate-800 pl-1 sm:pl-2">
+                                                        <label className="flex items-center gap-1 cursor-pointer group/cb">
+                                                            <span className="text-[9px] font-black text-slate-500 whitespace-nowrap">드롭</span>
+                                                            <input 
+                                                                type="checkbox" 
+                                                                checked={s.isDropSet || false} 
+                                                                onChange={(e) => {
+                                                                    const nd = [...setsData]; 
+                                                                    nd[idx].isDropSet = e.target.checked;
+                                                                    if (!e.target.checked && typeof nd[idx].weight === 'string') {
+                                                                        nd[idx].weight = nd[idx].weight.split('/')[0] || '';
+                                                                    }
+                                                                    setSetsData(nd);
+                                                                }}
+                                                                className="hidden" 
+                                                            />
+                                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500 shadow-lg shadow-rose-600/20' : 'border-slate-700 bg-slate-800'}`}>
+                                                                {s.isDropSet && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
+                                                            </div>
+                                                        </label>
+                                                        {setsData.length > 1 && (
+                                                            <button onClick={() => handleDeleteSet(idx)} className="p-1 text-slate-600 hover:text-rose-500 transition-colors">
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                     <button 
                                         onClick={handleAddSet}
@@ -1249,76 +1303,73 @@ const WorkoutPlanScreen = () => {
                                                                 };
 
                                                                 return (
-                                                                    <div key={sIdx} className="flex flex-col gap-2 bg-slate-900 border border-slate-700 rounded-lg p-3 transition-all hover:border-slate-500">
-                                                                        <div className="flex items-center justify-between gap-2">
-                                                                            <span className="text-[10px] text-slate-500 font-bold whitespace-nowrap">{sIdx + 1}SET</span>
-                                                                            <div className="flex-1 flex gap-1">
-                                                                                {s.isDropSet ? (
-                                                                                    <div className="flex gap-1 flex-1">
-                                                                                        {weights.slice(0, 3).map((w, wIdx) => (
-                                                                                            <input 
-                                                                                                key={wIdx}
-                                                                                                type="number" 
-                                                                                                value={w} 
-                                                                                                onChange={(e) => updateWeight(e.target.value, wIdx)}
-                                                                                                className="w-full bg-slate-800 border border-slate-700 rounded-md p-1.5 text-white text-center text-[10px] focus:border-rose-500 outline-none" 
-                                                                                                placeholder={`${wIdx+1}차`}
-                                                                                            />
-                                                                                        ))}
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <input 
-                                                                                        type="number" 
-                                                                                        value={s.weight} 
-                                                                                        onChange={(e) => updateWeight(e.target.value)}
-                                                                                        placeholder={lastRecord?.weight || "KG"} 
-                                                                                        className="flex-1 bg-transparent p-1 text-white text-right font-bold outline-none text-xs"
-                                                                                    />
-                                                                                )}
-                                                                                <span className="text-[10px] text-slate-500 font-bold self-center">KG</span>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div className="flex items-center justify-between gap-4 border-t border-slate-800 pt-2">
-                                                                            <div className="flex items-center gap-1 flex-1">
+                                                                    <div key={sIdx} className="flex flex-row flex-nowrap items-center gap-1.5 sm:gap-2 bg-slate-900 border border-slate-700 rounded-lg p-2 sm:p-3 transition-all hover:border-slate-500">
+                                                                        <span className="text-[10px] text-slate-500 font-bold whitespace-nowrap w-6 sm:w-8 shrink-0 text-center">{sIdx + 1}S</span>
+                                                                        
+                                                                        <div className="flex-[2.5] min-w-0 flex items-center gap-1">
+                                                                            {s.isDropSet ? (
+                                                                                <div className="flex gap-1 flex-1 min-w-0">
+                                                                                    {weights.slice(0, 3).map((w, wIdx) => (
+                                                                                        <input 
+                                                                                            key={wIdx}
+                                                                                            type="number" 
+                                                                                            value={w} 
+                                                                                            onChange={(e) => updateWeight(e.target.value, wIdx)}
+                                                                                            className="w-full bg-slate-800 border border-slate-700 rounded p-1 text-white text-center text-[10px] focus:border-rose-500 outline-none" 
+                                                                                            placeholder={`${wIdx+1}`}
+                                                                                        />
+                                                                                    ))}
+                                                                                </div>
+                                                                            ) : (
                                                                                 <input 
                                                                                     type="number" 
-                                                                                    value={s.reps} 
-                                                                                    onChange={(e) => {
-                                                                                        const nd = [...setsData]; nd[sIdx].reps = e.target.value; setSetsData(nd);
-                                                                                    }}
-                                                                                    placeholder={lastRecord?.reps || "REPS"} 
-                                                                                    className="w-full bg-transparent p-1 text-white text-right font-bold outline-none text-xs"
+                                                                                    value={s.weight} 
+                                                                                    onChange={(e) => updateWeight(e.target.value)}
+                                                                                    placeholder={lastRecord?.weight || "0"} 
+                                                                                    className="flex-1 min-w-0 bg-transparent p-1 text-white text-right font-bold outline-none text-xs"
                                                                                 />
-                                                                                <span className="text-[10px] text-slate-500 font-bold">회</span>
-                                                                            </div>
+                                                                            )}
+                                                                            <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap uppercase tracking-tighter">KG</span>
+                                                                        </div>
 
-                                                                            <div className="flex items-center gap-3">
-                                                                                <label className="flex items-center gap-1.5 cursor-pointer group">
-                                                                                    <span className="text-[10px] font-black text-slate-500 group-hover:text-rose-400 transition-colors">드롭</span>
-                                                                                    <input 
-                                                                                        type="checkbox" 
-                                                                                        checked={s.isDropSet || false} 
-                                                                                        onChange={(e) => {
-                                                                                            const nd = [...setsData]; 
-                                                                                            nd[sIdx].isDropSet = e.target.checked;
-                                                                                            if (!e.target.checked && typeof nd[sIdx].weight === 'string') {
-                                                                                                nd[sIdx].weight = nd[sIdx].weight.split('/')[0] || '';
-                                                                                            }
-                                                                                            setSetsData(nd);
-                                                                                        }} 
-                                                                                        className="hidden" 
-                                                                                    />
-                                                                                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500' : 'border-slate-700 bg-slate-800'}`}>
-                                                                                        {s.isDropSet && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
-                                                                                    </div>
-                                                                                </label>
-                                                                                {setsData.length > 1 && (
-                                                                                    <button onClick={() => setSetsData(setsData.filter((_, i) => i !== sIdx))} className="p-1 text-slate-600 hover:text-rose-500 transition-colors">
-                                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                                                    </button>
-                                                                                )}
-                                                                            </div>
+                                                                        <div className="flex-1 min-w-0 flex items-center gap-1 border-l border-slate-800 pl-1 sm:pl-2">
+                                                                            <input 
+                                                                                type="number" 
+                                                                                value={s.reps} 
+                                                                                onChange={(e) => {
+                                                                                    const nd = [...setsData]; nd[sIdx].reps = e.target.value; setSetsData(nd);
+                                                                                }}
+                                                                                placeholder={lastRecord?.reps || "0"} 
+                                                                                className="flex-1 min-w-0 bg-transparent p-1 text-white text-right font-bold outline-none text-xs"
+                                                                            />
+                                                                            <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap">회</span>
+                                                                        </div>
+
+                                                                        <div className="flex items-center gap-1 sm:gap-2 shrink-0 border-l border-slate-800 pl-1 sm:pl-2">
+                                                                            <label className="flex items-center gap-1 cursor-pointer group">
+                                                                                <span className="text-[9px] font-black text-slate-500 whitespace-nowrap group-hover:text-rose-400 transition-colors">드롭</span>
+                                                                                <input 
+                                                                                    type="checkbox" 
+                                                                                    checked={s.isDropSet || false} 
+                                                                                    onChange={(e) => {
+                                                                                        const nd = [...setsData]; 
+                                                                                        nd[sIdx].isDropSet = e.target.checked;
+                                                                                        if (!e.target.checked && typeof nd[sIdx].weight === 'string') {
+                                                                                            nd[sIdx].weight = nd[sIdx].weight.split('/')[0] || '';
+                                                                                        }
+                                                                                        setSetsData(nd);
+                                                                                    }} 
+                                                                                    className="hidden" 
+                                                                                />
+                                                                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500 shadow-lg shadow-rose-600/20' : 'border-slate-700 bg-slate-800'}`}>
+                                                                                    {s.isDropSet && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
+                                                                                </div>
+                                                                            </label>
+                                                                            {setsData.length > 1 && (
+                                                                                <button onClick={() => setSetsData(setsData.filter((_, i) => i !== sIdx))} className="p-1 text-slate-600 hover:text-rose-500 transition-colors">
+                                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                                                </button>
+                                                                            )}
                                                                         </div>
                                                                     </div>
                                                                 );
@@ -2110,77 +2161,75 @@ const WorkoutSetupView = ({ selectedDate, editLog, onBack, onSuccess }) => {
                                         };
 
                                         return (
-                                            <div key={idx} className="flex flex-col sm:flex-row items-center gap-2 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                                                <div className="flex items-center w-full sm:w-auto gap-2">
-                                                    <span className="w-8 text-xs font-bold text-slate-600 text-center">{idx + 1}S</span>
-                                                    <div className="flex-1 flex gap-1">
-                                                        {s.isDropSet ? (
-                                                            <div className="flex gap-1 flex-1">
-                                                                {weights.slice(0, 3).map((w, wIdx) => (
-                                                                    <input 
-                                                                        key={wIdx}
-                                                                        type="number" 
-                                                                        value={w} 
-                                                                        onChange={(e) => updateWeight(e.target.value, wIdx)}
-                                                                        className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-center text-xs focus:border-rose-500 outline-none" 
-                                                                        placeholder={`${wIdx+1}차`}
-                                                                    />
-                                                                ))}
-                                                            </div>
-                                                        ) : (
-                                                            <input 
-                                                                type="number" 
-                                                                value={s.weight} 
-                                                                onChange={(e) => updateWeight(e.target.value)}
-                                                                className="flex-1 bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right text-sm focus:border-blue-500 outline-none" 
-                                                                placeholder="KG" 
-                                                            />
-                                                        )}
-                                                        <span className="flex items-center text-[10px] font-bold text-slate-500 mr-1">KG</span>
-                                                    </div>
+                                            <div key={idx} className="flex flex-row flex-nowrap items-center gap-1.5 sm:gap-2 bg-slate-900/50 p-2 sm:p-3 rounded-xl border border-slate-800 transition-all hover:border-slate-600">
+                                                <div className="flex flex-col items-center w-6 sm:w-8 shrink-0">
+                                                    <span className="text-[10px] sm:text-xs font-bold text-slate-600 text-center">{idx + 1}S</span>
                                                 </div>
                                                 
-                                                <div className="flex items-center w-full sm:w-auto gap-2">
-                                                    <div className="flex-1 flex items-center gap-1">
+                                                <div className="flex-[2.5] min-w-0 flex items-center gap-1">
+                                                    {s.isDropSet ? (
+                                                        <div className="flex gap-1 flex-1 min-w-0">
+                                                            {weights.slice(0, 3).map((w, wIdx) => (
+                                                                <input 
+                                                                    key={wIdx}
+                                                                    type="number" 
+                                                                    value={w} 
+                                                                    onChange={(e) => updateWeight(e.target.value, wIdx)}
+                                                                    className="w-full bg-slate-950 border border-slate-700 p-1 rounded text-white text-center text-[10px] focus:border-rose-500 outline-none" 
+                                                                    placeholder={`${wIdx+1}`}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    ) : (
                                                         <input 
                                                             type="number" 
-                                                            value={s.reps} 
-                                                            onChange={(e) => {
-                                                                const nd = [...setsData]; nd[idx].reps = e.target.value; setSetsData(nd);
-                                                            }} 
-                                                            className="flex-1 bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-right text-sm focus:border-blue-500 outline-none" 
-                                                            placeholder="REPS" 
+                                                            value={s.weight} 
+                                                            onChange={(e) => updateWeight(e.target.value)}
+                                                            className="flex-1 min-w-0 bg-slate-950 border border-slate-700 p-1.5 rounded text-white text-right text-xs focus:border-blue-500 outline-none" 
+                                                            placeholder="0" 
                                                         />
-                                                        <span className="text-[10px] font-bold text-slate-500">회</span>
-                                                    </div>
+                                                    )}
+                                                    <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap uppercase tracking-tighter">KG</span>
+                                                </div>
 
-                                                    <div className="flex items-center gap-3 ml-2">
-                                                        <label className="flex items-center gap-1.5 cursor-pointer group">
-                                                            <span className="text-[10px] font-black text-slate-500 group-hover:text-rose-400 transition-colors">드롭</span>
-                                                            <input 
-                                                                type="checkbox" 
-                                                                checked={s.isDropSet || false} 
-                                                                onChange={(e) => {
-                                                                    const nd = [...setsData]; 
-                                                                    nd[idx].isDropSet = e.target.checked;
-                                                                    // 체크 해제 시 문자열 초기화
-                                                                    if (!e.target.checked && typeof nd[idx].weight === 'string') {
-                                                                        nd[idx].weight = nd[idx].weight.split('/')[0] || '';
-                                                                    }
-                                                                    setSetsData(nd);
-                                                                }} 
-                                                                className="hidden" 
-                                                            />
-                                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500 shadow-lg shadow-rose-600/20' : 'border-slate-700 bg-slate-800'}`}>
-                                                                {s.isDropSet && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
-                                                            </div>
-                                                        </label>
-                                                        {setsData.length > 1 && (
-                                                            <button onClick={() => setSetsData(setsData.filter((_, i) => i !== idx))} className="p-2 text-slate-600 hover:text-rose-500 transition-colors">
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                            </button>
-                                                        )}
-                                                    </div>
+                                                <div className="flex-1 min-w-0 flex items-center gap-1 border-l border-slate-800 pl-1 sm:pl-2">
+                                                    <input 
+                                                        type="number" 
+                                                        value={s.reps} 
+                                                        onChange={(e) => {
+                                                            const nd = [...setsData]; nd[idx].reps = e.target.value; setSetsData(nd);
+                                                        }} 
+                                                        className="flex-1 min-w-0 bg-slate-950 border border-slate-700 p-1.5 rounded text-white text-right text-xs focus:border-blue-500 outline-none" 
+                                                        placeholder="0" 
+                                                    />
+                                                    <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap">회</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-1 sm:gap-2 shrink-0 border-l border-slate-800 pl-1 sm:pl-2">
+                                                    <label className="flex items-center gap-1 cursor-pointer group">
+                                                        <span className="text-[9px] font-black text-slate-500 whitespace-nowrap group-hover:text-rose-400 transition-colors">드롭</span>
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={s.isDropSet || false} 
+                                                            onChange={(e) => {
+                                                                const nd = [...setsData]; 
+                                                                nd[idx].isDropSet = e.target.checked;
+                                                                if (!e.target.checked && typeof nd[idx].weight === 'string') {
+                                                                    nd[idx].weight = nd[idx].weight.split('/')[0] || '';
+                                                                }
+                                                                setSetsData(nd);
+                                                            }} 
+                                                            className="hidden" 
+                                                        />
+                                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500 shadow-lg shadow-rose-600/20' : 'border-slate-700 bg-slate-800'}`}>
+                                                            {s.isDropSet && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
+                                                        </div>
+                                                    </label>
+                                                    {setsData.length > 1 && (
+                                                        <button onClick={() => setSetsData(setsData.filter((_, i) => i !== idx))} className="p-1 text-slate-600 hover:text-rose-500 transition-colors">
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
