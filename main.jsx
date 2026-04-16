@@ -7,8 +7,9 @@ import { supabase } from './src/api/supabase';
 import OpenAI from 'openai';
 import ChatMessage from './src/components/ChatMessage';
 import { BODY_PARTS, PART_MAP, CATEGORIES, STORAGE_KEYS } from './src/constants/exerciseConstants';
-import { fetchLastExerciseRecord } from './src/api/workoutApi';
+import { fetchLastExerciseRecord, saveWorkoutLogs } from './src/api/workoutApi';
 import BottomNav from './src/components/BottomNav';
+import WelcomeInterview from './src/components/WelcomeInterview';
 
 // OpenAI 인스턴스 생성 (Vite 환경변수 사용 및 브라우저 호출 허용)
 const openai = new OpenAI({
@@ -2381,6 +2382,7 @@ const AppContent = () => {
     const [session, setSession] = useState(null);
     const [isInitializing, setIsInitializing] = useState(true);
     const [isTimeout, setIsTimeout] = useState(false);
+    const [showInterview, setShowInterview] = useState(false);
 
     useEffect(() => {
         // 1. 초기 세션 확인
@@ -2389,6 +2391,23 @@ const AppContent = () => {
                 const { data: { session: initialSession } } = await supabase.auth.getSession();
                 setSession(initialSession);
                 
+                if (initialSession) {
+                    // Check if first user or no data
+                    const isFirstUser = localStorage.getItem('isFirstUser') !== 'false';
+                    if (isFirstUser) {
+                        const { count, error } = await supabase
+                            .from('workout_logs')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('user_id', initialSession.user.id);
+                        
+                        if (!error && count === 0) {
+                            setShowInterview(true);
+                        } else {
+                            localStorage.setItem('isFirstUser', 'false');
+                        }
+                    }
+                }
+
                 // OAuth 콜백 상태(hash/code)가 아니라면 즉시 초기화 완료
                 const isOAuthFlow = window.location.hash.includes('access_token') || window.location.search.includes('code=');
                 if (!isOAuthFlow && !initialSession) {
@@ -2471,6 +2490,7 @@ const AppContent = () => {
     // 인증 완료 시 메인 앱 라우터
     return (
         <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
+            {showInterview && <WelcomeInterview onComplete={() => setShowInterview(false)} />}
             <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-white font-bold italic tracking-tighter text-2xl animate-pulse">LOADING...</div>}>
                 <Routes>
                     <Route path="/" element={<MainAppLayout />} />

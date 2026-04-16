@@ -34,19 +34,19 @@ export const fetchLastExerciseRecord = async (userId, exerciseName) => {
 };
 
 /**
- * Saves a workout log to Supabase.
- * @param {Object} logData - The workout log data to save.
+ * Saves multiple workout logs to Supabase.
+ * @param {Array<Object>} logsData - The workout logs data to save.
  * @returns {Promise<boolean>} - Whether the save was successful.
  */
-export const saveWorkoutLog = async (logData) => {
+export const saveWorkoutLogs = async (logsData) => {
     try {
         const { error } = await supabase
             .from('workout_logs')
-            .insert([logData]);
+            .insert(logsData);
         if (error) throw error;
         return true;
     } catch (err) {
-        console.error("Error saving workout log:", err);
+        console.error("Error saving workout logs:", err);
         return false;
     }
 };
