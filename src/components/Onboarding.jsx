@@ -49,7 +49,7 @@ const INTERVIEW_STEPS = [
 ];
 
 const Onboarding = ({ onComplete }) => {
-    const [phase, setPhase] = useState(1); // 1: Interview, 2: Body Metrics, 3: Generating
+    const [phase, setPhase] = useState(1); // 1: Interview, 2: Body Metrics, 3: Generating, 4: Briefing
     const [currentStep, setCurrentStep] = useState(0);
     const [answers, setAnswers] = useState({});
     const [bodyMetrics, setBodyMetrics] = useState({
@@ -57,6 +57,7 @@ const Onboarding = ({ onComplete }) => {
         skeletal_muscle_mass: '', body_fat_mass: '', body_fat_percentage: '',
         bmr: '', visceral_fat_level: ''
     });
+    const [planExplanation, setPlanExplanation] = useState('');
 
     const handleOptionSelect = (value) => {
         const newAnswers = { ...answers, [INTERVIEW_STEPS[currentStep].id]: value };
@@ -95,7 +96,7 @@ const Onboarding = ({ onComplete }) => {
                 : 'User did not provide body metrics (standard routine needed).';
 
             const prompt = `
-            You are a professional PT coach. Generate a 1-week (7 days) workout routine.
+            You are a professional PT coach. Generate a 1-week (7 days) workout routine and a brief explanation.
             
             User Profile:
             - Goal: ${answers.goal}
@@ -122,9 +123,13 @@ const Onboarding = ({ onComplete }) => {
                - If time is '1h': Include 5-6 exercises with standard sets.
                - If time is '1.5h+': Include 7-8 exercises with more sets and auxiliary movements.
             3. The frequency is ${answers.frequency} times per week. For other days, mark them as 'Rest Day'.
-            4. Output MUST be a valid JSON array of objects.
+            4. Output MUST be a valid JSON object with two keys: "explanation" (string) and "routine" (array of objects).
             
-            JSON Structure for each exercise object:
+            Explanation Requirement:
+            - Write 3-4 lines in Korean explaining WHY this routine was designed based on the user's 4 inputs (Goal, Level, Frequency, Time). 
+            - Use a professional yet friendly and encouraging tone (e.g., PT 코치 말투).
+
+            JSON Structure for "routine" array elements:
             {
                 "user_id": "${user.id}",
                 "part": "chest" | "back_part" | "legs" | "shoulders" | "arms" | "abs" | "cardio" | "stretching",
@@ -138,7 +143,7 @@ const Onboarding = ({ onComplete }) => {
                 "created_at": "YYYY-MM-DDTHH:mm:ssZ" // Distribute across 7 days starting from today (${new Date().toISOString()})
             }
 
-            ONLY output the JSON array. No conversational text.
+            ONLY output the JSON object. No conversational text.
             `;
 
             const response = await openai.chat.completions.create({
@@ -148,19 +153,25 @@ const Onboarding = ({ onComplete }) => {
             });
 
             const content = JSON.parse(response.choices[0].message.content);
-            const routineData = content.routine || content.workouts || content.data || (Array.isArray(content) ? content : Object.values(content)[0]);
+            const routineData = content.routine || content.workouts || content.data;
+            const explanation = content.explanation || '회원님의 목표와 성향에 맞춘 최적의 1주일 루틴이 생성되었습니다.';
 
             if (Array.isArray(routineData)) {
                 await saveWorkoutLogs(routineData);
             }
 
-            localStorage.setItem('isFirstUser', 'false');
-            onComplete();
+            setPlanExplanation(explanation);
+            setPhase(4);
         } catch (error) {
             console.error('Error generating routine:', error);
             alert('루틴 생성 중 오류가 발생했습니다. 다시 시도해 주세요.');
             setPhase(2);
         }
+    };
+
+    const finishOnboarding = () => {
+        localStorage.setItem('isFirstUser', 'false');
+        onComplete();
     };
 
     const renderInterview = () => {
@@ -292,6 +303,36 @@ const Onboarding = ({ onComplete }) => {
         </div>
     );
 
+    const renderBriefing = () => (
+        <div className="space-y-8 animate-slide-up text-center">
+            <div className="space-y-4">
+                <div className="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-blue-600/40">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-tight">분석이 완료되었습니다!</h2>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2rem] relative group">
+                <div className="absolute -top-3 left-8 px-3 py-1 bg-blue-600 rounded-full text-[10px] font-black text-white uppercase tracking-widest">AI PT Briefing</div>
+                <p className="text-slate-300 font-bold leading-relaxed text-lg break-keep italic">
+                    "{planExplanation}"
+                </p>
+            </div>
+
+            <div className="pt-4 space-y-4">
+                <button
+                    onClick={finishOnboarding}
+                    className="w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black rounded-3xl shadow-2xl shadow-blue-600/30 active:scale-95 transition-all text-xl italic tracking-tighter uppercase"
+                >
+                    내 운동 스케줄 확인하기
+                </button>
+                <p className="text-slate-500 text-xs font-bold">이제부터 당신의 성장을 함께하겠습니다.</p>
+            </div>
+        </div>
+    );
+
     return (
         <div className="fixed inset-0 z-[200] bg-slate-950 flex items-center justify-center p-6 animate-fade-in overflow-hidden">
             <div className="w-full max-w-md relative">
@@ -312,6 +353,7 @@ const Onboarding = ({ onComplete }) => {
                 {phase === 1 && renderInterview()}
                 {phase === 2 && renderBodyMetrics()}
                 {phase === 3 && renderGenerating()}
+                {phase === 4 && renderBriefing()}
             </div>
         </div>
     );
