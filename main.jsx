@@ -1,18 +1,19 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
 import { CUSTOM_EXERCISES } from './src/data/customExercises';
 import ApiViewer from './src/components/ApiViewer';
 import { supabase } from './src/api/supabase';
 import OpenAI from 'openai';
+import ChatMessage from './src/components/ChatMessage';
+import { BODY_PARTS, PART_MAP, CATEGORIES, STORAGE_KEYS } from './src/constants/exerciseConstants';
+import { fetchLastExerciseRecord } from './src/api/workoutApi';
 
 // OpenAI 인스턴스 생성 (Vite 환경변수 사용 및 브라우저 호출 허용)
 const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true
 });
-
-console.log("MyGym App Initializing with Custom Exercise Data...");
 
 /**
  * [Common: User Profile Modal]
@@ -121,70 +122,9 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
 };
 
 /**
- * [Common: Exercise Detail Modal]
- */
-const ExerciseModal = ({ exercise, onClose }) => {
-    if (!exercise) return null;
-    
-    const data = {
-        name: exercise.name,
-        target: exercise.target,
-        equipment: exercise.equipment,
-        image: exercise.imageUrl || exercise.image
-    };
-
-    const handleImgError = (e) => {
-        e.target.onerror = null;
-        e.target.src = 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=300&fit=crop';
-    };
-
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
-            <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={onClose}></div>
-            <div className="relative bg-slate-900 border border-white/10 w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl animate-scale-up">
-                <button 
-                    onClick={onClose}
-                    className="absolute top-6 right-6 z-20 p-2.5 bg-slate-950/50 hover:bg-slate-950 text-white rounded-full transition-all hover:rotate-90"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                
-                <div className="relative h-72">
-                    <img 
-                        src={data.image} 
-                        alt={data.name} 
-                        className="w-full h-full object-cover" 
-                        referrerPolicy="no-referrer"
-                        onError={handleImgError}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
-                </div>
-                
-                <div className="p-8 -mt-12 relative z-10">
-                    <div className="mb-8">
-                        <div className="flex gap-2 mb-3">
-                            <span className="bg-blue-500/20 text-blue-400 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-blue-500/20">
-                                {data.target}
-                            </span>
-                            <span className="bg-slate-800 text-slate-400 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-slate-700">
-                                {data.equipment}
-                            </span>
-                        </div>
-                        <h3 className="text-4xl font-black text-white italic tracking-tighter mb-2 uppercase">{data.name}</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-/**
  * [Common: Exercise Selector]
  */
 const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
-    const [modalExercise, setModalExercise] = useState(null);
     const [manualName, setManualName] = useState(selection.manualName || '');
 
     useEffect(() => {
@@ -192,17 +132,6 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             setManualName(selection.manualName);
         }
     }, [selection.manualName]);
-
-    const bodyParts = [
-        { key: 'chest', label: '가슴' },
-        { key: 'shoulders', label: '어깨' },
-        { key: 'back_part', label: '등' },
-        { key: 'legs', label: '하체' },
-        { key: 'arms', label: '팔' },
-        { key: 'cardio', label: '유산소' }
-    ];
-
-    const categories = ['머신', '프리웨이트', '케이블'];
 
     const handlePartClick = (p) => {
         setSelection({ part: p, category: '', exercise: '', manualName: '' });
@@ -240,7 +169,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             {(selection.part || selection.category || selection.exercise) && (
                 <div className="p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl animate-fade-in">
                     <div className="flex flex-wrap items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest">
-                        {selection.part && <span>{bodyParts.find(p => p.key === selection.part)?.label}</span>}
+                        {selection.part && <span>{BODY_PARTS.find(p => p.key === selection.part)?.label}</span>}
                         {selection.category && (
                             <>
                                 <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
@@ -261,7 +190,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             <div>
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 1. 부위 선택</label>
                 <div className="grid grid-cols-3 gap-2">
-                    {bodyParts.map(p => (
+                    {BODY_PARTS.map(p => (
                         <button 
                             key={p.key} 
                             onClick={() => handlePartClick(p.key)} 
@@ -278,7 +207,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                 <div className="animate-fade-in">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 2. 기구 분류</label>
                     <div className="grid grid-cols-3 gap-2">
-                        {categories.map(c => (
+                        {CATEGORIES.map(c => (
                             <button 
                                 key={c} 
                                 onClick={() => handleCategoryClick(c)} 
@@ -328,8 +257,6 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                     ))}
                 </div>
             )}
-            
-            <ExerciseModal exercise={modalExercise} onClose={() => setModalExercise(null)} />
         </div>
     );
 };
@@ -614,7 +541,7 @@ const WorkoutDetailScreen = () => {
                                 <div>
                                     <div className="flex gap-1 mb-1">
                                         <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest text-white">
-                                            {log.part === 'chest' ? '가슴' : log.part === 'back_part' ? '등' : log.part === 'legs' ? '하체' : log.part === 'shoulders' ? '어깨' : log.part === 'arms' ? '팔' : log.part === 'cardio' ? '유산소' : log.part}
+                                            {PART_MAP[log.part] || log.part}
                                         </span>
                                         <span className="bg-slate-800 text-slate-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-slate-700">
                                             {log.type}
@@ -677,7 +604,6 @@ const WorkoutSetupScreen = () => {
     const [cardioSeconds, setCardioSeconds] = useState('');
     const [addedExercises, setAddedExercises] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
-    const [isInitialLoading, setIsInitialLoading] = useState(false);
     const [lastRecord, setLastRecord] = useState(null);
 
     const queryDate = searchParams.get('date');
@@ -725,7 +651,6 @@ const WorkoutSetupScreen = () => {
     useEffect(() => {
         const fetchExistingLog = async () => {
             if (!editId) return;
-            setIsInitialLoading(true);
             try {
                 const { data, error } = await supabase
                     .from('workout_logs')
@@ -756,8 +681,6 @@ const WorkoutSetupScreen = () => {
             } catch (err) {
                 console.error("Error fetching log for edit:", err);
                 alert("기록을 불러오지 못했습니다.");
-            } finally {
-                setIsInitialLoading(false);
             }
         };
 
@@ -959,7 +882,7 @@ const WorkoutSetupScreen = () => {
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
                                         <span className="text-[10px] font-bold text-blue-400 block uppercase">
-                                            {ex.part === 'chest' ? '가슴' : ex.part === 'back_part' ? '등' : ex.part === 'legs' ? '하체' : ex.part === 'shoulders' ? '어깨' : ex.part === 'arms' ? '팔' : ex.part === 'cardio' ? '유산소' : ex.part} / {ex.type}
+                                            {PART_MAP[ex.part] || ex.part} / {ex.type}
                                         </span>
                                         <span className="font-bold text-white text-lg">{ex.exercise}</span>
                                     </div>
@@ -996,7 +919,7 @@ const WorkoutPlanScreen = () => {
     const [searchParams] = useSearchParams();
     const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
     const [planList, setPlanList] = useState(() => {
-        const saved = localStorage.getItem('mygym_today_routine');
+        const saved = localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE);
         return saved ? JSON.parse(saved) : [];
     });
     const [recordingIndex, setRecordingIndex] = useState(null);
@@ -1009,7 +932,7 @@ const WorkoutPlanScreen = () => {
     const queryDate = searchParams.get('date');
 
     useEffect(() => {
-        localStorage.setItem('mygym_today_routine', JSON.stringify(planList));
+        localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify(planList));
     }, [planList]);
 
     const handleAddToList = () => {
@@ -1210,7 +1133,7 @@ const WorkoutPlanScreen = () => {
     };
 
     return (
-        <div className="p-6 md:p-12 max-w-6xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
+        <div className="p-6 md:p-12 max-6xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative">
             <BackButton />
             
             <div className="mb-8">
@@ -1255,7 +1178,7 @@ const WorkoutPlanScreen = () => {
                                         <div className="flex justify-between items-start">
                                             <div className="flex-1">
                                                 <span className="text-[10px] font-bold text-indigo-400 block uppercase mb-1">
-                                                    {item.part === 'chest' ? '가슴' : item.part === 'back_part' ? '등' : item.part === 'legs' ? '하체' : item.part === 'shoulders' ? '어깨' : item.part === 'arms' ? '팔' : item.part === 'cardio' ? '유산소' : item.part}
+                                                    {PART_MAP[item.part] || item.part}
                                                     {item.category && ` / ${item.category}`}
                                                 </span>
                                                 <h4 className={`text-lg font-bold flex items-center flex-wrap ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>
@@ -1384,7 +1307,7 @@ const AIRecommendationScreen = () => {
     const [userData, setUserData] = useState(null);
     const [recentLogs, setRecentLogs] = useState([]);
     const [messages, setMessages] = useState(() => {
-        const saved = localStorage.getItem('aiCoachChatHistory');
+        const saved = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY);
         return saved ? JSON.parse(saved) : [
             { id: 1, type: 'ai', text: '안녕하세요! 당신의 데이터 기반 전문 PT 코치입니다. 최근 기록을 바탕으로 최적의 루틴을 제안해 드릴게요. 무엇을 도와드릴까요?' }
         ];
@@ -1393,7 +1316,7 @@ const AIRecommendationScreen = () => {
     const [isTyping, setIsTyping] = useState(false);
 
     useEffect(() => {
-        localStorage.setItem('aiCoachChatHistory', JSON.stringify(messages));
+        localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages));
     }, [messages]);
 
     useEffect(() => {
@@ -1423,7 +1346,7 @@ const AIRecommendationScreen = () => {
 
     const handleClearHistory = () => {
         if (confirm('대화 내역을 모두 초기화하시겠습니까?')) {
-            localStorage.removeItem('aiCoachChatHistory');
+            localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY);
             setMessages([
                 { id: 1, type: 'ai', text: '안녕하세요! 당신의 데이터 기반 전문 PT 코치입니다. 최근 기록을 바탕으로 최적의 루틴을 제안해 드릴게요. 무엇을 도와드릴까요?' }
             ]);
@@ -1452,7 +1375,6 @@ const AIRecommendationScreen = () => {
         if (!textForApi.trim() || isTyping) return;
 
         // 1. 데이터 가공 (전체 기록 기반 부위별 최근 수행일 분석)
-        const partMap = { chest: '가슴', back_part: '등', legs: '하체', shoulders: '어깨', arms: '팔', cardio: '유산소' };
         
         // 부위별 마지막 운동일 추출
         const lastTrained = {};
@@ -1463,7 +1385,7 @@ const AIRecommendationScreen = () => {
         });
 
         const formattedHistory = recentLogs.length > 0 
-            ? recentLogs.slice(0, 15).map(l => `${new Date(l.created_at).toLocaleDateString()}: ${partMap[l.part] || l.part} (${l.exercise})`).join('\n')
+            ? recentLogs.slice(0, 15).map(l => `${new Date(l.created_at).toLocaleDateString()}: ${PART_MAP[l.part] || l.part} (${l.exercise})`).join('\n')
             : '없음';
 
         const userContext = `
@@ -1537,7 +1459,6 @@ ${formattedHistory}`;
         ];
         
         const aiText = await generateAIResponse(apiMessages);
-        console.log("🔥 [1] AI 원본 응답:", aiText);
         const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
         setMessages(prev => [...prev, aiMsg]);
         setIsTyping(false);
@@ -1545,7 +1466,7 @@ ${formattedHistory}`;
 
     const handleAddRoutineItem = (item) => {
         try {
-            const saved = localStorage.getItem('mygym_today_routine');
+            const saved = localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE);
             const currentRoutine = saved ? JSON.parse(saved) : [];
             
             // 데이터 키 유연성 보정 (궁극의 데이터 정제)
@@ -1570,131 +1491,13 @@ ${formattedHistory}`;
             };
 
             const updatedRoutine = [...currentRoutine, newItem];
-            localStorage.setItem('mygym_today_routine', JSON.stringify(updatedRoutine));
+            localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify(updatedRoutine));
             window.dispatchEvent(new Event('storage'));
             return true;
         } catch (e) {
             console.error("Routine add error", e);
             return false;
         }
-    };
-
-    const MessageBubble = ({ msg }) => {
-        const [addedItems, setAddedItems] = useState([]);
-
-        // ROUTINE_DATA 태그를 찾기 위한 정규식 (객체 {} 또는 배열 [] 모두 대응)
-        const routineRegex = /\[ROUTINE_DATA:\s*(\{.*?\}|\[.*?\])\]/gs;
-        
-        const parts = [];
-        let lastIndex = 0;
-        let match;
-
-        while ((match = routineRegex.exec(msg.text)) !== null) {
-            if (match.index > lastIndex) {
-                parts.push({ type: 'text', content: msg.text.substring(lastIndex, match.index) });
-            }
-
-            try {
-                const extractedText = match[1];
-                console.log("🔥 [2] 추출된 JSON 문자열:", extractedText);
-
-                // 1. 파싱
-                let parsed = JSON.parse(extractedText);
-                
-                // 2. 객체 안에 배열이 숨어있는 경우 추출 (예: { routines: [...] })
-                if (!Array.isArray(parsed)) {
-                    const arrayKey = Object.keys(parsed).find(key => Array.isArray(parsed[key]));
-                    parsed = arrayKey ? parsed[arrayKey] : [parsed];
-                }
-                
-                // 3. 평탄화 및 키(Key) 강제 매핑 (궁극의 데이터 정제)
-                const safeRoutineData = parsed.flat(Infinity).map(item => {
-                    // AI가 텍스트만 덜렁 던진 경우 (문자열 방어)
-                    if (typeof item === 'string') {
-                        return { name: item, sets: 4, reps: 12, weight: 0 };
-                    }
-                    // 정상적으로 객체가 들어온 경우
-                    return {
-                        name: item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동",
-                        sets: item.sets || item.Sets || item.세트 || 0,
-                        reps: item.reps || item.Reps || item.횟수 || item.반복수 || 0,
-                        weight: item.weight || item.Weight || item.무게 || item.중량 || 0
-                    };
-                });
-
-                console.log("🔥 [3] 정제 및 매핑 완료된 최종 데이터:", safeRoutineData);
-                parts.push({ type: 'routine_list', data: safeRoutineData });
-            } catch (e) {
-                console.error("JSON parse error in message bubble", e);
-                parts.push({ type: 'text', content: match[0] });
-            }
-
-            lastIndex = routineRegex.lastIndex;
-        }
-
-        if (lastIndex < msg.text.length) {
-            parts.push({ type: 'text', content: msg.text.substring(lastIndex) });
-        }
-
-        const onAddItem = (item, itemIdx) => {
-            const success = handleAddRoutineItem(item);
-            if (success) {
-                setAddedItems(prev => [...prev, itemIdx]);
-            }
-        };
-
-        return (
-            <div className={`flex flex-col ${msg.type === 'user' ? 'items-end' : 'items-start'} animate-slide-up`}>
-                <div className={`max-w-[90%] p-4 rounded-[1.5rem] text-sm leading-relaxed ${
-                    msg.type === 'user' 
-                    ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-600/10' 
-                    : 'bg-slate-800 text-slate-200 rounded-tl-none border border-white/5'
-                }`}>
-                    {parts.map((part, idx) => {
-                        if (part.type === 'text') {
-                            return <span key={idx} className="whitespace-pre-wrap">{part.content}</span>;
-                        } else {
-                            console.log("🔥 [4] 화면에 그릴 리스트 데이터:", part.data);
-                            return (
-                                <div key={idx} className="mt-4 space-y-2 bg-slate-900/50 p-3 rounded-2xl border border-white/5">
-                                    <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 px-1">추천 루틴 리스트</div>
-                                    {part.data.map((item, itemIdx) => {
-                                        const isAdded = addedItems.includes(itemIdx);
-                                        
-                                        return (
-                                            <div key={itemIdx} className="flex justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-white/5 group transition-all hover:border-indigo-500/30">
-                                                <div className="flex flex-col">
-                                                    <span className="text-white font-black italic uppercase tracking-tighter text-base mb-1">
-                                                        {item.name}
-                                                    </span>
-                                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                                        {item.sets}세트 x {item.reps}회 {item.weight > 0 ? `(${item.weight}kg)` : ''}
-                                                    </span>
-                                                </div>
-                                                <button 
-                                                    onClick={() => !isAdded && onAddItem(item, itemIdx)}
-                                                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                                                        isAdded 
-                                                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
-                                                        : 'bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white active:scale-90 shadow-lg shadow-black/20'
-                                                    }`}
-                                                >
-                                                    {isAdded ? (
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-                                                    ) : (
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            );
-                        }
-                    })}
-                </div>
-            </div>
-        );
     };
 
     return (
@@ -1729,7 +1532,7 @@ ${formattedHistory}`;
             {/* Chat Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-32">
                 {messages.map((msg) => (
-                    <MessageBubble key={msg.id} msg={msg} />
+                    <ChatMessage key={msg.id} msg={msg} onAddRoutineItem={handleAddRoutineItem} />
                 ))}
                 {isTyping && (
                     <div className="flex justify-start">
@@ -1802,15 +1605,6 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
     const today = new Date();
     const isToday = (date) => date === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
-    const partLabels = {
-        chest: '가슴',
-        shoulders: '어깨',
-        back_part: '등',
-        legs: '하체',
-        arms: '팔',
-        cardio: '유산소'
-    };
-
     return (
         <div className="mt-2 md:mt-6 p-4 md:p-6 bg-slate-800/50 rounded-[2.5rem] border border-slate-700/50 shadow-2xl w-full">
             <div className="flex justify-between items-center mb-4 px-4">
@@ -1877,7 +1671,7 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
                                     <div className="flex flex-wrap justify-center gap-0.5 max-w-full px-1 overflow-hidden">
                                         {uniqueParts.map(p => (
                                             <span key={p} className="text-[7px] md:text-[9px] font-black text-slate-300 leading-tight uppercase tracking-tight bg-slate-800/80 px-1 py-0.5 rounded-md border border-white/10 whitespace-nowrap">
-                                                {partLabels[p] || p}
+                                                {PART_MAP[p] || p}
                                             </span>
                                         ))}
                                     </div>
@@ -1890,6 +1684,7 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange })
         </div>
     );
 };
+
 
 const DashboardScreen = () => {
     const navigate = useNavigate();
