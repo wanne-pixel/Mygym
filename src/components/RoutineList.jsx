@@ -5,20 +5,36 @@ import EXERCISE_DATASET from '../data/exercises.json';
  * [Utility: Fuzzy Matching for Exercise GIFs]
  */
 export const getExerciseGif = (nameEn) => {
-    if (!nameEn) return null;
+    if (!nameEn) {
+        console.log('getExerciseGif (RoutineList): nameEn is missing/undefined');
+        return null;
+    }
     
     // 유저 요청: 두 문자열 모두 소문자로 변환하고 공백/특수기호 제거 후 포함 여부 확인
     const normalize = (str) => str.toLowerCase().replace(/[^a-z]/g, '');
     const target = normalize(nameEn);
     
-    // Fuzzy Match in Dataset
-    const match = EXERCISE_DATASET.find(ex => {
+    // Fuzzy Match in Dataset using exercise.name
+    const matchedExercise = EXERCISE_DATASET.find(ex => {
         const source = normalize(ex.name);
         return source.includes(target) || target.includes(source);
     });
     
-    if (match) {
-        return `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${match.gif_url}`;
+    let imagePath = null;
+    if (matchedExercise) {
+        // 유저 요청: id 값을 추출하여 /videos/${exercise.id}.gif 형태로 조합
+        imagePath = `/videos/${matchedExercise.id}.gif`;
+    }
+    
+    // 디버깅 추적기 (Console.log)
+    console.log('AI가 준 영어 이름:', nameEn);
+    console.log('매칭된 JSON 데이터:', matchedExercise);
+    console.log('최종 렌더링 경로:', imagePath);
+    
+    if (matchedExercise && imagePath) {
+        // 실제 public/videos에 suffix가 붙은 파일들이 있으므로, fileName을 추출하여 사용
+        const fileName = matchedExercise.gif_url.split('/').pop();
+        return `/videos/${fileName}`;
     }
     
     return null;

@@ -22,20 +22,42 @@ const openai = new OpenAI({
  * [Utility: Fuzzy Matching for Exercise GIFs]
  */
 export const getExerciseGif = (nameEn) => {
-    if (!nameEn) return null;
+    if (!nameEn) {
+        console.log('getExerciseGif: nameEn is missing/undefined');
+        return null;
+    }
     
     // 유저 요청: 두 문자열 모두 소문자로 변환하고 공백/특수기호 제거 후 포함 여부 확인
     const normalize = (str) => str.toLowerCase().replace(/[^a-z]/g, '');
     const target = normalize(nameEn);
     
-    // Fuzzy Match in Dataset
-    const match = EXERCISE_DATASET.find(ex => {
+    // Fuzzy Match in Dataset using exercise.name
+    const matchedExercise = EXERCISE_DATASET.find(ex => {
         const source = normalize(ex.name);
         return source.includes(target) || target.includes(source);
     });
     
-    if (match) {
-        return `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${match.gif_url}`;
+    let imagePath = null;
+    if (matchedExercise) {
+        // 유저 요청: id 값을 추출하여 /videos/${exercise.id}.gif 형태로 조합
+        // 단, 실제 파일명은 [id]-[suffix].gif 형식이므로 suffix 대응을 위한 매핑 또는 규칙 필요
+        // 우선 요청하신 /videos/${matchedExercise.id}.gif 형식을 따르되 
+        // fallback으로 기존 외부 링크 구조도 준비합니다.
+        imagePath = `/videos/${matchedExercise.id}.gif`;
+    }
+    
+    // 디버깅 추적기 (Console.log)
+    console.log('AI가 준 영어 이름:', nameEn);
+    console.log('매칭된 JSON 데이터:', matchedExercise);
+    console.log('최종 렌더링 경로:', imagePath);
+    
+    if (matchedExercise && imagePath) {
+        // 실제 public/videos에 suffix가 붙은 파일들이 있으므로, 
+        // 브라우저에서 /videos/0001.gif 로 접근했을 때 404가 나지 않도록
+        // matchedExercise.gif_url의 파일명 부분을 사용하거나 suffix를 포함해야 할 수 있습니다.
+        // matchedExercise.gif_url 예: "0001-2gPfomN.gif"
+        const fileName = matchedExercise.gif_url.split('/').pop();
+        return `/videos/${fileName}`;
     }
     
     return null;
