@@ -1536,6 +1536,7 @@ ${formattedHistory}`;
         ];
         
         const aiText = await generateAIResponse(apiMessages);
+        console.log("🔥 [1] AI 원본 응답:", aiText);
         const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
         setMessages(prev => [...prev, aiMsg]);
         setIsTyping(false);
@@ -1546,11 +1547,11 @@ ${formattedHistory}`;
             const saved = localStorage.getItem('mygym_today_routine');
             const currentRoutine = saved ? JSON.parse(saved) : [];
             
-            // 데이터 키 유연성 보정
-            const name = item.name || item.Name || item.exercise || item.운동명 || "알 수 없는 운동";
+            // 데이터 키 유연성 보정 (궁극의 데이터 정제)
+            const name = item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동";
             const sets = item.sets || item.Sets || item.세트 || 0;
-            const reps = item.reps || item.Reps || item.횟수 || 0;
-            const weight = item.weight || item.Weight || item.무게 || 0;
+            const reps = item.reps || item.Reps || item.횟수 || item.반복수 || 0;
+            const weight = item.weight || item.Weight || item.무게 || item.중량 || 0;
 
             // 기존 커스텀 운동 데이터에서 부위와 카테고리 정보 찾기
             const exInfo = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(name.toLowerCase()));
@@ -1580,8 +1581,8 @@ ${formattedHistory}`;
     const MessageBubble = ({ msg }) => {
         const [addedItems, setAddedItems] = useState([]);
 
-        // ROUTINE_DATA 태그를 찾기 위한 정규식 (배열 형태)
-        const routineRegex = /\[ROUTINE_DATA:\s*(\[.*?\])\]/gs;
+        // ROUTINE_DATA 태그를 찾기 위한 정규식 (객체 {} 또는 배열 [] 모두 대응)
+        const routineRegex = /\[ROUTINE_DATA:\s*(\{.*?\}|\[.*?\])\]/gs;
         
         const parts = [];
         let lastIndex = 0;
@@ -1593,9 +1594,28 @@ ${formattedHistory}`;
             }
 
             try {
-                // 평탄화 처리 (flat(Infinity)) 로 다중 배열 대응
-                const data = JSON.parse(match[1]).flat(Infinity);
-                parts.push({ type: 'routine_list', data: data });
+                const extractedText = match[1];
+                console.log("🔥 [2] 추출된 JSON 문자열:", extractedText);
+
+                // 1. 파싱
+                let parsed = JSON.parse(extractedText);
+                
+                // 2. 객체 안에 배열이 숨어있는 경우 추출 (예: { routines: [...] })
+                if (!Array.isArray(parsed)) {
+                    const arrayKey = Object.keys(parsed).find(key => Array.isArray(parsed[key]));
+                    parsed = arrayKey ? parsed[arrayKey] : [parsed];
+                }
+                
+                // 3. 평탄화 및 키(Key) 강제 매핑 (궁극의 데이터 정제)
+                const safeRoutineData = parsed.flat(Infinity).map(item => ({
+                    name: item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동",
+                    sets: item.sets || item.Sets || item.세트 || 0,
+                    reps: item.reps || item.Reps || item.횟수 || item.반복수 || 0,
+                    weight: item.weight || item.Weight || item.무게 || item.중량 || 0
+                }));
+
+                console.log("🔥 [3] 정제 및 매핑 완료된 최종 데이터:", safeRoutineData);
+                parts.push({ type: 'routine_list', data: safeRoutineData });
             } catch (e) {
                 console.error("JSON parse error in message bubble", e);
                 parts.push({ type: 'text', content: match[0] });
@@ -1626,26 +1646,21 @@ ${formattedHistory}`;
                         if (part.type === 'text') {
                             return <span key={idx} className="whitespace-pre-wrap">{part.content}</span>;
                         } else {
+                            console.log("🔥 [4] 화면에 그릴 리스트 데이터:", part.data);
                             return (
                                 <div key={idx} className="mt-4 space-y-2 bg-slate-900/50 p-3 rounded-2xl border border-white/5">
                                     <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 px-1">추천 루틴 리스트</div>
                                     {part.data.map((item, itemIdx) => {
                                         const isAdded = addedItems.includes(itemIdx);
                                         
-                                        // 데이터 키 유연성 보정 (방어 코드)
-                                        const safeName = item.name || item.Name || item.exercise || item.운동명 || "운동명 누락";
-                                        const safeSets = item.sets || item.Sets || item.세트 || 0;
-                                        const safeReps = item.reps || item.Reps || item.횟수 || 0;
-                                        const safeWeight = item.weight || item.Weight || item.무게 || 0;
-
                                         return (
                                             <div key={itemIdx} className="flex justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-white/5 group transition-all hover:border-indigo-500/30">
                                                 <div className="flex flex-col">
                                                     <span className="text-white font-black italic uppercase tracking-tighter text-base mb-1">
-                                                        {safeName}
+                                                        {item.name}
                                                     </span>
                                                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                                        {safeSets}세트 x {safeReps}회 {safeWeight > 0 ? `(${safeWeight}kg)` : ''}
+                                                        {item.sets}세트 x {item.reps}회 {item.weight > 0 ? `(${item.weight}kg)` : ''}
                                                     </span>
                                                 </div>
                                                 <button 
