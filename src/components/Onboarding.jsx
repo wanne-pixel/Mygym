@@ -132,7 +132,7 @@ const Onboarding = ({ onComplete }) => {
             JSON Structure for "routine" array elements:
             {
                 "user_id": "${user.id}",
-                "part": "chest" | "back_part" | "legs" | "shoulders" | "arms" | "abs" | "cardio" | "stretching",
+                "part": "가슴" | "등" | "하체" | "어깨" | "팔" | "코어" | "유산소",
                 "type": "기구" | "프리웨이트" | "맨몸" | "유산소" | "스트레칭",
                 "exercise": "운동 이름 (반드시 한국어)",
                 "sets_count": number,

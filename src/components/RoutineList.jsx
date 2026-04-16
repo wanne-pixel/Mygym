@@ -12,9 +12,24 @@ const RoutineList = ({ data, onAddItem }) => {
         }
     };
 
+    const handleApplyAll = () => {
+        const success = onAddItem(data);
+        if (success) {
+            setAddedItems(data.map((_, idx) => idx));
+        }
+    };
+
     return (
         <div className="mt-4 space-y-2 bg-slate-900/50 p-3 rounded-2xl border border-white/5">
-            <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 px-1">추천 루틴 리스트</div>
+            <div className="flex justify-between items-center mb-3 px-1">
+                <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">추천 루틴 리스트</div>
+                <button 
+                    onClick={handleApplyAll}
+                    className="text-[9px] font-black text-white bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded-md transition-all active:scale-95"
+                >
+                    루틴 전체 적용하기 (덮어쓰기)
+                </button>
+            </div>
             {data.map((item, itemIdx) => {
                 const isAdded = addedItems.includes(itemIdx);
                 

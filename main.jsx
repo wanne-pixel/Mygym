@@ -1117,9 +1117,7 @@ const WorkoutPlanScreen = () => {
             const { error } = await supabase.from('workout_logs').insert([newLog]);
             if (error) throw error;
 
-            const newPlanList = [...planList];
-            newPlanList[recordingIndex].isCompleted = true;
-            setPlanList(newPlanList);
+            setPlanList([]);
             setRecordingIndex(null);
             alert('기록이 완료되었습니다!');
         } catch (error) {
@@ -1569,7 +1567,7 @@ ${formattedHistory}`;
         1. 루틴 구성: 반드시 4~6개 종목으로 구성하라.
         2. 중량: 이전 기록보다 2.5~5kg 증량 제안 (기록 없으면 0). JSON 'weight'는 숫자만 허용.
         3. 형식: 마지막에 [ROUTINE_DATA: [...]] JSON 배열 포함.
-        4. 필수 키값: name (문자열), sets (숫자), reps (숫자), weight (숫자), isDropSet (불리언).
+        4. 필수 키값: name (문자열), part (문자열: 가슴, 등, 하체, 어깨, 팔, 코어, 유산소 중 하나), sets (숫자), reps (숫자), weight (숫자), isDropSet (불리언).
 
         [대화 원칙]
         - 말투: 3~5문장의 간결하고 파이팅 넘치는 말투. 번호 매기기 금지.
@@ -1594,33 +1592,55 @@ ${formattedHistory}`;
 
     const handleAddRoutineItem = (item) => {
         try {
+            // 배열로 들어오면 전체 교체, 단일 객체면 기존 로직 유지 (단, 요구사항에 따라 AI 추천 시 교체하도록 유도)
+            const isBatch = Array.isArray(item);
+            const itemsToAdd = isBatch ? item : [item];
+            
             const saved = localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE);
-            const currentRoutine = saved ? JSON.parse(saved) : [];
+            const currentRoutine = (saved && !isBatch) ? JSON.parse(saved) : [];
             
-            // 데이터 키 유연성 보정 (궁극의 데이터 정제)
-            const name = item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동";
-            const sets = item.sets || item.Sets || item.세트 || 0;
-            const reps = item.reps || item.Reps || item.횟수 || item.반복수 || 0;
-            const weight = item.weight || item.Weight || item.무게 || item.중량 || 0;
-            const isDropSet = item.isDropSet || false;
+            const newItems = itemsToAdd.map(singleItem => {
+                // 데이터 키 유연성 보정
+                const name = singleItem.name || singleItem.Name || singleItem.운동명 || singleItem.운동이름 || singleItem.exercise || "알 수 없는 운동";
+                const sets = singleItem.sets || singleItem.Sets || singleItem.세트 || 0;
+                const reps = singleItem.reps || singleItem.Reps || singleItem.횟수 || singleItem.반복수 || 0;
+                const weight = singleItem.weight || singleItem.Weight || singleItem.무게 || singleItem.중량 || 0;
+                const isDropSet = singleItem.isDropSet || false;
+                
+                // AI가 제공한 part 값을 우선 사용, 없으면 기존 매핑 시도
+                const aiPart = singleItem.part || singleItem.Part || singleItem.부위;
+                let finalPart = 'etc';
+                
+                const PART_REVERSE_MAP = {
+                    '가슴': 'chest', '등': 'back_part', '하체': 'legs', '어깨': 'shoulders', '팔': 'arms', '코어': 'abs', '유산소': 'cardio'
+                };
 
-            // 기존 커스텀 운동 데이터에서 부위와 카테고리 정보 찾기
-            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(name.toLowerCase()));
-            
-            const newItem = {
-                id: Date.now() + Math.random(),
-                part: exInfo?.part || 'etc',
-                category: exInfo?.equipment || '기타',
-                exercise: name,
-                manualName: '',
-                isCompleted: false,
-                suggestedSets: sets,
-                suggestedReps: reps,
-                suggestedWeight: weight,
-                isDropSet: isDropSet
-            };
+                if (aiPart && PART_REVERSE_MAP[aiPart]) {
+                    finalPart = PART_REVERSE_MAP[aiPart];
+                } else if (aiPart && Object.values(PART_REVERSE_MAP).includes(aiPart.toLowerCase())) {
+                    finalPart = aiPart.toLowerCase();
+                } else {
+                    const exInfo = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(name.toLowerCase()));
+                    finalPart = exInfo?.part || 'etc';
+                }
 
-            const updatedRoutine = [...currentRoutine, newItem];
+                const exInfoForCategory = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(name.toLowerCase()));
+
+                return {
+                    id: Date.now() + Math.random(),
+                    part: finalPart,
+                    category: exInfoForCategory?.equipment || '기타',
+                    exercise: name,
+                    manualName: '',
+                    isCompleted: false,
+                    suggestedSets: sets,
+                    suggestedReps: reps,
+                    suggestedWeight: weight,
+                    isDropSet: isDropSet
+                };
+            });
+
+            const updatedRoutine = isBatch ? newItems : [...currentRoutine, ...newItems];
             localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify(updatedRoutine));
             window.dispatchEvent(new Event('storage'));
             return true;

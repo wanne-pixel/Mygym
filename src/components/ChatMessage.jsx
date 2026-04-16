@@ -38,6 +38,7 @@ const ChatMessage = ({ msg, onAddRoutineItem }) => {
                 }
                 
                 let name = item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동";
+                let part = item.part || item.Part || item.부위 || "";
                 let isDropSet = item.isDropSet || false;
                 
                 if (name.includes('(드롭)')) {
@@ -47,6 +48,7 @@ const ChatMessage = ({ msg, onAddRoutineItem }) => {
 
                 return {
                     name,
+                    part,
                     sets: item.sets || item.Sets || item.세트 || 0,
                     reps: item.reps || item.Reps || item.횟수 || item.반복수 || 0,
                     weight: item.weight || item.Weight || item.무게 || item.중량 || 0,
