@@ -21,28 +21,64 @@ const openai = new OpenAI({
 /**
  * [Utility: Fuzzy Matching for Exercise GIFs]
  */
-export const getExerciseGif = (nameEn, part) => {
+export const getExerciseGif = (nameEn) => {
     if (!nameEn) return null;
     
-    const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+    // 유저 요청: 두 문자열 모두 소문자로 변환하고 공백/특수기호 제거 후 포함 여부 확인
+    const normalize = (str) => str.toLowerCase().replace(/[^a-z]/g, '');
     const target = normalize(nameEn);
     
-    // 1. Fuzzy Match in Dataset
+    // Fuzzy Match in Dataset
     const match = EXERCISE_DATASET.find(ex => {
         const source = normalize(ex.name);
         return source.includes(target) || target.includes(source);
     });
     
     if (match) {
-        // Base URL for the raw content from the dataset repository or local path
-        // Since we are using hasaneyldrm/exercises-dataset structure:
         return `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${match.gif_url}`;
     }
     
     return null;
 };
 
-const GifRenderer = ({ nameEn, part, className = "w-full h-full object-cover" }) => {
+/**
+ * [Full-screen GIF Modal]
+ */
+const GifModal = ({ isOpen, onClose, gifUrl, exerciseName }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fade-in">
+            <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl" onClick={onClose}></div>
+            <div className="relative w-full max-w-2xl bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 animate-scale-up">
+                <div className="absolute top-6 right-6 z-10">
+                    <button 
+                        onClick={onClose}
+                        className="p-3 bg-slate-800/80 hover:bg-slate-700 text-white rounded-full transition-all active:scale-90 border border-white/10"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                
+                <div className="aspect-square w-full bg-slate-950 flex items-center justify-center p-8">
+                    <img 
+                        src={gifUrl} 
+                        alt={exerciseName} 
+                        className="w-full h-full object-contain rounded-2xl shadow-2xl"
+                    />
+                </div>
+                
+                <div className="p-8 bg-gradient-to-t from-slate-950 to-slate-900 border-t border-white/5">
+                    <h3 className="text-2xl font-black italic text-white uppercase tracking-tighter text-center">
+                        {exerciseName}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const GifRenderer = ({ nameEn, part, className = "w-full h-full object-cover", onClick }) => {
     const gifUrl = getExerciseGif(nameEn, part);
     
     if (!gifUrl) {
@@ -51,7 +87,6 @@ const GifRenderer = ({ nameEn, part, className = "w-full h-full object-cover" })
                 <svg className="w-8 h-8 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">No Preview</span>
             </div>
         );
     }
@@ -60,13 +95,9 @@ const GifRenderer = ({ nameEn, part, className = "w-full h-full object-cover" })
         <img 
             src={gifUrl} 
             alt="Exercise Preview" 
-            className={className}
+            className={`${className} cursor-pointer hover:scale-110 transition-transform duration-500`}
             loading="lazy"
-            onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = ""; // Clear src to trigger fallback or empty state
-                e.target.parentElement.innerHTML = '<div class="bg-slate-800 w-full h-full flex items-center justify-center"><span class="text-[8px] font-black text-slate-600 uppercase">Error</span></div>';
-            }}
+            onClick={onClick}
         />
     );
 };
@@ -1044,6 +1075,7 @@ const WorkoutPlanScreen = () => {
     const [cardioSeconds, setCardioSeconds] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [lastRecord, setLastRecord] = useState(null);
+    const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '' });
 
     const queryDate = searchParams.get('date');
 
@@ -1186,6 +1218,13 @@ const WorkoutPlanScreen = () => {
         setPlanList(prev => prev.filter(item => item.id !== id));
     };
 
+    const openPreview = (nameEn, name) => {
+        const url = getExerciseGif(nameEn);
+        if (url) {
+            setModalState({ isOpen: true, gifUrl: url, name: name });
+        }
+    };
+
     // Helper component to fetch and display PR for an exercise
     const PersonalRecordDisplay = ({ exerciseName }) => {
         const [pr, setPr] = useState(null);
@@ -1279,45 +1318,52 @@ const WorkoutPlanScreen = () => {
                             ) : (
                                 planList.map((item, idx) => (
                                     <div key={item.id} className={`p-5 rounded-2xl border transition-all ${item.isCompleted ? 'bg-slate-800/20 border-emerald-500/30' : 'bg-slate-800/60 border-slate-700 hover:border-slate-500'}`}>
-                                        <div className="flex gap-4">
-                                            <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-white/5 bg-slate-900">
-                                                <GifRenderer nameEn={item.nameEn} />
+                                        <div className="flex items-center gap-4">
+                                            {/* 썸네일 아이콘 크기 적용 (w-10 h-10) */}
+                                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/5 bg-slate-900 shadow-inner">
+                                                <GifRenderer 
+                                                    nameEn={item.nameEn} 
+                                                    onClick={() => openPreview(item.nameEn, item.exercise === '직접 입력' ? item.manualName : item.exercise)}
+                                                />
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between items-start">
-                                                    <div className="flex-1 min-w-0">
-                                                        <span className="text-[10px] font-bold text-indigo-400 block uppercase mb-1">
+                                            
+                                            <div className="flex-1 min-w-0 flex justify-between items-center">
+                                                <div className="flex flex-col min-w-0 pr-2">
+                                                    <div className="flex items-center gap-2 mb-0.5">
+                                                        <span className="text-[10px] font-bold text-indigo-400 block uppercase shrink-0">
                                                             {PART_MAP[item.part] || item.part}
-                                                            {item.category && ` / ${item.category}`}
                                                         </span>
-                                                        <h4 className={`text-lg font-bold flex items-center flex-wrap truncate ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>
+                                                        <h4 className={`text-sm font-bold flex items-center flex-wrap truncate ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>
                                                             {item.exercise === '직접 입력' ? item.manualName : item.exercise}
                                                             {item.part !== 'cardio' && <PersonalRecordDisplay exerciseName={item.exercise === '직접 입력' ? item.manualName : item.exercise} />}
                                                         </h4>
                                                     </div>
-                                                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                                                        {item.isCompleted ? (
-                                                            <div className="flex items-center gap-2 text-emerald-400 font-black italic text-sm">
-                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-                                                                COMPLETED
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex items-center gap-2">
-                                                                <button 
-                                                                    onClick={() => startRecording(idx)}
-                                                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black italic rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-600/20"
-                                                                >
-                                                                    기록하기
-                                                                </button>
-                                                                <button 
-                                                                    onClick={() => handleDeleteFromList(item.id)}
-                                                                    className="p-2 bg-slate-700/50 hover:bg-rose-600/80 text-slate-400 hover:text-white rounded-lg transition-all active:scale-90 border border-white/5"
-                                                                >
-                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest truncate">
+                                                        {item.category || '기타'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    {item.isCompleted ? (
+                                                        <div className="flex items-center gap-2 text-emerald-400 font-black italic text-[10px]">
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                                            DONE
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1.5">
+                                                            <button 
+                                                                onClick={() => startRecording(idx)}
+                                                                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black italic rounded-lg transition-all active:scale-95"
+                                                            >
+                                                                기록
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleDeleteFromList(item.id)}
+                                                                className="p-1.5 bg-slate-700/50 hover:bg-rose-600/80 text-slate-400 hover:text-white rounded-lg transition-all"
+                                                            >
+                                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -1470,12 +1516,17 @@ const WorkoutPlanScreen = () => {
                     </div>
                 </div>
             </div>
+            <GifModal 
+                isOpen={modalState.isOpen} 
+                onClose={() => setModalState({ ...modalState, isOpen: false })} 
+                gifUrl={modalState.gifUrl} 
+                exerciseName={modalState.name} 
+            />
         </div>
     );
 };
 
 const AIRecommendationScreen = () => {
-    const [userData, setUserData] = useState(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.USER_BODY_INFO);
         return saved ? JSON.parse(saved) : null;
     });
