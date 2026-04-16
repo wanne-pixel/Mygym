@@ -9,7 +9,7 @@ import ChatMessage from './src/components/ChatMessage';
 import { BODY_PARTS, PART_MAP, CATEGORIES, STORAGE_KEYS } from './src/constants/exerciseConstants';
 import { fetchLastExerciseRecord, saveWorkoutLogs } from './src/api/workoutApi';
 import BottomNav from './src/components/BottomNav';
-import WelcomeInterview from './src/components/WelcomeInterview';
+import Onboarding from './src/components/Onboarding';
 
 // OpenAI 인스턴스 생성 (Vite 환경변수 사용 및 브라우저 호출 허용)
 const openai = new OpenAI({
@@ -2490,7 +2490,7 @@ const AppContent = () => {
     // 인증 완료 시 메인 앱 라우터
     return (
         <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
-            {showInterview && <WelcomeInterview onComplete={() => setShowInterview(false)} />}
+            {showInterview && <Onboarding onComplete={() => setShowInterview(false)} />}
             <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-white font-bold italic tracking-tighter text-2xl animate-pulse">LOADING...</div>}>
                 <Routes>
                     <Route path="/" element={<MainAppLayout />} />
