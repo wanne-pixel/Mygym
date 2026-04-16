@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
 import { CUSTOM_EXERCISES } from './src/data/customExercises';
+import EXERCISE_DATASET from './src/data/exercises.json';
 import ApiViewer from './src/components/ApiViewer';
 import { supabase } from './src/api/supabase';
 import OpenAI from 'openai';
@@ -16,6 +17,59 @@ const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true
 });
+
+/**
+ * [Utility: Fuzzy Matching for Exercise GIFs]
+ */
+export const getExerciseGif = (nameEn, part) => {
+    if (!nameEn) return null;
+    
+    const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const target = normalize(nameEn);
+    
+    // 1. Fuzzy Match in Dataset
+    const match = EXERCISE_DATASET.find(ex => {
+        const source = normalize(ex.name);
+        return source.includes(target) || target.includes(source);
+    });
+    
+    if (match) {
+        // Base URL for the raw content from the dataset repository or local path
+        // Since we are using hasaneyldrm/exercises-dataset structure:
+        return `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${match.gif_url}`;
+    }
+    
+    return null;
+};
+
+const GifRenderer = ({ nameEn, part, className = "w-full h-full object-cover" }) => {
+    const gifUrl = getExerciseGif(nameEn, part);
+    
+    if (!gifUrl) {
+        return (
+            <div className={`bg-slate-800 flex flex-col items-center justify-center gap-2 ${className}`}>
+                <svg className="w-8 h-8 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">No Preview</span>
+            </div>
+        );
+    }
+    
+    return (
+        <img 
+            src={gifUrl} 
+            alt="Exercise Preview" 
+            className={className}
+            loading="lazy"
+            onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = ""; // Clear src to trigger fallback or empty state
+                e.target.parentElement.innerHTML = '<div class="bg-slate-800 w-full h-full flex items-center justify-center"><span class="text-[8px] font-black text-slate-600 uppercase">Error</span></div>';
+            }}
+        />
+    );
+};
 
 /**
  * [Common: User Profile Modal]
@@ -1225,39 +1279,46 @@ const WorkoutPlanScreen = () => {
                             ) : (
                                 planList.map((item, idx) => (
                                     <div key={item.id} className={`p-5 rounded-2xl border transition-all ${item.isCompleted ? 'bg-slate-800/20 border-emerald-500/30' : 'bg-slate-800/60 border-slate-700 hover:border-slate-500'}`}>
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <span className="text-[10px] font-bold text-indigo-400 block uppercase mb-1">
-                                                    {PART_MAP[item.part] || item.part}
-                                                    {item.category && ` / ${item.category}`}
-                                                </span>
-                                                <h4 className={`text-lg font-bold flex items-center flex-wrap ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>
-                                                    {item.exercise === '직접 입력' ? item.manualName : item.exercise}
-                                                    {item.part !== 'cardio' && <PersonalRecordDisplay exerciseName={item.exercise === '직접 입력' ? item.manualName : item.exercise} />}
-                                                </h4>
+                                        <div className="flex gap-4">
+                                            <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+                                                <GifRenderer nameEn={item.nameEn} />
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                {item.isCompleted ? (
-                                                    <div className="flex items-center gap-2 text-emerald-400 font-black italic text-sm">
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-                                                        COMPLETED
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex-1 min-w-0">
+                                                        <span className="text-[10px] font-bold text-indigo-400 block uppercase mb-1">
+                                                            {PART_MAP[item.part] || item.part}
+                                                            {item.category && ` / ${item.category}`}
+                                                        </span>
+                                                        <h4 className={`text-lg font-bold flex items-center flex-wrap truncate ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>
+                                                            {item.exercise === '직접 입력' ? item.manualName : item.exercise}
+                                                            {item.part !== 'cardio' && <PersonalRecordDisplay exerciseName={item.exercise === '직접 입력' ? item.manualName : item.exercise} />}
+                                                        </h4>
                                                     </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-2">
-                                                        <button 
-                                                            onClick={() => startRecording(idx)}
-                                                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black italic rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-600/20"
-                                                        >
-                                                            기록하기
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => handleDeleteFromList(item.id)}
-                                                            className="p-2 bg-slate-700/50 hover:bg-rose-600/80 text-slate-400 hover:text-white rounded-lg transition-all active:scale-90 border border-white/5"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                        </button>
+                                                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                                                        {item.isCompleted ? (
+                                                            <div className="flex items-center gap-2 text-emerald-400 font-black italic text-sm">
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                                                COMPLETED
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center gap-2">
+                                                                <button 
+                                                                    onClick={() => startRecording(idx)}
+                                                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black italic rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+                                                                >
+                                                                    기록하기
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleDeleteFromList(item.id)}
+                                                                    className="p-2 bg-slate-700/50 hover:bg-rose-600/80 text-slate-400 hover:text-white rounded-lg transition-all active:scale-90 border border-white/5"
+                                                                >
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                )}
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1567,7 +1628,7 @@ ${formattedHistory}`;
         1. 루틴 구성: 반드시 4~6개 종목으로 구성하라.
         2. 중량: 이전 기록보다 2.5~5kg 증량 제안 (기록 없으면 0). JSON 'weight'는 숫자만 허용.
         3. 형식: 마지막에 [ROUTINE_DATA: [...]] JSON 배열 포함.
-        4. 필수 키값: name (문자열), part (문자열: 가슴, 등, 하체, 어깨, 팔, 코어, 유산소 중 하나), sets (숫자), reps (숫자), weight (숫자), isDropSet (불리언).
+        4. 필수 키값: name (한국어 이름), nameEn (영어 이름 - GIF 매칭용), part (문자열: 가슴, 등, 하체, 어깨, 팔, 코어, 유산소 중 하나), sets (숫자), reps (숫자), weight (숫자), isDropSet (불리언).
 
         [대화 원칙]
         - 말투: 3~5문장의 간결하고 파이팅 넘치는 말투. 번호 매기기 금지.
@@ -1602,6 +1663,7 @@ ${formattedHistory}`;
             const newItems = itemsToAdd.map(singleItem => {
                 // 데이터 키 유연성 보정
                 const name = singleItem.name || singleItem.Name || singleItem.운동명 || singleItem.운동이름 || singleItem.exercise || "알 수 없는 운동";
+                const nameEn = singleItem.nameEn || singleItem.exerciseEn || "";
                 const sets = singleItem.sets || singleItem.Sets || singleItem.세트 || 0;
                 const reps = singleItem.reps || singleItem.Reps || singleItem.횟수 || singleItem.반복수 || 0;
                 const weight = singleItem.weight || singleItem.Weight || singleItem.무게 || singleItem.중량 || 0;
@@ -1631,6 +1693,7 @@ ${formattedHistory}`;
                     part: finalPart,
                     category: exInfoForCategory?.equipment || '기타',
                     exercise: name,
+                    nameEn: nameEn,
                     manualName: '',
                     isCompleted: false,
                     suggestedSets: sets,

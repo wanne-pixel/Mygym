@@ -34,10 +34,11 @@ const ChatMessage = ({ msg, onAddRoutineItem }) => {
                         name = name.replace('(드롭)', '').trim();
                         isDropSet = true;
                     }
-                    return { name, sets: 4, reps: 12, weight: 0, isDropSet };
+                    return { name, nameEn: "", sets: 4, reps: 12, weight: 0, isDropSet };
                 }
                 
                 let name = item.name || item.Name || item.운동명 || item.운동이름 || item.exercise || "알 수 없는 운동";
+                let nameEn = item.nameEn || item.exerciseEn || "";
                 let part = item.part || item.Part || item.부위 || "";
                 let isDropSet = item.isDropSet || false;
                 
@@ -48,6 +49,7 @@ const ChatMessage = ({ msg, onAddRoutineItem }) => {
 
                 return {
                     name,
+                    nameEn,
                     part,
                     sets: item.sets || item.Sets || item.세트 || 0,
                     reps: item.reps || item.Reps || item.횟수 || item.반복수 || 0,

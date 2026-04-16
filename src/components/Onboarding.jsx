@@ -109,6 +109,7 @@ const Onboarding = ({ onComplete }) => {
 
             Rules for Localization:
             - ALL exercise names ("exercise" field) MUST be in Korean only. (e.g., "벤치 프레스" instead of "Bench Press").
+            - For EACH exercise, provide the English name in "nameEn" for GIF matching (e.g., "Barbell Bench Press").
 
             Rules for Beginner Optimization (if Level is 'beginner'):
             - DO NOT provide complex split routines. Use a Full-Body (무분할) routine for every active day.
@@ -135,6 +136,7 @@ const Onboarding = ({ onComplete }) => {
                 "part": "가슴" | "등" | "하체" | "어깨" | "팔" | "코어" | "유산소",
                 "type": "기구" | "프리웨이트" | "맨몸" | "유산소" | "스트레칭",
                 "exercise": "운동 이름 (반드시 한국어)",
+                "nameEn": "English Name of Exercise",
                 "sets_count": number,
                 "sets_data": [
                     { "weight": number, "reps": number } // For cardio/stretching, use { "duration": "10분 0초" }
