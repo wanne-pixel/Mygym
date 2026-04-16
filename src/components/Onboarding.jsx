@@ -106,10 +106,19 @@ const Onboarding = ({ onComplete }) => {
 
             Mode: ${hasMetrics ? 'ULTRA-PERSONALIZED (based on body metrics)' : 'STANDARD-PERSONALIZED'}
 
-            Requirements:
-            1. Every session MUST follow this structure: [Dynamic Stretching (5 min) -> Main Workout -> Cardio & Static Stretching (5-10 min)].
+            Rules for Localization:
+            - ALL exercise names ("exercise" field) MUST be in Korean only. (e.g., "벤치 프레스" instead of "Bench Press").
+
+            Rules for Beginner Optimization (if Level is 'beginner'):
+            - DO NOT provide complex split routines. Use a Full-Body (무분할) routine for every active day.
+            - Limit main workout to 3-4 CORE COMPOUND exercises (e.g., Squats, Lat Pulldowns, Push-ups).
+            - EXCLUDE isolation exercises for small muscles like arms (biceps/triceps) or shoulders (lateral raises).
+            - Include exactly 10-15 minutes of light cardio at the end of each session.
+
+            General Requirements:
+            1. Every session MUST follow this structure: [Dynamic Stretching (5 min) -> Main Workout -> Cardio & Static Stretching (5-15 min)].
             2. Volume adjustment:
-               - If time is '30m': Limit main workout to 3-4 essential compound exercises.
+               - If time is '30m': Limit main workout to 3-4 essential exercises.
                - If time is '1h': Include 5-6 exercises with standard sets.
                - If time is '1.5h+': Include 7-8 exercises with more sets and auxiliary movements.
             3. The frequency is ${answers.frequency} times per week. For other days, mark them as 'Rest Day'.
@@ -120,10 +129,10 @@ const Onboarding = ({ onComplete }) => {
                 "user_id": "${user.id}",
                 "part": "chest" | "back_part" | "legs" | "shoulders" | "arms" | "abs" | "cardio" | "stretching",
                 "type": "기구" | "프리웨이트" | "맨몸" | "유산소" | "스트레칭",
-                "exercise": "Exercise Name",
+                "exercise": "운동 이름 (반드시 한국어)",
                 "sets_count": number,
                 "sets_data": [
-                    { "weight": number, "reps": number } // For cardio/stretching, use { "duration": "5분 0초" }
+                    { "weight": number, "reps": number } // For cardio/stretching, use { "duration": "10분 0초" }
                 ],
                 "is_completed": false,
                 "created_at": "YYYY-MM-DDTHH:mm:ssZ" // Distribute across 7 days starting from today (${new Date().toISOString()})
