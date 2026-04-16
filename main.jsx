@@ -1,58 +1,41 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
-import { CUSTOM_EXERCISES } from './src/data/customExercises';
 import EXERCISE_DATASET from './src/data/exercises.json';
 import ApiViewer from './src/components/ApiViewer';
 import { supabase } from './src/api/supabase';
 import OpenAI from 'openai';
 import ChatMessage from './src/components/ChatMessage';
-import { BODY_PARTS, PART_MAP, CATEGORIES, STORAGE_KEYS } from './src/constants/exerciseConstants';
+import { BODY_PARTS, PART_MAP, STORAGE_KEYS } from './src/constants/exerciseConstants';
 import { fetchLastExerciseRecord, saveWorkoutLogs } from './src/api/workoutApi';
 import BottomNav from './src/components/BottomNav';
 import Onboarding from './src/components/Onboarding';
 
-// OpenAI 인스턴스 생성 (Vite 환경변수 사용 및 브라우저 호출 허용)
+// OpenAI 인스턴스 생성
 const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true
 });
 
 /**
- * [Utility: Fuzzy Matching for Exercise GIFs]
+ * [Utility: Perfect GIF Matching]
  */
-export const getExerciseGif = (nameEn) => {
-    if (!nameEn) {
-        return null;
+export const getExerciseGif = (nameEn, exerciseId) => {
+    if (!nameEn && !exerciseId) return null;
+    
+    // 1. ID가 있으면 최우선으로 매칭 (가장 정확)
+    if (exerciseId) {
+        const ex = EXERCISE_DATASET.find(e => e.id === exerciseId);
+        if (ex) return `/${ex.gif_url}`;
     }
     
-    // 유저 요청: 키워드 교집합 방식 (띄어쓰기 기준 쪼개서 모두 포함되는지 확인)
-    const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, ''); // 띄어쓰기는 유지
-    const keywords = normalize(nameEn).split(/\s+/).filter(k => k.length > 0);
-    
-    // Fuzzy Match in Dataset using Keyword Intersection
-    const matchedExercise = EXERCISE_DATASET.find(ex => {
-        const source = normalize(ex.name);
-        return keywords.every(kw => source.includes(kw));
-    });
-    
-    let imagePath = null;
-    if (matchedExercise) {
-        const fileName = matchedExercise.gif_url.split('/').pop();
-        imagePath = `/videos/${fileName}`;
-    }
-    
-    // 디버깅 로그 (유지)
+    // 2. 이름으로 정확히 일치하는 항목 찾기
     if (nameEn) {
-        console.log('GIF 매칭 시도:', { 
-            input: nameEn, 
-            keywords, 
-            matched: matchedExercise?.name, 
-            path: imagePath 
-        });
+        const ex = EXERCISE_DATASET.find(e => e.name.toLowerCase() === nameEn.toLowerCase());
+        if (ex) return `/${ex.gif_url}`;
     }
-    
-    return imagePath;
+
+    return null;
 };
 
 /**
@@ -92,8 +75,8 @@ const GifModal = ({ isOpen, onClose, gifUrl, exerciseName }) => {
     );
 };
 
-const GifRenderer = ({ nameEn, part, className = "w-full h-full object-cover", onClick }) => {
-    const gifUrl = getExerciseGif(nameEn, part);
+const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cover", onClick }) => {
+    const gifUrl = getExerciseGif(nameEn, exerciseId);
     
     if (!gifUrl) {
         return (
@@ -145,7 +128,6 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
         if (error) {
             alert('저장 실패: ' + error.message);
         } else {
-            // 로컬 스토리지에도 최신 정보 저장
             localStorage.setItem(STORAGE_KEYS.USER_BODY_INFO, JSON.stringify(profile));
             alert('저장되었습니다.');
             onUpdate();
@@ -225,70 +207,47 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
 };
 
 /**
- * [Common: Exercise Selector]
+ * [Common: Exercise Selector - Refactored for exercises.json]
  */
 const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
-    const [manualName, setManualName] = useState(selection.manualName || '');
-
-    useEffect(() => {
-        if (selection.manualName !== undefined && selection.manualName !== manualName) {
-            setManualName(selection.manualName);
-        }
-    }, [selection.manualName]);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const handlePartClick = (p) => {
-        setSelection({ part: p, category: '', exercise: '', manualName: '' });
-        setManualName('');
+        setSelection({ part: p, exercise: null, manualName: '' });
+        setSearchTerm('');
     };
 
-    const handleCategoryClick = (c) => {
-        setSelection({ ...selection, category: c, exercise: '', manualName: '' });
-        setManualName('');
-    };
-
-    const handleExerciseClick = (exName) => {
-        const isManual = exName === '직접 입력';
-        const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === exName);
+    const handleExerciseClick = (ex) => {
         setSelection({ 
             ...selection, 
-            exercise: exName, 
-            manualName: isManual ? manualName : '',
-            nameEn: exInfo?.nameEn || ''
+            exercise: ex,
+            manualName: ''
         });
-        if (onExerciseSelect && !isManual) onExerciseSelect(exName);
-    };
-
-    const handleManualNameChange = (val) => {
-        setManualName(val);
-        setSelection({ ...selection, manualName: val, nameEn: '' });
+        if (onExerciseSelect) onExerciseSelect(ex.name);
     };
 
     const filteredExercises = useMemo(() => {
         if (!selection.part) return [];
-        if (selection.part === 'cardio') {
-            return CUSTOM_EXERCISES.filter(ex => ex.part === 'cardio');
+        let list = EXERCISE_DATASET.filter(ex => ex.body_part === selection.part);
+        if (searchTerm.trim()) {
+            list = list.filter(ex => 
+                ex.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
         }
-        if (!selection.category) return [];
-        return CUSTOM_EXERCISES.filter(ex => ex.part === selection.part && ex.equipment === selection.category);
-    }, [selection.part, selection.category]);
+        return list;
+    }, [selection.part, searchTerm]);
 
     return (
         <div className="space-y-8">
             {/* Selection Summary */}
-            {(selection.part || selection.category || selection.exercise) && (
+            {(selection.part || selection.exercise) && (
                 <div className="p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl animate-fade-in">
                     <div className="flex flex-wrap items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest">
                         {selection.part && <span>{BODY_PARTS.find(p => p.key === selection.part)?.label}</span>}
-                        {selection.category && (
-                            <>
-                                <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                                <span>{selection.category}</span>
-                            </>
-                        )}
                         {selection.exercise && (
                             <>
                                 <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                                <span className="text-white">{selection.exercise === '직접 입력' ? (selection.manualName || '직접 입력 중...') : selection.exercise}</span>
+                                <span className="text-white uppercase">{selection.exercise.name}</span>
                             </>
                         )}
                     </div>
@@ -298,12 +257,12 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             {/* Step 1: Body Part */}
             <div>
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 1. 부위 선택</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {BODY_PARTS.map(p => (
                         <button 
                             key={p.key} 
                             onClick={() => handlePartClick(p.key)} 
-                            className={`py-4 rounded-2xl font-black text-xs tracking-tighter transition-all duration-300 ${selection.part === p.key ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/30 ring-2 ring-blue-400/50' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50'}`}
+                            className={`py-3 rounded-2xl font-black text-[10px] sm:text-xs tracking-tighter transition-all duration-300 ${selection.part === p.key ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/30 ring-2 ring-blue-400/50' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50'}`}
                         >
                             {p.label.toUpperCase()}
                         </button>
@@ -311,59 +270,41 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                 </div>
             </div>
 
-            {/* Step 2: Category (Weightlifting only) */}
-            {selection.part && selection.part !== 'cardio' && (
-                <div className="animate-fade-in">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 2. 기구 분류</label>
-                    <div className="grid grid-cols-3 gap-2">
-                        {CATEGORIES.map(c => (
-                            <button 
-                                key={c} 
-                                onClick={() => handleCategoryClick(c)} 
-                                className={`py-4 rounded-2xl font-black text-xs tracking-tighter transition-all duration-300 ${selection.category === c ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 ring-2 ring-indigo-400/50' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50'}`}
-                            >
-                                {c}
-                            </button>
-                        ))}
+            {/* Step 2: Search and List */}
+            {selection.part && (
+                <div className="animate-fade-in space-y-4">
+                    <div className="relative">
+                        <input 
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="운동 명칭 검색 (English)..."
+                            className="w-full bg-slate-900 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                        />
+                        <svg className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
-                </div>
-            )}
 
-            {/* Step 3: Exercise Selection */}
-            {(selection.part === 'cardio' || selection.category) && (
-                <div className="animate-fade-in space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-4 px-1">Step {selection.part === 'cardio' ? '2' : '3'}. 종목 선택</label>
-                    
-                    {filteredExercises.map((ex) => (
-                        <div key={ex.id} className="space-y-3">
-                            <div 
-                                onClick={() => handleExerciseClick(ex.name)}
-                                className={`group relative flex items-center justify-between p-4 rounded-[1.5rem] cursor-pointer transition-all duration-500 border ${selection.exercise === ex.name ? 'bg-blue-600/10 border-blue-500 ring-1 ring-blue-500/50' : 'bg-slate-800/30 border-white/5 hover:border-slate-600 hover:bg-slate-800/50'}`}
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div>
-                                        <p className={`text-base font-black italic tracking-tight uppercase transition-colors ${selection.exercise === ex.name ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
-                                        <div className="flex gap-2 mt-1">
-                                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{ex.equipment}</span>
-                                        </div>
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                        {filteredExercises.length === 0 ? (
+                            <p className="text-center py-10 text-slate-500 italic text-xs">검색 결과가 없습니다.</p>
+                        ) : (
+                            filteredExercises.map((ex) => (
+                                <div 
+                                    key={ex.id}
+                                    onClick={() => handleExerciseClick(ex)}
+                                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${selection.exercise?.id === ex.id ? 'bg-blue-600/20 border-blue-500' : 'bg-slate-800/30 border-white/5 hover:border-slate-600'}`}
+                                >
+                                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-900 shrink-0">
+                                        <GifRenderer exerciseId={ex.id} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-xs font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{ex.equipment}</span>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            {ex.name === '직접 입력' && selection.exercise === '직접 입력' && (
-                                <div className="px-2 animate-slide-down">
-                                    <input 
-                                        type="text" 
-                                        value={manualName}
-                                        onChange={(e) => handleManualNameChange(e.target.value)}
-                                        onBlur={() => { if(onExerciseSelect && manualName.trim()) onExerciseSelect('직접 입력'); }}
-                                        placeholder="운동 이름 입력"
-                                        className="w-full bg-slate-900 border border-blue-500/50 rounded-xl p-3 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                            ))
+                        )}
+                    </div>
                 </div>
             )}
         </div>
@@ -381,19 +322,15 @@ const BackButton = () => {
 };
 
 /**
- * [Screen 1: Login and Sign Up]
+ * [Screen: Login]
  */
 const LoginScreen = () => {
     const [isSignup, setIsSignup] = useState(false);
-    
-    // 폼 상태 관리
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
-    
     const [isLoading, setIsLoading] = useState(false);
 
-    // 로그인 로직
     const handleLogin = async () => {
         if (!email || !password) {
             alert('이메일과 비밀번호를 입력해주세요.');
@@ -402,63 +339,36 @@ const LoginScreen = () => {
         setIsLoading(true);
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         setIsLoading(false);
-        
-        if (error) {
-            if (error.message.includes('Email not confirmed')) {
-                alert('이메일 인증이 완료되지 않았습니다. 가입하신 이메일의 수신함을 확인해주세요.');
-            } else {
-                alert('로그인 실패: ' + error.message);
-            }
-        }
+        if (error) alert('로그인 실패: ' + error.message);
     };
 
-    // 소셜 로그인 (Google)
     const handleGoogleLogin = async () => {
         const { error } = await supabase.auth.signInWithOAuth({ 
             provider: 'google',
-            options: {
-                redirectTo: window.location.origin
-            }
+            options: { redirectTo: window.location.origin }
         });
         if (error) alert('구글 로그인 실패: ' + error.message);
     };
 
-    // 상세 회원가입 및 이메일 전송 로직
     const handleSignupComplete = async () => {
-        if (!email || !password) {
-            alert('이메일과 비밀번호는 필수입니다.');
-            return;
-        }
-        if (password !== passwordConfirm) {
-            alert('비밀번호가 일치하지 않습니다.');
-            return;
-        }
+        if (!email || !password) { alert('이메일과 비밀번호는 필수입니다.'); return; }
+        if (password !== passwordConfirm) { alert('비밀번호가 일치하지 않습니다.'); return; }
         
         setIsLoading(true);
-        const { data, error } = await supabase.auth.signUp({ 
-            email, 
-            password
-        });
+        const { data, error } = await supabase.auth.signUp({ email, password });
         setIsLoading(false);
 
         if (error) {
             alert('회원가입 실패: ' + error.message);
         } else {
-            if (data?.user && data?.user?.identities && data?.user?.identities.length === 0) {
-                 alert('이미 존재하는 이메일입니다.');
-            } else {
-                 alert('가입하신 이메일로 인증 메일이 발송되었습니다!\n이메일의 링크를 클릭하여 인증을 완료한 후 로그인해주세요.');
-                 setIsSignup(false);
-                 setPassword('');
-                 setPasswordConfirm('');
-            }
+            alert('가입하신 이메일로 인증 메일이 발송되었습니다!');
+            setIsSignup(false);
         }
     };
 
-    // 회원가입 화면
     if (isSignup) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 animate-fade-in bg-slate-950 relative">
+            <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 animate-fade-in bg-slate-950">
                 <div className="w-full max-sm space-y-8">
                     <button onClick={() => setIsSignup(false)} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4 group">
                         <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
@@ -466,99 +376,34 @@ const LoginScreen = () => {
                     </button>
                     <div className="text-center">
                         <h2 className="text-4xl font-black italic tracking-tighter text-white uppercase">회원가입</h2>
-                        <p className="mt-2 text-slate-400 font-medium">간편하게 가입하고 운동 기록을 시작하세요.</p>
                     </div>
-                    
-                    <div className="space-y-6 bg-slate-900/50 p-8 rounded-3xl border border-slate-800 shadow-2xl">
-                        <div className="space-y-4">
-                            <input
-                                type="email"
-                                placeholder="이메일 주소"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all"
-                            />
-                            <input
-                                type="password"
-                                placeholder="비밀번호"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                            <input
-                                type="password"
-                                placeholder="비밀번호 확인"
-                                value={passwordConfirm}
-                                onChange={(e) => setPasswordConfirm(e.target.value)}
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                        </div>
-
-                        <div className="pt-4">
-                            <button
-                                onClick={handleSignupComplete}
-                                disabled={isLoading}
-                                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all mb-4"
-                            >
-                                {isLoading ? '처리 중...' : '가입 완료'}
-                            </button>
-                        </div>
+                    <div className="space-y-4 bg-slate-900/50 p-8 rounded-3xl border border-slate-800">
+                        <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="password" placeholder="비밀번호 확인" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <button onClick={handleSignupComplete} disabled={isLoading} className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl active:scale-95 transition-all">가입 완료</button>
                     </div>
                 </div>
             </div>
         );
     }
 
-    // 로그인 화면
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-6 animate-fade-in relative bg-slate-950">
+        <div className="flex flex-col items-center justify-center min-h-screen px-6 bg-slate-950">
             <div className="mb-12 text-center">
-                <h1 className="text-6xl font-extrabold italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">
-                    MyGym
-                </h1>
-                <p className="mt-2 text-gray-400 font-medium tracking-wide uppercase">LEVEL UP YOUR LIMITS</p>
+                <h1 className="text-6xl font-extrabold italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">MyGym</h1>
+                <p className="mt-2 text-gray-400 font-medium tracking-wide uppercase italic">Level up your limits</p>
             </div>
             <div className="w-full max-sm space-y-4">
-                <div className="space-y-2">
-                    <input
-                        type="email"
-                        placeholder="이메일 주소"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-4 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-4 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-500 transition-all"
-                    />
-                </div>
+                <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-4 bg-slate-800 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-4 bg-slate-800 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none" />
                 <div className="flex gap-3">
-                    <button
-                        onClick={handleLogin}
-                        disabled={isLoading}
-                        className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
-                    >
-                        {isLoading ? '로딩중...' : '로그인'}
-                    </button>
-                    <button
-                        onClick={() => setIsSignup(true)}
-                        className="flex-1 py-4 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl active:scale-95 transition-all"
-                    >
-                        회원가입
-                    </button>
+                    <button onClick={handleLogin} disabled={isLoading} className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-xl active:scale-95 transition-all">로그인</button>
+                    <button onClick={() => setIsSignup(true)} className="flex-1 py-4 bg-slate-700 text-white font-bold rounded-xl active:scale-95 transition-all">회원가입</button>
                 </div>
-                <div className="pt-2">
-                    <button
-                        onClick={handleGoogleLogin}
-                        className="w-full py-4 bg-white hover:bg-gray-100 text-slate-900 font-bold rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
-                    >
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="G" />
-                        Google로 시작하기
-                    </button>
-                </div>
+                <button onClick={handleGoogleLogin} className="w-full py-4 bg-white text-slate-900 font-bold rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-all">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="G" /> Google로 시작하기
+                </button>
             </div>
         </div>
     );
@@ -566,11 +411,8 @@ const LoginScreen = () => {
 
 const WorkoutDetailScreen = () => {
     const navigate = useNavigate();
-    const location = useLocation();
     const [searchParams] = useSearchParams();
     const queryDate = searchParams.get('date');
-    const { date: dateStrFromState } = location.state || { date: '?' };
-    
     const [logs, setLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -580,124 +422,45 @@ const WorkoutDetailScreen = () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
-
-            const start = `${queryDate}T00:00:00`;
-            const end = `${queryDate}T23:59:59`;
-
-            const { data, error } = await supabase
-                .from('workout_logs')
-                .select('*')
-                .eq('user_id', user.id)
-                .gte('created_at', start)
-                .lte('created_at', end)
-                .order('created_at', { ascending: true });
-
+            const { data, error } = await supabase.from('workout_logs').select('*').eq('user_id', user.id).gte('created_at', `${queryDate}T00:00:00`).lte('created_at', `${queryDate}T23:59:59`).order('created_at', { ascending: true });
             if (error) throw error;
             setLogs(data || []);
-        } catch (error) {
-            console.error("Error fetching logs:", error);
-        } finally {
-            setIsLoading(false);
-        }
+        } catch (e) { console.error(e); } finally { setIsLoading(false); }
     };
 
-    useEffect(() => {
-        fetchLogs();
-    }, [queryDate]);
+    useEffect(() => { fetchLogs(); }, [queryDate]);
 
     const handleDelete = async (id) => {
-        if (!confirm('정말 삭제하시겠습니까?')) return;
+        if (!confirm('삭제하시겠습니까?')) return;
         const { error } = await supabase.from('workout_logs').delete().eq('id', id);
-        if (error) {
-            alert('삭제 실패: ' + error.message);
-        } else {
-            alert('삭제되었습니다.');
-            fetchLogs();
-        }
+        if (!error) fetchLogs();
     };
 
-    const handleEdit = (log) => {
-        navigate(`/routine-record?id=${log.id}&date=${queryDate}`);
-    };
-    
     return (
-        <div className="p-4 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24">
+        <div className="p-4 md:p-12 max-w-4xl mx-auto bg-slate-950 min-h-screen pb-24">
             <BackButton />
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                <h2 className="text-3xl font-black italic tracking-tighter text-white">
-                    {dateStrFromState} 트레이닝 상세
-                </h2>
-                <button 
-                    onClick={() => navigate(`/routine-record${queryDate ? `?date=${queryDate}` : ''}`)}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all text-center"
-                >
-                    운동 추가하기
-                </button>
-            </div>
-
+            <h2 className="text-3xl font-black italic text-white mb-8">{queryDate} 트레이닝 상세</h2>
             <div className="space-y-4">
-                {isLoading ? (
-                    <div className="py-20 text-center text-slate-500 italic">기록을 불러오는 중...</div>
-                ) : logs.length === 0 ? (
-                    <div className="py-20 text-center bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-800">
-                        <p className="text-slate-500 italic">운동 기록이 없습니다.</p>
-                    </div>
-                ) : (
-                    logs.map((log, idx) => (
-                        <div key={log.id || idx} className="bg-slate-900/40 border border-white/5 p-4 md:p-6 rounded-[1.5rem] shadow-2xl relative overflow-hidden group">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
-                            <div className="flex items-center justify-between mb-3">
-                                <div>
-                                    <div className="flex gap-1 mb-1">
-                                        <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest text-white">
-                                            {PART_MAP[log.part] || log.part}
-                                        </span>
-                                        <span className="bg-slate-800 text-slate-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-slate-700">
-                                            {log.type}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <h3 className="text-lg md:text-xl font-black italic text-white uppercase tracking-tighter leading-none">{log.exercise}</h3>
-                                        {log.part !== 'cardio' && <span className="text-xs font-black text-slate-500 italic uppercase leading-none">{log.sets_count} SETS</span>}
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button 
-                                        onClick={() => handleEdit(log)}
-                                        className="p-2 bg-slate-800 hover:bg-blue-600 text-slate-400 hover:text-white rounded-lg transition-all"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                    </button>
-                                    <button 
-                                        onClick={() => handleDelete(log.id)}
-                                        className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                    </button>
-                                </div>
+                {isLoading ? <div className="text-center text-slate-500 italic">로딩 중...</div> : logs.map(log => (
+                    <div key={log.id} className="bg-slate-900/40 border border-white/5 p-6 rounded-[1.5rem] relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                        <div className="flex justify-between items-start mb-4">
+                            <div>
+                                <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase text-white mb-1 inline-block">{PART_MAP[log.part] || log.part}</span>
+                                <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">{log.exercise}</h3>
                             </div>
-
-                            <div className="space-y-1">
-                                {log.part === 'cardio' ? (
-                                    <div className="flex items-center justify-between py-3 px-4 bg-slate-950/50 rounded-lg border border-white/5 transition-all hover:border-blue-500/30">
-                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DURATION</span>
-                                        <span className="text-base font-black text-blue-400 italic">{log.sets_data[0]?.duration || '0분 0초'}</span>
-                                    </div>
-                                ) : (
-                                    log.sets_data.map((s, sIdx) => (
-                                        <div key={sIdx} className="flex items-center justify-between py-1.5 px-4 bg-slate-950/50 rounded-lg border border-white/5 transition-all hover:border-blue-500/30">
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{sIdx + 1} SET</span>
-                                            <div className="flex gap-4 items-center">
-                                                <span className="text-xs font-bold text-white w-12 text-right">{s.weight}kg</span>
-                                                <span className="text-xs font-bold text-blue-400 w-12 text-right">{s.reps} r</span>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
+                            <button onClick={() => handleDelete(log.id)} className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
-                    ))
-                )}
+                        <div className="space-y-1">
+                            {log.part === 'cardio' ? <div className="text-blue-400 font-black">{log.sets_data[0]?.duration}</div> : log.sets_data.map((s, idx) => (
+                                <div key={idx} className="flex justify-between py-1 px-3 bg-slate-950/50 rounded-lg text-xs font-bold">
+                                    <span className="text-slate-500">{idx + 1} SET</span>
+                                    <span className="text-white">{s.weight}kg x {s.reps}회</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -705,377 +468,77 @@ const WorkoutDetailScreen = () => {
 
 const WorkoutSetupScreen = () => {
     const [searchParams] = useSearchParams();
-    const [step, setStep] = useState(1);
-    const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
+    const [selection, setSelection] = useState({ part: '', exercise: null, manualName: '' });
     const [setsData, setSetsData] = useState([{ weight: '', reps: '' }]);
     const [cardioMinutes, setCardioMinutes] = useState('');
     const [cardioSeconds, setCardioSeconds] = useState('');
     const [addedExercises, setAddedExercises] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
-    const [lastRecord, setLastRecord] = useState(null);
-
     const queryDate = searchParams.get('date');
-    const editId = searchParams.get('id');
 
-    // Fetch last record when exercise is selected
-    useEffect(() => {
-        const fetchLast = async () => {
-            const exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
-            if (!exerciseName) {
-                setLastRecord(null);
-                return;
-            }
-
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) return;
-                const record = await fetchLastExerciseRecord(user.id, exerciseName);
-                setLastRecord(record);
-            } catch (err) {
-                console.error("Error fetching last record:", err);
-            }
-        };
-
-        fetchLast();
-    }, [selection.exercise, selection.manualName]);
-
-    useEffect(() => {
-        const fetchExistingLog = async () => {
-            if (!editId) return;
-            try {
-                const { data, error } = await supabase
-                    .from('workout_logs')
-                    .select('*')
-                    .eq('id', editId)
-                    .single();
-
-                if (error) throw error;
-                if (data) {
-                    setSelection({
-                        part: data.part,
-                        category: data.type,
-                        exercise: CUSTOM_EXERCISES.find(ex => ex.name === data.exercise) ? data.exercise : '직접 입력',
-                        manualName: CUSTOM_EXERCISES.find(ex => ex.name === data.exercise) ? '' : data.exercise
-                    });
-                    
-                    if (data.part === 'cardio') {
-                        const durationMatch = data.sets_data[0]?.duration?.match(/(\d+)분 (\d+)초/);
-                        if (durationMatch) {
-                            setCardioMinutes(durationMatch[1]);
-                            setCardioSeconds(durationMatch[2]);
-                        }
-                    } else {
-                        setSetsData(data.sets_data);
-                    }
-                    setStep(4);
-                }
-            } catch (err) {
-                console.error("Error fetching log for edit:", err);
-                alert("기록을 불러오지 못했습니다.");
-            }
-        };
-
-        fetchExistingLog();
-    }, [editId]);
-
-    const handleAddSet = () => {
-        const lastSet = setsData[setsData.length - 1];
-        setSetsData([...setsData, { weight: lastSet.weight, reps: lastSet.reps }]);
-    };
-
-    const handleDeleteSet = (index) => {
-        if (setsData.length <= 1) return;
-        setSetsData(setsData.filter((_, i) => i !== index));
-    };
-
-    const handleSetDataChange = (index, field, value) => {
-        const newData = [...setsData];
-        newData[index] = { ...newData[index], [field]: value };
-        setSetsData(newData);
-    };
-
-    const handleLoadLastRecord = () => {
-        if (!lastRecord) return;
-        const newData = setsData.map(s => ({
-            weight: lastRecord.weight || '',
-            reps: lastRecord.reps || ''
-        }));
-        setSetsData(newData);
-    };
-
-    const isRecordEnabled = useMemo(() => {
-        const isExerciseReady = selection.exercise !== '' && (selection.exercise !== '직접 입력' || (selection.manualName && selection.manualName.trim() !== ''));
-        if (!isExerciseReady) return false;
-
-        if (selection.part === 'cardio') {
-            const mins = parseInt(cardioMinutes) || 0;
-            const secs = parseInt(cardioSeconds) || 0;
-            return mins >= 0 && secs >= 0 && (mins > 0 || secs > 0);
-        } else {
-            const allSetsFilled = setsData.length > 0 && setsData.every(s => s.weight !== '' && s.reps !== '' && parseFloat(s.weight) >= 0 && parseInt(s.reps) > 0);
-            return allSetsFilled;
-        }
-    }, [setsData, selection, cardioMinutes, cardioSeconds]);
-
-    const handleAddOrUpdateExercise = async (e) => {
-        if (e) e.preventDefault();
-        if (!isRecordEnabled || isSaving) return;
+    const handleAddOrUpdateExercise = async () => {
+        if (!selection.exercise || isSaving) return;
         setIsSaving(true);
-
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                alert('로그인이 필요한 서비스입니다.');
-                setIsSaving(false);
-                return;
-            }
-
-            let exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
-            exerciseName = exerciseName.replace('(드롭)', '').trim();
-            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === selection.exercise && ex.part === selection.part);
-
-            const finalSetsData = selection.part === 'cardio' 
-                ? [{ duration: `${cardioMinutes || 0}분 ${cardioSeconds || 0}초` }] 
-                : setsData;
-
-            // Determine target date
-            let targetDate = queryDate ? new Date(queryDate) : new Date();
-            if (queryDate) {
-                targetDate.setHours(12, 0, 0, 0);
-            }
-
             const logData = {
                 user_id: user.id,
                 part: selection.part,
-                type: exInfo?.equipment || selection.category || '기타',
-                exercise: exerciseName,
-                nameEn: selection.nameEn || '',
+                type: selection.exercise.equipment,
+                exercise: selection.exercise.name,
+                exercise_id: selection.exercise.id,
                 sets_count: selection.part === 'cardio' ? 1 : setsData.length,
-                sets_data: finalSetsData,
-                is_completed: true
+                sets_data: selection.part === 'cardio' ? [{ duration: `${cardioMinutes}분 ${cardioSeconds}초` }] : setsData,
+                is_completed: true,
+                created_at: queryDate ? new Date(queryDate).toISOString() : new Date().toISOString()
             };
-
-            if (editId) {
-                const { error } = await supabase
-                    .from('workout_logs')
-                    .update(logData)
-                    .eq('id', editId);
-                if (error) throw error;
-                alert('기록이 수정되었습니다!');
-            } else {
-                const { error } = await supabase
-                    .from('workout_logs')
-                    .insert([{ ...logData, created_at: targetDate.toISOString() }]);
-                if (error) throw error;
-                alert('성공적으로 기록이 저장되었습니다!');
-            }
-
-            // Redirect back to detail view if date exists
-            if (queryDate) {
-                navigate(`/routine-detail?date=${queryDate}`);
-            } else {
-                setAddedExercises([...addedExercises, { ...logData, id: Date.now() }]);
-                setSetsData([{ weight: '', reps: '' }]);
-                setCardioMinutes('');
-                setCardioSeconds('');
-                setStep(1);
-                setSelection({ part: '', category: '', exercise: '', manualName: '' });
-            }
-
-        } catch (error) {
-            console.error('Error saving workout:', error);
-            alert('저장 중 오류가 발생했습니다: ' + error.message);
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleDeleteLog = (id) => {
-        if (confirm('이 기록을 화면에서 지우시겠습니까? (DB에서는 삭제되지 않습니다)')) {
-            setAddedExercises(prev => prev.filter(ex => ex.id !== id));
-        }
+            const { error } = await supabase.from('workout_logs').insert([logData]);
+            if (error) throw error;
+            setAddedExercises([...addedExercises, { ...logData, id: Date.now() }]);
+            setSelection({ part: '', exercise: null, manualName: '' });
+            alert('기록 완료!');
+        } catch (e) { alert(e.message); } finally { setIsSaving(false); }
     };
 
     return (
-        <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24">
-            <div className="mb-8">
-                <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-blue-500 decoration-4 underline-offset-8">
-                    루틴 기록
-                </h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="p-8 max-w-4xl mx-auto bg-slate-950 min-h-screen pb-24">
+            <h2 className="text-3xl font-black italic text-white uppercase mb-8">루틴 기록</h2>
+            <div className="grid lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                    <ExerciseSelector selection={selection} setSelection={setSelection} onExerciseSelect={() => setStep(4)} />
-                    
-                    {step >= 4 && (
-                        <div className="animate-fade-in space-y-6 bg-slate-800/30 p-6 rounded-2xl border border-slate-700">
+                    <ExerciseSelector selection={selection} setSelection={setSelection} />
+                    {selection.exercise && (
+                        <div className="bg-slate-800/30 p-6 rounded-2xl border border-slate-700 space-y-6">
                             {selection.part === 'cardio' ? (
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">운동 시간 입력</label>
-                                    <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                                        <div className="flex-1 flex items-center gap-2">
-                                            <input type="number" value={cardioMinutes} onChange={e => setCardioMinutes(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none" placeholder="0" />
-                                            <span className="text-slate-400 font-bold">분</span>
-                                        </div>
-                                        <div className="flex-1 flex items-center gap-2">
-                                            <input type="number" value={cardioSeconds} onChange={e => setCardioSeconds(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none placeholder-slate-700" placeholder="0" />
-                                            <span className="text-slate-400 font-bold">초</span>
-                                        </div>
-                                    </div>
+                                <div className="flex gap-4">
+                                    <input type="number" placeholder="분" value={cardioMinutes} onChange={e => setCardioMinutes(e.target.value)} className="w-full bg-slate-900 p-3 rounded-lg text-white font-bold" />
+                                    <input type="number" placeholder="초" value={cardioSeconds} onChange={e => setCardioSeconds(e.target.value)} className="w-full bg-slate-900 p-3 rounded-lg text-white font-bold" />
                                 </div>
                             ) : (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-end px-1">
-                                        <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">세트별 상세 기록 (KG / REPS)</label>
-                                        {lastRecord && (
-                                            <div className="flex flex-col items-end">
-                                                <span className="text-[9px] font-black text-slate-500 uppercase italic">Last: {lastRecord.weight}kg x {lastRecord.reps}회</span>
-                                                <button onClick={handleLoadLastRecord} className="text-[9px] font-black text-blue-400 uppercase hover:underline">기록 불러오기</button>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        {setsData.map((s, idx) => {
-                                            const weights = s.isDropSet && typeof s.weight === 'string' ? s.weight.split('/') : [s.weight];
-                                            if (s.isDropSet && weights.length < 3) while(weights.length < 3) weights.push('');
-
-                                            const updateWeight = (val, wIdx) => {
-                                                const nd = [...setsData];
-                                                if (s.isDropSet) {
-                                                    const newWeights = [...weights];
-                                                    newWeights[wIdx] = val;
-                                                    nd[idx].weight = newWeights.join('/');
-                                                } else {
-                                                    nd[idx].weight = val;
-                                                }
-                                                setSetsData(nd);
-                                            };
-
-                                            return (
-                                                <div key={idx} className="flex flex-row flex-nowrap items-center gap-1.5 sm:gap-2 bg-slate-900/50 p-2 sm:p-3 rounded-xl border border-slate-800 group transition-all hover:border-slate-600">
-                                                    <div className="flex flex-col items-center w-6 sm:w-8 shrink-0">
-                                                        <span className="text-[10px] sm:text-xs font-bold text-slate-600">{idx + 1}S</span>
-                                                    </div>
-                                                    
-                                                    <div className="flex-[2.5] min-w-0 flex items-center gap-1">
-                                                        {s.isDropSet ? (
-                                                            <div className="flex gap-1 flex-1 min-w-0">
-                                                                {weights.slice(0, 3).map((w, wIdx) => (
-                                                                    <input 
-                                                                        key={wIdx}
-                                                                        type="number" 
-                                                                        value={w} 
-                                                                        onChange={(e) => updateWeight(e.target.value, wIdx)}
-                                                                        className="w-full bg-slate-950 border border-slate-700 p-1 rounded text-white text-center text-[10px] focus:border-rose-500 outline-none" 
-                                                                        placeholder={`${wIdx+1}`}
-                                                                    />
-                                                                ))}
-                                                            </div>
-                                                        ) : (
-                                                            <input 
-                                                                type="number" 
-                                                                value={s.weight} 
-                                                                onChange={(e) => updateWeight(e.target.value)}
-                                                                className="flex-1 min-w-0 bg-slate-950 border border-slate-700 p-1.5 rounded text-white text-right text-xs focus:border-blue-500 outline-none" 
-                                                                placeholder="0" 
-                                                            />
-                                                        )}
-                                                        <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap uppercase tracking-tighter">KG</span>
-                                                    </div>
-
-                                                    <div className="flex-1 min-w-0 flex items-center gap-1 border-l border-slate-800 pl-1 sm:pl-2">
-                                                        <input 
-                                                            type="number" 
-                                                            value={s.reps} 
-                                                            onChange={(e) => handleSetDataChange(idx, 'reps', e.target.value)}
-                                                            className="flex-1 min-w-0 bg-slate-950 border border-slate-700 p-1.5 rounded text-white text-right text-xs focus:border-blue-500 outline-none" 
-                                                            placeholder="0" 
-                                                        />
-                                                        <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap">회</span>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-1 sm:gap-2 shrink-0 border-l border-slate-800 pl-1 sm:pl-2">
-                                                        <label className="flex items-center gap-1 cursor-pointer group/cb">
-                                                            <span className="text-[9px] font-black text-slate-500 whitespace-nowrap">드롭</span>
-                                                            <input 
-                                                                type="checkbox" 
-                                                                checked={s.isDropSet || false} 
-                                                                onChange={(e) => {
-                                                                    const nd = [...setsData]; 
-                                                                    nd[idx].isDropSet = e.target.checked;
-                                                                    if (!e.target.checked && typeof nd[idx].weight === 'string') {
-                                                                        nd[idx].weight = nd[idx].weight.split('/')[0] || '';
-                                                                    }
-                                                                    setSetsData(nd);
-                                                                }}
-                                                                className="hidden" 
-                                                            />
-                                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500 shadow-lg shadow-rose-600/20' : 'border-slate-700 bg-slate-800'}`}>
-                                                                {s.isDropSet && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
-                                                            </div>
-                                                        </label>
-                                                        {setsData.length > 1 && (
-                                                            <button onClick={() => handleDeleteSet(idx)} className="p-1 text-slate-600 hover:text-rose-500 transition-colors">
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                    <button 
-                                        onClick={handleAddSet}
-                                        className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs border border-white/5 transition-all active:scale-95"
-                                    >
-                                        + 세트 추가
-                                    </button>
+                                <div className="space-y-2">
+                                    {setsData.map((s, idx) => (
+                                        <div key={idx} className="flex gap-2 items-center bg-slate-900 p-2 rounded-xl border border-slate-800">
+                                            <span className="text-[10px] text-slate-500 w-8 text-center">{idx + 1}S</span>
+                                            <input type="number" placeholder="KG" value={s.weight} onChange={e => { const nd = [...setsData]; nd[idx].weight = e.target.value; setSetsData(nd); }} className="flex-1 bg-slate-950 p-2 rounded text-white text-xs outline-none" />
+                                            <input type="number" placeholder="회" value={s.reps} onChange={e => { const nd = [...setsData]; nd[idx].reps = e.target.value; setSetsData(nd); }} className="flex-1 bg-slate-950 p-2 rounded text-white text-xs outline-none" />
+                                            <button onClick={() => setSetsData(setsData.filter((_, i) => i !== idx))} className="text-slate-600 px-2">×</button>
+                                        </div>
+                                    ))}
+                                    <button onClick={() => setSetsData([...setsData, { weight: '', reps: '' }])} className="w-full py-2 bg-slate-800 text-slate-400 text-[10px] rounded-xl">+ 세트 추가</button>
                                 </div>
                             )}
-                            <button 
-                                onClick={handleAddOrUpdateExercise} 
-                                disabled={!isRecordEnabled || isSaving} 
-                                className={`w-full py-4 font-black rounded-xl italic tracking-tighter transition-all ${isRecordEnabled && !isSaving ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}
-                            >
-                                {isSaving ? '저장 중...' : '기록하기'}
-                            </button>
+                            <button onClick={handleAddOrUpdateExercise} className="w-full py-4 bg-blue-600 text-white font-black rounded-xl italic">기록하기</button>
                         </div>
                     )}
                 </div>
-                <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6">
-                    <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>현재 세션에 추가된 기록 ({addedExercises.length})</h3>
+                <div className="bg-slate-900/50 rounded-3xl p-6 border border-slate-800">
+                    <h3 className="text-xl font-bold text-white mb-6">최근 추가됨</h3>
                     <div className="space-y-4">
-                        {addedExercises.length === 0 ? (<p className="text-slate-600 text-center py-12 italic text-sm">기록된 루틴이 없습니다.</p>) : (addedExercises.map((ex, idx) => (
-                            <div key={ex.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700 group relative">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div>
-                                        <span className="text-[10px] font-bold text-blue-400 block uppercase">
-                                            {PART_MAP[ex.part] || ex.part} / {ex.type}
-                                        </span>
-                                        <span className="font-bold text-white text-lg">{ex.exercise}</span>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button onClick={() => handleDeleteLog(ex.id)} className="p-2 bg-slate-700 hover:bg-rose-600 text-white rounded-lg transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                                    </div>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {ex.part === 'cardio' ? (
-                                        <div className="px-4 py-2 bg-slate-900 rounded-lg border border-slate-700">
-                                            <span className="text-blue-400 font-black italic">{ex.sets_data[0]?.duration}</span>
-                                        </div>
-                                    ) : (
-                                        ex.sets_data.map((s, i) => (
-                                            <div key={i} className="px-3 py-1 bg-slate-900 rounded-lg border border-slate-700 text-[11px] flex flex-col items-center min-w-[50px]">
-                                                <span className="text-slate-500 text-[9px] mb-1">{i+1}S</span>
-                                                <span className="text-white font-bold">{s.weight}kg</span>
-                                                <span className="text-indigo-400 font-medium">{s.reps}R</span>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                                <div className="mt-3 text-right"><span className="text-xs font-bold text-slate-500 uppercase">{ex.part === 'cardio' ? 'Cardio Session' : `Total ${ex.sets_count} Sets`}</span></div>
+                        {addedExercises.map(ex => (
+                            <div key={ex.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                                <p className="text-[10px] text-blue-400 uppercase font-bold">{PART_MAP[ex.part]} / {ex.type}</p>
+                                <p className="font-bold text-white">{ex.exercise}</p>
                             </div>
-                        )))}
+                        ))}
                     </div>
                 </div>
             </div>
@@ -1084,790 +547,139 @@ const WorkoutSetupScreen = () => {
 };
 
 const WorkoutPlanScreen = () => {
-    const [searchParams] = useSearchParams();
-    const [selection, setSelection] = useState({ part: '', category: '', exercise: '', manualName: '' });
-    const [planList, setPlanList] = useState(() => {
-        const saved = localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE);
-        return saved ? JSON.parse(saved) : [];
-    });
-    const [recordingIndex, setRecordingIndex] = useState(null);
-    const [setsData, setSetsData] = useState([]);
-    const [cardioMinutes, setCardioMinutes] = useState('');
-    const [cardioSeconds, setCardioSeconds] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
-    const [lastRecord, setLastRecord] = useState(null);
+    const [selection, setSelection] = useState({ part: '', exercise: null, manualName: '' });
+    const [planList, setPlanList] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE) || '[]'));
     const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '' });
 
-    const queryDate = searchParams.get('date');
-
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify(planList));
-    }, [planList]);
+    useEffect(() => { localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify(planList)); }, [planList]);
 
     const handleAddToList = () => {
-        if (!selection.exercise || (selection.exercise === '직접 입력' && (!selection.manualName || !selection.manualName.trim()))) return;
-        const newItem = {
-            id: Date.now(),
-            part: selection.part,
-            category: selection.category,
-            exercise: selection.exercise,
-            nameEn: selection.nameEn || '', // nameEn 추가
-            manualName: selection.manualName,
-            isCompleted: false
-        };
-        setPlanList([...planList, newItem]);
-        setSelection({ part: '', category: '', exercise: '', manualName: '' });
+        if (!selection.exercise) return;
+        setPlanList([...planList, { id: Date.now(), ...selection.exercise, body_part: selection.part, isCompleted: false }]);
+        setSelection({ part: '', exercise: null, manualName: '' });
     };
 
-    const startRecording = async (index) => {
-        const item = planList[index];
-        const exerciseName = item.exercise === '직접 입력' ? item.manualName : item.exercise;
-        
-        setRecordingIndex(index);
-        setCardioMinutes('');
-        setCardioSeconds('');
-        setLastRecord(null);
-
-        // Fetch last record
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const record = await fetchLastExerciseRecord(user.id, exerciseName);
-                setLastRecord(record);
-            }
-        } catch (e) { console.error(e); }
-
-        // Use AI suggested values if available, otherwise fetch last record or default
-        if (item.suggestedWeight !== undefined || item.suggestedReps !== undefined) {
-            setSetsData([{ weight: item.suggestedWeight || '', reps: item.suggestedReps || '', isDropSet: item.isDropSet || false }]);
-        } else {
-            setSetsData([{ weight: '', reps: '', isDropSet: false }]);
-        }
-    };
-
-    const handleAddSet = () => {
-        const lastSet = setsData[setsData.length - 1];
-        setSetsData([...setsData, { weight: lastSet.weight, reps: lastSet.reps }]);
-    };
-
-    const handleDeleteSet = (index) => {
-        if (setsData.length <= 1) return;
-        setSetsData(setsData.filter((_, i) => i !== index));
-    };
-
-    const handleSetDataChange = (index, field, value) => {
-        const newData = [...setsData];
-        newData[index] = { ...newData[index], [field]: value };
-        setSetsData(newData);
-    };
-
-    const handleLoadLastRecord = () => {
-        if (!lastRecord) return;
-        const newData = setsData.map(s => ({
-            weight: lastRecord.weight || '',
-            reps: lastRecord.reps || ''
-        }));
-        setSetsData(newData);
-    };
-
-    const handleFinishRecording = async () => {
-        if (recordingIndex === null || isSaving) return;
-        
-        const targetExercise = planList[recordingIndex];
-        let finalSetsData = [];
-        let finalSetsCount = 0;
-
-        if (targetExercise.part === 'cardio') {
-            const mins = parseInt(cardioMinutes) || 0;
-            const secs = parseInt(cardioSeconds) || 0;
-            if (mins <= 0 && secs <= 0) {
-                alert('운동 시간을 입력해주세요.');
-                return;
-            }
-            finalSetsData = [{ duration: `${mins}분 ${secs}초` }];
-            finalSetsCount = 1;
-        } else {
-            const allSetsFilled = setsData.length > 0 && setsData.every(s => s.weight !== '' && s.reps !== '');
-            if (!allSetsFilled) {
-                alert('모든 세트의 정보를 입력해주세요.');
-                return;
-            }
-            finalSetsData = setsData;
-            finalSetsCount = setsData.length;
-        }
-
-        setIsSaving(true);
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('로그인이 필요합니다.');
-
-            let exerciseName = targetExercise.exercise === '직접 입력' ? targetExercise.manualName : targetExercise.exercise;
-            exerciseName = exerciseName.replace('(드롭)', '').trim();
-            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === targetExercise.exercise && ex.part === targetExercise.part);
-
-            // Determine target date
-            const targetDate = queryDate ? new Date(queryDate) : new Date();
-            if (queryDate) {
-                targetDate.setHours(12, 0, 0, 0);
-            }
-
-            const newLog = {
-                user_id: user.id,
-                part: targetExercise.part,
-                type: exInfo?.equipment || targetExercise.category || '기타',
-                exercise: exerciseName,
-                sets_count: finalSetsCount,
-                sets_data: finalSetsData,
-                is_completed: true,
-                created_at: targetDate.toISOString()
-            };
-
-            const { error } = await supabase.from('workout_logs').insert([newLog]);
-            if (error) throw error;
-
-            setPlanList([]);
-            setRecordingIndex(null);
-            alert('기록이 완료되었습니다!');
-        } catch (error) {
-            alert('저장 오류: ' + error.message);
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleDeleteFromList = (id) => {
-        if (!confirm('이 운동을 리스트에서 삭제하시겠습니까?')) return;
-        setPlanList(prev => prev.filter(item => item.id !== id));
-    };
-
-    const openPreview = (nameEn, name) => {
-        const url = getExerciseGif(nameEn);
-        if (url) {
-            setModalState({ isOpen: true, gifUrl: url, name: name });
-        }
-    };
-
-    // Helper component to fetch and display PR for an exercise
-    const PersonalRecordDisplay = ({ exerciseName }) => {
-        const [pr, setPr] = useState(null);
-
-        useEffect(() => {
-            const fetchPR = async () => {
-                try {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (!user) return;
-
-                    const { data, error } = await supabase
-                        .from('workout_logs')
-                        .select('sets_data')
-                        .eq('user_id', user.id)
-                        .eq('exercise', exerciseName);
-
-                    if (error) throw error;
-                    
-                    if (data && data.length > 0) {
-                        let maxWeight = 0;
-                        let maxReps = 0;
-                        
-                        data.forEach(log => {
-                            log.sets_data.forEach(set => {
-                                const w = parseFloat(set.weight) || 0;
-                                const r = parseInt(set.reps) || 0;
-                                if (w > maxWeight || (w === maxWeight && r > maxReps)) {
-                                    maxWeight = w;
-                                    maxReps = r;
-                                }
-                            });
-                        });
-                        
-                        if (maxWeight > 0) {
-                            setPr({ weight: maxWeight, reps: maxReps });
-                        }
-                    }
-                } catch (e) {
-                    console.error("PR fetch error", e);
-                }
-            };
-            fetchPR();
-        }, [exerciseName]);
-
-        if (!pr) return null;
-        return (
-            <span className="text-[10px] font-black text-slate-500 ml-2 italic lowercase opacity-80">
-                (best: {pr.weight}kg x {pr.reps}회)
-            </span>
-        );
+    const openPreview = (id, name) => {
+        const url = getExerciseGif(null, id);
+        if (url) setModalState({ isOpen: true, gifUrl: url, name });
     };
 
     return (
-        <div className="p-6 md:p-12 max-6xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24">
-            <div className="mb-8">
-                <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-indigo-500 decoration-4 underline-offset-8">
-                    루틴 구성
-                </h2>
-                <p className="text-slate-400 mt-2 font-medium">오늘 수행할 운동들을 미리 구성하고 기록해보세요.</p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                {/* 왼쪽: 운동 추가 */}
-                <div className="space-y-6">
-                    <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                        <ExerciseSelector selection={selection} setSelection={setSelection} />
-                        {(selection.exercise && (selection.exercise !== '직접 입력' || (selection.manualName && selection.manualName.trim()))) && (
-                            <button 
-                                onClick={handleAddToList}
-                                className="w-full mt-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl italic tracking-tighter transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
-                            >
-                                리스트에 추가하기
-                            </button>
-                        )}
-                    </div>
+        <div className="p-6 md:p-12 max-w-6xl mx-auto bg-slate-950 min-h-screen pb-24">
+            <h2 className="text-3xl font-black italic text-white uppercase underline decoration-indigo-500 decoration-4 underline-offset-8 mb-8">루틴 구성</h2>
+            <div className="grid lg:grid-cols-2 gap-10">
+                <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                    <ExerciseSelector selection={selection} setSelection={setSelection} />
+                    {selection.exercise && <button onClick={handleAddToList} className="w-full mt-6 py-4 bg-indigo-600 text-white font-black rounded-xl italic active:scale-95 transition-all">리스트에 추가하기</button>}
                 </div>
-
-                {/* 오른쪽: 오늘 할 운동 리스트 */}
-                <div className="space-y-6">
-                    <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 min-h-[400px]">
-                        <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                            <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
-                            오늘의 운동 리스트 ({planList.length})
-                        </h3>
-                        
-                        <div className="space-y-4">
-                            {planList.length === 0 ? (
-                                <div className="py-20 text-center">
-                                    <p className="text-slate-600 italic">왼쪽에서 운동을 선택해 리스트를 구성하세요.</p>
+                <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 min-h-[400px]">
+                    <h3 className="text-xl font-bold text-white mb-6">오늘의 운동 리스트 ({planList.length})</h3>
+                    <div className="space-y-4">
+                        {planList.map(item => (
+                            <div key={item.id} className="p-4 bg-slate-800/60 border border-slate-700 rounded-2xl flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-900">
+                                    <GifRenderer exerciseId={item.id} onClick={() => openPreview(item.id, item.name)} />
                                 </div>
-                            ) : (
-                                planList.map((item, idx) => (
-                                    <div key={item.id} className={`p-5 rounded-2xl border transition-all ${item.isCompleted ? 'bg-slate-800/20 border-emerald-500/30' : 'bg-slate-800/60 border-slate-700 hover:border-slate-500'}`}>
-                                        <div className="flex items-center gap-4">
-                                            {/* 썸네일 아이콘 크기 적용 (w-10 h-10) */}
-                                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/5 bg-slate-900 shadow-inner">
-                                                <GifRenderer 
-                                                    nameEn={item.nameEn} 
-                                                    onClick={() => openPreview(item.nameEn, item.exercise === '직접 입력' ? item.manualName : item.exercise)}
-                                                />
-                                            </div>
-                                            
-                                            <div className="flex-1 min-w-0 flex justify-between items-center">
-                                                <div className="flex flex-col min-w-0 pr-2">
-                                                    <div className="flex items-center gap-2 mb-0.5">
-                                                        <span className="text-[10px] font-bold text-indigo-400 block uppercase shrink-0">
-                                                            {PART_MAP[item.part] || item.part}
-                                                        </span>
-                                                        <h4 className={`text-sm font-bold flex items-center flex-wrap truncate ${item.isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>
-                                                            {item.exercise === '직접 입력' ? item.manualName : item.exercise}
-                                                            {item.part !== 'cardio' && <PersonalRecordDisplay exerciseName={item.exercise === '직접 입력' ? item.manualName : item.exercise} />}
-                                                        </h4>
-                                                    </div>
-                                                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest truncate">
-                                                        {item.category || '기타'}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    {item.isCompleted ? (
-                                                        <div className="flex items-center gap-2 text-emerald-400 font-black italic text-[10px]">
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-                                                            DONE
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center gap-1.5">
-                                                            <button 
-                                                                onClick={() => startRecording(idx)}
-                                                                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black italic rounded-lg transition-all active:scale-95"
-                                                            >
-                                                                기록
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => handleDeleteFromList(item.id)}
-                                                                className="p-1.5 bg-slate-700/50 hover:bg-rose-600/80 text-slate-400 hover:text-white rounded-lg transition-all"
-                                                            >
-                                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* 기록 폼 (해당 아이템을 기록 중일 때만 표시) */}
-                                        {recordingIndex === idx && (
-                                            <div className="mt-6 pt-6 border-t border-slate-700 space-y-4 animate-slide-down">
-                                                {item.part === 'cardio' ? (
-                                                    <div className="space-y-4">
-                                                        <label className="text-xs font-bold text-slate-400">운동 시간</label>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-lg px-3">
-                                                                <input type="number" value={cardioMinutes} onChange={e => setCardioMinutes(e.target.value)} placeholder="0" className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs" />
-                                                                <span className="text-[10px] text-slate-500 font-bold ml-1">분</span>
-                                                            </div>
-                                                            <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-lg px-3">
-                                                                <input type="number" value={cardioSeconds} onChange={e => setCardioSeconds(e.target.value)} placeholder="0" className="w-full bg-transparent p-2 text-white text-right font-bold outline-none text-xs" />
-                                                                <span className="text-[10px] text-slate-500 font-bold ml-1">초</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <div className="flex justify-between items-end mb-2">
-                                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">상세 기록</label>
-                                                            {lastRecord && (
-                                                                <button onClick={handleLoadLastRecord} className="text-[9px] font-black text-blue-400 uppercase hover:underline">기록 불러오기 ({lastRecord.weight}kg x {lastRecord.reps})</button>
-                                                            )}
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            {setsData.map((s, sIdx) => {
-                                                                const weights = s.isDropSet && typeof s.weight === 'string' ? s.weight.split('/') : [s.weight];
-                                                                if (s.isDropSet && weights.length < 3) while(weights.length < 3) weights.push('');
-
-                                                                const updateWeight = (val, wIdx) => {
-                                                                    const nd = [...setsData];
-                                                                    if (s.isDropSet) {
-                                                                        const newWeights = [...weights];
-                                                                        newWeights[wIdx] = val;
-                                                                        nd[sIdx].weight = newWeights.join('/');
-                                                                    } else {
-                                                                        nd[sIdx].weight = val;
-                                                                    }
-                                                                    setSetsData(nd);
-                                                                };
-
-                                                                return (
-                                                                    <div key={sIdx} className="flex flex-row flex-nowrap items-center gap-1.5 sm:gap-2 bg-slate-900 border border-slate-700 rounded-lg p-2 sm:p-3 transition-all hover:border-slate-500">
-                                                                        <span className="text-[10px] text-slate-500 font-bold whitespace-nowrap w-6 sm:w-8 shrink-0 text-center">{sIdx + 1}S</span>
-                                                                        
-                                                                        <div className="flex-[2.5] min-w-0 flex items-center gap-1">
-                                                                            {s.isDropSet ? (
-                                                                                <div className="flex gap-1 flex-1 min-w-0">
-                                                                                    {weights.slice(0, 3).map((w, wIdx) => (
-                                                                                        <input 
-                                                                                            key={wIdx}
-                                                                                            type="number" 
-                                                                                            value={w} 
-                                                                                            onChange={(e) => updateWeight(e.target.value, wIdx)}
-                                                                                            className="w-full bg-slate-800 border border-slate-700 rounded p-1 text-white text-center text-[10px] focus:border-rose-500 outline-none" 
-                                                                                            placeholder={`${wIdx+1}`}
-                                                                                        />
-                                                                                    ))}
-                                                                                </div>
-                                                                            ) : (
-                                                                                <input 
-                                                                                    type="number" 
-                                                                                    value={s.weight} 
-                                                                                    onChange={(e) => updateWeight(e.target.value)}
-                                                                                    placeholder={lastRecord?.weight || "0"} 
-                                                                                    className="flex-1 min-w-0 bg-transparent p-1 text-white text-right font-bold outline-none text-xs"
-                                                                                />
-                                                                            )}
-                                                                            <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap uppercase tracking-tighter">KG</span>
-                                                                        </div>
-
-                                                                        <div className="flex-1 min-w-0 flex items-center gap-1 border-l border-slate-800 pl-1 sm:pl-2">
-                                                                            <input 
-                                                                                type="number" 
-                                                                                value={s.reps} 
-                                                                                onChange={(e) => {
-                                                                                    const nd = [...setsData]; nd[sIdx].reps = e.target.value; setSetsData(nd);
-                                                                                }}
-                                                                                placeholder={lastRecord?.reps || "0"} 
-                                                                                className="flex-1 min-w-0 bg-transparent p-1 text-white text-right font-bold outline-none text-xs"
-                                                                            />
-                                                                            <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap">회</span>
-                                                                        </div>
-
-                                                                        <div className="flex items-center gap-1 sm:gap-2 shrink-0 border-l border-slate-800 pl-1 sm:pl-2">
-                                                                            <label className="flex items-center gap-1 cursor-pointer group">
-                                                                                <span className="text-[9px] font-black text-slate-500 whitespace-nowrap group-hover:text-rose-400 transition-colors">드롭</span>
-                                                                                <input 
-                                                                                    type="checkbox" 
-                                                                                    checked={s.isDropSet || false} 
-                                                                                    onChange={(e) => {
-                                                                                        const nd = [...setsData]; 
-                                                                                        nd[sIdx].isDropSet = e.target.checked;
-                                                                                        if (!e.target.checked && typeof nd[sIdx].weight === 'string') {
-                                                                                            nd[sIdx].weight = nd[sIdx].weight.split('/')[0] || '';
-                                                                                        }
-                                                                                        setSetsData(nd);
-                                                                                    }} 
-                                                                                    className="hidden" 
-                                                                                />
-                                                                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500 shadow-lg shadow-rose-600/20' : 'border-slate-700 bg-slate-800'}`}>
-                                                                                    {s.isDropSet && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
-                                                                                </div>
-                                                                            </label>
-                                                                            {setsData.length > 1 && (
-                                                                                <button onClick={() => setSetsData(setsData.filter((_, i) => i !== sIdx))} className="p-1 text-slate-600 hover:text-rose-500 transition-colors">
-                                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                                                </button>
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                        <button 
-                                                            onClick={handleAddSet}
-                                                            className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold rounded-xl text-[10px] border border-white/5 transition-all"
-                                                        >
-                                                            + 세트 추가
-                                                        </button>
-                                                    </>
-                                                )}
-
-                                                <div className="flex gap-2">
-                                                    <button 
-                                                        onClick={() => setRecordingIndex(null)}
-                                                        className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-xl transition-all"
-                                                    >
-                                                        취소
-                                                    </button>
-                                                    <button 
-                                                        onClick={handleFinishRecording}
-                                                        disabled={isSaving}
-                                                        className="flex-[2] py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black italic rounded-xl transition-all shadow-lg shadow-emerald-600/20"
-                                                    >
-                                                        {isSaving ? '저장 중...' : '기록 완료'}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                                <div className="flex-1">
+                                    <p className="text-[10px] font-bold text-indigo-400 uppercase">{PART_MAP[item.body_part]}</p>
+                                    <h4 className="text-sm font-bold text-white uppercase">{item.name}</h4>
+                                </div>
+                                <button onClick={() => setPlanList(planList.filter(p => p.id !== item.id))} className="p-2 text-slate-500 hover:text-white">×</button>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
-            <GifModal 
-                isOpen={modalState.isOpen} 
-                onClose={() => setModalState({ ...modalState, isOpen: false })} 
-                gifUrl={modalState.gifUrl} 
-                exerciseName={modalState.name} 
-            />
+            <GifModal isOpen={modalState.isOpen} onClose={() => setModalState({ ...modalState, isOpen: false })} gifUrl={modalState.gifUrl} exerciseName={modalState.name} />
         </div>
     );
 };
 
 const AIRecommendationScreen = () => {
-    const [userData, setUserData] = useState(() => {
-        const saved = localStorage.getItem(STORAGE_KEYS.USER_BODY_INFO);
-        return saved ? JSON.parse(saved) : null;
-    });
     const [recentLogs, setRecentLogs] = useState([]);
-    const [messages, setMessages] = useState(() => {
-        const saved = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY);
-        return saved ? JSON.parse(saved) : [
-            { id: 1, type: 'ai', text: '안녕하세요! 당신의 데이터 기반 전문 PT 코치입니다. 최근 기록을 바탕으로 최적의 루틴을 제안해 드릴게요. 무엇을 도와드릴까요?' }
-        ];
-    });
+    const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[{"id":1,"type":"ai","text":"안녕하세요! 공식 운동 메뉴얼을 기반으로 최적의 루틴을 제안해 드립니다. 어떤 운동을 하고 싶으신가요?"}]'));
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
 
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages));
-    }, [messages]);
+    useEffect(() => { localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages)); }, [messages]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    // Supabase 최신 데이터로 상태 업데이트 및 로컬 스토리지 동기화
-                    const metadata = user.user_metadata;
-                    setUserData(metadata);
-                    localStorage.setItem(STORAGE_KEYS.USER_BODY_INFO, JSON.stringify(metadata));
-                    
-                    // 정교한 분석을 위해 최근 50개의 기록을 가져옴
-                    const { data: logs, error } = await supabase
-                        .from('workout_logs')
-                        .select('*')
-                        .eq('user_id', user.id)
-                        .order('created_at', { ascending: false })
-                        .limit(50);
-                    
-                    if (error) throw error;
-                    setRecentLogs(logs || []);
-                }
-            } catch (err) {
-                console.error('Data loading error:', err);
+        const fetchRecent = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
+                setRecentLogs(data || []);
             }
         };
-        fetchData();
+        fetchRecent();
     }, []);
 
-    const handleClearHistory = () => {
-        if (confirm('대화 내역을 모두 초기화하시겠습니까?')) {
-            localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY);
-            setMessages([
-                { id: 1, type: 'ai', text: '안녕하세요! 당신의 데이터 기반 전문 PT 코치입니다. 최근 기록을 바탕으로 최적의 루틴을 제안해 드릴게요. 무엇을 도와드릴까요?' }
-            ]);
-        }
-    };
-
-    const generateAIResponse = async (messages) => {
-        try {
-            const response = await openai.chat.completions.create({
-                model: 'gpt-4o-mini',
-                messages: messages,
-                temperature: 0
-            });
-
-            return response.choices[0].message.content || "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.";
-        } catch (error) {
-            console.error('OpenAI API Error:', error);
-            return `OpenAI Error: ${error.message}`;
-        }
-    };
-
-    const handleSendMessage = async (customText = null, displayUiText = null) => {
-        let textToDisplay = displayUiText || customText || inputText;
-        let textForApi = customText || inputText;
-
-        if (!textForApi.trim() || isTyping) return;
-
-        // 최신 신체 데이터 로컬 스토리지에서 다시 불러오기 (동적 주입)
-        const latestBodyInfo = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_BODY_INFO) || '{}');
-
-        // 1. 데이터 가공 (전체 기록 기반 부위별 최근 수행일 분석)
-        
-        // 부위별 마지막 운동일 추출
-        const lastTrained = {};
-        recentLogs.forEach(l => {
-            if (!lastTrained[l.part]) {
-                lastTrained[l.part] = new Date(l.created_at).toLocaleString();
-            }
-        });
-
-        const formattedHistory = recentLogs.length > 0 
-            ? recentLogs.slice(0, 15).map(l => `${new Date(l.created_at).toLocaleDateString()}: ${PART_MAP[l.part] || l.part} (${l.exercise})`).join('\n')
-            : '없음';
-
-        const userContext = `
-[오늘 날짜]
-${new Date().toLocaleString()}
-
-[사용자 신체 정보 (로컬 데이터)]
-나이: ${latestBodyInfo?.age || '미입력'}세, 성별: ${latestBodyInfo?.gender || '미입력'}, 키: ${latestBodyInfo?.height || '미입력'}cm, 현재 체중: ${latestBodyInfo?.weight || '미입력'}kg
-골격근량: ${latestBodyInfo?.skeletal_muscle_mass || '미입력'}kg, 체지방률: ${latestBodyInfo?.body_fat_percentage || '미입력'}%
-
-[부위별 마지막 운동 일시 (전수 조사 결과)]
-가슴: ${lastTrained['chest'] || '기록 없음'}
-등: ${lastTrained['back_part'] || '기록 없음'}
-하체: ${lastTrained['legs'] || '기록 없음'}
-어깨: ${lastTrained['shoulders'] || '기록 없음'}
-팔: ${lastTrained['arms'] || '기록 없음'}
-
-[최근 운동 로그]
-${formattedHistory}`;
-
-        // 타겟 선정 로직 강화 (날짜 기반 정교화)
-        const TARGET_SELECTION_RULE = `
-[타겟 부위 선정 로직]
-1. 사용자의 전체 운동 기록을 전수 조사하여 가슴, 등, 하체 부위별로 '가장 최근에 운동한 날짜'와 오늘 날짜의 차이(휴식 일수)를 계산하라.
-2. 어제(또는 24시간 이내) 운동한 부위는 오늘 추천 목록에서 절대적으로 제외하라.
-3. 기록이 아예 없는 부위가 있다면 휴식 일수를 '무한대'로 간주하여 최우선으로 추천하라.
-4. 가슴, 등, 하체 중 위 로직을 거쳐 휴식 일수가 가장 긴 단 하나의 타겟 부위를 선정하라.
-5. '오늘의 운동루틴'과 '하드모드' 모두 반드시 이 동일한 분석 로직을 거쳐 동일한 타겟 부위를 선정해야 한다.`;
-
-        if (textToDisplay === "오늘의 운동루틴 추천해 줘") {
-            textForApi = `${TARGET_SELECTION_RULE} 
-위 원칙으로 선정된 타겟 부위를 위해 반드시 4~5개 종목의 전체 루틴을 [ROUTINE_DATA] 배열에 담아줘.`;
-        }
-
-        if (textToDisplay === "⚡ 하드모드") {
-            textForApi = `${TARGET_SELECTION_RULE} 
-지금은 하드모드 1단계 질문이야. 분석된 타겟 부위를 말하며 '1. 볼륨업' 또는 '2. 강도업' 중 선택하라고 파이팅 넘치게 물어봐. 절대 [ROUTINE_DATA]를 출력하지 마.`;
-        }
-
-        // 사용자 메시지 추가
-        const userMsg = { id: Date.now(), type: 'user', text: textToDisplay };
-        setMessages(prev => [...prev, userMsg]);
+    const handleSendMessage = async (text = inputText) => {
+        if (!text.trim() || isTyping) return;
+        setMessages([...messages, { id: Date.now(), type: 'user', text }]);
         setInputText('');
         setIsTyping(true);
 
-        const systemRole = `너는 데이터 기반 전문 PT 코치야. 사용자의 신체 정보를 바탕으로 수준과 목적을 판단하고 맞춤형 코칭을 제공하라.
-
-        [코칭 분석 및 개인화 로직]
-        1. 수준 및 목적 판단: 제공된 '사용자 신체 정보'와 '최근 운동 로그'를 분석하여 초보/중급/고급 여부와 다이어트/벌크업/스트렝스 목적을 스스로 판단하라.
-        2. 데이터 기반 루틴 조정:
-           - 체지방률(body_fat_percentage)이 높을 경우: 심폐 지구력과 칼로리 소모 극대화를 위해 세트 간 휴식 시간을 줄이고 반복 횟수(15~20회)를 높이는 루틴을 제안하라.
-           - 골격근량(skeletal_muscle_mass)이 적을 경우: 근신경계 발달과 기본 근력 향상을 위해 스쿼트, 데드리프트, 벤치프레스 등 기초적인 다관절 운동 위주로 세트를 구성하라.
+        const EXERCISE_MENU = EXERCISE_DATASET.slice(0, 300).map(ex => ex.name).join(', ');
+        const systemRole = `너는 전문 PT 코치야. 
+        [중요 규칙]
+        1. 반드시 아래 [공식 운동 리스트]에 존재하는 영어 이름(name)을 'nameEn' 키값으로 사용해야 한다. 다른 이름은 절대 안 된다.
+        2. [ROUTINE_DATA] JSON 형식으로 답변 끝에 포함하라.
+        3. 'nameEn'은 반드시 JSON의 'name'과 토씨 하나 틀리지 않고 일치해야 한다.
+        4. 루틴 항목: { "name": "한국어명", "nameEn": "공식영어명", "part": "가슴|등|하체|어깨|팔|코어|유산소", "sets": 4, "reps": 12, "weight": 0 }
         
-        [답변 및 동기부여 규칙 - 필수 수행]
-        1. 긍정적 오프닝: 모든 답변의 첫 문장은 사용자를 격려하고 동기부여를 주는 따뜻하고 긍정적인 멘트로 시작하라.
-        2. 숫자 노출 금지: 답변 텍스트(멘트) 내에 체지방률, 몸무게 등 민감한 숫자를 직접 언급하지 마라. 대신 "신체 밸런스가 좋습니다", "에너지를 태우기 최적의 상태입니다"와 같은 전문적이고 긍정적인 표현을 사용하라. (단, [ROUTINE_DATA] JSON 내의 숫자는 허용)
-        3. 전문적 톤앤매너: 따뜻하지만 전문 지식이 느껴지는 용어를 사용하여 신뢰감을 주어라.
+        [공식 운동 리스트 (일부)]
+        ${EXERCISE_MENU}`;
 
-        [하드모드 및 루틴 구성 규칙]
-        1. 루틴 구성: 반드시 4~6개 종목으로 구성하라.
-        2. 중량: 이전 기록보다 2.5~5kg 증량 제안 (기록 없으면 0). JSON 'weight'는 숫자만 허용.
-        3. 형식: 마지막에 [ROUTINE_DATA: [...]] JSON 배열 포함.
-        4. 필수 키값: name (한국어 이름), nameEn (영어 이름 - GIF 매칭용), part (문자열: 가슴, 등, 하체, 어깨, 팔, 코어, 유산소 중 하나), sets (숫자), reps (숫자), weight (숫자), isDropSet (불리언).
-
-        [대화 원칙]
-        - 말투: 3~5문장의 간결하고 파이팅 넘치는 말투. 번호 매기기 금지.
-        - 컨텍스트: ${userContext}`;
-
-        const history = messages.slice(-6).map(m => ({
-            role: m.type === 'ai' ? 'assistant' : 'user',
-            content: m.text
-        }));
-
-        const apiMessages = [
-            { role: "system", content: systemRole },
-            ...history,
-            { role: "user", content: textForApi }
-        ];
-        
-        const aiText = await generateAIResponse(apiMessages);
-        const aiMsg = { id: Date.now() + 1, type: 'ai', text: aiText };
-        setMessages(prev => [...prev, aiMsg]);
-        setIsTyping(false);
+        try {
+            const response = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'system', content: systemRole }, ...messages.slice(-5).map(m => ({ role: m.type === 'ai' ? 'assistant' : 'user', content: m.text })), { role: 'user', content: text }],
+                temperature: 0.5
+            });
+            setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', text: response.choices[0].message.content }]);
+        } catch (e) { console.error(e); } finally { setIsTyping(false); }
     };
 
-    const handleAddRoutineItem = (item) => {
-        try {
-            // 배열로 들어오면 전체 교체, 단일 객체면 기존 로직 유지 (단, 요구사항에 따라 AI 추천 시 교체하도록 유도)
-            const isBatch = Array.isArray(item);
-            const itemsToAdd = isBatch ? item : [item];
-            
-            const saved = localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE);
-            const currentRoutine = (saved && !isBatch) ? JSON.parse(saved) : [];
-            
-            const newItems = itemsToAdd.map(singleItem => {
-                // 데이터 키 유연성 보정
-                const name = singleItem.name || singleItem.Name || singleItem.운동명 || singleItem.운동이름 || singleItem.exercise || "알 수 없는 운동";
-                const nameEn = singleItem.nameEn || singleItem.exerciseEn || "";
-                const sets = singleItem.sets || singleItem.Sets || singleItem.세트 || 0;
-                const reps = singleItem.reps || singleItem.Reps || singleItem.횟수 || singleItem.반복수 || 0;
-                const weight = singleItem.weight || singleItem.Weight || singleItem.무게 || singleItem.중량 || 0;
-                const isDropSet = singleItem.isDropSet || false;
-                
-                // AI가 제공한 part 값을 우선 사용, 없으면 기존 매핑 시도
-                const aiPart = singleItem.part || singleItem.Part || singleItem.부위;
-                let finalPart = 'etc';
-                
-                const PART_REVERSE_MAP = {
-                    '가슴': 'chest', '등': 'back_part', '하체': 'legs', '어깨': 'shoulders', '팔': 'arms', '코어': 'abs', '유산소': 'cardio'
-                };
-
-                if (aiPart && PART_REVERSE_MAP[aiPart]) {
-                    finalPart = PART_REVERSE_MAP[aiPart];
-                } else if (aiPart && Object.values(PART_REVERSE_MAP).includes(aiPart.toLowerCase())) {
-                    finalPart = aiPart.toLowerCase();
-                } else {
-                    const exInfo = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(name.toLowerCase()));
-                    finalPart = exInfo?.part || 'etc';
-                }
-
-                const exInfoForCategory = CUSTOM_EXERCISES.find(ex => ex.name.toLowerCase().includes(name.toLowerCase()));
-
-                return {
-                    id: Date.now() + Math.random(),
-                    part: finalPart,
-                    category: exInfoForCategory?.equipment || '기타',
-                    exercise: name,
-                    nameEn: nameEn,
-                    manualName: '',
-                    isCompleted: false,
-                    suggestedSets: sets,
-                    suggestedReps: reps,
-                    suggestedWeight: weight,
-                    isDropSet: isDropSet
-                };
-            });
-
-            const updatedRoutine = isBatch ? newItems : [...currentRoutine, ...newItems];
-            localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify(updatedRoutine));
-            window.dispatchEvent(new Event('storage'));
-            return true;
-        } catch (e) {
-            console.error("Routine add error", e);
-            return false;
-        }
+    const handleAddRoutineBatch = (items) => {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE) || '[]');
+        const newItems = items.map(item => {
+            const ex = EXERCISE_DATASET.find(e => e.name.toLowerCase() === item.nameEn.toLowerCase());
+            const PART_REVERSE = { '가슴': 'chest', '등': 'back', '어깨': 'shoulders', '하체': 'upper legs', '팔': 'upper arms', '코어': 'waist', '유산소': 'cardio' };
+            return {
+                id: Date.now() + Math.random(),
+                exercise: item.nameEn,
+                exercise_id: ex?.id,
+                name: item.name,
+                nameEn: item.nameEn,
+                body_part: PART_REVERSE[item.part] || 'chest',
+                equipment: ex?.equipment || '기타',
+                suggestedSets: item.sets,
+                suggestedReps: item.reps,
+                suggestedWeight: item.weight,
+                isCompleted: false
+            };
+        });
+        localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify([...saved, ...newItems]));
+        alert('루틴에 추가되었습니다!');
+        return true;
     };
 
     return (
-        <div className="flex flex-col h-screen bg-slate-950 animate-fade-in relative max-w-2xl mx-auto border-x border-white/5 pb-20">
-            {/* Header */}
-            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-3 ml-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 className="text-sm font-black text-white leading-none uppercase tracking-tighter italic">AI MyGym Coach</h2>
-                            <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 mt-1">
-                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Online
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                
-                <button 
-                    onClick={handleClearHistory}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-[10px] font-black uppercase rounded-lg border border-white/5 transition-all active:scale-95"
-                >
-                    대화 초기화
-                </button>
+        <div className="flex flex-col h-screen bg-slate-950 max-w-2xl mx-auto border-x border-white/5 pb-20 relative">
+            <div className="p-4 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 flex justify-between items-center">
+                <h2 className="text-sm font-black text-white italic uppercase tracking-tighter">AI PT COACH</h2>
+                <button onClick={() => { setMessages([{ id: 1, type: 'ai', text: "내역을 초기화했습니다." }]); localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY); }} className="text-[9px] font-bold text-slate-500 uppercase">초기화</button>
             </div>
-
-            {/* Chat Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-32">
-                {messages.map((msg) => (
-                    <ChatMessage key={msg.id} msg={msg} onAddRoutineItem={handleAddRoutineItem} />
-                ))}
-                {isTyping && (
-                    <div className="flex justify-start">
-                        <div className="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-white/5 flex gap-1">
-                            <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></span>
-                            <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce delay-75"></span>
-                            <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce delay-150"></span>
-                        </div>
-                    </div>
-                )}
+                {messages.map(msg => <ChatMessage key={msg.id} msg={msg} onAddRoutineItem={handleAddRoutineBatch} />)}
+                {isTyping && <div className="text-slate-500 italic text-xs animate-pulse">코치가 생각 중...</div>}
             </div>
-
-            {/* Input Area */}
             <div className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent">
-                <div className="max-w-xl mx-auto space-y-3">
-                    {/* Quick Actions */}
-                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                        <button 
-                            onClick={() => handleSendMessage("오늘의 운동루틴 추천해 줘")}
-                            className="whitespace-nowrap px-5 py-2.5 bg-slate-900 border border-white/10 hover:border-indigo-500/50 rounded-full text-[11px] font-black text-slate-300 hover:text-white transition-all shadow-xl active:scale-95 flex items-center gap-2 group"
-                        >
-                            <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse group-hover:bg-indigo-400"></span>
-                            🔥 오늘의 운동루틴
-                        </button>
-                        <button 
-                            onClick={() => handleSendMessage("⚡ 하드모드")}
-                            className="whitespace-nowrap px-5 py-2.5 bg-gradient-to-r from-orange-600 to-rose-600 border border-white/10 rounded-full text-[11px] font-black text-white transition-all shadow-xl active:scale-95 flex items-center gap-2 group"
-                        >
-                            ⚡ 하드모드
-                        </button>
-                    </div>
-
-                    <div className="relative group">
-                        <input 
-                            type="text"
-                            value={inputText}
-                            onChange={(e) => setInputText(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                            placeholder="코치에게 질문하기..."
-                            className="w-full bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-2xl"
-                        />
-                        <button 
-                            onClick={() => handleSendMessage()}
-                            disabled={!inputText.trim() || isTyping}
-                            className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 transition-all active:scale-95 shadow-lg shadow-blue-600/20"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9-2-9-18-9 18 9 2zm0 0v-8" /></svg>
-                        </button>
-                    </div>
+                <div className="flex gap-2 mb-2"><button onClick={() => handleSendMessage("오늘 가슴 운동 루틴 추천해 줘")} className="text-[10px] bg-slate-900 border border-white/10 px-3 py-1.5 rounded-full text-slate-400">🔥 가슴 루틴</button><button onClick={() => handleSendMessage("유산소 포함 전신 루틴 알려줘")} className="text-[10px] bg-slate-900 border border-white/10 px-3 py-1.5 rounded-full text-slate-400">⚡ 전신 루틴</button></div>
+                <div className="relative">
+                    <input type="text" value={inputText} onChange={e => setInputText(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSendMessage()} placeholder="질문하기..." className="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <button onClick={() => handleSendMessage()} className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 text-white rounded-xl font-bold">↑</button>
                 </div>
             </div>
         </div>
@@ -1875,625 +687,68 @@ ${formattedHistory}`;
 };
 
 const CalendarScreen = () => {
-    const [viewMode, setViewMode] = useState('LIST'); // 'LIST', 'DETAIL', 'ADD', 'EDIT'
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [editLog, setEditLog] = useState(null);
-    
-    const [workoutGroups, setWorkoutGroups] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
+    const [workoutGroups, setWorkoutGroups] = useState({});
     const [userData, setUserData] = useState(null);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const today = new Date();
-
-    const fetchLogs = async (viewDate) => {
+    const fetchLogs = async () => {
         setIsLoading(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
             setUserData(user.user_metadata);
-
-            const year = viewDate.getFullYear();
-            const month = viewDate.getMonth();
-            
-            const startDate = new Date(year, month, 1, 0, 0, 0).toISOString();
-            const endDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
-
-            const { data, error } = await supabase
-                .from('workout_logs')
-                .select('*')
-                .eq('user_id', user.id)
-                .gte('created_at', startDate)
-                .lte('created_at', endDate)
-                .order('created_at', { ascending: true });
-
-            if (error) throw error;
-
+            const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id);
             const groups = {};
-            data.forEach(log => {
-                const d = new Date(log.created_at);
-                const logDate = d.getDate();
-                if (!groups[logDate]) {
-                    groups[logDate] = { logs: [] };
-                }
-                groups[logDate].logs.push(log);
+            data?.forEach(log => {
+                const d = new Date(log.created_at).getDate();
+                if (!groups[d]) groups[d] = { logs: [] };
+                groups[d].logs.push(log);
             });
             setWorkoutGroups(groups);
-        } catch (error) {
-            console.error("데이터 불러오기 에러:", error);
-        } finally {
-            setIsLoading(false);
-        }
+        } catch (e) { console.error(e); } finally { setIsLoading(false); }
     };
 
-    useEffect(() => {
-        fetchLogs(currentViewDate);
-    }, [currentViewDate]);
-
-    const handleMonthChange = (offset) => {
-        const newDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + offset, 1);
-        const monthDiff = (newDate.getFullYear() - today.getFullYear()) * 12 + (newDate.getMonth() - today.getMonth());
-        
-        if (monthDiff < -3 || monthDiff > 3) {
-            alert('이전 3개월부터 이후 3개월까지의 기록만 확인할 수 있습니다.');
-            return;
-        }
-        setCurrentViewDate(newDate);
-    };
-
-    const handleDayClick = (date, formattedDate, displayStr) => {
-        setSelectedDate({ date, formattedDate, displayStr });
-        setViewMode('DETAIL');
-    };
-
-    const handleBackToList = (e) => {
-        if (e) e.preventDefault();
-        setViewMode('LIST');
-        setEditLog(null);
-        fetchLogs(currentViewDate);
-    };
-
-    const handleOpenAdd = (e) => {
-        if (e) e.preventDefault();
-        setEditLog(null);
-        setViewMode('ADD');
-    };
-
-    const handleOpenEdit = (log) => {
-        setEditLog(log);
-        setViewMode('EDIT');
-    };
-
-    const handleSaveSuccess = () => {
-        // 운동 저장 성공 후 DETAIL로 복귀하여 해당 날짜의 기록을 계속 보여줌
-        setViewMode('DETAIL');
-        setEditLog(null);
-        fetchLogs(currentViewDate); // 기록 갱신
-    };
-
-    // Sub-components within CalendarScreen context to maintain state
-    const renderSubView = () => {
-        switch (viewMode) {
-            case 'DETAIL':
-                return (
-                    <WorkoutDetailView 
-                        selectedDate={selectedDate} 
-                        onBack={handleBackToList} 
-                        onAdd={handleOpenAdd}
-                        onEdit={handleOpenEdit}
-                        onRefresh={() => fetchLogs(currentViewDate)}
-                    />
-                );
-            case 'ADD':
-            case 'EDIT':
-                return (
-                    <WorkoutSetupView 
-                        selectedDate={selectedDate} 
-                        editLog={editLog}
-                        onBack={() => setViewMode('DETAIL')} 
-                        onSuccess={handleSaveSuccess}
-                    />
-                );
-            default:
-                return (
-                    <div className="w-full p-4 md:p-12 flex flex-col justify-center">
-                        <div className="mb-2 md:mb-6">
-                            <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
-                                <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
-                                나의 운동 현황
-                            </h2>
-                        </div>
-                        {isLoading ? (
-                            <div className="min-h-[300px] flex items-center justify-center text-slate-500 italic">기록을 불러오는 중...</div>
-                        ) : (
-                            <MonthlyCalendar 
-                                workoutGroups={workoutGroups} 
-                                currentViewDate={currentViewDate}
-                                onMonthChange={handleMonthChange}
-                                onDayClick={handleDayClick}
-                            />
-                        )}
-                    </div>
-                );
-        }
-    };
+    useEffect(() => { fetchLogs(); }, []);
 
     return (
-        <div className="flex flex-col min-h-screen animate-fade-in overflow-x-hidden relative bg-slate-950 pb-24">
-            {viewMode === 'LIST' && (
-                <div className="absolute top-6 right-6 z-20 flex gap-3">
-                    <button 
-                        onClick={(e) => { e.preventDefault(); setIsProfileModalOpen(true); }}
-                        className="bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-full transition-all active:scale-95 flex items-center gap-2 shadow-xl backdrop-blur-md"
-                    >
-                        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                        <span className="text-xs font-black text-white uppercase tracking-wider">내 정보</span>
-                    </button>
-                    <button 
-                        onClick={(e) => { e.preventDefault(); supabase.auth.signOut(); }}
-                        className="bg-slate-800/50 hover:bg-rose-500/20 border border-slate-700 px-3 py-1.5 rounded-full transition-all active:scale-95 group shadow-lg shadow-black/20"
-                    >
-                        <span className="text-[10px] font-black text-slate-300 group-hover:text-rose-400 uppercase tracking-widest">
-                            LOGOUT
-                        </span>
-                    </button>
-                </div>
-            )}
-            
-            {renderSubView()}
-
-            <UserProfileModal 
-                isOpen={isProfileModalOpen} 
-                onClose={() => setIsProfileModalOpen(false)} 
-                userData={userData}
-                onUpdate={() => fetchLogs(currentViewDate)}
-            />
+        <div className="p-4 md:p-12 flex flex-col justify-center bg-slate-950 min-h-screen pb-24">
+            <div className="flex justify-between items-center mb-8">
+                <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">My Workout Hub</h2>
+                <button onClick={() => setIsProfileModalOpen(true)} className="p-2 bg-slate-800 rounded-full"><svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg></button>
+            </div>
+            <MonthlyCalendar workoutGroups={workoutGroups} currentViewDate={currentViewDate} onMonthChange={(off) => setCurrentViewDate(new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + off, 1))} onDayClick={(d, f, s) => {}} />
+            <UserProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} userData={userData} onUpdate={fetchLogs} />
         </div>
     );
 };
 
-/**
- * [Sub-component for CalendarScreen: Detail View]
- */
-const WorkoutDetailView = ({ selectedDate, onBack, onAdd, onEdit, onRefresh }) => {
-    const [logs, setLogs] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    const fetchLogs = async () => {
-        if (!selectedDate) return;
-        setIsLoading(true);
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const dateStr = selectedDate.formattedDate;
-            const start = `${dateStr}T00:00:00`;
-            const end = `${dateStr}T23:59:59`;
-
-            const { data, error } = await supabase
-                .from('workout_logs')
-                .select('*')
-                .eq('user_id', user.id)
-                .gte('created_at', start)
-                .lte('created_at', end)
-                .order('created_at', { ascending: true });
-
-            if (error) throw error;
-            setLogs(data || []);
-        } catch (error) {
-            console.error("Error fetching logs:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchLogs();
-    }, [selectedDate]);
-
-    const handleDelete = async (e, id) => {
-        if (e) e.preventDefault();
-        if (!confirm('정말 삭제하시겠습니까?')) return;
-        const { error } = await supabase.from('workout_logs').delete().eq('id', id);
-        if (error) {
-            alert('삭제 실패: ' + error.message);
-        } else {
-            alert('삭제되었습니다.');
-            fetchLogs();
-            if (onRefresh) onRefresh();
-        }
-    };
-
-    return (
-        <div className="p-4 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24 w-full">
-            <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group">
-                <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                <span className="font-medium">달력으로 돌아가기</span>
-            </button>
-            
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                <h2 className="text-3xl font-black italic tracking-tighter text-white">
-                    {selectedDate?.displayStr} 트레이닝 상세
-                </h2>
-                <button 
-                    onClick={onAdd}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all text-center"
-                >
-                    운동 추가하기
-                </button>
-            </div>
-
-            <div className="space-y-4">
-                {isLoading ? (
-                    <div className="py-20 text-center text-slate-500 italic">기록을 불러오는 중...</div>
-                ) : logs.length === 0 ? (
-                    <div className="py-20 text-center bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-800">
-                        <p className="text-slate-500 italic">운동 기록이 없습니다.</p>
-                    </div>
-                ) : (
-                    logs.map((log, idx) => (
-                        <div key={log.id || idx} className="bg-slate-900/40 border border-white/5 p-4 md:p-6 rounded-[1.5rem] shadow-2xl relative overflow-hidden group">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
-                            <div className="flex items-center justify-between mb-3">
-                                <div>
-                                    <div className="flex gap-1 mb-1">
-                                        <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest text-white">
-                                            {PART_MAP[log.part] || log.part}
-                                        </span>
-                                        <span className="bg-slate-800 text-slate-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-slate-700">
-                                            {log.type}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <h3 className="text-lg md:text-xl font-black italic text-white uppercase tracking-tighter leading-none">{log.exercise}</h3>
-                                        {log.part !== 'cardio' && <span className="text-xs font-black text-slate-500 italic uppercase leading-none">{log.sets_count} SETS</span>}
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button 
-                                        onClick={(e) => { e.preventDefault(); onEdit(log); }}
-                                        className="p-2 bg-slate-800 hover:bg-blue-600 text-slate-400 hover:text-white rounded-lg transition-all"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                    </button>
-                                    <button 
-                                        onClick={(e) => handleDelete(e, log.id)}
-                                        className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-1">
-                                {log.part === 'cardio' ? (
-                                    <div className="flex items-center justify-between py-3 px-4 bg-slate-950/50 rounded-lg border border-white/5 transition-all hover:border-blue-500/30">
-                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DURATION</span>
-                                        <span className="text-base font-black text-blue-400 italic">{log.sets_data[0]?.duration || '0분 0초'}</span>
-                                    </div>
-                                ) : (
-                                    log.sets_data.map((s, sIdx) => (
-                                        <div key={sIdx} className="flex items-center justify-between py-1.5 px-4 bg-slate-950/50 rounded-lg border border-white/5 transition-all hover:border-blue-500/30">
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{sIdx + 1} SET {s.isDropSet && <span className="ml-1 text-rose-500 text-[8px] font-black">D</span>}</span>
-                                            <div className="flex gap-4 items-center">
-                                                <span className="text-xs font-bold text-white w-12 text-right">{s.weight}kg</span>
-                                                <span className="text-xs font-bold text-blue-400 w-12 text-right">{s.reps} r</span>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
-        </div>
-    );
-};
-
-/**
- * [Sub-component for CalendarScreen: Add/Edit Form View]
- */
-const WorkoutSetupView = ({ selectedDate, editLog, onBack, onSuccess }) => {
-    const [step, setStep] = useState(editLog ? 4 : 1);
-    const [selection, setSelection] = useState({ 
-        part: editLog?.part || '', 
-        category: editLog?.type || '', 
-        exercise: editLog ? (CUSTOM_EXERCISES.find(ex => ex.name === editLog.exercise) ? editLog.exercise : '직접 입력') : '', 
-        manualName: editLog ? (CUSTOM_EXERCISES.find(ex => ex.name === editLog.exercise) ? '' : editLog.exercise) : '' 
-    });
-    const [setsData, setSetsData] = useState(editLog?.part !== 'cardio' ? (editLog?.sets_data || [{ weight: '', reps: '' }]) : [{ weight: '', reps: '' }]);
-    const [cardioMinutes, setCardioMinutes] = useState('');
-    const [cardioSeconds, setCardioSeconds] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
-    const [lastRecord, setLastRecord] = useState(null);
-
-    useEffect(() => {
-        if (editLog && editLog.part === 'cardio') {
-            const durationMatch = editLog.sets_data[0]?.duration?.match(/(\d+)분 (\d+)초/);
-            if (durationMatch) {
-                setCardioMinutes(durationMatch[1]);
-                setCardioSeconds(durationMatch[2]);
-            }
-        }
-    }, [editLog]);
-
-    useEffect(() => {
-        const fetchLast = async () => {
-            const exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
-            if (!exerciseName) return;
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const record = await fetchLastExerciseRecord(user.id, exerciseName);
-                setLastRecord(record);
-            }
-        };
-        if (selection.exercise) fetchLast();
-    }, [selection.exercise, selection.manualName]);
-
-    const handleAddOrUpdate = async (e) => {
-        if (e) e.preventDefault();
-        if (isSaving) return;
-        setIsSaving(true);
-
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('로그인이 필요합니다.');
-
-            let exerciseName = selection.exercise === '직접 입력' ? selection.manualName : selection.exercise;
-            exerciseName = exerciseName.replace('(드롭)', '').trim();
-            const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === selection.exercise && ex.part === selection.part);
-
-            const finalSetsData = selection.part === 'cardio' 
-                ? [{ duration: `${cardioMinutes || 0}분 ${cardioSeconds || 0}초` }] 
-                : setsData;
-
-            const logData = {
-                user_id: user.id,
-                part: selection.part,
-                type: exInfo?.equipment || selection.category || '기타',
-                exercise: exerciseName,
-                nameEn: selection.nameEn || '',
-                sets_count: selection.part === 'cardio' ? 1 : setsData.length,
-                sets_data: finalSetsData,
-                is_completed: true
-            };
-
-            if (editLog) {
-                const { error } = await supabase.from('workout_logs').update(logData).eq('id', editLog.id);
-                if (error) throw error;
-                alert('기록이 수정되었습니다!');
-            } else {
-                let targetDate = selectedDate ? new Date(selectedDate.formattedDate) : new Date();
-                targetDate.setHours(12, 0, 0, 0);
-                const { error } = await supabase.from('workout_logs').insert([{ ...logData, created_at: targetDate.toISOString() }]);
-                if (error) throw error;
-                alert('성공적으로 기록이 저장되었습니다!');
-            }
-
-            if (onSuccess) onSuccess();
-        } catch (error) {
-            alert('저장 오류: ' + error.message);
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    return (
-        <div className="p-8 md:p-12 max-w-4xl mx-auto animate-fade-in bg-slate-950 min-h-screen relative pb-24 w-full">
-            <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group">
-                <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                <span className="font-medium">상세 화면으로 돌아가기</span>
-            </button>
-
-            <div className="mb-8">
-                <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter underline decoration-blue-500 decoration-4 underline-offset-8">
-                    {editLog ? '기록 수정' : '기록 추가'} ({selectedDate?.displayStr})
-                </h2>
-            </div>
-
-            <div className="space-y-6">
-                <ExerciseSelector selection={selection} setSelection={setSelection} onExerciseSelect={() => setStep(4)} />
-                
-                {step >= 4 && (
-                    <div className="animate-fade-in space-y-6 bg-slate-800/30 p-6 rounded-2xl border border-slate-700">
-                        {selection.part === 'cardio' ? (
-                            <div className="space-y-4">
-                                <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">운동 시간 입력</label>
-                                <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                                    <div className="flex-1 flex items-center gap-2">
-                                        <input type="number" value={cardioMinutes} onChange={e => setCardioMinutes(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none" placeholder="0" />
-                                        <span className="text-slate-400 font-bold">분</span>
-                                    </div>
-                                    <div className="flex-1 flex items-center gap-2">
-                                        <input type="number" value={cardioSeconds} onChange={e => setCardioSeconds(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white text-right font-bold focus:border-blue-500 outline-none" placeholder="0" />
-                                        <span className="text-slate-400 font-bold">초</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-end px-1">
-                                    <label className="text-[10px] font-bold text-blue-500 uppercase block tracking-widest">세트별 상세 기록</label>
-                                    {lastRecord && (
-                                        <button onClick={() => setSetsData(setsData.map(() => ({ weight: lastRecord.weight, reps: lastRecord.reps })))} className="text-[9px] font-black text-blue-400 uppercase hover:underline">마지막 기록 불러오기</button>
-                                    )}
-                                </div>
-                                <div className="space-y-2">
-                                    {setsData.map((s, idx) => {
-                                        // 드롭 세트인 경우 중량 문자열 분리 ("20/15/10" -> ["20", "15", "10"])
-                                        const weights = s.isDropSet && typeof s.weight === 'string' ? s.weight.split('/') : [s.weight];
-                                        if (s.isDropSet && weights.length < 3) while(weights.length < 3) weights.push('');
-
-                                        const updateWeight = (val, wIdx) => {
-                                            const nd = [...setsData];
-                                            if (s.isDropSet) {
-                                                const newWeights = [...weights];
-                                                newWeights[wIdx] = val;
-                                                nd[idx].weight = newWeights.join('/');
-                                            } else {
-                                                nd[idx].weight = val;
-                                            }
-                                            setSetsData(nd);
-                                        };
-
-                                        return (
-                                            <div key={idx} className="flex flex-row flex-nowrap items-center gap-1.5 sm:gap-2 bg-slate-900/50 p-2 sm:p-3 rounded-xl border border-slate-800 transition-all hover:border-slate-600">
-                                                <div className="flex flex-col items-center w-6 sm:w-8 shrink-0">
-                                                    <span className="text-[10px] sm:text-xs font-bold text-slate-600 text-center">{idx + 1}S</span>
-                                                </div>
-                                                
-                                                <div className="flex-[2.5] min-w-0 flex items-center gap-1">
-                                                    {s.isDropSet ? (
-                                                        <div className="flex gap-1 flex-1 min-w-0">
-                                                            {weights.slice(0, 3).map((w, wIdx) => (
-                                                                <input 
-                                                                    key={wIdx}
-                                                                    type="number" 
-                                                                    value={w} 
-                                                                    onChange={(e) => updateWeight(e.target.value, wIdx)}
-                                                                    className="w-full bg-slate-950 border border-slate-700 p-1 rounded text-white text-center text-[10px] focus:border-rose-500 outline-none" 
-                                                                    placeholder={`${wIdx+1}`}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    ) : (
-                                                        <input 
-                                                            type="number" 
-                                                            value={s.weight} 
-                                                            onChange={(e) => updateWeight(e.target.value)}
-                                                            className="flex-1 min-w-0 bg-slate-950 border border-slate-700 p-1.5 rounded text-white text-right text-xs focus:border-blue-500 outline-none" 
-                                                            placeholder="0" 
-                                                        />
-                                                    )}
-                                                    <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap uppercase tracking-tighter">KG</span>
-                                                </div>
-
-                                                <div className="flex-1 min-w-0 flex items-center gap-1 border-l border-slate-800 pl-1 sm:pl-2">
-                                                    <input 
-                                                        type="number" 
-                                                        value={s.reps} 
-                                                        onChange={(e) => {
-                                                            const nd = [...setsData]; nd[idx].reps = e.target.value; setSetsData(nd);
-                                                        }} 
-                                                        className="flex-1 min-w-0 bg-slate-950 border border-slate-700 p-1.5 rounded text-white text-right text-xs focus:border-blue-500 outline-none" 
-                                                        placeholder="0" 
-                                                    />
-                                                    <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap">회</span>
-                                                </div>
-
-                                                <div className="flex items-center gap-1 sm:gap-2 shrink-0 border-l border-slate-800 pl-1 sm:pl-2">
-                                                    <label className="flex items-center gap-1 cursor-pointer group">
-                                                        <span className="text-[9px] font-black text-slate-500 whitespace-nowrap group-hover:text-rose-400 transition-colors">드롭</span>
-                                                        <input 
-                                                            type="checkbox" 
-                                                            checked={s.isDropSet || false} 
-                                                            onChange={(e) => {
-                                                                const nd = [...setsData]; 
-                                                                nd[idx].isDropSet = e.target.checked;
-                                                                if (!e.target.checked && typeof nd[idx].weight === 'string') {
-                                                                    nd[idx].weight = nd[idx].weight.split('/')[0] || '';
-                                                                }
-                                                                setSetsData(nd);
-                                                            }} 
-                                                            className="hidden" 
-                                                        />
-                                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${s.isDropSet ? 'bg-rose-600 border-rose-500 shadow-lg shadow-rose-600/20' : 'border-slate-700 bg-slate-800'}`}>
-                                                            {s.isDropSet && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
-                                                        </div>
-                                                    </label>
-                                                    {setsData.length > 1 && (
-                                                        <button onClick={() => setSetsData(setsData.filter((_, i) => i !== idx))} className="p-1 text-slate-600 hover:text-rose-500 transition-colors">
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                                <button onClick={() => setSetsData([...setsData, { weight: setsData[setsData.length-1].weight, reps: setsData[setsData.length-1].reps }])} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition-all">+ 세트 추가</button>
-                            </div>
-                        )}
-                        <button onClick={handleAddOrUpdate} disabled={isSaving} className={`w-full py-4 font-black rounded-xl italic tracking-tighter transition-all ${isSaving ? 'bg-slate-700 text-slate-500' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20'}`}>
-                            {isSaving ? '저장 중...' : '기록 저장하기'}
-                        </button>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
-const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange, onDayClick }) => {
-    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayClick }) => {
+    const navigate = useNavigate();
+    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const year = currentViewDate.getFullYear();
     const month = currentViewDate.getMonth();
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
-    
-    const calendarDays = [];
-    for (let i = 0; i < firstDayOfMonth; i++) calendarDays.push(null);
-    for (let i = 1; i <= lastDateOfMonth; i++) calendarDays.push(i);
-
-    const today = new Date();
-    const isToday = (date) => date === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+    const calendarDays = [...Array(firstDay).fill(null), ...[...Array(lastDate).keys()].map(i => i + 1)];
 
     return (
-        <div className="mt-2 md:mt-6 p-4 md:p-6 bg-slate-800/50 rounded-[2.5rem] border border-slate-700/50 shadow-2xl w-full">
-            <div className="flex justify-between items-center mb-4 px-4">
-                <button onClick={(e) => { e.preventDefault(); onMonthChange(-1); }} className="p-4 hover:bg-slate-700 rounded-full text-white transition-colors">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <h3 className="text-xl md:text-3xl font-black text-white uppercase italic tracking-tighter">
-                    {year}년 {month + 1}월
-                </h3>
-                <button onClick={(e) => { e.preventDefault(); onMonthChange(1); }} className="p-4 hover:bg-slate-700 rounded-full text-white transition-colors">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
-                </button>
+        <div className="bg-slate-800/50 p-6 rounded-[2.5rem] border border-slate-700/50 shadow-2xl">
+            <div className="flex justify-between items-center mb-6 px-4">
+                <button onClick={() => onMonthChange(-1)} className="text-white text-2xl font-bold">‹</button>
+                <h3 className="text-2xl font-black text-white italic">{year}년 {month + 1}월</h3>
+                <button onClick={() => onMonthChange(1)} className="text-white text-2xl font-bold">›</button>
             </div>
-            <div className="grid grid-cols-7 gap-x-1 gap-y-1 md:gap-4">
-                {daysOfWeek.map(day => (
-                    <div key={day} className="text-center text-[10px] md:text-sm font-black text-slate-500 py-2 uppercase tracking-widest flex items-center justify-center">
-                        {day}
-                    </div>
-                ))}
-                {calendarDays.map((date, idx) => {
-                    const workoutInfo = date ? workoutGroups[date] : null;
-                    const todayActive = date && isToday(date);
-                    const uniqueParts = workoutInfo ? [...new Set(workoutInfo.logs.map(l => l.part))] : [];
-
+            <div className="grid grid-cols-7 gap-1">
+                {days.map(d => <div key={d} className="text-center text-[10px] font-black text-slate-500 py-2 uppercase">{d}</div>)}
+                {calendarDays.map((d, i) => {
+                    const info = d ? workoutGroups[d] : null;
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     return (
-                        <div 
-                            key={idx} 
-                            onClick={(e) => {
-                                if (!date) return;
-                                e.preventDefault();
-                                const selDate = new Date(year, month, date);
-                                const days = ['일', '월', '화', '수', '목', '금', '토'];
-                                const displayStr = `${month + 1}/${date}(${days[selDate.getDay()]})`;
-                                const yyyy = selDate.getFullYear();
-                                const mm = String(selDate.getMonth() + 1).padStart(2, '0');
-                                const dd = String(selDate.getDate()).padStart(2, '0');
-                                onDayClick(date, `${yyyy}-${mm}-${dd}`, displayStr);
-                            }}
-                            className={`flex flex-col items-center justify-start py-1 md:py-2 relative group cursor-pointer hover:bg-slate-700/30 rounded-[2.5rem] transition-all duration-300 min-h-[60px] md:min-h-[100px] border border-transparent hover:border-white/5 w-full overflow-hidden`}
-                        >
-                            {date && (
-                                <div className="flex flex-col items-center justify-center w-full">
-                                    <div className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 mb-0.5">
-                                        {todayActive && <div className="absolute inset-0 bg-blue-600 rounded-full shadow-lg shadow-blue-600/30"></div>}
-                                        {workoutInfo && <div className="absolute inset-0 border-2 md:border-[3px] border-rose-500 rounded-full animate-pulse shadow-lg shadow-rose-500/20"></div>}
-                                        <span className="relative z-10 text-sm md:text-lg font-black italic tracking-tighter text-white leading-none">{date}</span>
-                                    </div>
-                                    <div className="flex flex-wrap justify-center gap-0.5 max-w-full px-1 overflow-hidden">
-                                        {uniqueParts.map(p => (
-                                            <span key={p} className="text-[7px] md:text-[9px] font-black text-slate-300 leading-tight uppercase tracking-tight bg-slate-800/80 px-1 py-0.5 rounded-md border border-white/10 whitespace-nowrap">{PART_MAP[p] || p}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                        <div key={i} onClick={() => d && navigate(`/routine-detail?date=${dateStr}`)} className={`h-16 flex flex-col items-center justify-center rounded-2xl relative cursor-pointer hover:bg-slate-700/30 transition-all ${d && new Date().getDate() === d && new Date().getMonth() === month ? 'bg-blue-600/20' : ''}`}>
+                            {d && <span className="text-sm font-black text-white">{d}</span>}
+                            {info && <div className="absolute bottom-2 flex gap-0.5">{[...new Set(info.logs.map(l => l.part))].map(p => <span key={p} className="w-1 h-1 bg-rose-500 rounded-full"></span>)}</div>}
                         </div>
                     );
                 })}
@@ -2505,32 +760,10 @@ const MonthlyCalendar = ({ workoutGroups = {}, currentViewDate, onMonthChange, o
 const MainAppLayout = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || '달력';
-
-    const setActiveTab = (tab) => {
-        setSearchParams({ tab });
-    };
-
-    const renderContent = () => {
-        switch (activeTab) {
-            case '달력':
-                return <CalendarScreen />;
-            case '루틴기록':
-                return <WorkoutSetupScreen />;
-            case '루틴구성':
-                return <WorkoutPlanScreen />;
-            case 'AI코치':
-                return <AIRecommendationScreen />;
-            default:
-                return <CalendarScreen />;
-        }
-    };
-
     return (
         <div className="relative min-h-screen bg-slate-950">
-            <main className="w-full">
-                {renderContent()}
-            </main>
-            <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+            <main>{activeTab === '달력' && <CalendarScreen />}{activeTab === '루틴기록' && <WorkoutSetupScreen />}{activeTab === '루틴구성' && <WorkoutPlanScreen />}{activeTab === 'AI코치' && <AIRecommendationScreen />}</main>
+            <BottomNav activeTab={activeTab} onTabChange={(tab) => setSearchParams({ tab })} />
         </div>
     );
 };
@@ -2538,137 +771,27 @@ const MainAppLayout = () => {
 const AppContent = () => {
     const navigate = useNavigate();
     const [session, setSession] = useState(null);
-    const [isInitializing, setIsInitializing] = useState(true);
-    const [isTimeout, setIsTimeout] = useState(false);
-    const [showInterview, setShowInterview] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // 1. 초기 세션 확인
-        const initializeAuth = async () => {
-            try {
-                const { data: { session: initialSession } } = await supabase.auth.getSession();
-                setSession(initialSession);
-                
-                if (initialSession) {
-                    // Check if first user or no data
-                    const isFirstUser = localStorage.getItem('isFirstUser') !== 'false';
-                    if (isFirstUser) {
-                        const { count, error } = await supabase
-                            .from('workout_logs')
-                            .select('*', { count: 'exact', head: true })
-                            .eq('user_id', initialSession.user.id);
-                        
-                        if (!error && count === 0) {
-                            setShowInterview(true);
-                        } else {
-                            localStorage.setItem('isFirstUser', 'false');
-                        }
-                    }
-                }
-
-                // OAuth 콜백 상태(hash/code)가 아니라면 즉시 초기화 완료
-                const isOAuthFlow = window.location.hash.includes('access_token') || window.location.search.includes('code=');
-                if (!isOAuthFlow && !initialSession) {
-                    setIsInitializing(false);
-                }
-            } catch (err) {
-                console.error("Auth init error:", err);
-                setIsInitializing(false);
-            }
-        };
-
-        initializeAuth();
-
-        // 2. 인증 상태 변화 감시 (OAuth 리다이렉트 대응 핵심)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-            setSession(currentSession);
-            
-            if (currentSession) {
-                setIsInitializing(false);
-                // 세션이 확인되면 메인 앱으로 이동
-                if (window.location.pathname === '/' || window.location.pathname === '/login') {
-                    navigate('/app', { replace: true });
-                }
-            } else if (event === 'SIGNED_OUT') {
-                setSession(null);
-                setIsInitializing(false);
-                navigate('/', { replace: true });
-            }
-        });
-
-        // 3. 5초 타임아웃 예외 처리
-        const timer = setTimeout(() => {
-            if (isInitializing) {
-                setIsTimeout(true);
-            }
-        }, 5000);
-
-        return () => {
-            subscription.unsubscribe();
-            clearTimeout(timer);
-        };
+        supabase.auth.getSession().then(({ data: { session } }) => { setSession(session); setIsLoading(false); });
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setSession(session); if (session) navigate('/app', { replace: true }); else navigate('/', { replace: true }); });
+        return () => subscription.unsubscribe();
     }, [navigate]);
 
-    // 타임아웃 발생 시 UI
-    if (isInitializing && isTimeout) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-6 text-center">
-                <div className="w-20 h-20 bg-rose-500/20 rounded-3xl flex items-center justify-center mb-6 border border-rose-500/30">
-                    <svg className="w-10 h-10 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                </div>
-                <h2 className="text-2xl font-black italic tracking-tighter mb-2">로그인이 지연되고 있습니다.</h2>
-                <p className="text-slate-400 mb-8 font-medium">네트워크 연결을 확인하거나 다시 시도해 주세요.</p>
-                <button 
-                    onClick={() => window.location.assign('/')}
-                    className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-xl"
-                >
-                    로그인 화면으로 돌아가기
-                </button>
-            </div>
-        );
-    }
+    if (isLoading) return <div className="flex items-center justify-center min-h-screen text-white font-black italic animate-pulse">MYGYM LOADING...</div>;
+    if (!session) return <LoginScreen />;
 
-    // 초기화 중 UI
-    if (isInitializing) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white">
-                <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
-                <div className="font-bold italic tracking-tighter text-2xl animate-pulse text-center">
-                    인증 정보 확인 중...
-                </div>
-            </div>
-        );
-    }
-
-    // 미인증 시 로그인 화면
-    if (!session) {
-        return <LoginScreen />;
-    }
-
-    // 인증 완료 시 메인 앱 라우터
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans">
-            {showInterview && <Onboarding onComplete={() => setShowInterview(false)} />}
-            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-white font-bold italic tracking-tighter text-2xl animate-pulse">LOADING...</div>}>
-                <Routes>
-                    <Route path="/" element={<MainAppLayout />} />
-                    <Route path="/app" element={<MainAppLayout />} />
-                    <Route path="/routine-detail" element={<WorkoutDetailScreen />} />
-                    <Route path="/api-view" element={<ApiViewer />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </React.Suspense>
-        </div>
+        <Routes>
+            <Route path="/" element={<MainAppLayout />} />
+            <Route path="/app" element={<MainAppLayout />} />
+            <Route path="/routine-detail" element={<WorkoutDetailScreen />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
     );
 };
 
-const App = () => {
-    return (
-        <BrowserRouter>
-            <AppContent />
-        </BrowserRouter>
-    );
-};
-
+const App = () => (<BrowserRouter><AppContent /></BrowserRouter>);
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);

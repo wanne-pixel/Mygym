@@ -2,40 +2,24 @@ import React, { useState } from 'react';
 import EXERCISE_DATASET from '../data/exercises.json';
 
 /**
- * [Utility: Fuzzy Matching for Exercise GIFs]
+ * [Utility: Perfect GIF Matching]
  */
-export const getExerciseGif = (nameEn) => {
-    if (!nameEn) {
-        return null;
+export const getExerciseGif = (nameEn, exerciseId) => {
+    if (!nameEn && !exerciseId) return null;
+    
+    // 1. ID 매칭
+    if (exerciseId) {
+        const ex = EXERCISE_DATASET.find(e => e.id === exerciseId);
+        if (ex) return `/${ex.gif_url}`;
     }
     
-    // 유저 요청: 키워드 교집합 방식 (띄어쓰기 기준 쪼개서 모두 포함되는지 확인)
-    const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, ''); // 띄어쓰기는 유지
-    const keywords = normalize(nameEn).split(/\s+/).filter(k => k.length > 0);
-    
-    // Fuzzy Match in Dataset using Keyword Intersection
-    const matchedExercise = EXERCISE_DATASET.find(ex => {
-        const source = normalize(ex.name);
-        return keywords.every(kw => source.includes(kw));
-    });
-    
-    let imagePath = null;
-    if (matchedExercise) {
-        const fileName = matchedExercise.gif_url.split('/').pop();
-        imagePath = `/videos/${fileName}`;
-    }
-    
-    // 디버깅 로그
+    // 2. 이름 매칭
     if (nameEn) {
-        console.log('GIF 매칭 시도 (RoutineList):', { 
-            input: nameEn, 
-            keywords, 
-            matched: matchedExercise?.name, 
-            path: imagePath 
-        });
+        const ex = EXERCISE_DATASET.find(e => e.name.toLowerCase() === nameEn.toLowerCase());
+        if (ex) return `/${ex.gif_url}`;
     }
-    
-    return imagePath;
+
+    return null;
 };
 
 /**
@@ -75,8 +59,8 @@ const GifModal = ({ isOpen, onClose, gifUrl, exerciseName }) => {
     );
 };
 
-export const GifRenderer = ({ nameEn, className = "w-full h-full object-cover", onClick }) => {
-    const gifUrl = getExerciseGif(nameEn);
+export const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cover", onClick }) => {
+    const gifUrl = getExerciseGif(nameEn, exerciseId);
     
     if (!gifUrl) {
         return (
@@ -142,7 +126,6 @@ const RoutineList = ({ data, onAddItem }) => {
                 
                 return (
                     <div key={itemIdx} className="flex items-center gap-3 bg-slate-800/50 p-3 rounded-xl border border-white/5 group transition-all hover:border-indigo-500/30">
-                        {/* 썸네일 아이콘 크기로 대폭 축소 (w-10 h-10) */}
                         <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/5 bg-slate-900 shadow-inner">
                             <GifRenderer 
                                 nameEn={item.nameEn} 
@@ -150,7 +133,6 @@ const RoutineList = ({ data, onAddItem }) => {
                             />
                         </div>
                         
-                        {/* 텍스트 영역 가로 공간 최대 확보 */}
                         <div className="flex-1 min-w-0 flex justify-between items-center">
                             <div className="flex flex-col min-w-0 pr-2">
                                 <div className="flex items-center gap-2 mb-0.5">
