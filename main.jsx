@@ -23,44 +23,36 @@ const openai = new OpenAI({
  */
 export const getExerciseGif = (nameEn) => {
     if (!nameEn) {
-        console.log('getExerciseGif: nameEn is missing/undefined');
         return null;
     }
     
-    // 유저 요청: 두 문자열 모두 소문자로 변환하고 공백/특수기호 제거 후 포함 여부 확인
-    const normalize = (str) => str.toLowerCase().replace(/[^a-z]/g, '');
-    const target = normalize(nameEn);
+    // 유저 요청: 키워드 교집합 방식 (띄어쓰기 기준 쪼개서 모두 포함되는지 확인)
+    const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, ''); // 띄어쓰기는 유지
+    const keywords = normalize(nameEn).split(/\s+/).filter(k => k.length > 0);
     
-    // Fuzzy Match in Dataset using exercise.name
+    // Fuzzy Match in Dataset using Keyword Intersection
     const matchedExercise = EXERCISE_DATASET.find(ex => {
         const source = normalize(ex.name);
-        return source.includes(target) || target.includes(source);
+        return keywords.every(kw => source.includes(kw));
     });
     
     let imagePath = null;
     if (matchedExercise) {
-        // 유저 요청: id 값을 추출하여 /videos/${exercise.id}.gif 형태로 조합
-        // 단, 실제 파일명은 [id]-[suffix].gif 형식이므로 suffix 대응을 위한 매핑 또는 규칙 필요
-        // 우선 요청하신 /videos/${matchedExercise.id}.gif 형식을 따르되 
-        // fallback으로 기존 외부 링크 구조도 준비합니다.
-        imagePath = `/videos/${matchedExercise.id}.gif`;
-    }
-    
-    // 디버깅 추적기 (Console.log)
-    console.log('AI가 준 영어 이름:', nameEn);
-    console.log('매칭된 JSON 데이터:', matchedExercise);
-    console.log('최종 렌더링 경로:', imagePath);
-    
-    if (matchedExercise && imagePath) {
-        // 실제 public/videos에 suffix가 붙은 파일들이 있으므로, 
-        // 브라우저에서 /videos/0001.gif 로 접근했을 때 404가 나지 않도록
-        // matchedExercise.gif_url의 파일명 부분을 사용하거나 suffix를 포함해야 할 수 있습니다.
-        // matchedExercise.gif_url 예: "0001-2gPfomN.gif"
         const fileName = matchedExercise.gif_url.split('/').pop();
-        return `/videos/${fileName}`;
+        imagePath = `/videos/${fileName}`;
     }
     
-    return null;
+    // 디버깅 로그 (유지)
+    if (nameEn) {
+        console.log('GIF 매칭 시도:', { 
+            input: nameEn, 
+            keywords, 
+            matched: matchedExercise?.name, 
+            path: imagePath 
+        });
+    }
+    
+    return imagePath;
 };
 
 /**
@@ -256,13 +248,19 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
 
     const handleExerciseClick = (exName) => {
         const isManual = exName === '직접 입력';
-        setSelection({ ...selection, exercise: exName, manualName: isManual ? manualName : '' });
+        const exInfo = CUSTOM_EXERCISES.find(ex => ex.name === exName);
+        setSelection({ 
+            ...selection, 
+            exercise: exName, 
+            manualName: isManual ? manualName : '',
+            nameEn: exInfo?.nameEn || ''
+        });
         if (onExerciseSelect && !isManual) onExerciseSelect(exName);
     };
 
     const handleManualNameChange = (val) => {
         setManualName(val);
-        setSelection({ ...selection, manualName: val });
+        setSelection({ ...selection, manualName: val, nameEn: '' });
     };
 
     const filteredExercises = useMemo(() => {
@@ -851,6 +849,7 @@ const WorkoutSetupScreen = () => {
                 part: selection.part,
                 type: exInfo?.equipment || selection.category || '기타',
                 exercise: exerciseName,
+                nameEn: selection.nameEn || '',
                 sets_count: selection.part === 'cardio' ? 1 : setsData.length,
                 sets_data: finalSetsData,
                 is_completed: true
@@ -1112,6 +1111,7 @@ const WorkoutPlanScreen = () => {
             part: selection.part,
             category: selection.category,
             exercise: selection.exercise,
+            nameEn: selection.nameEn || '', // nameEn 추가
             manualName: selection.manualName,
             isCompleted: false
         };
@@ -2254,6 +2254,7 @@ const WorkoutSetupView = ({ selectedDate, editLog, onBack, onSuccess }) => {
                 part: selection.part,
                 type: exInfo?.equipment || selection.category || '기타',
                 exercise: exerciseName,
+                nameEn: selection.nameEn || '',
                 sets_count: selection.part === 'cardio' ? 1 : setsData.length,
                 sets_data: finalSetsData,
                 is_completed: true
