@@ -878,13 +878,84 @@ const AIRecommendationScreen = () => {
     );
 };
 
+const DayDetailView = ({ date, onBack, onGoToRoutine }) => {
+    const [logs, setLogs] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchLogs = async () => {
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { data, error } = await supabase.from('workout_logs').select('*').eq('user_id', user.id).gte('created_at', `${date}T00:00:00`).lte('created_at', `${date}T23:59:59`).order('created_at', { ascending: true });
+            if (error) throw error;
+            setLogs(data || []);
+        } catch (e) { console.error(e); } finally { setIsLoading(false); }
+    };
+
+    useEffect(() => { fetchLogs(); }, [date]);
+
+    const handleDelete = async (id) => {
+        if (!confirm('삭제하시겠습니까?')) return;
+        const { error } = await supabase.from('workout_logs').delete().eq('id', id);
+        if (!error) fetchLogs();
+    };
+
+    return (
+        <div className="animate-fade-in">
+            <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group">
+                <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+                <span className="font-bold">달력으로</span>
+            </button>
+            <h2 className="text-2xl font-black italic text-white mb-6">{date} 트레이닝</h2>
+            <div className="space-y-4">
+                {isLoading ? (
+                    <div className="text-center text-slate-500 italic py-20">로딩 중...</div>
+                ) : logs.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-24 gap-6 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="w-20 h-20 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800">
+                                <svg className="w-10 h-10 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                            </div>
+                            <p className="text-slate-500 font-bold text-sm">이 날의 운동 기록이 없습니다.</p>
+                        </div>
+                        <button onClick={onGoToRoutine} className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl italic text-sm active:scale-95 transition-all shadow-lg shadow-blue-600/20">
+                            + 운동 추가하기
+                        </button>
+                    </div>
+                ) : logs.map(log => (
+                    <div key={log.id} className="bg-slate-900/40 border border-white/5 p-6 rounded-[1.5rem] relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                        <div className="flex justify-between items-start mb-4">
+                            <div>
+                                <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase text-white mb-1 inline-block">{PART_MAP[log.part] || log.part}</span>
+                                <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">{log.exercise}</h3>
+                            </div>
+                            <button onClick={() => handleDelete(log.id)} className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                        </div>
+                        <div className="space-y-1">
+                            {log.part === 'cardio' ? <div className="text-blue-400 font-black">{log.sets_data[0]?.duration}</div> : log.sets_data.map((s, idx) => (
+                                <div key={idx} className="flex justify-between py-1 px-3 bg-slate-950/50 rounded-lg text-xs font-bold">
+                                    <span className="text-slate-500">{idx + 1} SET</span>
+                                    <span className="text-white">{s.weight}kg x {s.reps}회</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 const CalendarScreen = () => {
-    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
     const [workoutGroups, setWorkoutGroups] = useState({});
     const [userData, setUserData] = useState(null);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedDate, setSelectedDate] = useState(null);
 
     const fetchLogs = async () => {
         setIsLoading(true);
@@ -907,14 +978,14 @@ const CalendarScreen = () => {
     useEffect(() => { fetchLogs(); }, []);
 
     return (
-        <div className="p-4 md:p-12 flex flex-col justify-center bg-slate-950 min-h-screen pb-24">
+        <div className="p-4 md:p-12 flex flex-col bg-slate-950 min-h-screen pb-24">
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">MY GYM</h2>
                 <div className="flex items-center gap-2">
                     <button onClick={() => setIsProfileModalOpen(true)} className="p-2 bg-slate-800 rounded-full">
                         <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
                     </button>
-                    <button 
+                    <button
                         onClick={async () => { if(window.confirm('로그아웃 하시겠습니까?')) { await supabase.auth.signOut(); localStorage.clear(); } }}
                         className="p-2 bg-red-900/20 text-red-400 rounded-full hover:bg-red-900/40 transition-all active:scale-95"
                         title="로그아웃"
@@ -927,36 +998,60 @@ const CalendarScreen = () => {
                     </button>
                 </div>
             </div>
-            <MonthlyCalendar workoutGroups={workoutGroups} currentViewDate={currentViewDate} onMonthChange={(off) => setCurrentViewDate(new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + off, 1))} onDayClick={(d, f, s) => {}} />
+            {selectedDate ? (
+                <DayDetailView
+                    date={selectedDate}
+                    onBack={() => setSelectedDate(null)}
+                    onGoToRoutine={() => setSearchParams({ tab: '루틴구성' })}
+                />
+            ) : (
+                <MonthlyCalendar
+                    workoutGroups={workoutGroups}
+                    currentViewDate={currentViewDate}
+                    onMonthChange={(off) => setCurrentViewDate(new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + off, 1))}
+                    onDayClick={(dateStr) => setSelectedDate(dateStr)}
+                />
+            )}
             <UserProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} userData={userData} onUpdate={fetchLogs} />
         </div>
     );
 };
 
 const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayClick }) => {
-    const navigate = useNavigate();
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const year = currentViewDate.getFullYear();
     const month = currentViewDate.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
     const calendarDays = [...Array(firstDay).fill(null), ...[...Array(lastDate).keys()].map(i => i + 1)];
+    const today = new Date();
 
     return (
         <div className="bg-slate-800/50 p-6 rounded-[2.5rem] border border-slate-700/50 shadow-2xl">
-            <div className="flex justify-between items-center mb-6 px-4">
-                <button onClick={() => onMonthChange(-1)} className="text-white text-2xl font-bold">‹</button>
+            <div className="flex justify-between items-center mb-6 px-2">
+                <button
+                    onClick={() => onMonthChange(-1)}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-700/50 hover:bg-slate-600 active:scale-90 active:bg-slate-500 transition-all text-white text-xl font-bold"
+                >‹</button>
                 <h3 className="text-2xl font-black text-white italic">{year}년 {month + 1}월</h3>
-                <button onClick={() => onMonthChange(1)} className="text-white text-2xl font-bold">›</button>
+                <button
+                    onClick={() => onMonthChange(1)}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-700/50 hover:bg-slate-600 active:scale-90 active:bg-slate-500 transition-all text-white text-xl font-bold"
+                >›</button>
             </div>
             <div className="grid grid-cols-7 gap-1">
                 {days.map(d => <div key={d} className="text-center text-[10px] font-black text-slate-500 py-2 uppercase">{d}</div>)}
                 {calendarDays.map((d, i) => {
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     const info = d ? workoutGroups[dateStr] : null;
+                    const isToday = d && today.getDate() === d && today.getMonth() === month && today.getFullYear() === year;
                     return (
-                        <div key={i} onClick={() => d && navigate(`/routine-detail?date=${dateStr}`)} className={`h-16 flex flex-col items-center justify-center rounded-2xl relative cursor-pointer hover:bg-slate-700/30 transition-all ${d && new Date().getDate() === d && new Date().getMonth() === month ? 'bg-blue-600/20' : ''}`}>
-                            {d && <span className="text-sm font-black text-white">{d}</span>}
+                        <div
+                            key={i}
+                            onClick={() => d && onDayClick(dateStr)}
+                            className={`h-16 flex flex-col items-center justify-center rounded-2xl relative transition-all ${d ? 'cursor-pointer hover:bg-slate-700/50 active:scale-90 active:bg-slate-600/50' : ''} ${isToday ? 'bg-blue-600/20' : ''}`}
+                        >
+                            {d && <span className={`text-sm font-black ${isToday ? 'text-blue-400' : 'text-white'}`}>{d}</span>}
                             {info && <div className="absolute bottom-2 flex gap-0.5">{[...new Set(info.logs.map(l => l.part))].map(p => <span key={p} className="w-1 h-1 bg-rose-500 rounded-full"></span>)}</div>}
                         </div>
                     );
