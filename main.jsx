@@ -625,8 +625,8 @@ const AIRecommendationScreen = () => {
         [중요 규칙]
         1. 반드시 아래 [공식 운동 리스트]에 존재하는 영어 이름(name)을 'nameEn' 키값으로 사용해야 한다. 다른 이름은 절대 안 된다.
         2. [ROUTINE_DATA] JSON 형식으로 답변 끝에 포함하라.
-        3. 'nameEn'은 반드시 JSON의 'name'과 토씨 하나 틀리지 않고 일치해야 한다.
-        4. 루틴 항목: { "name": "한국어명", "nameEn": "공식영어명", "part": "가슴|등|하체|어깨|팔|코어|유산소", "sets": 4, "reps": 12, "weight": 0 }
+        3. 'nameEn'은 반드시 [공식 운동 리스트]의 영어 이름과 토씨 하나 틀리지 않고 일치해야 하며, 'name'에는 해당 운동의 한국어 번역 이름을 넣어야 한다.
+        4. 루틴 항목: { "name": "바벨 벤치 프레스" (UI 표시용 한국어), "nameEn": "barbell bench press" (JSON 매칭용 공식 영어), "part": "가슴|등|하체|어깨|팔|코어|유산소", "sets": 4, "reps": 12, "weight": 0 }
         
         [공식 운동 리스트 (일부)]
         ${EXERCISE_MENU}`;
@@ -648,7 +648,7 @@ const AIRecommendationScreen = () => {
             const PART_REVERSE = { '가슴': 'chest', '등': 'back', '어깨': 'shoulders', '하체': 'upper legs', '팔': 'upper arms', '코어': 'waist', '유산소': 'cardio' };
             return {
                 id: Date.now() + Math.random(),
-                exercise: item.nameEn,
+                exercise: item.name, // UI 표시용 한국어 이름 저장
                 exercise_id: ex?.id,
                 name: item.name,
                 nameEn: item.nameEn,
