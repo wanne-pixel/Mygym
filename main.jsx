@@ -1108,6 +1108,7 @@ const AIRecommendationScreen = () => {
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [showHardModeOptions, setShowHardModeOptions] = useState(false);
+    const [currentRecommendationMode, setCurrentRecommendationMode] = useState('balanced');
 
     const getMostFrequent = (arr) => {
         if (!arr || arr.length === 0) return null;
@@ -1447,6 +1448,7 @@ ${recordsText}
 
     const sendRecommendationRequest = async (mode) => {
         if (!profile) { alert("프로필 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요."); return; }
+        setCurrentRecommendationMode('balanced');
         let displayMessage = '';
         let aiPrompt = '';
         if (mode === 'balanced') {
@@ -1465,6 +1467,7 @@ ${recordsText}
             return;
         }
 
+        setCurrentRecommendationMode('hard');
         setShowHardModeOptions(false);
 
         let displayMessage = '';
@@ -1889,6 +1892,7 @@ const CalendarScreen = () => {
                         </div>
                         
                         <div className="space-y-4">
+                            {/* 운동 목표 */}
                             <div>
                                 <label className="text-sm text-gray-400 block mb-1">운동 목표</label>
                                 <select
@@ -1903,18 +1907,7 @@ const CalendarScreen = () => {
                                 </select>
                             </div>
                             
-                            <div>
-                                <label className="text-sm text-gray-400 block mb-1">주간 운동 횟수</label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="7"
-                                    value={editProfile?.weekly_frequency || 3}
-                                    onChange={(e) => setEditProfile({...editProfile, weekly_frequency: parseInt(e.target.value)})}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
-                                />
-                            </div>
-                            
+                            {/* 운동 경험 */}
                             <div>
                                 <label className="text-sm text-gray-400 block mb-1">운동 경험</label>
                                 <select
@@ -1922,33 +1915,139 @@ const CalendarScreen = () => {
                                     onChange={(e) => setEditProfile({...editProfile, experience_level: e.target.value})}
                                     className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
                                 >
-                                    <option value="beginner">초보</option>
-                                    <option value="intermediate">중급</option>
-                                    <option value="advanced">고급</option>
+                                    <option value="beginner">초보 (3개월 미만)</option>
+                                    <option value="intermediate">중급 (3개월~2년)</option>
+                                    <option value="advanced">고급 (2년 이상)</option>
                                 </select>
+                            </div>
+                            
+                            {/* 주간 운동 횟수 */}
+                            <div>
+                                <label className="text-sm text-gray-400 block mb-1">주간 운동 횟수</label>
+                                <input
+                                    type="number"
+                                    min="2"
+                                    max="7"
+                                    value={editProfile?.weekly_frequency || 3}
+                                    onChange={(e) => setEditProfile({...editProfile, weekly_frequency: parseInt(e.target.value)})}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                                />
+                            </div>
+                            
+                            {/* 기구 접근성 */}
+                            <div>
+                                <label className="text-sm text-gray-400 block mb-1">운동 환경</label>
+                                <select
+                                    value={editProfile?.equipment_access || ''}
+                                    onChange={(e) => setEditProfile({...editProfile, equipment_access: e.target.value})}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                                >
+                                    <option value="home">집 (맨몸)</option>
+                                    <option value="home_gym">홈짐 (덤벨/벤치)</option>
+                                    <option value="full_gym">헬스장 (모든 기구)</option>
+                                </select>
+                            </div>
+                            
+                            <div className="border-t border-gray-700 pt-4 mt-4">
+                                <p className="text-sm text-gray-400 mb-3">신체 정보 (선택)</p>
+                                
+                                {/* 키 */}
+                                <div className="mb-3">
+                                    <label className="text-xs text-gray-500 block mb-1">키 (cm)</label>
+                                    <input
+                                        type="number"
+                                        placeholder="170"
+                                        value={editProfile?.height || ''}
+                                        onChange={(e) => setEditProfile({...editProfile, height: parseInt(e.target.value) || null})}
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                                
+                                {/* 몸무게 */}
+                                <div className="mb-3">
+                                    <label className="text-xs text-gray-500 block mb-1">몸무게 (kg)</label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        placeholder="70"
+                                        value={editProfile?.weight || ''}
+                                        onChange={(e) => setEditProfile({...editProfile, weight: parseFloat(e.target.value) || null})}
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                                
+                                {/* 나이 */}
+                                <div className="mb-3">
+                                    <label className="text-xs text-gray-500 block mb-1">나이</label>
+                                    <input
+                                        type="number"
+                                        placeholder="25"
+                                        value={editProfile?.age || ''}
+                                        onChange={(e) => setEditProfile({...editProfile, age: parseInt(e.target.value) || null})}
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                                
+                                {/* 성별 */}
+                                <div className="mb-3">
+                                    <label className="text-xs text-gray-500 block mb-1">성별</label>
+                                    <select
+                                        value={editProfile?.gender || ''}
+                                        onChange={(e) => setEditProfile({...editProfile, gender: e.target.value || null})}
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                                    >
+                                        <option value="">선택 안 함</option>
+                                        <option value="male">남성</option>
+                                        <option value="female">여성</option>
+                                        <option value="other">기타</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            {/* 제한사항 */}
+                            <div className="border-t border-gray-700 pt-4">
+                                <label className="text-sm text-gray-400 block mb-2">부상/제한사항 (선택)</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {['무릎', '허리', '어깨', '손목', '발목', '목'].map((part) => (
+                                        <label key={part} className="flex items-center gap-2 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={editProfile?.limitations?.includes(part) || false}
+                                                onChange={(e) => {
+                                                    const current = editProfile?.limitations || [];
+                                                    const updated = e.target.checked
+                                                        ? [...current, part]
+                                                        : current.filter(p => p !== part);
+                                                    setEditProfile({...editProfile, limitations: updated});
+                                                }}
+                                                className="w-4 h-4 accent-blue-500"
+                                            />
+                                            <span className="text-gray-300">{part}</span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                             
                             <button
                                 onClick={async () => {
-                                    const { data: session } = await supabase.auth.getSession();
-                                    const { error } = await supabase
-                                        .from('user_profiles')
-                                        .update({
-                                            goal: editProfile.goal,
-                                            weekly_frequency: editProfile.weekly_frequency,
-                                            experience_level: editProfile.experience_level
-                                        })
-                                        .eq('user_id', session.session.user.id);
-                                    
-                                    if (error) {
-                                        alert('저장 실패: ' + error.message);
-                                    } else {
+                                    try {
+                                        const { data: session } = await supabase.auth.getSession();
+                                        const { error } = await supabase
+                                            .from('user_profiles')
+                                            .update(editProfile)
+                                            .eq('user_id', session.session.user.id);
+                                        
+                                        if (error) throw error;
+                                        
                                         alert('개인정보가 수정되었습니다.');
                                         fetchLogs();
                                         setShowProfileEdit(false);
+                                    } catch (error) {
+                                        console.error('프로필 수정 실패:', error);
+                                        alert('수정 중 오류가 발생했습니다.');
                                     }
                                 }}
-                                className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-medium text-white transition-all active:scale-[0.98]"
+                                className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-medium mt-4 text-white transition-all active:scale-[0.98]"
                             >
                                 저장
                             </button>
