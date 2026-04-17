@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
-import { Target, Flame, Plus, Dumbbell } from 'lucide-react';
+import { Target, Flame, Plus, Dumbbell, TrendingUp } from 'lucide-react';
 import EXERCISE_DATASET from './src/data/exercises.json';
 
 const EQUIPMENT_MAP = {
@@ -1009,6 +1009,7 @@ const AIRecommendationScreen = () => {
     const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[]'));
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [showHardModeOptions, setShowHardModeOptions] = useState(false);
 
     const getMostFrequent = (arr) => {
         if (!arr || arr.length === 0) return null;
@@ -1230,14 +1231,12 @@ const AIRecommendationScreen = () => {
 운동별 최고 기록 (1RM 추정용):
 ${recordsText}
 
-중요 규칙:
-1. 루틴 추천 시 JSON 형식으로만 응답
-2. 각 운동의 kg/reps 설정:
-   - 해당 운동의 최고 기록이 있으면: 최고 기록의 80-90% 무게, reps는 8-12회
-   - 최고 기록이 없으면: kg=0, reps=0 (사용자가 직접 입력하도록)
-   - 맨몸 운동(푸시업, 풀업 등): kg=0, reps만 설정
+응답 형식 (반드시 준수):
+1. 먼저 사용자 상태 분석 + 추천 이유를 친근하게 설명 (2-4문장)
+   예시: "이번 주 가슴 운동이 부족하시네요! 오늘은 가슴과 삼두에 집중해볼게요. 최근 벤치 프레스 60kg 기록을 보니 70% 정도 무게로 볼륨을 늘려보면 좋겠어요."
 
-3. JSON 형식:
+2. 그 다음 JSON 블록으로 루틴 제공
+
 \`\`\`json
 {
   "routine": [
@@ -1245,26 +1244,23 @@ ${recordsText}
       "name": "벤치 프레스",
       "part": "가슴",
       "sets": [
-        {"kg": 50, "reps": 10, "isDropSet": false},
-        {"kg": 52.5, "reps": 8, "isDropSet": false}
-      ]
-    },
-    {
-      "name": "새로운 운동 (기록 없음)",
-      "part": "등",
-      "sets": [
-        {"kg": 0, "reps": 0, "isDropSet": false}
+        {"kg": 50, "reps": 10, "isDropSet": false}
       ]
     }
   ]
 }
 \`\`\`
 
-4. part는: 가슴, 등, 어깨, 하체, 팔, 허리/코어, 유산소 중 하나
-5. 오늘 하루 루틴만 (여러 날 X)
-6. 운동 3-5개
-7. JSON 외 마크다운 헤더/번호 목록 금지
-8. 일반 질문에는 자유롭게 대화`
+중요:
+- 설명은 친근하고 격려하는 톤
+- 사용자 이름 부를 필요 없음
+- 최고 기록이 있으면 80-90% 무게 추천
+- 최고 기록이 없으면 kg=0, reps=0
+- part는: 가슴, 등, 어깨, 하체, 팔, 허리/코어, 유산소 중 하나
+- 오늘 하루 루틴만 (여러 날 X)
+- 운동 3-5개
+- JSON 외 마크다운 헤더(###), 번호 목록 사용 금지
+- 일반 질문에는 자유롭게 대화`
         };
 
         try {
@@ -1303,10 +1299,85 @@ ${recordsText}
         if (mode === 'balanced') {
             displayMessage = '🎯 오늘의 루틴 추천';
             aiPrompt = "나의 프로필과 최근 운동 기록을 분석해서 오늘 할 균형잡힌 운동 루틴을 추천해줘. 부족한 부위가 있으면 보완하고 점진적 과부하 원칙을 적용해줘. 오늘 하루 루틴만 3-5개 운동으로 구성해서 JSON 형식으로 응답해줘.";
-        } else if (mode === 'hard') {
-            displayMessage = '🔥 하드모드';
-            aiPrompt = "나의 프로필과 최근 운동 기록을 분석해서 강도 높은 하드모드 루틴을 추천해줘. 평소보다 운동 개수와 세트 수를 늘리고 도전적인 무게를 제시해줘. 오늘 하루 루틴만 JSON 형식으로 응답해줘.";
         }
+        const userMsg = { id: Date.now(), type: 'user', text: displayMessage };
+        const updatedHistory = [...messages, userMsg];
+        setMessages(updatedHistory);
+        await callOpenAI(aiPrompt, updatedHistory);
+    };
+
+    const sendHardModeRequest = async (hardModeType) => {
+        if (!profile || !recentStats) {
+            alert("프로필 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+            return;
+        }
+
+        setShowHardModeOptions(false);
+
+        let displayMessage = '';
+        let aiPrompt = '';
+
+        const modeLabels = {
+            low_weight_high_reps: '🔥 저중량 고반복',
+            high_weight_low_reps: '🔥 고중량 저반복',
+            progressive_overload: '🔥 점진적 중량증가',
+            drop_sets: '🔥 드롭세트'
+        };
+
+        displayMessage = modeLabels[hardModeType];
+
+        const modeInstructions = {
+            low_weight_high_reps: `저중량 고반복 하드모드:
+- 최고 기록의 60-70% 무게
+- 15-20회 고반복
+- 세트 수 평소보다 +1세트
+- 근지구력과 펌핑감 극대화
+- 예: 벤치 프레스 최고 60kg → 40kg × 18회 × 4세트`,
+
+            high_weight_low_reps: `고중량 저반복 하드모드:
+- 최고 기록의 90-95% 무게
+- 4-6회 저반복
+- 세트 수 평소보다 +1세트
+- 최대 근력 향상
+- 예: 벤치 프레스 최고 60kg → 55kg × 5회 × 4세트`,
+
+            progressive_overload: `점진적 중량증가 하드모드:
+- 세트마다 무게를 2.5-5kg씩 증가
+- 횟수는 8-12회로 고정
+- 마지막 세트는 최고 기록 도전
+- 예: 벤치 프레스 → 50kg×12, 55kg×10, 60kg×8, 62.5kg×6`,
+
+            drop_sets: `드롭세트 하드모드:
+- 마지막 세트를 드롭세트로 구성
+- 최고 기록 무게 → 70% → 50% 순차 감소
+- 각 단계 실패 지점까지
+- 예: 벤치 프레스 60kg×8 → 40kg×10 → 30kg×12 (쉬는 시간 없이 연속)`
+        };
+
+        aiPrompt = `나의 프로필과 최근 운동 기록, 최고 기록을 분석해서 다음 하드모드 루틴을 추천해줘:
+
+${modeInstructions[hardModeType]}
+
+중요:
+- 오늘 하루 루틴만 (여러 날 X)
+- 3-5개 운동
+- 각 운동에 위 모드 규칙 적용
+- 반드시 아래 형식으로 응답
+
+먼저 이 모드를 선택한 이유와 효과를 2-3문장으로 설명한 후 JSON 제공:
+
+\`\`\`json
+{
+  "routine": [
+    {
+      "name": "운동명",
+      "part": "부위",
+      "sets": [...]
+    }
+  ]
+}
+\`\`\``;
+
         const userMsg = { id: Date.now(), type: 'user', text: displayMessage };
         const updatedHistory = [...messages, userMsg];
         setMessages(updatedHistory);
@@ -1345,16 +1416,22 @@ ${recordsText}
                             
                             {/* 메시지 + 운동 카드를 하나의 말풍선에 */}
                             <div className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 space-y-3 max-w-[85%] shadow-xl">
-                                {/* 텍스트 부분 */}
+                                {/* 분석/설명 섹션 강조 */}
                                 {textOnly && (
-                                    <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-medium">
-                                        {textOnly}
-                                    </p>
+                                    <div className="bg-blue-600/10 border-l-4 border-blue-500 pl-3 py-2 rounded-r">
+                                        <p className="text-[10px] text-blue-400 font-black mb-1 flex items-center gap-1.5 uppercase tracking-widest">
+                                            <TrendingUp size={12} />
+                                            트레이너 분석
+                                        </p>
+                                        <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-medium">
+                                            {textOnly}
+                                        </p>
+                                    </div>
                                 )}
                                 
                                 {/* 운동 카드 (JSON 파싱 성공 시) */}
                                 {routine && routine.length > 0 && (
-                                    <div className="space-y-3 pt-2 border-t border-white/5">
+                                    <div className="space-y-3 pt-2">
                                         <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1.5 uppercase tracking-widest">
                                             <Dumbbell size={12} className="text-blue-500" />
                                             운동을 탭하여 루틴에 추가
@@ -1410,9 +1487,54 @@ ${recordsText}
                 {isTyping && <div className="text-slate-500 italic text-xs animate-pulse ml-2">코치가 데이터를 분석 중...</div>}
             </div>
             <div className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent space-y-4">
-                <div className="flex gap-3">
-                    <button onClick={() => sendRecommendationRequest('balanced')} className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-600/20"><Target size={16} /> 오늘의 루틴 추천</button>
-                    <button onClick={() => sendRecommendationRequest('hard')} className="flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/20"><Flame size={16} /> 하드모드</button>
+                <div className="space-y-3">
+                    <div className="flex gap-3">
+                        <button onClick={() => sendRecommendationRequest('balanced')} className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-600/20"><Target size={16} /> 오늘의 루틴 추천</button>
+                        <button onClick={() => setShowHardModeOptions(!showHardModeOptions)} className="flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/20"><Flame size={16} /> 하드모드</button>
+                    </div>
+
+                    {showHardModeOptions && (
+                        <div className="bg-slate-900/80 border border-rose-500/30 rounded-2xl p-3 space-y-3 animate-slide-up shadow-2xl backdrop-blur-md">
+                            <p className="text-[10px] text-slate-500 font-black mb-1 flex items-center gap-1.5 uppercase tracking-widest px-1">
+                                <Flame size={12} className="text-rose-500" />
+                                하드모드 유형을 선택하세요
+                            </p>
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={() => sendHardModeRequest('low_weight_high_reps')}
+                                    className="bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 rounded-xl py-3 px-4 text-left active:scale-95 transition-all group"
+                                >
+                                    <p className="text-xs font-black text-white italic group-hover:text-rose-400">저중량 고반복</p>
+                                    <p className="text-[9px] font-bold text-slate-500 mt-0.5 uppercase">근지구력 향상</p>
+                                </button>
+                                
+                                <button
+                                    onClick={() => sendHardModeRequest('high_weight_low_reps')}
+                                    className="bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 rounded-xl py-3 px-4 text-left active:scale-95 transition-all group"
+                                >
+                                    <p className="text-xs font-black text-white italic group-hover:text-rose-400">고중량 저반복</p>
+                                    <p className="text-[9px] font-bold text-slate-500 mt-0.5 uppercase">최대 근력 증가</p>
+                                </button>
+                                
+                                <button
+                                    onClick={() => sendHardModeRequest('progressive_overload')}
+                                    className="bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 rounded-xl py-3 px-4 text-left active:scale-95 transition-all group"
+                                >
+                                    <p className="text-xs font-black text-white italic group-hover:text-rose-400">점진적 증가</p>
+                                    <p className="text-[9px] font-bold text-slate-500 mt-0.5 uppercase">세트마다 무게↑</p>
+                                </button>
+                                
+                                <button
+                                    onClick={() => sendHardModeRequest('drop_sets')}
+                                    className="bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 rounded-xl py-3 px-4 text-left active:scale-95 transition-all group"
+                                >
+                                    <p className="text-xs font-black text-white italic group-hover:text-rose-400">드롭세트</p>
+                                    <p className="text-[9px] font-bold text-slate-500 mt-0.5 uppercase">근비대 극대화</p>
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className="relative">
                     <input type="text" value={inputText} onChange={e => setInputText(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSendMessage()} placeholder="코치에게 질문하기..." className="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" />
