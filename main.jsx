@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
-import { Target, Flame } from 'lucide-react';
+import { Target, Flame, Plus } from 'lucide-react';
 import EXERCISE_DATASET from './src/data/exercises.json';
 
 const EQUIPMENT_MAP = {
@@ -1001,8 +1001,6 @@ const WorkoutPlanScreen = () => {
         </div>
     );
 };
-
-import { Target, Flame, Plus } from 'lucide-react';
 
 const AIRecommendationScreen = () => {
     const [profile, setProfile] = useState(null);
