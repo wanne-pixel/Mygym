@@ -338,87 +338,6 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
         </div>
     );
 };
-                            <select
-                                value={profile.goal}
-                                onChange={e => setProfile({...profile, goal: e.target.value})}
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                            >
-                                <option value="strength">근력 증가</option>
-                                <option value="hypertrophy">근육 성장</option>
-                                <option value="weight_loss">체중 감량</option>
-                                <option value="maintenance">현상 유지</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">주간 운동 횟수</label>
-                            <input
-                                type="number"
-                                min="1"
-                                max="7"
-                                value={profile.weekly_frequency}
-                                onChange={e => setProfile({...profile, weekly_frequency: e.target.value})}
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">나이</label>
-                            <input type="number" value={profile.age} onChange={e => setProfile({...profile, age: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="세" />
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">성별</label>
-                            <select value={profile.gender} onChange={e => setProfile({...profile, gender: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none">
-                                <option value="">선택</option>
-                                <option value="male">남성</option>
-                                <option value="female">여성</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">키 (cm)</label>
-                            <input type="number" value={profile.height} onChange={e => setProfile({...profile, height: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="cm" />
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">몸무게 (kg)</label>
-                            <input type="number" value={profile.weight} onChange={e => setProfile({...profile, weight: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="kg" />
-                        </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-slate-800">
-                        <label className="text-xs font-black text-blue-400 uppercase block mb-4">인바디 정보</label>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">골격근량 (kg)</label>
-                                <input type="number" value={profile.skeletal_muscle_mass} onChange={e => setProfile({...profile, skeletal_muscle_mass: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">체지방량 (kg)</label>
-                                <input type="number" value={profile.body_fat_mass} onChange={e => setProfile({...profile, body_fat_mass: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">체지방률 (%)</label>
-                                <input type="number" value={profile.body_fat_percentage} onChange={e => setProfile({...profile, body_fat_percentage: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">기초대사량 (kcal)</label>
-                                <input type="number" value={profile.bmr} onChange={e => setProfile({...profile, bmr: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                            </div>
-                            <div className="col-span-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">내장지방레벨</label>
-                                <input type="number" value={profile.visceral_fat_level} onChange={e => setProfile({...profile, visceral_fat_level: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="pt-6 flex gap-3">
-                        <button onClick={onClose} className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-xl transition-all hover:bg-slate-700">취소</button>
-                        <button onClick={handleSave} disabled={isSaving} className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:bg-blue-500 disabled:opacity-50">{isSaving ? '저장 중...' : '저장하기'}</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-
 /**
  * [Common: Exercise Selector - Refactored for exercises.json]
  */
@@ -1871,7 +1790,8 @@ const CalendarScreen = () => {
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
     const [workoutGroups, setWorkoutGroups] = useState({});
     const [userData, setUserData] = useState(null);
-    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [showProfileEdit, setShowProfileEdit] = useState(false);
+    const [editProfile, setEditProfile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(null);
 
@@ -1902,6 +1822,17 @@ const CalendarScreen = () => {
         } catch (e) { console.error(e); } finally { setIsLoading(false); }
     };
 
+    const fetchUserProfile = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+        
+        setEditProfile(profile || {});
+    };
+
     useEffect(() => { fetchLogs(); }, []);
 
     return (
@@ -1911,8 +1842,8 @@ const CalendarScreen = () => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => {
-                            fetchLogs();
-                            setIsProfileModalOpen(true);
+                            fetchUserProfile();
+                            setShowProfileEdit(true);
                         }}
                         className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1.5 bg-blue-500/10 px-3 py-2 rounded-xl transition-all border border-blue-500/20"
                     >
@@ -1946,7 +1877,85 @@ const CalendarScreen = () => {
                     onDayClick={(dateStr) => setSelectedDate(dateStr)}
                 />
             )}
-            <UserProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} userData={userData} onUpdate={fetchLogs} />
+            
+            {showProfileEdit && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto custom-scrollbar">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-white">개인정보 수정</h2>
+                            <button onClick={() => setShowProfileEdit(false)} className="text-slate-400 hover:text-white">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-sm text-gray-400 block mb-1">운동 목표</label>
+                                <select
+                                    value={editProfile?.goal || ''}
+                                    onChange={(e) => setEditProfile({...editProfile, goal: e.target.value})}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                                >
+                                    <option value="strength">근력 증가</option>
+                                    <option value="hypertrophy">근육 성장</option>
+                                    <option value="weight_loss">체중 감량</option>
+                                    <option value="maintenance">현상 유지</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="text-sm text-gray-400 block mb-1">주간 운동 횟수</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="7"
+                                    value={editProfile?.weekly_frequency || 3}
+                                    onChange={(e) => setEditProfile({...editProfile, weekly_frequency: parseInt(e.target.value)})}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="text-sm text-gray-400 block mb-1">운동 경험</label>
+                                <select
+                                    value={editProfile?.experience_level || ''}
+                                    onChange={(e) => setEditProfile({...editProfile, experience_level: e.target.value})}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                                >
+                                    <option value="beginner">초보</option>
+                                    <option value="intermediate">중급</option>
+                                    <option value="advanced">고급</option>
+                                </select>
+                            </div>
+                            
+                            <button
+                                onClick={async () => {
+                                    const { data: session } = await supabase.auth.getSession();
+                                    const { error } = await supabase
+                                        .from('user_profiles')
+                                        .update({
+                                            goal: editProfile.goal,
+                                            weekly_frequency: editProfile.weekly_frequency,
+                                            experience_level: editProfile.experience_level
+                                        })
+                                        .eq('user_id', session.session.user.id);
+                                    
+                                    if (error) {
+                                        alert('저장 실패: ' + error.message);
+                                    } else {
+                                        alert('개인정보가 수정되었습니다.');
+                                        fetchLogs();
+                                        setShowProfileEdit(false);
+                                    }
+                                }}
+                                className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-medium text-white transition-all active:scale-[0.98]"
+                            >
+                                저장
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
