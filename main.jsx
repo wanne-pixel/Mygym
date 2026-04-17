@@ -892,6 +892,7 @@ const AIRecommendationScreen = () => {
 };
 
 const CalendarScreen = () => {
+    const navigate = useNavigate();
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
     const [workoutGroups, setWorkoutGroups] = useState({});
     const [userData, setUserData] = useState(null);
@@ -915,13 +916,31 @@ const CalendarScreen = () => {
         } catch (e) { console.error(e); } finally { setIsLoading(false); }
     };
 
-    useEffect(() => { fetchLogs(); }, []);
-
     return (
         <div className="p-4 md:p-12 flex flex-col justify-center bg-slate-950 min-h-screen pb-24">
             <div className="flex justify-between items-center mb-8">
-                <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">My Workout Hub</h2>
-                <button onClick={() => setIsProfileModalOpen(true)} className="p-2 bg-slate-800 rounded-full"><svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg></button>
+                <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">MY GYM</h2>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => setIsProfileModalOpen(true)} className="p-2 bg-slate-800 rounded-full">
+                        <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
+                    </button>
+                    <button 
+                        onClick={() => {
+                          if (window.confirm("로그아웃 하시겠습니까?")) {
+                            localStorage.clear(); // 로컬 데이터 초기화
+                            window.location.reload(); // 새로고침하여 로그인/초기 화면으로 이동
+                          }
+                        }}
+                        className="p-2 bg-red-900/20 text-red-400 rounded-full hover:bg-red-900/40 transition-all active:scale-95"
+                        title="로그아웃"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
             <MonthlyCalendar workoutGroups={workoutGroups} currentViewDate={currentViewDate} onMonthChange={(off) => setCurrentViewDate(new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + off, 1))} onDayClick={(d, f, s) => {}} />
             <UserProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} userData={userData} onUpdate={fetchLogs} />
