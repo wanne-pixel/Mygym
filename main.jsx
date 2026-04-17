@@ -8,6 +8,7 @@ import OpenAI from 'openai';
 import ChatMessage from './src/components/ChatMessage';
 import { BODY_PARTS, PART_MAP, STORAGE_KEYS } from './src/constants/exerciseConstants';
 import { fetchLastExerciseRecord, saveWorkoutLogs } from './src/api/workoutApi';
+import { translateToKorean } from './src/api/exerciseApi';
 import BottomNav from './src/components/BottomNav';
 import Onboarding from './src/components/Onboarding';
 
@@ -230,9 +231,13 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
         if (!selection.part) return [];
         let list = EXERCISE_DATASET.filter(ex => ex.body_part === selection.part);
         if (searchTerm.trim()) {
-            list = list.filter(ex => 
-                ex.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+            list = list.filter(ex => {
+                const searchLower = searchTerm.toLowerCase();
+                const nameEn = ex.name.toLowerCase();
+                const nameKo = translateToKorean(ex.name).toLowerCase();
+                // 원본 영문 이름에 포함되거나, 번역된 한글 이름에 포함될 경우 둘 다 노출
+                return nameEn.includes(searchLower) || nameKo.includes(searchLower);
+            });
         }
         return list;
     }, [selection.part, searchTerm]);
@@ -247,7 +252,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                         {selection.exercise && (
                             <>
                                 <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                                <span className="text-white uppercase">{selection.exercise.name}</span>
+                                <span className="text-white uppercase">{translateToKorean(selection.exercise.name)}</span>
                             </>
                         )}
                     </div>
@@ -278,7 +283,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="운동 명칭 검색 (English)..."
+                            placeholder="운동 명칭 검색 (한글/English)..."
                             className="w-full bg-slate-900 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                         />
                         <svg className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -298,7 +303,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                         <GifRenderer exerciseId={ex.id} />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-xs font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
+                                        <p className={`text-xs font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{translateToKorean(ex.name)}</p>
                                         <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{ex.equipment}</span>
                                     </div>
                                 </div>
@@ -447,7 +452,7 @@ const WorkoutDetailScreen = () => {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase text-white mb-1 inline-block">{PART_MAP[log.part] || log.part}</span>
-                                <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">{log.exercise}</h3>
+                                <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">{translateToKorean(log.exercise)}</h3>
                             </div>
                             <button onClick={() => handleDelete(log.id)} className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
@@ -536,7 +541,7 @@ const WorkoutSetupScreen = () => {
                         {addedExercises.map(ex => (
                             <div key={ex.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700">
                                 <p className="text-[10px] text-blue-400 uppercase font-bold">{PART_MAP[ex.part]} / {ex.type}</p>
-                                <p className="font-bold text-white">{ex.exercise}</p>
+                                <p className="font-bold text-white">{translateToKorean(ex.exercise)}</p>
                             </div>
                         ))}
                     </div>
@@ -582,7 +587,7 @@ const WorkoutPlanScreen = () => {
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-[10px] font-bold text-indigo-400 uppercase">{PART_MAP[item.body_part]}</p>
-                                    <h4 className="text-sm font-bold text-white uppercase">{item.name}</h4>
+                                    <h4 className="text-sm font-bold text-white uppercase">{translateToKorean(item.name || item.exercise)}</h4>
                                 </div>
                                 <button onClick={() => setPlanList(planList.filter(p => p.id !== item.id))} className="p-2 text-slate-500 hover:text-white">×</button>
                             </div>

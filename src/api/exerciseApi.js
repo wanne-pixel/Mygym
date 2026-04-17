@@ -39,7 +39,7 @@ const translationMap = {
   "triceps": "삼두근",
   "upper back": "등 상부",
 
-  // Equipment
+  // Equipment & Common Terms
   "assisted": "보조 기구",
   "band": "밴드",
   "barbell": "바벨",
@@ -67,7 +67,81 @@ const translationMap = {
   "trap bar": "트랩바",
   "upper body ergometer": "상체 에르고미터",
   "weighted": "중량 추가",
-  "wheel roller": "휠 롤러"
+  "wheel roller": "휠 롤러",
+  
+  // Action & Form Terms
+  "press": "프레스",
+  "raise": "레이즈",
+  "fly": "플라이",
+  "curl": "컬",
+  "extension": "익스텐션",
+  "squat": "스쿼트",
+  "deadlift": "데드리프트",
+  "lunge": "런지",
+  "row": "로우",
+  "pulldown": "풀다운",
+  "front": "프론트",
+  "lateral": "레터럴",
+  "reverse": "리버스",
+  "overhead": "오버헤드",
+  "seated": "시티드",
+  "standing": "스탠딩",
+  "incline": "인클라인",
+  "decline": "디클라인",
+  "shoulder": "숄더",
+  "leg": "레그",
+  "arm": "팔",
+  "machine": "머신",
+  "smith": "스미스",
+  "bench": "벤치",
+  "pull-up": "풀업",
+  "push-up": "푸쉬업",
+  "dip": "딥스",
+  "crunch": "크런치",
+  "plank": "플랭크",
+  "bent": "벤트",
+  "over": "오버",
+  "one": "원",
+  "arm": "암",
+  "alternate": "얼터네이트",
+  "close": "클로즈",
+  "grip": "그립",
+  "wide": "와이드",
+  "straight": "스트레이트",
+  "behind": "비하인드",
+  "the": "",
+  "with": "",
+  "on": "",
+  "to": "",
+  "of": "",
+  "and": ""
+};
+
+/**
+ * Translates an English exercise name into Korean by splitting words and matching with dictionary.
+ * Words not found in the dictionary are kept as original (uppercase for English).
+ * @param {string} englishName - The full English name of the exercise
+ * @returns {string} - The translated Korean name
+ */
+export const translateToKorean = (englishName) => {
+  if (!englishName) return "";
+  
+  // Clean string and split by spaces or hyphens
+  const words = englishName.toLowerCase().replace(/[^a-z0-9-\s]/g, '').split(/[\s-]+/);
+  
+  const translatedWords = words.map(word => {
+    if (!word) return "";
+    const translated = translationMap[word];
+    // If found in map and not an empty string (like 'the', 'and')
+    if (translated !== undefined) {
+      return translated;
+    }
+    // Otherwise keep as original, uppercase for English words
+    return word.toUpperCase();
+  });
+  
+  // Filter out empty strings and join
+  return translatedWords.filter(w => w !== "").join(" ");
 };
 
 /**
