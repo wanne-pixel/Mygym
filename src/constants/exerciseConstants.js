@@ -1,21 +1,21 @@
 export const BODY_PARTS = [
-    { key: 'chest', label: '가슴' },
-    { key: 'back', label: '등' },
-    { key: 'shoulders', label: '어깨' },
-    { key: 'legs', label: '하체' },
-    { key: 'arms', label: '팔' },
-    { key: 'waist', label: '허리/코어' },
-    { key: 'cardio', label: '유산소' }
+    { key: '가슴', label: '가슴' },
+    { key: '등', label: '등' },
+    { key: '어깨', label: '어깨' },
+    { key: '하체', label: '하체' },
+    { key: '팔', label: '팔' },
+    { key: '허리/코어', label: '허리/코어' },
+    { key: '유산소', label: '유산소' }
 ];
 
 export const PART_MAP = {
-    chest: '가슴',
-    back: '등',
-    shoulders: '어깨',
-    legs: '하체',
-    arms: '팔',
-    waist: '허리/코어',
-    cardio: '유산소'
+    '가슴': '가슴',
+    '등': '등',
+    '어깨': '어깨',
+    '하체': '하체',
+    '팔': '팔',
+    '허리/코어': '허리/코어',
+    '유산소': '유산소'
 };
 
 export const CATEGORIES = ['머신', '프리웨이트', '케이블'];

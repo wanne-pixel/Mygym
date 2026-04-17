@@ -1,48 +1,5 @@
 import React, { useState } from 'react';
 import EXERCISE_DATASET from '../data/exercises.json';
-import { translateToKorean } from '../api/exerciseApi';
-
-// UX를 해치는 비주류 변형 운동(장비 기준) 필터링 (Curation)
-const EXCLUDED_EQUIPMENT = [
-    'medicine ball', 'exercise ball', 'bosu ball', 'stability ball', 
-    'roller', 'band', 'resistance band', 'kettlebell', 'wheel roller'
-];
-
-// 실전성이 떨어지는 '부위 + 기구' 조합 블랙리스트
-const JUNK_COMBINATIONS = {
-    'chest': ['weighted', 'upper body ergometer', 'assisted'],
-    'back': ['weighted', 'rope', 'ez barbell'],
-    'shoulders': ['weighted', 'ez barbell', 'rope'],
-    'upper legs': ['weighted', 'assisted'],
-    'lower legs': ['weighted', 'assisted'],
-    'upper arms': ['weighted', 'skierg machine', 'olympic barbell'],
-    'lower arms': ['weighted', 'skierg machine', 'olympic barbell'],
-    'waist': ['hammer', 'leverage machine'],
-    'cardio': ['dumbbell']
-};
-
-const CURATED_EXERCISES = EXERCISE_DATASET
-    .filter(ex => {
-        const part = ex.body_part.toLowerCase();
-        const equip = ex.equipment.toLowerCase();
-        
-        // 1. 기본 제외 부위 및 장비
-        if (part === 'neck') return false;
-        if (EXCLUDED_EQUIPMENT.includes(equip)) return false;
-        
-        // 2. 부위별 정밀 블랙리스트 필터링
-        if (JUNK_COMBINATIONS[part] && JUNK_COMBINATIONS[part].includes(equip)) {
-            return false;
-        }
-        
-        return true;
-    })
-    .map(ex => {
-        let consolidatedPart = ex.body_part;
-        if (ex.body_part === 'upper legs' || ex.body_part === 'lower legs') consolidatedPart = 'legs';
-        if (ex.body_part === 'upper arms' || ex.body_part === 'lower arms') consolidatedPart = 'arms';
-        return { ...ex, body_part: consolidatedPart };
-    });
 
 /**
  * [Utility: Perfect GIF Matching]
@@ -52,13 +9,13 @@ export const getExerciseGif = (nameEn, exerciseId) => {
     
     // 1. ID 매칭
     if (exerciseId) {
-        const ex = CURATED_EXERCISES.find(e => e.id === exerciseId);
+        const ex = EXERCISE_DATASET.find(e => e.id === exerciseId);
         if (ex) return `/${ex.gif_url}`;
     }
     
     // 2. 이름 매칭
     if (nameEn) {
-        const ex = CURATED_EXERCISES.find(e => e.name.toLowerCase() === nameEn.toLowerCase());
+        const ex = EXERCISE_DATASET.find(e => e.nameEn?.toLowerCase() === nameEn.toLowerCase() || e.name.toLowerCase() === nameEn.toLowerCase());
         if (ex) return `/${ex.gif_url}`;
     }
 
@@ -94,7 +51,7 @@ const GifModal = ({ isOpen, onClose, gifUrl, exerciseName }) => {
                 
                 <div className="p-8 bg-gradient-to-t from-slate-950 to-slate-900 border-t border-white/5">
                     <h3 className="text-2xl font-black italic text-white uppercase tracking-tighter text-center">
-                        {translateToKorean(exerciseName)}
+                        {exerciseName}
                     </h3>
                 </div>
             </div>
@@ -107,7 +64,7 @@ export const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full obj
     
     if (!gifUrl) {
         return (
-            <div className={`bg-slate-800 flex flex-col items-center justify-center gap-1 ${className}`}>
+            <div className={`bg-slate-800 flex flex-col items-center justify-center gap-1 ${className}`} onClick={onClick}>
                 <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -180,7 +137,7 @@ const RoutineList = ({ data, onAddItem }) => {
                             <div className="flex flex-col min-w-0 pr-2">
                                 <div className="flex items-center gap-2 mb-0.5">
                                     <span className="text-white font-black italic uppercase tracking-tighter text-sm truncate">
-                                        {translateToKorean(item.name)}
+                                        {item.name}
                                     </span>
                                     {item.isDropSet && (
                                         <span className="bg-rose-600 text-white text-[7px] font-black px-1 py-0.5 rounded italic shrink-0">D</span>

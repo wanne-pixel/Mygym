@@ -3,55 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
 import EXERCISE_DATASET from './src/data/exercises.json';
 
-// UX를 해치는 비주류 변형 운동(장비 기준) 필터링 (Curation)
-const EXCLUDED_EQUIPMENT = [
-    'medicine ball', 'exercise ball', 'bosu ball', 'stability ball', 
-    'roller', 'band', 'resistance band', 'kettlebell', 'wheel roller'
-];
-
-// 실전성이 떨어지는 '부위 + 기구' 조합 블랙리스트
-const JUNK_COMBINATIONS = {
-    'chest': ['weighted', 'upper body ergometer', 'assisted'],
-    'back': ['weighted', 'rope', 'ez barbell'],
-    'shoulders': ['weighted', 'ez barbell', 'rope'],
-    'upper legs': ['weighted', 'assisted'],
-    'lower legs': ['weighted', 'assisted'],
-    'upper arms': ['weighted', 'skierg machine', 'olympic barbell'],
-    'lower arms': ['weighted', 'skierg machine', 'olympic barbell'],
-    'waist': ['hammer', 'leverage machine'],
-    'cardio': ['dumbbell']
-};
-
-const CURATED_EXERCISES = EXERCISE_DATASET
-    .filter(ex => {
-        const part = ex.body_part.toLowerCase();
-        const equip = ex.equipment.toLowerCase();
-        
-        // 1. 기본 제외 부위 및 장비
-        if (part === 'neck') return false;
-        if (EXCLUDED_EQUIPMENT.includes(equip)) return false;
-        
-        // 2. 부위별 정밀 블랙리스트 필터링
-        if (JUNK_COMBINATIONS[part] && JUNK_COMBINATIONS[part].includes(equip)) {
-            return false;
-        }
-        
-        return true;
-    })
-    .map(ex => {
-        let consolidatedPart = ex.body_part;
-        if (ex.body_part === 'upper legs' || ex.body_part === 'lower legs') consolidatedPart = 'legs';
-        if (ex.body_part === 'upper arms' || ex.body_part === 'lower arms') consolidatedPart = 'arms';
-        return { ...ex, body_part: consolidatedPart };
-    });
-
 import ApiViewer from './src/components/ApiViewer';
 import { supabase } from './src/api/supabase';
 import OpenAI from 'openai';
 import ChatMessage from './src/components/ChatMessage';
 import { BODY_PARTS, PART_MAP, STORAGE_KEYS } from './src/constants/exerciseConstants';
 import { fetchLastExerciseRecord, saveWorkoutLogs } from './src/api/workoutApi';
-import { translateToKorean, translateExerciseTerm } from './src/api/exerciseApi';
 import BottomNav from './src/components/BottomNav';
 import Onboarding from './src/components/Onboarding';
 
@@ -69,13 +26,13 @@ export const getExerciseGif = (nameEn, exerciseId) => {
     
     // 1. ID가 있으면 최우선으로 매칭 (가장 정확)
     if (exerciseId) {
-        const ex = CURATED_EXERCISES.find(e => e.id === exerciseId);
+        const ex = EXERCISE_DATASET.find(e => e.id === exerciseId);
         if (ex) return `/${ex.gif_url}`;
     }
     
     // 2. 이름으로 정확히 일치하는 항목 찾기
     if (nameEn) {
-        const ex = CURATED_EXERCISES.find(e => e.name.toLowerCase() === nameEn.toLowerCase());
+        const ex = EXERCISE_DATASET.find(e => e.nameEn?.toLowerCase() === nameEn.toLowerCase() || e.name.toLowerCase() === nameEn.toLowerCase());
         if (ex) return `/${ex.gif_url}`;
     }
 
@@ -111,7 +68,7 @@ const GifModal = ({ isOpen, onClose, gifUrl, exerciseName }) => {
                 
                 <div className="p-8 bg-gradient-to-t from-slate-950 to-slate-900 border-t border-white/5">
                     <h3 className="text-2xl font-black italic text-white uppercase tracking-tighter text-center">
-                        {translateToKorean(exerciseName)}
+                        {exerciseName}
                     </h3>
                 </div>
             </div>
@@ -296,24 +253,23 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
 
     const availableEquipments = useMemo(() => {
         if (!selection.part) return [];
-        const equipments = CURATED_EXERCISES
-            .filter(ex => ex.body_part === selection.part)
+        const equipments = EXERCISE_DATASET
+            .filter(ex => ex.bodyPart === selection.part)
             .map(ex => ex.equipment);
         return [...new Set(equipments)];
     }, [selection.part]);
 
     const filteredExercises = useMemo(() => {
         if (!selection.part || !selection.equipment) return [];
-        let list = CURATED_EXERCISES.filter(ex => 
-            ex.body_part === selection.part && 
+        let list = EXERCISE_DATASET.filter(ex => 
+            ex.bodyPart === selection.part && 
             ex.equipment === selection.equipment
         );
         if (searchTerm.trim()) {
             list = list.filter(ex => {
                 const searchLower = searchTerm.toLowerCase();
-                const nameEn = ex.name.toLowerCase();
-                const nameKo = translateToKorean(ex.name).toLowerCase();
-                // 원본 영문 이름에 포함되거나, 번역된 한글 이름에 포함될 경우 둘 다 노출
+                const nameEn = ex.nameEn?.toLowerCase() || '';
+                const nameKo = ex.name.toLowerCase();
                 return nameEn.includes(searchLower) || nameKo.includes(searchLower);
             });
         }
@@ -339,13 +295,13 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                             {selection.equipment && (
                                 <>
                                     <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                                    <span className="text-slate-300">{translateExerciseTerm(selection.equipment)}</span>
+                                    <span className="text-slate-300">{selection.equipment}</span>
                                 </>
                             )}
                             {selection.exercise && (
                                 <>
                                     <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                                    <span className="text-white uppercase">{translateToKorean(selection.exercise.name)}</span>
+                                    <span className="text-white uppercase">{selection.exercise.name}</span>
                                 </>
                             )}
                         </div>
@@ -382,7 +338,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                 onClick={() => handleEquipmentClick(eq)} 
                                 className={`py-3 rounded-2xl font-black text-[10px] sm:text-xs tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50`}
                             >
-                                {translateExerciseTerm(eq).toUpperCase()}
+                                {eq.toUpperCase()}
                             </button>
                         ))}
                     </div>
@@ -421,8 +377,8 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                         />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-xs font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{translateToKorean(ex.name)}</p>
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{translateExerciseTerm(ex.equipment)}</span>
+                                        <p className={`text-xs font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{ex.equipment}</span>
                                     </div>
                                     <div className="shrink-0">
                                         <button 
@@ -585,7 +541,7 @@ const WorkoutDetailScreen = () => {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase text-white mb-1 inline-block">{PART_MAP[log.part] || log.part}</span>
-                                <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">{translateToKorean(log.exercise)}</h3>
+                                <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">{log.exercise}</h3>
                             </div>
                             <button onClick={() => handleDelete(log.id)} className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
@@ -674,7 +630,7 @@ const WorkoutSetupScreen = () => {
                         {addedExercises.map(ex => (
                             <div key={ex.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700">
                                 <p className="text-[10px] text-blue-400 uppercase font-bold">{PART_MAP[ex.part]} / {ex.type}</p>
-                                <p className="font-bold text-white">{translateToKorean(ex.exercise)}</p>
+                                <p className="font-bold text-white">{ex.exercise}</p>
                             </div>
                         ))}
                     </div>
@@ -720,7 +676,7 @@ const WorkoutPlanScreen = () => {
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-[10px] font-bold text-indigo-400 uppercase">{PART_MAP[item.body_part]}</p>
-                                    <h4 className="text-sm font-bold text-white uppercase">{translateToKorean(item.name || item.exercise)}</h4>
+                                    <h4 className="text-sm font-bold text-white uppercase">{item.name || item.exercise}</h4>
                                 </div>
                                 <button onClick={() => setPlanList(planList.filter(p => p.id !== item.id))} className="p-2 text-slate-500 hover:text-white">×</button>
                             </div>
@@ -758,16 +714,16 @@ const AIRecommendationScreen = () => {
         setInputText('');
         setIsTyping(true);
 
-        // 필터링된 알짜배기 리스트를 AI 코치에게 전달 (메뉴판 정제)
-        const EXERCISE_MENU = CURATED_EXERCISES.slice(0, 400).map(ex => ex.name).join(', ');
+        // 큐레이션된 전체 리스트를 AI 코치에게 전달
+        const EXERCISE_MENU = EXERCISE_DATASET.map(ex => `${ex.name} (${ex.nameEn})`).join(', ');
         const systemRole = `너는 전문 PT 코치야. 
         [중요 규칙]
-        1. 반드시 아래 [공식 운동 리스트]에 존재하는 영어 이름(name)을 'nameEn' 키값으로 사용해야 한다. 다른 이름은 절대 안 된다.
+        1. 반드시 아래 [공식 운동 리스트]에 존재하는 영어 이름을 'nameEn' 키값으로 사용해야 한다.
         2. [ROUTINE_DATA] JSON 형식으로 답변 끝에 포함하라.
-        3. 'nameEn'은 반드시 [공식 운동 리스트]의 영어 이름과 토씨 하나 틀리지 않고 일치해야 하며, 'name'에는 해당 운동의 한국어 번역 이름을 넣어야 한다.
-        4. 루틴 항목: { "name": "바벨 벤치 프레스" (UI 표시용 한국어), "nameEn": "barbell bench press" (JSON 매칭용 공식 영어), "part": "가슴|등|하체|어깨|팔|허리/코어|유산소", "sets": 4, "reps": 12, "weight": 0 }
+        3. 'name'에는 해당 운동의 한국어 이름을 넣어야 한다.
+        4. 루틴 항목: { "name": "바벨 벤치 프레스", "nameEn": "barbell bench press", "part": "가슴|등|하체|어깨|팔|허리/코어|유산소", "sets": 4, "reps": 12, "weight": 0 }
         
-        [공식 운동 리스트 (일부)]
+        [공식 운동 리스트]
         ${EXERCISE_MENU}`;
 
         try {
@@ -783,15 +739,14 @@ const AIRecommendationScreen = () => {
     const handleAddRoutineBatch = (items) => {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE) || '[]');
         const newItems = items.map(item => {
-            const ex = CURATED_EXERCISES.find(e => e.name.toLowerCase() === item.nameEn.toLowerCase());
-            const PART_REVERSE = { '가슴': 'chest', '등': 'back', '어깨': 'shoulders', '하체': 'legs', '팔': 'arms', '허리/코어': 'waist', '코어': 'waist', '유산소': 'cardio' };
+            const ex = EXERCISE_DATASET.find(e => e.nameEn?.toLowerCase() === item.nameEn?.toLowerCase() || e.name === item.name);
             return {
                 id: Date.now() + Math.random(),
-                exercise: item.name, // UI 표시용 한국어 이름 저장
+                exercise: item.name, 
                 exercise_id: ex?.id,
                 name: item.name,
                 nameEn: item.nameEn,
-                body_part: PART_REVERSE[item.part] || 'chest',
+                body_part: item.part,
                 equipment: ex?.equipment || '기타',
                 suggestedSets: item.sets,
                 suggestedReps: item.reps,
