@@ -26,12 +26,15 @@ const translationMap = {
   "calves": "종아리근",
   "cardiovascular system": "심혈관계",
   "delts": "삼각근(어깨)",
+  "deltoid": "삼각근",
   "forearms": "전완근",
   "glutes": "둔근(엉덩이)",
+  "glute": "둔근",
   "hamstrings": "햄스트링",
   "lats": "광배근",
   "levator scapulae": "견갑거근",
   "pectorals": "흉근(가슴)",
+  "pec": "가슴",
   "quads": "대퇴사두근",
   "serratus anterior": "전거근",
   "spine": "척추",
@@ -43,6 +46,7 @@ const translationMap = {
   "assisted": "어시스트",
   "band": "밴드",
   "barbell": "바벨",
+  "bar": "바",
   "body weight": "맨몸",
   "bodyweight": "맨몸",
   "bosu ball": "보수볼",
@@ -50,9 +54,11 @@ const translationMap = {
   "dumbbell": "덤벨",
   "elliptical machine": "일립티컬",
   "ez barbell": "EZ 바벨",
+  "ez": "EZ",
   "hammer": "해머 머신",
   "kettlebell": "케틀벨",
   "leverage machine": "레버리지 머신",
+  "leverage": "레버리지",
   "medicine ball": "메디신볼",
   "olympic barbell": "올림픽 바벨",
   "resistance band": "저항 밴드",
@@ -60,15 +66,20 @@ const translationMap = {
   "rope": "로프",
   "skater machine": "스케이터 머신",
   "sled machine": "슬레드 머신",
+  "sled": "슬레드",
   "smith machine": "스미스 머신",
+  "smith": "스미스",
   "stability ball": "짐볼",
   "stationary bike": "싸이클",
   "stepmill machine": "천국의 계단",
+  "suspension": "서스펜션",
   "tire": "타이어",
   "trap bar": "트랩바",
   "upper body ergometer": "상체 에르고미터",
   "weighted": "중량",
   "wheel roller": "휠 롤러",
+  "plate": "원판",
+  "loaded": "로드",
   
   // Action & Form Terms
   "press": "프레스",
@@ -108,7 +119,7 @@ const translationMap = {
   "variation": "바리에이션",
   
   // Body Parts (Additional)
-  "calf": "카프",
+  "calf": "종아리",
   "wrist": "리스트",
   "shoulder": "숄더",
   "leg": "레그",
@@ -124,7 +135,6 @@ const translationMap = {
   "incline": "인클라인",
   "decline": "디클라인",
   "machine": "머신",
-  "smith": "스미스",
   "bench": "벤치",
   "pull-up": "풀업",
   "push-up": "푸쉬업",
@@ -138,6 +148,8 @@ const translationMap = {
   "neutral": "뉴트럴",
   "straight": "스트레이트",
   "behind": "비하인드",
+  "v-bar": "V바",
+  "v": "V",
   "the": "",
   "with": "",
   "on": "",
@@ -155,28 +167,16 @@ const translationMap = {
 export const translateToKorean = (englishName) => {
   if (!englishName) return "";
   
-  // Clean string but keep hyphens for words like sit-up
-  const cleanedName = englishName.toLowerCase().replace(/[^a-z0-9-\s]/g, '');
-  
-  // Split by spaces
-  const words = cleanedName.split(/\s+/);
+  // Clean string and split by spaces, hyphens, and slashes to handle all cases
+  const words = englishName.toLowerCase().split(/[\s\-\/\(\)]+/);
   
   const translatedWords = words.map(word => {
     if (!word) return "";
     
-    // 1. Try whole word (might include hyphens)
-    if (translationMap[word] !== undefined) {
-      return translationMap[word];
-    }
-    
-    // 2. If it has hyphens, try splitting by hyphens as well
-    if (word.includes('-')) {
-      const subWords = word.split('-');
-      const translatedSubWords = subWords.map(sw => {
-        if (translationMap[sw] !== undefined) return translationMap[sw];
-        return sw.toUpperCase();
-      });
-      return translatedSubWords.filter(w => w !== "").join(" ");
+    const translated = translationMap[word];
+    // If found in map and not an empty string (like 'the', 'and')
+    if (translated !== undefined) {
+      return translated;
     }
     
     // Otherwise keep as original, uppercase for English words

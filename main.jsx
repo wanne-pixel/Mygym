@@ -68,7 +68,7 @@ const GifModal = ({ isOpen, onClose, gifUrl, exerciseName }) => {
                 
                 <div className="p-8 bg-gradient-to-t from-slate-950 to-slate-900 border-t border-white/5">
                     <h3 className="text-2xl font-black italic text-white uppercase tracking-tighter text-center">
-                        {exerciseName}
+                        {translateToKorean(exerciseName)}
                     </h3>
                 </div>
             </div>

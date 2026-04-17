@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import EXERCISE_DATASET from '../data/exercises.json';
+import { translateToKorean } from '../api/exerciseApi';
 
 /**
  * [Utility: Perfect GIF Matching]
@@ -51,7 +52,7 @@ const GifModal = ({ isOpen, onClose, gifUrl, exerciseName }) => {
                 
                 <div className="p-8 bg-gradient-to-t from-slate-950 to-slate-900 border-t border-white/5">
                     <h3 className="text-2xl font-black italic text-white uppercase tracking-tighter text-center">
-                        {exerciseName}
+                        {translateToKorean(exerciseName)}
                     </h3>
                 </div>
             </div>
@@ -137,7 +138,7 @@ const RoutineList = ({ data, onAddItem }) => {
                             <div className="flex flex-col min-w-0 pr-2">
                                 <div className="flex items-center gap-2 mb-0.5">
                                     <span className="text-white font-black italic uppercase tracking-tighter text-sm truncate">
-                                        {item.name}
+                                        {translateToKorean(item.name)}
                                     </span>
                                     {item.isDropSet && (
                                         <span className="bg-rose-600 text-white text-[7px] font-black px-1 py-0.5 rounded italic shrink-0">D</span>
