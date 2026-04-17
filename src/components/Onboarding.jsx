@@ -18,7 +18,8 @@ const STEPS = {
     EQUIPMENT: 5,
     BODY_INFO: 6,
     LIMITATIONS: 7,
-    GENERATING: 8
+    FINISH: 8,
+    GENERATING: 9
 };
 
 const Onboarding = ({ onComplete }) => {
@@ -306,7 +307,7 @@ const Onboarding = ({ onComplete }) => {
                     <div className="animate-slide-up">
                         <div className="flex justify-between items-center mb-8">
                             <h2 className="text-2xl font-black text-white italic">부상/제한사항 (선택)</h2>
-                            <button onClick={generateInitialRoutine} className="text-slate-500 font-bold text-sm">건너뛰기</button>
+                            <button onClick={handleNext} className="text-slate-500 font-bold text-sm">건너뛰기</button>
                         </div>
                         <div className="grid grid-cols-2 gap-4 mb-12">
                             {limits.map(l => (
@@ -320,7 +321,28 @@ const Onboarding = ({ onComplete }) => {
                                 </button>
                             ))}
                         </div>
-                        <button onClick={generateInitialRoutine} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic shadow-2xl shadow-blue-600/20 active:scale-95 transition-all uppercase tracking-tighter">분석 시작 및 플랜 생성</button>
+                        <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic shadow-2xl shadow-blue-600/20 active:scale-95 transition-all uppercase tracking-tighter">다음 단계</button>
+                    </div>
+                );
+
+            case STEPS.FINISH:
+                return (
+                    <div className="text-center space-y-6 animate-fade-in">
+                        <div className="w-24 h-24 bg-green-500 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-green-500/20">
+                            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="4"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                        <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">READY TO GO!</h2>
+                        <p className="text-slate-400 font-bold leading-relaxed">
+                            모든 준비가 완료되었습니다!<br/>
+                            입력하신 정보는 달력 화면 우측 상단<br/>
+                            '개인정보' 버튼에서 언제든 수정할 수 있습니다.
+                        </p>
+                        <button 
+                            onClick={generateInitialRoutine} 
+                            className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic text-lg shadow-xl shadow-blue-600/20 active:scale-95 transition-all uppercase tracking-tighter"
+                        >
+                            분석 시작 및 플랜 생성
+                        </button>
                     </div>
                 );
 

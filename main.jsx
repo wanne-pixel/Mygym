@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
-import { Target, Flame, Plus, Dumbbell, TrendingUp } from 'lucide-react';
+import { Target, Flame, Plus, Dumbbell, TrendingUp, User, X, Check } from 'lucide-react';
 import EXERCISE_DATASET from './src/data/exercises.json';
 
 const EQUIPMENT_MAP = {
@@ -194,24 +194,53 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
         body_fat_mass: userData?.body_fat_mass || '',
         body_fat_percentage: userData?.body_fat_percentage || '',
         bmr: userData?.bmr || '',
-        visceral_fat_level: userData?.visceral_fat_level || ''
+        visceral_fat_level: userData?.visceral_fat_level || '',
+        goal: userData?.goal || 'strength',
+        weekly_frequency: userData?.weekly_frequency || 3
     });
 
     const [isSaving, setIsSaving] = useState(false);
 
     const handleSave = async () => {
         setIsSaving(true);
-        const { error } = await supabase.auth.updateUser({
-            data: { ...profile }
-        });
-        setIsSaving(false);
-        if (error) {
-            alert('저장 실패: ' + error.message);
-        } else {
+        try {
+            const { data: session } = await supabase.auth.getSession();
+            if (!session.session) throw new Error('로그인이 필요합니다.');
+            const userId = session.session.user.id;
+
+            // 1. Auth metadata 업데이트
+            await supabase.auth.updateUser({
+                data: { ...profile }
+            });
+
+            // 2. user_profiles 테이블 업데이트
+            const { error: profileError } = await supabase
+                .from('user_profiles')
+                .update({
+                    goal: profile.goal,
+                    weekly_frequency: parseInt(profile.weekly_frequency),
+                    height: profile.height ? parseInt(profile.height) : null,
+                    weight: profile.weight ? parseFloat(profile.weight) : null,
+                    age: profile.age ? parseInt(profile.age) : null,
+                    gender: profile.gender || null,
+                    skeletal_muscle_mass: profile.skeletal_muscle_mass ? parseFloat(profile.skeletal_muscle_mass) : null,
+                    body_fat_mass: profile.body_fat_mass ? parseFloat(profile.body_fat_mass) : null,
+                    body_fat_percentage: profile.body_fat_percentage ? parseFloat(profile.body_fat_percentage) : null,
+                    bmr: profile.bmr ? parseInt(profile.bmr) : null,
+                    visceral_fat_level: profile.visceral_fat_level ? parseInt(profile.visceral_fat_level) : null
+                })
+                .eq('user_id', userId);
+
+            if (profileError) throw profileError;
+
             localStorage.setItem(STORAGE_KEYS.USER_BODY_INFO, JSON.stringify(profile));
-            alert('저장되었습니다.');
+            alert('개인정보가 수정되었습니다.');
             onUpdate();
             onClose();
+        } catch (error) {
+            alert('저장 실패: ' + error.message);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -220,14 +249,117 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
             <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={onClose}></div>
             <div className="relative bg-slate-900 border border-white/10 w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-2xl font-black text-white italic">내 정보 설정</h3>
+                    <h3 className="text-2xl font-black text-white italic text-shadow">개인정보 수정</h3>
                     <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <X size={24} />
                     </button>
                 </div>
                 
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-1">
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">운동 목표</label>
+                            <select
+                                value={profile.goal}
+                                onChange={e => setProfile({...profile, goal: e.target.value})}
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold"
+                            >
+                                <option value="strength">근력 증가</option>
+                                <option value="hypertrophy">근육 성장</option>
+                                <option value="weight_loss">체중 감량</option>
+                                <option value="maintenance">현상 유지</option>
+                            </select>
+                        </div>
+                        <div className="col-span-1">
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">주간 운동 횟수</label>
+                            <input
+                                type="number"
+                                min="1"
+                                max="7"
+                                value={profile.weekly_frequency}
+                                onChange={e => setProfile({...profile, weekly_frequency: e.target.value})}
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">나이</label>
+                            <input type="number" value={profile.age} onChange={e => setProfile({...profile, age: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder="세" />
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">성별</label>
+                            <select value={profile.gender} onChange={e => setProfile({...profile, gender: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold">
+                                <option value="">선택</option>
+                                <option value="male">남성</option>
+                                <option value="female">여성</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">키 (cm)</label>
+                            <input type="number" value={profile.height} onChange={e => setProfile({...profile, height: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder="cm" />
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">몸무게 (kg)</label>
+                            <input type="number" value={profile.weight} onChange={e => setProfile({...profile, weight: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder="kg" />
+                        </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-800">
+                        <label className="text-[10px] font-black text-blue-400 uppercase block mb-4 tracking-widest italic">인바디 정보</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">골격근량 (kg)</label>
+                                <input type="number" value={profile.skeletal_muscle_mass} onChange={e => setProfile({...profile, skeletal_muscle_mass: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">체지방량 (kg)</label>
+                                <input type="number" value={profile.body_fat_mass} onChange={e => setProfile({...profile, body_fat_mass: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">체지방률 (%)</label>
+                                <input type="number" value={profile.body_fat_percentage} onChange={e => setProfile({...profile, body_fat_percentage: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">기초대사량 (kcal)</label>
+                                <input type="number" value={profile.bmr} onChange={e => setProfile({...profile, bmr: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">내장지방레벨</label>
+                                <input type="number" value={profile.visceral_fat_level} onChange={e => setProfile({...profile, visceral_fat_level: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="pt-6 flex gap-3">
+                        <button onClick={onClose} className="flex-1 py-4 bg-slate-800 text-white font-black rounded-xl transition-all hover:bg-slate-700 text-xs italic uppercase tracking-widest">취소</button>
+                        <button onClick={handleSave} disabled={isSaving} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:bg-blue-500 disabled:opacity-50 text-xs italic uppercase tracking-widest">{isSaving ? 'SAVING...' : 'SAVE CHANGES'}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+                            <select
+                                value={profile.goal}
+                                onChange={e => setProfile({...profile, goal: e.target.value})}
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                            >
+                                <option value="strength">근력 증가</option>
+                                <option value="hypertrophy">근육 성장</option>
+                                <option value="weight_loss">체중 감량</option>
+                                <option value="maintenance">현상 유지</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">주간 운동 횟수</label>
+                            <input
+                                type="number"
+                                min="1"
+                                max="7"
+                                value={profile.weekly_frequency}
+                                onChange={e => setProfile({...profile, weekly_frequency: e.target.value})}
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
+                        </div>
                         <div>
                             <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">나이</label>
                             <input type="number" value={profile.age} onChange={e => setProfile({...profile, age: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="세" />
@@ -285,6 +417,7 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
         </div>
     );
 };
+
 
 /**
  * [Common: Exercise Selector - Refactored for exercises.json]
@@ -755,6 +888,46 @@ const WorkoutPlanScreen = () => {
     const [planList, setPlanList] = useState(() => JSON.parse(localStorage.getItem(storageKey) || '[]'));
     const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '' });
     const [isSaving, setIsSaving] = useState(false);
+    const [personalRecords, setPersonalRecords] = useState({});
+
+    const fetchExercisePersonalRecords = async (userId) => {
+        try {
+            const { data: logs } = await supabase
+                .from('workout_logs')
+                .select('exercise, sets_data')
+                .eq('user_id', userId);
+            
+            if (!logs || logs.length === 0) return {};
+            
+            const records = {};
+            logs.forEach(log => {
+                const exerciseName = log.exercise;
+                let sets = Array.isArray(log.sets_data) ? log.sets_data : JSON.parse(log.sets_data || '[]');
+                sets.forEach(set => {
+                    const kg = parseFloat(set.kg) || 0;
+                    const reps = parseInt(set.reps) || 0;
+                    if (!records[exerciseName] || kg > records[exerciseName].kg) {
+                        records[exerciseName] = { kg, reps };
+                    }
+                });
+            });
+            return records;
+        } catch (e) {
+            console.error('[PR] 조회 실패:', e);
+            return {};
+        }
+    };
+
+    useEffect(() => {
+        const loadData = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const records = await fetchExercisePersonalRecords(session.user.id);
+                setPersonalRecords(records);
+            }
+        };
+        loadData();
+    }, []);
 
     useEffect(() => {
         setPlanList(JSON.parse(localStorage.getItem(storageKey) || '[]'));
@@ -886,6 +1059,7 @@ const WorkoutPlanScreen = () => {
                         {planList.map((item, exIdx) => {
                             const cardio = isCardio(item);
                             const sets = item.sets || [];
+                            const pr = personalRecords[item.name || item.exercise];
                             return (
                                 <div key={item.id} className={`p-4 border rounded-2xl space-y-3 transition-all ${item.completed ? 'bg-slate-800/30 border-green-500/30 opacity-70' : 'bg-slate-800/60 border-slate-700'}`}>
                                     {/* 운동 헤더 */}
@@ -896,6 +1070,11 @@ const WorkoutPlanScreen = () => {
                                         <div className="flex-1 min-w-0">
                                             <p className="text-[10px] font-bold text-indigo-400 uppercase">{PART_MAP[item.body_part]}</p>
                                             <h4 className="text-sm font-bold text-white uppercase truncate">{item.name || item.exercise}</h4>
+                                            {pr && (
+                                                <p className="text-[10px] text-green-400 font-bold mt-0.5">
+                                                    🏆 최고: {pr.kg}kg × {pr.reps}회
+                                                </p>
+                                            )}
                                         </div>
                                         <button
                                             onClick={() => toggleCompleted(exIdx)}
@@ -1090,7 +1269,7 @@ const AIRecommendationScreen = () => {
         }
     };
 
-    const addExerciseToRoutine = (exercise) => {
+    const addExerciseToRoutine = (exercise, isHardMode = false) => {
         const today = new Date().toISOString().split('T')[0];
         const storageKey = `mygym_routine_${today}`;
         
@@ -1098,36 +1277,85 @@ const AIRecommendationScreen = () => {
         try {
             fullExercise = EXERCISE_DATASET?.find(e => e.name === exercise.name);
         } catch (e) {
-            console.log('exercises.json 조회 실패, 기본값 사용');
+            console.log('exercises.json 조회 실패');
         }
         
-        // kg=0, reps=0인 세트는 빈 값으로 변환
-        const cleanedSets = exercise.sets?.map(set => ({
-            kg: set.kg === 0 ? '' : set.kg,
-            reps: set.reps === 0 ? '' : set.reps,
-            isDropSet: set.isDropSet || false,
-            dropKgs: set.dropKgs || ['', '', '']
-        })) || Array(3).fill({ kg: '', reps: '', isDropSet: false, dropKgs: ['', '', ''] });
+        // 하드모드는 AI 추천값 그대로, 일반모드는 빈 값으로 변환
+        const cleanedSets = isHardMode 
+            ? exercise.sets?.map(set => ({
+                kg: set.kg,
+                reps: set.reps,
+                isDropSet: set.isDropSet || false,
+                dropKgs: set.dropKgs || ['', '', '']
+              }))
+            : exercise.sets?.map(set => ({
+                kg: '',
+                reps: '',
+                isDropSet: set.isDropSet || false,
+                dropKgs: ['', '', '']
+              })) || Array(3).fill({ kg: '', reps: '', isDropSet: false, dropKgs: ['', '', ''] });
 
         const exerciseToAdd = {
             ...exercise,
+            sets: cleanedSets,
             id: fullExercise?.id || `temp_${Date.now()}`,
             image: fullExercise?.gif_url || '',
-            completed: false,
-            sets: cleanedSets
+            completed: false
         };
 
         const existingRoutine = JSON.parse(localStorage.getItem(storageKey) || '[]');
         
         if (existingRoutine.find(e => e.name === exercise.name)) {
-            alert(`${exercise.name}은(는) 이미 오늘 루틴에 추가되어 있습니다.`);
-            return;
+            return; // 중복 무시
         }
 
         const updatedRoutine = [...existingRoutine, exerciseToAdd];
         localStorage.setItem(storageKey, JSON.stringify(updatedRoutine));
+    };
+
+    const ExerciseCard = ({ exercise, mode, onAdd }) => {
+        const [isAdded, setIsAdded] = useState(false);
         
-        alert(`✅ ${exercise.name}\n오늘 루틴에 추가했습니다!`);
+        const handleAdd = () => {
+            onAdd(exercise, mode === 'hard');
+            setIsAdded(true);
+            setTimeout(() => setIsAdded(false), 2000);
+        };
+        
+        return (
+            <button
+                onClick={handleAdd}
+                disabled={isAdded}
+                className={`flex-shrink-0 w-32 bg-blue-600/10 hover:bg-blue-600/20 border rounded-xl p-3 text-left transition-all ${
+                    isAdded ? 'border-green-500 bg-green-600/10' : 'border-blue-500/30'
+                }`}
+            >
+                <div className="flex items-start justify-between gap-1 mb-2">
+                    <p className="font-bold text-white text-[11px] leading-tight line-clamp-2 uppercase italic">
+                        {exercise.name}
+                    </p>
+                    {isAdded ? (
+                        <Check size={16} className="text-green-400 flex-shrink-0" />
+                    ) : (
+                        <Plus size={16} className="text-blue-400 flex-shrink-0" />
+                    )}
+                </div>
+                
+                <p className="text-[9px] font-black text-blue-500/70 mb-2 uppercase tracking-tighter">{exercise.part}</p>
+                
+                {mode !== 'balanced' && (
+                    <div className="text-[9px] font-bold text-slate-400 space-y-0.5">
+                        <div>{exercise.sets?.length || 0}세트</div>
+                        {exercise.sets?.[0] && exercise.sets[0].kg > 0 && (
+                            <div>{exercise.sets[0].kg}kg × {exercise.sets[0].reps}회</div>
+                        )}
+                        {exercise.sets?.[0] && !exercise.sets[0].kg && exercise.sets[0].reps > 0 && (
+                            <div>{exercise.sets[0].reps}회</div>
+                        )}
+                    </div>
+                )}
+            </button>
+        );
     };
 
     useEffect(() => {
@@ -1228,14 +1456,18 @@ const AIRecommendationScreen = () => {
 - 운동 횟수: ${recentStats?.totalWorkouts || 0}회
 - 가장 많이 한 부위: ${recentStats?.mostFrequentPart || '없음'}
 
-운동별 최고 기록 (1RM 추정용):
+운동별 최고 기록:
 ${recordsText}
 
-응답 형식 (반드시 준수):
-1. 먼저 사용자 상태 분석 + 추천 이유를 친근하게 설명 (2-4문장)
-   예시: "이번 주 가슴 운동이 부족하시네요! 오늘은 가슴과 삼두에 집중해볼게요. 최근 벤치 프레스 60kg 기록을 보니 70% 정도 무게로 볼륨을 늘려보면 좋겠어요."
+응답 형식 (5단계 구조, 반드시 준수):
 
-2. 그 다음 JSON 블록으로 루틴 제공
+**1. 오늘의 상태분석** (1문장, 간결하게)
+예시: 하체는 이틀 전에 진행해서 아직 피로가 남아 있을 가능성이 있습니다.
+
+**2. 오늘의 루틴 방향** (1문장 요약)
+예시: 오늘은 등 중심 넓이에 집중하는 운동으로 하겠습니다.
+
+**3. 오늘의 운동 루틴** (JSON)
 
 \`\`\`json
 {
@@ -1251,16 +1483,18 @@ ${recordsText}
 }
 \`\`\`
 
-중요:
-- 설명은 친근하고 격려하는 톤
-- 사용자 이름 부를 필요 없음
-- 최고 기록이 있으면 80-90% 무게 추천
-- 최고 기록이 없으면 kg=0, reps=0
+**4. 주의사항** (1-2문장)
+예시: 벤치 프레스 시 어깨가 말리지 않도록 견갑골을 고정하세요.
+
+**5. 응원 메시지** (1문장 또는 짧은 명언)
+예시: "고통은 일시적이지만, 성취는 영원합니다!" 오늘도 화이팅!
+
+중요 규칙:
 - part는: 가슴, 등, 어깨, 하체, 팔, 허리/코어, 유산소 중 하나
+- 최고 기록 있으면 80-90% 무게, 없으면 kg=0, reps=0
 - 오늘 하루 루틴만 (여러 날 X)
 - 운동 3-5개
-- JSON 외 마크다운 헤더(###), 번호 목록 사용 금지
-- 일반 질문에는 자유롭게 대화`
+- 일반 질문에는 자유롭게 대화하되, 루틴 추천 시에는 반드시 위 형식을 지킬 것`
         };
 
         try {
@@ -1405,7 +1639,13 @@ ${modeInstructions[hardModeType]}
                     }
 
                     const routine = parseRoutineFromResponse(msg.text);
-                    const textOnly = msg.text.replace(/```json[\s\S]*?```/g, '').trim();
+                    
+                    // Parse sections by **d.
+                    const sections = msg.text.split(/\*\*\d\.\s*/);
+                    const analysis = sections[1]?.split('\n')[0] || '';
+                    const direction = sections[2]?.split('\n')[0] || '';
+                    const caution = sections[4]?.split('\n')[0] || '';
+                    const motivation = sections[5]?.split('\n')[0] || '';
 
                     return (
                         <div key={msg.id} className="flex items-start gap-3 mb-4 animate-slide-up">
@@ -1414,71 +1654,73 @@ ${modeInstructions[hardModeType]}
                                 AI
                             </div>
                             
-                            {/* 메시지 + 운동 카드를 하나의 말풍선에 */}
-                            <div className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 space-y-3 max-w-[85%] shadow-xl">
-                                {/* 분석/설명 섹션 강조 */}
-                                {textOnly && (
+                            <div className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 space-y-3 max-w-[85%] shadow-xl overflow-hidden">
+                                {/* 1. 상태분석 */}
+                                {analysis && (
                                     <div className="bg-blue-600/10 border-l-4 border-blue-500 pl-3 py-2 rounded-r">
-                                        <p className="text-[10px] text-blue-400 font-black mb-1 flex items-center gap-1.5 uppercase tracking-widest">
-                                            <TrendingUp size={12} />
-                                            트레이너 분석
+                                        <p className="text-[10px] text-blue-400 font-black mb-1 uppercase tracking-widest flex items-center gap-1.5">
+                                            <TrendingUp size={12} /> 📊 상태분석
                                         </p>
-                                        <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-medium">
-                                            {textOnly}
-                                        </p>
+                                        <p className="text-sm text-slate-200 leading-relaxed font-medium">{analysis}</p>
                                     </div>
                                 )}
                                 
-                                {/* 운동 카드 (JSON 파싱 성공 시) */}
+                                {/* 2. 루틴 방향 */}
+                                {direction && (
+                                    <div className="bg-green-600/10 border-l-4 border-green-500 pl-3 py-2 rounded-r">
+                                        <p className="text-[10px] text-green-400 font-black mb-1 uppercase tracking-widest flex items-center gap-1.5">
+                                            🎯 오늘의 방향
+                                        </p>
+                                        <p className="text-sm text-slate-200 leading-relaxed font-medium">{direction}</p>
+                                    </div>
+                                )}
+                                
+                                {/* 3. 운동 루틴 */}
                                 {routine && routine.length > 0 && (
-                                    <div className="space-y-3 pt-2">
+                                    <div className="space-y-2 pt-2">
                                         <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1.5 uppercase tracking-widest">
                                             <Dumbbell size={12} className="text-blue-500" />
-                                            운동을 탭하여 루틴에 추가
+                                            운동을 탭하여 추가
                                         </p>
                                         
-                                        <div className="grid grid-cols-2 gap-2">
+                                        {/* 가로 스크롤 컨테이너 */}
+                                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
                                             {routine.map((exercise, exIdx) => (
-                                                <button
+                                                <ExerciseCard
                                                     key={exIdx}
-                                                    onClick={() => addExerciseToRoutine(exercise)}
-                                                    className="bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-xl p-3 text-left group active:scale-95 transition-all"
-                                                >
-                                                    <div className="flex items-start justify-between gap-1 mb-2">
-                                                        <p className="font-bold text-white text-[11px] leading-tight line-clamp-2 uppercase italic">
-                                                            {exercise.name}
-                                                        </p>
-                                                        <Plus size={14} className="text-blue-500 group-hover:text-blue-400 flex-shrink-0" />
-                                                    </div>
-                                                    
-                                                    <p className="text-[9px] font-black text-blue-500/70 mb-2 uppercase tracking-tighter">
-                                                        {exercise.part}
-                                                    </p>
-                                                    
-                                                    <div className="text-[9px] font-bold text-slate-500 space-y-1">
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="w-1 h-1 bg-slate-700 rounded-full" />
-                                                            {exercise.sets?.length || 0} SETS
-                                                        </div>
-                                                        {exercise.sets?.[0] && (
-                                                            <div className="flex items-center gap-1">
-                                                                <span className="w-1 h-1 bg-slate-700 rounded-full" />
-                                                                {exercise.sets[0].kg > 0 ? (
-                                                                    <span className="text-slate-300">
-                                                                        {exercise.sets[0].kg}kg × {exercise.sets[0].reps}회
-                                                                    </span>
-                                                                ) : exercise.sets[0].reps > 0 ? (
-                                                                    <span className="text-slate-300">{exercise.sets[0].reps}회</span>
-                                                                ) : (
-                                                                    <span className="text-slate-600 italic">입력 필요</span>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </button>
+                                                    exercise={exercise}
+                                                    mode={currentRecommendationMode}
+                                                    onAdd={addExerciseToRoutine}
+                                                />
                                             ))}
                                         </div>
                                     </div>
+                                )}
+                                
+                                {/* 4. 주의사항 */}
+                                {caution && (
+                                    <div className="bg-yellow-600/10 border-l-4 border-yellow-500 pl-3 py-2 rounded-r">
+                                        <p className="text-[10px] text-yellow-400 font-black mb-1 uppercase tracking-widest flex items-center gap-1.5">
+                                            ⚠️ 주의사항
+                                        </p>
+                                        <p className="text-sm text-slate-200 leading-relaxed font-medium">{caution}</p>
+                                    </div>
+                                )}
+                                
+                                {/* 5. 응원 */}
+                                {motivation && (
+                                    <div className="bg-purple-600/10 border-l-4 border-purple-500 pl-3 py-2 rounded-r">
+                                        <p className="text-[10px] text-purple-400 font-black mb-1 uppercase tracking-widest flex items-center gap-1.5">
+                                            💬 응원
+                                        </p>
+                                        <p className="text-sm text-slate-200 italic font-medium">"{motivation}"</p>
+                                    </div>
+                                )}
+
+                                {!analysis && !routine && (
+                                    <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-medium">
+                                        {msg.text}
+                                    </p>
                                 )}
                             </div>
                         </div>
@@ -1638,7 +1880,16 @@ const CalendarScreen = () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
-            setUserData(user.user_metadata);
+            
+            // user_profiles 정보 가져오기
+            const { data: profile } = await supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+            setUserData({ ...user.user_metadata, ...profile });
+
             const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id);
             const groups = {};
             data?.forEach(log => {
@@ -1657,9 +1908,16 @@ const CalendarScreen = () => {
         <div className="p-4 md:p-12 flex flex-col bg-slate-950 min-h-screen pb-24">
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">MY GYM</h2>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => setIsProfileModalOpen(true)} className="p-2 bg-slate-800 rounded-full">
-                        <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => {
+                            fetchLogs();
+                            setIsProfileModalOpen(true);
+                        }}
+                        className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1.5 bg-blue-500/10 px-3 py-2 rounded-xl transition-all border border-blue-500/20"
+                    >
+                        <User size={14} />
+                        개인정보
                     </button>
                     <button
                         onClick={async () => { if(window.confirm('로그아웃 하시겠습니까?')) { await supabase.auth.signOut(); localStorage.clear(); } }}
