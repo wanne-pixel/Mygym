@@ -1005,6 +1005,7 @@ const WorkoutPlanScreen = () => {
 const AIRecommendationScreen = () => {
     const [profile, setProfile] = useState(null);
     const [recentStats, setRecentStats] = useState({ totalWorkouts: 0, mostFrequentPart: null });
+    const [personalRecords, setPersonalRecords] = useState({});
     const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[]'));
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -1015,6 +1016,48 @@ const AIRecommendationScreen = () => {
         arr.forEach(item => { if (item) counts[item] = (counts[item] || 0) + 1; });
         const keys = Object.keys(counts);
         return keys.length === 0 ? null : keys.reduce((a, b) => counts[a] > counts[b] ? a : b);
+    };
+
+    const fetchExercisePersonalRecords = async (userId) => {
+        try {
+            const { data: logs } = await supabase
+                .from('workout_logs')
+                .select('exercise, sets_data')
+                .eq('user_id', userId);
+            
+            if (!logs || logs.length === 0) return {};
+            
+            const records = {};
+            
+            logs.forEach(log => {
+                const exerciseName = log.exercise;
+                let sets = [];
+                
+                try {
+                    sets = typeof log.sets_data === 'string' 
+                        ? JSON.parse(log.sets_data) 
+                        : log.sets_data;
+                } catch (e) {
+                    return;
+                }
+                
+                if (!Array.isArray(sets)) return;
+                
+                sets.forEach(set => {
+                    const kg = parseFloat(set.kg) || 0;
+                    const reps = parseInt(set.reps) || 0;
+                    
+                    if (!records[exerciseName] || kg > records[exerciseName].kg) {
+                        records[exerciseName] = { kg, reps };
+                    }
+                });
+            });
+            
+            return records;
+        } catch (error) {
+            console.error('[PR] 최고 기록 조회 실패:', error);
+            return {};
+        }
     };
 
     const generateGreeting = (profile, stats) => {
@@ -1057,13 +1100,20 @@ const AIRecommendationScreen = () => {
             console.log('exercises.json 조회 실패, 기본값 사용');
         }
         
+        // kg=0, reps=0인 세트는 빈 값으로 변환
+        const cleanedSets = exercise.sets?.map(set => ({
+            kg: set.kg === 0 ? '' : set.kg,
+            reps: set.reps === 0 ? '' : set.reps,
+            isDropSet: set.isDropSet || false,
+            dropKgs: set.dropKgs || ['', '', '']
+        })) || Array(3).fill({ kg: '', reps: '', isDropSet: false, dropKgs: ['', '', ''] });
+
         const exerciseToAdd = {
             ...exercise,
             id: fullExercise?.id || `temp_${Date.now()}`,
             image: fullExercise?.gif_url || '',
             completed: false,
-            // 세트 데이터가 없으면 기본값 생성
-            sets: exercise.sets || Array(3).fill({ kg: 0, reps: 10, isDropSet: false })
+            sets: cleanedSets
         };
 
         const existingRoutine = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -1099,14 +1149,19 @@ const AIRecommendationScreen = () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) return;
-                const { data: profileData } = await supabase.from('user_profiles').select('*').eq('user_id', session.user.id).maybeSingle();
+                const userId = session.user.id;
+                const { data: profileData } = await supabase.from('user_profiles').select('*').eq('user_id', userId).maybeSingle();
                 setProfile(profileData);
                 const sevenDaysAgo = new Date();
                 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                const { data: logs } = await supabase.from('workout_logs').select('*').eq('user_id', session.user.id).gte('created_at', sevenDaysAgo.toISOString());
+                const { data: logs } = await supabase.from('workout_logs').select('*').eq('user_id', userId).gte('created_at', sevenDaysAgo.toISOString());
                 const stats = { totalWorkouts: new Set(logs?.map(l => l.created_at.split('T')[0])).size || 0, mostFrequentPart: getMostFrequent(logs?.map(l => l.part)) };
                 setRecentStats(stats);
                 
+                // 최고 기록 조회
+                const records = await fetchExercisePersonalRecords(userId);
+                setPersonalRecords(records);
+
                 if (shouldReset) {
                     const greetingText = generateGreeting(profileData, stats);
                     const initialMessage = { id: Date.now(), type: 'ai', text: greetingText };
@@ -1150,6 +1205,13 @@ const AIRecommendationScreen = () => {
 
     const callOpenAI = async (userPrompt, currentHistory) => {
         setIsTyping(true);
+
+        const recordsText = Object.keys(personalRecords).length > 0
+            ? Object.entries(personalRecords)
+                .map(([name, record]) => `- ${name}: ${record.kg}kg × ${record.reps}회`)
+                .join('\n')
+            : '없음 (초보자)';
+
         const systemMessage = {
             role: 'system',
             content: `당신은 MyGym의 퍼스널 트레이너 AI입니다.
@@ -1165,27 +1227,44 @@ const AIRecommendationScreen = () => {
 - 운동 횟수: ${recentStats?.totalWorkouts || 0}회
 - 가장 많이 한 부위: ${recentStats?.mostFrequentPart || '없음'}
 
-응답 규칙:
-1. 루틴 추천 시: 간단한 설명 1-2문장 + JSON 블록
-2. JSON 형식:
+운동별 최고 기록 (1RM 추정용):
+${recordsText}
 
+중요 규칙:
+1. 루틴 추천 시 JSON 형식으로만 응답
+2. 각 운동의 kg/reps 설정:
+   - 해당 운동의 최고 기록이 있으면: 최고 기록의 80-90% 무게, reps는 8-12회
+   - 최고 기록이 없으면: kg=0, reps=0 (사용자가 직접 입력하도록)
+   - 맨몸 운동(푸시업, 풀업 등): kg=0, reps만 설정
+
+3. JSON 형식:
 \`\`\`json
 {
   "routine": [
     {
-      "name": "운동명 (한글)",
-      "part": "부위",
-      "sets": [{"kg": 무게, "reps": 횟수, "isDropSet": false}]
+      "name": "벤치 프레스",
+      "part": "가슴",
+      "sets": [
+        {"kg": 50, "reps": 10, "isDropSet": false},
+        {"kg": 52.5, "reps": 8, "isDropSet": false}
+      ]
+    },
+    {
+      "name": "새로운 운동 (기록 없음)",
+      "part": "등",
+      "sets": [
+        {"kg": 0, "reps": 0, "isDropSet": false}
+      ]
     }
   ]
 }
 \`\`\`
 
-3. part는: 가슴, 등, 어깨, 하체, 팔, 허리/코어, 유산소 중 하나
-4. 오늘 하루 루틴만 추천 (여러 날 X)
-5. 운동 3-5개
-6. JSON 외 마크다운 헤더(###), 번호 목록 사용 금지
-7. 일반 질문에는 자유롭게 대화`
+4. part는: 가슴, 등, 어깨, 하체, 팔, 허리/코어, 유산소 중 하나
+5. 오늘 하루 루틴만 (여러 날 X)
+6. 운동 3-5개
+7. JSON 외 마크다운 헤더/번호 목록 금지
+8. 일반 질문에는 자유롭게 대화`
         };
 
         try {
@@ -1258,55 +1337,73 @@ const AIRecommendationScreen = () => {
                     const textOnly = msg.text.replace(/```json[\s\S]*?```/g, '').trim();
 
                     return (
-                        <div key={msg.id} className="space-y-3 animate-slide-up">
-                            {textOnly && (
-                                <ChatMessage msg={{ type: 'ai', text: textOnly }} />
-                            )}
+                        <div key={msg.id} className="flex items-start gap-3 mb-4 animate-slide-up">
+                            {/* AI 아이콘 */}
+                            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg shadow-blue-900/20">
+                                AI
+                            </div>
                             
-                            {routine && routine.length > 0 && (
-                                <div className="ml-12 space-y-3">
-                                    <p className="text-xs text-gray-400 flex items-center gap-2">
-                                        <Dumbbell size={14} />
-                                        추천 운동을 탭하여 오늘 루틴에 추가하세요
+                            {/* 메시지 + 운동 카드를 하나의 말풍선에 */}
+                            <div className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 space-y-3 max-w-[85%] shadow-xl">
+                                {/* 텍스트 부분 */}
+                                {textOnly && (
+                                    <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-medium">
+                                        {textOnly}
                                     </p>
-                                    
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {routine.map((exercise, exIdx) => (
-                                            <button
-                                                key={exIdx}
-                                                onClick={() => addExerciseToRoutine(exercise)}
-                                                className="bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 rounded-lg p-3 text-left group active:scale-95 transition-all"
-                                            >
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-medium text-white text-sm truncate">
+                                )}
+                                
+                                {/* 운동 카드 (JSON 파싱 성공 시) */}
+                                {routine && routine.length > 0 && (
+                                    <div className="space-y-3 pt-2 border-t border-white/5">
+                                        <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1.5 uppercase tracking-widest">
+                                            <Dumbbell size={12} className="text-blue-500" />
+                                            운동을 탭하여 루틴에 추가
+                                        </p>
+                                        
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {routine.map((exercise, exIdx) => (
+                                                <button
+                                                    key={exIdx}
+                                                    onClick={() => addExerciseToRoutine(exercise)}
+                                                    className="bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-xl p-3 text-left group active:scale-95 transition-all"
+                                                >
+                                                    <div className="flex items-start justify-between gap-1 mb-2">
+                                                        <p className="font-bold text-white text-[11px] leading-tight line-clamp-2 uppercase italic">
                                                             {exercise.name}
                                                         </p>
-                                                        <p className="text-[10px] text-blue-400 mt-0.5">
-                                                            {exercise.part}
-                                                        </p>
+                                                        <Plus size={14} className="text-blue-500 group-hover:text-blue-400 flex-shrink-0" />
                                                     </div>
-                                                    <Plus size={16} className="text-blue-400 group-hover:text-blue-300 flex-shrink-0 ml-1" />
-                                                </div>
-                                                
-                                                <div className="text-[10px] text-gray-400 space-y-0.5">
-                                                    <div className="flex items-center gap-1">
-                                                        <span>{exercise.sets?.length || 0}세트</span>
-                                                    </div>
-                                                    {exercise.sets?.[0] && (
-                                                        <div className="flex items-center gap-2">
-                                                            {exercise.sets[0].kg > 0 && (
-                                                                <span>{exercise.sets[0].kg}kg</span>
-                                                            )}
-                                                            <span>×{exercise.sets[0].reps}회</span>
+                                                    
+                                                    <p className="text-[9px] font-black text-blue-500/70 mb-2 uppercase tracking-tighter">
+                                                        {exercise.part}
+                                                    </p>
+                                                    
+                                                    <div className="text-[9px] font-bold text-slate-500 space-y-1">
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="w-1 h-1 bg-slate-700 rounded-full" />
+                                                            {exercise.sets?.length || 0} SETS
                                                         </div>
-                                                    )}
-                                                </div>
-                                            </button>
-                                        ))}
+                                                        {exercise.sets?.[0] && (
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="w-1 h-1 bg-slate-700 rounded-full" />
+                                                                {exercise.sets[0].kg > 0 ? (
+                                                                    <span className="text-slate-300">
+                                                                        {exercise.sets[0].kg}kg × {exercise.sets[0].reps}회
+                                                                    </span>
+                                                                ) : exercise.sets[0].reps > 0 ? (
+                                                                    <span className="text-slate-300">{exercise.sets[0].reps}회</span>
+                                                                ) : (
+                                                                    <span className="text-slate-600 italic">입력 필요</span>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     );
                 })}
