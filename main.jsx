@@ -9,11 +9,35 @@ const EXCLUDED_EQUIPMENT = [
     'roller', 'band', 'resistance band', 'kettlebell', 'wheel roller'
 ];
 
+// 실전성이 떨어지는 '부위 + 기구' 조합 블랙리스트
+const JUNK_COMBINATIONS = {
+    'chest': ['weighted', 'upper body ergometer', 'assisted'],
+    'back': ['weighted', 'rope', 'ez barbell'],
+    'shoulders': ['weighted', 'ez barbell', 'rope'],
+    'upper legs': ['weighted', 'assisted'],
+    'lower legs': ['weighted', 'assisted'],
+    'upper arms': ['weighted', 'skierg machine', 'olympic barbell'],
+    'lower arms': ['weighted', 'skierg machine', 'olympic barbell'],
+    'waist': ['hammer', 'leverage machine'],
+    'cardio': ['dumbbell']
+};
+
 const CURATED_EXERCISES = EXERCISE_DATASET
-    .filter(ex => 
-        ex.body_part !== 'neck' &&
-        !EXCLUDED_EQUIPMENT.includes(ex.equipment.toLowerCase())
-    )
+    .filter(ex => {
+        const part = ex.body_part.toLowerCase();
+        const equip = ex.equipment.toLowerCase();
+        
+        // 1. 기본 제외 부위 및 장비
+        if (part === 'neck') return false;
+        if (EXCLUDED_EQUIPMENT.includes(equip)) return false;
+        
+        // 2. 부위별 정밀 블랙리스트 필터링
+        if (JUNK_COMBINATIONS[part] && JUNK_COMBINATIONS[part].includes(equip)) {
+            return false;
+        }
+        
+        return true;
+    })
     .map(ex => {
         let consolidatedPart = ex.body_part;
         if (ex.body_part === 'upper legs' || ex.body_part === 'lower legs') consolidatedPart = 'legs';
