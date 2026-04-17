@@ -696,7 +696,24 @@ const WorkoutDetailScreen = () => {
             <BackButton />
             <h2 className="text-3xl font-black italic text-white mb-8">{queryDate} 트레이닝 상세</h2>
             <div className="space-y-4">
-                {isLoading ? <div className="text-center text-slate-500 italic">로딩 중...</div> : logs.map(log => (
+                {isLoading ? (
+                    <div className="text-center text-slate-500 italic py-20">로딩 중...</div>
+                ) : logs.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-24 gap-6 text-center animate-fade-in">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="w-20 h-20 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800">
+                                <svg className="w-10 h-10 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                            </div>
+                            <p className="text-slate-500 font-bold text-sm">이 날의 운동 기록이 없습니다.</p>
+                        </div>
+                        <button
+                            onClick={() => navigate('/app?tab=루틴구성')}
+                            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl italic text-sm active:scale-95 transition-all shadow-lg shadow-blue-600/20"
+                        >
+                            + 운동 추가하기
+                        </button>
+                    </div>
+                ) : logs.map(log => (
                     <div key={log.id} className="bg-slate-900/40 border border-white/5 p-6 rounded-[1.5rem] relative overflow-hidden group">
                         <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
                         <div className="flex justify-between items-start mb-4">
@@ -878,13 +895,16 @@ const CalendarScreen = () => {
             const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id);
             const groups = {};
             data?.forEach(log => {
-                const d = new Date(log.created_at).getDate();
-                if (!groups[d]) groups[d] = { logs: [] };
-                groups[d].logs.push(log);
+                const date = new Date(log.created_at);
+                const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                if (!groups[key]) groups[key] = { logs: [] };
+                groups[key].logs.push(log);
             });
             setWorkoutGroups(groups);
         } catch (e) { console.error(e); } finally { setIsLoading(false); }
     };
+
+    useEffect(() => { fetchLogs(); }, []);
 
     return (
         <div className="p-4 md:p-12 flex flex-col justify-center bg-slate-950 min-h-screen pb-24">
@@ -932,8 +952,8 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
             <div className="grid grid-cols-7 gap-1">
                 {days.map(d => <div key={d} className="text-center text-[10px] font-black text-slate-500 py-2 uppercase">{d}</div>)}
                 {calendarDays.map((d, i) => {
-                    const info = d ? workoutGroups[d] : null;
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const info = d ? workoutGroups[dateStr] : null;
                     return (
                         <div key={i} onClick={() => d && navigate(`/routine-detail?date=${dateStr}`)} className={`h-16 flex flex-col items-center justify-center rounded-2xl relative cursor-pointer hover:bg-slate-700/30 transition-all ${d && new Date().getDate() === d && new Date().getMonth() === month ? 'bg-blue-600/20' : ''}`}>
                             {d && <span className="text-sm font-black text-white">{d}</span>}
