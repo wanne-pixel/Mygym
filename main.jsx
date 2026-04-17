@@ -1005,7 +1005,6 @@ const WorkoutPlanScreen = () => {
 const AIRecommendationScreen = () => {
     const [profile, setProfile] = useState(null);
     const [recentStats, setRecentStats] = useState({ totalWorkouts: 0, mostFrequentPart: null });
-    const [greeting, setGreeting] = useState('');
     const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[]'));
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -1015,127 +1014,75 @@ const AIRecommendationScreen = () => {
         const counts = {};
         arr.forEach(item => { if (item) counts[item] = (counts[item] || 0) + 1; });
         const keys = Object.keys(counts);
-        if (keys.length === 0) return null;
-        return keys.reduce((a, b) => counts[a] > counts[b] ? a : b);
+        return keys.length === 0 ? null : keys.reduce((a, b) => counts[a] > counts[b] ? a : b);
     };
 
     const generateGreeting = (profile, stats) => {
-        if (!profile) return "안녕하세요! MyGym AI 코치입니다. 프로필을 설정하시면 더 개인화된 코칭을 받으실 수 있어요. 오늘은 어떤 운동을 하실까요?";
-
+        if (!profile) return "안녕하세요! 😊\n\nMyGym AI 코치입니다. 프로필을 설정하시면 더 개인화된 코칭을 받으실 수 있어요. 오늘은 어떤 운동을 하실까요?";
         const { experience_level, goal, weekly_frequency, limitations } = profile;
-        const { totalWorkouts, mostFrequentPart } = stats;
-
-        let greeting = "안녕하세요! ";
-
-        if (experience_level === 'beginner') greeting += "웨이트트레이닝 경험이 많이 없으셔서 걱정되시겠지만, 저만 믿고 따라와 주세요! ";
-        else if (experience_level === 'intermediate') greeting += "꾸준히 운동하고 계시는 걸 알고 있어요. 한 단계 더 성장할 준비가 되셨네요! ";
-        else greeting += "탄탄한 운동 경력을 가지고 계시네요. 더 강해질 준비 되셨죠? ";
-
-        if (goal === 'strength') greeting += "강력한 근력을 만들기 위해 ";
-        else if (goal === 'hypertrophy') greeting += "멋진 근육을 키우기 위해 ";
-        else if (goal === 'weight_loss') greeting += "건강한 체중 감량을 위해 ";
-        else greeting += "건강한 생활을 위해 ";
-
-        greeting += `주 ${weekly_frequency}회 함께 달려볼게요. `;
-
-        if (limitations && limitations.length > 0) {
-            greeting += `${limitations.join(', ')} 부위 부상을 고려해서 안전한 운동으로 구성할게요. `;
-        }
-
-        if (totalWorkouts > 0) {
-            greeting += `\n지난 7일간 ${totalWorkouts}회 운동하셨네요! `;
-            if (mostFrequentPart) greeting += `${mostFrequentPart} 위주로 하셨는데, 오늘은 어떤 부위를 공략해볼까요?`;
-        } else {
-            greeting += "\n오늘부터 다시 활기차게 시작해볼까요? 어떤 운동이 필요하신가요?";
-        }
-
-        return greeting;
+        const { totalWorkouts } = stats;
+        let text = "안녕하세요! 😊\n\n";
+        if (experience_level === 'beginner') text += "웨이트트레이닝이 처음이시군요! 걱정 마세요, 제가 차근차근 알려드릴게요. ";
+        else if (experience_level === 'intermediate') text += "꾸준히 운동하고 계시는 걸 알고 있어요. 한 단계 더 성장할 준비가 되셨네요! ";
+        else text += "탄탄한 운동 경력을 가지고 계시네요. 더 강해질 준비 되셨죠? ";
+        const goalText = { strength: '강력한 근력', hypertrophy: '멋진 근육', weight_loss: '건강한 체중 감량', maintenance: '현재 컨디션 유지' };
+        text += `${goalText[goal] || '목표 달성'}을 위해 주 ${weekly_frequency}회 함께해요!\n\n`;
+        if (limitations?.length > 0) text += `${limitations.join(', ')} 부위를 고려해서 안전한 운동으로 구성할게요.\n\n`;
+        if (totalWorkouts > 0) text += `이번 주 ${totalWorkouts}회 운동하셨네요! 오늘은 어떤 부위를 하실까요?`;
+        else text += "오늘부터 시작해볼까요? 아래 버튼으로 루틴 추천을 받아보세요!";
+        return text;
     };
 
     useEffect(() => {
-        const loadInitialData = async () => {
+        const initializeChat = async () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) return;
-
-                // 1. 프로필 조회
-                const { data: profileData } = await supabase
-                    .from('user_profiles')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .maybeSingle();
+                const { data: profileData } = await supabase.from('user_profiles').select('*').eq('user_id', session.user.id).maybeSingle();
                 setProfile(profileData);
-
-                // 2. 최근 7일 운동 기록 조회
                 const sevenDaysAgo = new Date();
                 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                const { data: logs } = await supabase
-                    .from('workout_logs')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .gte('created_at', sevenDaysAgo.toISOString());
-
-                const stats = {
-                    totalWorkouts: new Set(logs?.map(l => l.created_at.split('T')[0])).size || 0,
-                    mostFrequentPart: getMostFrequent(logs?.map(l => l.part))
-                };
+                const { data: logs } = await supabase.from('workout_logs').select('*').eq('user_id', session.user.id).gte('created_at', sevenDaysAgo.toISOString());
+                const stats = { totalWorkouts: new Set(logs?.map(l => l.created_at.split('T')[0])).size || 0, mostFrequentPart: getMostFrequent(logs?.map(l => l.part)) };
                 setRecentStats(stats);
-
-                // 3. 인사말 생성
-                const greetingText = generateGreeting(profileData, stats);
-                setGreeting(greetingText);
-
-                // 4. 채팅 내역이 비어있으면 인사말 추가
-                if (messages.length === 0) {
-                    setMessages([{ id: Date.now(), type: 'ai', text: greetingText }]);
+                const storedHistory = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[]');
+                if (storedHistory.length === 0) {
+                    const greetingText = generateGreeting(profileData, stats);
+                    const initialMessage = { id: Date.now(), type: 'ai', text: greetingText };
+                    setMessages([initialMessage]);
+                    localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify([initialMessage]));
+                } else {
+                    setMessages(storedHistory);
                 }
-            } catch (e) {
-                console.error('Error loading AI Coach data:', e);
-            }
+            } catch (e) { console.error('Error initializing AI Coach:', e); }
         };
-        loadInitialData();
+        initializeChat();
     }, []);
 
     useEffect(() => { localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages)); }, [messages]);
 
-    const handleSendMessage = async (text = inputText) => {
-        if (!text.trim() || isTyping) return;
-        
-        const userMsg = { id: Date.now(), type: 'user', text };
-        setMessages(prev => [...prev, userMsg]);
-        setInputText('');
+    const callOpenAI = async (userPrompt, currentHistory) => {
         setIsTyping(true);
-
-        const EXERCISE_MENU = EXERCISE_DATASET.map(ex => `${ex.name} (${ex.nameEn})`).join(', ');
-        const systemRole = `너는 MyGym의 전문 PT 코치야. 
-        [사용자 프로필]
-        - 목표: ${profile?.goal || '건강 관리'}
-        - 경험: ${profile?.experience_level || '초보'}
-        - 주당 횟수: ${profile?.weekly_frequency || 3}회
-        - 기구: ${profile?.equipment_access || '헬스장'}
-        - 제한사항: ${profile?.limitations?.join(', ') || '없음'}
-        - 신체: ${profile?.height || '--'}cm, ${profile?.weight || '--'}kg
-        
-        [최근 7일 기록]
-        - 운동 횟수: ${recentStats.totalWorkouts}회
-        - 집중 부위: ${recentStats.mostFrequentPart || '없음'}
-
-        [중요 규칙]
-        1. 사용자 프로필과 최근 기록을 분석해 개인화된 답변을 제공하라.
-        2. 루틴 추천 시 반드시 답변 끝에 [ROUTINE_DATA: JSON] 형식으로 포함하라.
-        3. 'nameEn'은 아래 [공식 리스트]의 이름을 정확히 사용하라.
-        4. 루틴 항목: { "name": "한국어명", "nameEn": "english name", "part": "부위", "sets": 4, "reps": 12, "weight": 0 }
-        
-        [공식 리스트]
-        ${EXERCISE_MENU}`;
+        const systemMessage = `너는 MyGym의 전문 PT 코치야. 
+[사용자 프로필] 목표: ${profile?.goal}, 경험: ${profile?.experience_level}, 주당횟수: ${profile?.weekly_frequency}, 기구: ${profile?.equipment_access}, 제한사항: ${profile?.limitations?.join(',')}.
+[최근기록] 7일간 ${recentStats.totalWorkouts}회, 빈출부위: ${recentStats.mostFrequentPart}.
+[중요 규칙]
+1. 루틴 추천 시 반드시 "오늘 하루" 루틴만 추천 (여러 날 추천 금지).
+2. 운동 개수는 3-5개.
+3. 반드시 [ROUTINE_DATA: JSON] 형식을 답변 끝에 포함. 
+4. 'nameEn'은 공식 리스트 이름을 정확히 사용. 
+5. 루틴 항목: { "name": "한글명", "nameEn": "english name", "part": "부위", "sets": 4, "reps": 12, "weight": 0 }.
+6. part는: 가슴, 등, 어깨, 하체, 팔, 허리/코어, 유산소 중 하나.
+7. 항상 친절하고 동기부여하는 톤.
+[공식리스트] ${EXERCISE_DATASET.map(ex => `${ex.name} (${ex.nameEn})`).join(', ')}`;
 
         try {
             const response = await openai.chat.completions.create({
                 model: 'gpt-4o-mini',
                 messages: [
-                    { role: 'system', content: systemRole },
-                    ...messages.slice(-6).map(m => ({ role: m.type === 'ai' ? 'assistant' : 'user', content: m.text })),
-                    { role: 'user', content: text }
+                    { role: 'system', content: systemMessage },
+                    ...currentHistory.slice(-6).map(m => ({ role: m.type === 'ai' ? 'assistant' : 'user', content: m.text })),
+                    { role: 'user', content: userPrompt }
                 ],
                 temperature: 0.7
             });
@@ -1149,85 +1096,65 @@ const AIRecommendationScreen = () => {
         }
     };
 
+    const handleSendMessage = async (text = inputText) => {
+        if (!text.trim() || isTyping) return;
+        const userMsg = { id: Date.now(), type: 'user', text };
+        const updatedHistory = [...messages, userMsg];
+        setMessages(updatedHistory);
+        setInputText('');
+        await callOpenAI(text, updatedHistory);
+    };
+
     const sendRecommendationRequest = async (mode) => {
-        if (!profile) {
-            alert("프로필 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.");
-            return;
-        }
-        let requestText = '';
+        if (!profile) { alert("프로필 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요."); return; }
+        let displayMessage = '';
+        let aiPrompt = '';
         if (mode === 'balanced') {
-            requestText = "나의 프로필과 최근 기록을 바탕으로 오늘 할 균형잡힌 운동 루틴을 추천해줘. 부족한 부위가 있으면 보완해주고 점진적 과부하 원칙을 적용해줘.";
+            displayMessage = '🎯 오늘의 루틴 추천';
+            aiPrompt = "나의 프로필과 최근 운동 기록을 분석해서 오늘 할 균형잡힌 운동 루틴을 추천해줘. 부족한 부위가 있으면 보완하고 점진적 과부하 원칙을 적용해줘. 오늘 하루 루틴만 3-5개 운동으로 구성해서 JSON 형식으로 응답해줘.";
         } else if (mode === 'hard') {
-            requestText = "나의 프로필을 바탕으로 강도 높은 하드모드 루틴을 추천해줘. 평소보다 운동 개수를 늘리고 도전적인 무게를 제시해줘.";
+            displayMessage = '🔥 하드모드';
+            aiPrompt = "나의 프로필과 최근 운동 기록을 분석해서 강도 높은 하드모드 루틴을 추천해줘. 평소보다 운동 개수와 세트 수를 늘리고 도전적인 무게를 제시해줘. 오늘 하루 루틴만 JSON 형식으로 응답해줘.";
         }
-        handleSendMessage(requestText);
+        const userMsg = { id: Date.now(), type: 'user', text: displayMessage };
+        const updatedHistory = [...messages, userMsg];
+        setMessages(updatedHistory);
+        await callOpenAI(aiPrompt, updatedHistory);
     };
 
     const handleAddRoutineBatch = (items) => {
         const today = new Date().toISOString().split('T')[0];
         const storageKey = `mygym_routine_${today}`;
         const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        
-        const newItems = items.map(item => {
+        const itemsArray = Array.isArray(items) ? items : [items];
+        const newItems = itemsArray.map(item => {
             const ex = EXERCISE_DATASET.find(e => e.nameEn?.toLowerCase() === item.nameEn?.toLowerCase() || e.name === item.name);
-            return {
-                id: Date.now() + Math.random(),
-                name: item.name,
-                exercise: item.name,
-                exercise_id: ex?.id,
-                body_part: item.part,
-                sets: Array(item.sets || 4).fill(0).map(() => ({
-                    kg: item.weight || 0,
-                    reps: item.reps || 12,
-                    isDropSet: item.isDropSet || false
-                })),
-                completed: false
-            };
+            return { id: Date.now() + Math.random(), name: item.name, exercise: item.name, exercise_id: ex?.id, body_part: item.part, sets: Array(item.sets || 4).fill(0).map(() => ({ kg: item.weight || 0, reps: item.reps || 12, isDropSet: false })), completed: false };
         });
-
-        const filteredNewItems = newItems.filter(newItem => !saved.some(s => s.name === newItem.name));
-        if (filteredNewItems.length === 0 && newItems.length > 0) {
-            alert('이미 루틴에 모두 추가되어 있습니다.');
-            return;
-        }
-
-        localStorage.setItem(storageKey, JSON.stringify([...saved, ...filteredNewItems]));
-        alert(`${filteredNewItems.length}개의 운동이 오늘 루틴에 추가되었습니다!`);
+        const filtered = newItems.filter(newItem => !saved.some(s => s.name === newItem.name));
+        if (filtered.length === 0) { alert('이미 루틴에 추가되어 있습니다.'); return false; }
+        localStorage.setItem(storageKey, JSON.stringify([...saved, ...filtered]));
+        alert(`${filtered.length}개의 운동이 오늘 루틴에 추가되었습니다!`);
+        return true;
     };
 
     return (
         <div className="flex flex-col h-screen bg-slate-950 max-w-2xl mx-auto border-x border-white/5 pb-20 relative">
             <div className="p-4 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    <h2 className="text-sm font-black text-white italic uppercase tracking-tighter">AI PT COACH</h2>
-                </div>
-                <button onClick={() => { if(confirm('대화 내역을 초기화할까요?')) { setMessages([{ id: Date.now(), type: 'ai', text: greeting }]); localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY); } }} className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300">초기화</button>
+                <div className="flex items-center gap-2"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /><h2 className="text-sm font-black text-white italic uppercase tracking-tighter">AI PT COACH</h2></div>
+                <button onClick={() => { if(confirm('대화 내역을 초기화할까요?')) { const initial = { id: Date.now(), type: 'ai', text: generateGreeting(profile, recentStats) }; setMessages([initial]); localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify([initial])); } }} className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300">초기화</button>
             </div>
-
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-32">
                 {messages.map(msg => <ChatMessage key={msg.id} msg={msg} onAddRoutineItem={handleAddRoutineBatch} />)}
-                {isTyping && <div className="text-slate-500 italic text-xs animate-pulse ml-2">코치가 당신의 데이터를 분석 중...</div>}
+                {isTyping && <div className="text-slate-500 italic text-xs animate-pulse ml-2">코치가 데이터를 분석 중...</div>}
             </div>
-
             <div className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent space-y-4">
                 <div className="flex gap-3">
-                    <button
-                        onClick={() => sendRecommendationRequest('balanced')}
-                        className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-600/20"
-                    >
-                        <Target size={16} /> 오늘의 루틴 추천
-                    </button>
-                    <button
-                        onClick={() => sendRecommendationRequest('hard')}
-                        className="flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/20"
-                    >
-                        <Flame size={16} /> 하드모드
-                    </button>
+                    <button onClick={() => sendRecommendationRequest('balanced')} className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-600/20"><Target size={16} /> 오늘의 루틴 추천</button>
+                    <button onClick={() => sendRecommendationRequest('hard')} className="flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/20"><Flame size={16} /> 하드모드</button>
                 </div>
-                
                 <div className="relative">
-                    <input type="text" value={inputText} onChange={e => setInputText(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSendMessage()} placeholder="코치에게 질문하기 (예: 어깨 넓어지는 루틴 짜줘)" className="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-600" />
+                    <input type="text" value={inputText} onChange={e => setInputText(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSendMessage()} placeholder="코치에게 질문하기..." className="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" />
                     <button onClick={() => handleSendMessage()} className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 text-white rounded-xl font-bold active:scale-90 transition-transform">↑</button>
                 </div>
             </div>
