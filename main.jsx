@@ -750,16 +750,62 @@ const WorkoutPlanScreen = () => {
 
     useEffect(() => { localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify(planList)); }, [planList]);
 
+    const isCardio = (item) => item.body_part === '유산소' || item.body_part === 'cardio';
+
+    const makeDefaultSet = (item, prevSet = null) => {
+        if (isCardio(item)) return { level: prevSet?.level ?? '', minutes: prevSet?.minutes ?? '' };
+        const kg = prevSet?.isDropSet ? (prevSet?.dropKgs?.[0] ?? '') : (prevSet?.kg ?? '');
+        return { kg, reps: prevSet?.reps ?? '', isDropSet: false, dropKgs: ['', '', ''] };
+    };
+
     const handleAddToList = () => {
         if (!selection.exercise) return;
-        setPlanList([...planList, { id: Date.now(), ...selection.exercise, body_part: selection.part, isCompleted: false }]);
+        const newItem = { id: Date.now(), ...selection.exercise, body_part: selection.part, isCompleted: false };
+        newItem.sets = [makeDefaultSet(newItem)];
+        setPlanList(prev => [...prev, newItem]);
         setSelection({ part: '', exercise: null, manualName: '' });
+    };
+
+    const updateSet = (exIdx, setIdx, field, value) => {
+        setPlanList(prev => prev.map((item, i) => {
+            if (i !== exIdx) return item;
+            return { ...item, sets: item.sets.map((s, j) => j === setIdx ? { ...s, [field]: value } : s) };
+        }));
+    };
+
+    const addSet = (exIdx) => {
+        setPlanList(prev => prev.map((item, i) => {
+            if (i !== exIdx) return item;
+            const prevSet = item.sets?.[item.sets.length - 1] ?? null;
+            return { ...item, sets: [...(item.sets || []), makeDefaultSet(item, prevSet)] };
+        }));
+    };
+
+    const removeSet = (exIdx, setIdx) => {
+        setPlanList(prev => prev.map((item, i) => {
+            if (i !== exIdx) return item;
+            return { ...item, sets: item.sets.filter((_, j) => j !== setIdx) };
+        }));
+    };
+
+    const toggleDropSet = (exIdx, setIdx) => {
+        setPlanList(prev => prev.map((item, i) => {
+            if (i !== exIdx) return item;
+            return { ...item, sets: item.sets.map((s, j) => {
+                if (j !== setIdx) return s;
+                return s.isDropSet
+                    ? { ...s, isDropSet: false, kg: s.dropKgs?.[0] ?? '' }
+                    : { ...s, isDropSet: true, dropKgs: [s.kg, '', ''] };
+            })};
+        }));
     };
 
     const openPreview = (id, name) => {
         const url = getExerciseGif(null, id);
         if (url) setModalState({ isOpen: true, gifUrl: url, name });
     };
+
+    const inputCls = "bg-white/5 border border-white/10 rounded-md px-2 py-1 text-sm text-white text-center focus:outline-none focus:border-blue-500 transition-colors";
 
     return (
         <div className="p-6 md:p-12 max-w-6xl mx-auto bg-slate-950 min-h-screen pb-24">
@@ -772,18 +818,80 @@ const WorkoutPlanScreen = () => {
                 <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 min-h-[400px]">
                     <h3 className="text-xl font-bold text-white mb-6">오늘의 운동 리스트 ({planList.length})</h3>
                     <div className="space-y-4">
-                        {planList.map(item => (
-                            <div key={item.id} className="p-4 bg-slate-800/60 border border-slate-700 rounded-2xl flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-900">
-                                    <GifRenderer exerciseId={item.id} onClick={() => openPreview(item.id, item.name)} />
+                        {planList.map((item, exIdx) => {
+                            const cardio = isCardio(item);
+                            const sets = item.sets || [];
+                            return (
+                                <div key={item.id} className="p-4 bg-slate-800/60 border border-slate-700 rounded-2xl space-y-3">
+                                    {/* 운동 헤더 */}
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-900">
+                                            <GifRenderer exerciseId={item.id} onClick={() => openPreview(item.id, item.name)} />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[10px] font-bold text-indigo-400 uppercase">{PART_MAP[item.body_part]}</p>
+                                            <h4 className="text-sm font-bold text-white uppercase truncate">{item.name || item.exercise}</h4>
+                                        </div>
+                                        <button onClick={() => setPlanList(prev => prev.filter(p => p.id !== item.id))} className="p-2 text-slate-500 hover:text-white shrink-0 transition-colors">×</button>
+                                    </div>
+
+                                    {/* 세트 입력 */}
+                                    <div className="space-y-2 pl-1">
+                                        {sets.length === 0 ? (
+                                            <button onClick={() => addSet(exIdx)} className="w-full py-2 text-xs text-indigo-400 border border-dashed border-indigo-800/60 rounded-xl hover:border-indigo-600 transition-all">
+                                                + 세트 추가
+                                            </button>
+                                        ) : sets.map((set, setIdx) => {
+                                            const isLast = setIdx === sets.length - 1;
+                                            return (
+                                                <div key={setIdx} className="flex flex-wrap items-center gap-1.5">
+                                                    <span className="text-gray-500 text-xs w-4 shrink-0 text-center">{setIdx + 1}</span>
+                                                    {cardio ? (
+                                                        <>
+                                                            <span className="text-[10px] text-gray-500 shrink-0">Lv</span>
+                                                            <input type="number" inputMode="decimal" value={set.level} onChange={e => updateSet(exIdx, setIdx, 'level', e.target.value)} className={`w-14 ${inputCls}`} placeholder="5" />
+                                                            <span className="text-gray-600 text-xs shrink-0">·</span>
+                                                            <input type="number" inputMode="numeric" value={set.minutes} onChange={e => updateSet(exIdx, setIdx, 'minutes', e.target.value)} className={`w-16 ${inputCls}`} placeholder="30" />
+                                                            <span className="text-[10px] text-gray-500 shrink-0">분</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            {set.isDropSet ? (
+                                                                <>
+                                                                    {[0, 1, 2].map(di => (
+                                                                        <React.Fragment key={di}>
+                                                                            <input type="number" inputMode="decimal" value={set.dropKgs[di]} onChange={e => { const d = [...set.dropKgs]; d[di] = e.target.value; updateSet(exIdx, setIdx, 'dropKgs', d); }} className={`w-12 ${inputCls}`} placeholder="kg" />
+                                                                            {di < 2 && <span className="text-gray-600 text-[10px] shrink-0">›</span>}
+                                                                        </React.Fragment>
+                                                                    ))}
+                                                                </>
+                                                            ) : (
+                                                                <input type="number" inputMode="decimal" value={set.kg} onChange={e => updateSet(exIdx, setIdx, 'kg', e.target.value)} className={`w-16 ${inputCls}`} placeholder="kg" />
+                                                            )}
+                                                            <span className="text-gray-600 text-xs shrink-0">×</span>
+                                                            <input type="number" inputMode="numeric" value={set.reps} onChange={e => updateSet(exIdx, setIdx, 'reps', e.target.value)} className={`w-14 ${inputCls}`} placeholder="회" />
+                                                            <label className="flex items-center gap-1 shrink-0">
+                                                                <input type="checkbox" checked={!!set.isDropSet} onChange={() => toggleDropSet(exIdx, setIdx)} className="w-3 h-3 accent-red-500" />
+                                                                <span className="text-[10px] text-gray-400">드롭</span>
+                                                            </label>
+                                                        </>
+                                                    )}
+                                                    <div className="ml-auto shrink-0">
+                                                        {isLast ? (
+                                                            <button onClick={() => addSet(exIdx)} className="w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-500 active:scale-90 text-white flex items-center justify-center text-base leading-none transition-all">+</button>
+                                                        ) : (
+                                                            <button onClick={() => removeSet(exIdx, setIdx)} className="w-7 h-7 rounded-full flex items-center justify-center text-gray-500 hover:text-red-400 transition-colors">
+                                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="text-[10px] font-bold text-indigo-400 uppercase">{PART_MAP[item.body_part]}</p>
-                                    <h4 className="text-sm font-bold text-white uppercase">{item.name || item.exercise}</h4>
-                                </div>
-                                <button onClick={() => setPlanList(planList.filter(p => p.id !== item.id))} className="p-2 text-slate-500 hover:text-white">×</button>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </div>
