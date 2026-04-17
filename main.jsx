@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
-import { Target, Flame, Plus } from 'lucide-react';
+import { Target, Flame, Plus, Dumbbell } from 'lucide-react';
 import EXERCISE_DATASET from './src/data/exercises.json';
 
 const EQUIPMENT_MAP = {
@@ -1033,8 +1033,69 @@ const AIRecommendationScreen = () => {
         return text;
     };
 
+    const parseRoutineFromResponse = (content) => {
+        try {
+            const jsonMatch = content.match(/```json[\s\S]*?```/);
+            if (!jsonMatch) return null;
+            const jsonStr = jsonMatch[0].replace(/```json|```/g, '').trim();
+            const data = JSON.parse(jsonStr);
+            return data.routine || null;
+        } catch (e) {
+            console.error('Failed to parse JSON routine from AI response', e);
+            return null;
+        }
+    };
+
+    const addExerciseToRoutine = (exercise) => {
+        const today = new Date().toISOString().split('T')[0];
+        const storageKey = `mygym_routine_${today}`;
+        
+        let fullExercise = null;
+        try {
+            fullExercise = EXERCISE_DATASET?.find(e => e.name === exercise.name);
+        } catch (e) {
+            console.log('exercises.json 조회 실패, 기본값 사용');
+        }
+        
+        const exerciseToAdd = {
+            ...exercise,
+            id: fullExercise?.id || `temp_${Date.now()}`,
+            image: fullExercise?.gif_url || '',
+            completed: false,
+            // 세트 데이터가 없으면 기본값 생성
+            sets: exercise.sets || Array(3).fill({ kg: 0, reps: 10, isDropSet: false })
+        };
+
+        const existingRoutine = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        
+        if (existingRoutine.find(e => e.name === exercise.name)) {
+            alert(`${exercise.name}은(는) 이미 오늘 루틴에 추가되어 있습니다.`);
+            return;
+        }
+
+        const updatedRoutine = [...existingRoutine, exerciseToAdd];
+        localStorage.setItem(storageKey, JSON.stringify(updatedRoutine));
+        
+        alert(`✅ ${exercise.name}\n오늘 루틴에 추가했습니다!`);
+    };
+
     useEffect(() => {
         const initializeChat = async () => {
+            // 마지막 초기화 시간 체크
+            const lastResetTime = localStorage.getItem('aiCoachLastReset');
+            const now = Date.now();
+            const twelveHours = 12 * 60 * 60 * 1000; // 12시간 (밀리초)
+
+            let shouldReset = false;
+            if (!lastResetTime) {
+                shouldReset = true;
+            } else {
+                const timeSinceReset = now - parseInt(lastResetTime);
+                if (timeSinceReset >= twelveHours) {
+                    shouldReset = true;
+                }
+            }
+
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) return;
@@ -1045,14 +1106,25 @@ const AIRecommendationScreen = () => {
                 const { data: logs } = await supabase.from('workout_logs').select('*').eq('user_id', session.user.id).gte('created_at', sevenDaysAgo.toISOString());
                 const stats = { totalWorkouts: new Set(logs?.map(l => l.created_at.split('T')[0])).size || 0, mostFrequentPart: getMostFrequent(logs?.map(l => l.part)) };
                 setRecentStats(stats);
-                const storedHistory = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[]');
-                if (storedHistory.length === 0) {
+                
+                if (shouldReset) {
                     const greetingText = generateGreeting(profileData, stats);
                     const initialMessage = { id: Date.now(), type: 'ai', text: greetingText };
                     setMessages([initialMessage]);
                     localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify([initialMessage]));
+                    localStorage.setItem('aiCoachLastReset', now.toString());
+                    console.log('[AI Coach] 12시간 경과, 채팅 초기화');
                 } else {
-                    setMessages(storedHistory);
+                    const storedHistory = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[]');
+                    if (storedHistory.length === 0) {
+                        const greetingText = generateGreeting(profileData, stats);
+                        const initialMessage = { id: Date.now(), type: 'ai', text: greetingText };
+                        setMessages([initialMessage]);
+                        localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify([initialMessage]));
+                        localStorage.setItem('aiCoachLastReset', now.toString());
+                    } else {
+                        setMessages(storedHistory);
+                    }
                 }
             } catch (e) { console.error('Error initializing AI Coach:', e); }
         };
@@ -1061,26 +1133,66 @@ const AIRecommendationScreen = () => {
 
     useEffect(() => { localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages)); }, [messages]);
 
+    const handleManualReset = () => {
+        if (!confirm('채팅 기록을 모두 삭제하고 새로 시작할까요?')) return;
+        
+        const greetingText = generateGreeting(profile, recentStats);
+        const initialMessage = {
+            id: Date.now(),
+            type: 'ai',
+            text: greetingText
+        };
+        
+        setMessages([initialMessage]);
+        localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify([initialMessage]));
+        localStorage.setItem('aiCoachLastReset', Date.now().toString());
+    };
+
     const callOpenAI = async (userPrompt, currentHistory) => {
         setIsTyping(true);
-        const systemMessage = `너는 MyGym의 전문 PT 코치야. 
-[사용자 프로필] 목표: ${profile?.goal}, 경험: ${profile?.experience_level}, 주당횟수: ${profile?.weekly_frequency}, 기구: ${profile?.equipment_access}, 제한사항: ${profile?.limitations?.join(',')}.
-[최근기록] 7일간 ${recentStats.totalWorkouts}회, 빈출부위: ${recentStats.mostFrequentPart}.
-[중요 규칙]
-1. 루틴 추천 시 반드시 "오늘 하루" 루틴만 추천 (여러 날 추천 금지).
-2. 운동 개수는 3-5개.
-3. 반드시 [ROUTINE_DATA: JSON] 형식을 답변 끝에 포함. 
-4. 'nameEn'은 공식 리스트 이름을 정확히 사용. 
-5. 루틴 항목: { "name": "한글명", "nameEn": "english name", "part": "부위", "sets": 4, "reps": 12, "weight": 0 }.
-6. part는: 가슴, 등, 어깨, 하체, 팔, 허리/코어, 유산소 중 하나.
-7. 항상 친절하고 동기부여하는 톤.
-[공식리스트] ${EXERCISE_DATASET.map(ex => `${ex.name} (${ex.nameEn})`).join(', ')}`;
+        const systemMessage = {
+            role: 'system',
+            content: `당신은 MyGym의 퍼스널 트레이너 AI입니다.
+
+사용자 프로필:
+- 목표: ${profile?.goal || '없음'}
+- 경험: ${profile?.experience_level || '없음'}
+- 주당 횟수: ${profile?.weekly_frequency || 0}회
+- 기구: ${profile?.equipment_access || '없음'}
+- 제한사항: ${profile?.limitations?.join(', ') || '없음'}
+
+최근 7일 운동 기록:
+- 운동 횟수: ${recentStats?.totalWorkouts || 0}회
+- 가장 많이 한 부위: ${recentStats?.mostFrequentPart || '없음'}
+
+응답 규칙:
+1. 루틴 추천 시: 간단한 설명 1-2문장 + JSON 블록
+2. JSON 형식:
+
+\`\`\`json
+{
+  "routine": [
+    {
+      "name": "운동명 (한글)",
+      "part": "부위",
+      "sets": [{"kg": 무게, "reps": 횟수, "isDropSet": false}]
+    }
+  ]
+}
+\`\`\`
+
+3. part는: 가슴, 등, 어깨, 하체, 팔, 허리/코어, 유산소 중 하나
+4. 오늘 하루 루틴만 추천 (여러 날 X)
+5. 운동 3-5개
+6. JSON 외 마크다운 헤더(###), 번호 목록 사용 금지
+7. 일반 질문에는 자유롭게 대화`
+        };
 
         try {
             const response = await openai.chat.completions.create({
                 model: 'gpt-4o-mini',
                 messages: [
-                    { role: 'system', content: systemMessage },
+                    systemMessage,
                     ...currentHistory.slice(-6).map(m => ({ role: m.type === 'ai' ? 'assistant' : 'user', content: m.text })),
                     { role: 'user', content: userPrompt }
                 ],
@@ -1122,30 +1234,82 @@ const AIRecommendationScreen = () => {
         await callOpenAI(aiPrompt, updatedHistory);
     };
 
-    const handleAddRoutineBatch = (items) => {
-        const today = new Date().toISOString().split('T')[0];
-        const storageKey = `mygym_routine_${today}`;
-        const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        const itemsArray = Array.isArray(items) ? items : [items];
-        const newItems = itemsArray.map(item => {
-            const ex = EXERCISE_DATASET.find(e => e.nameEn?.toLowerCase() === item.nameEn?.toLowerCase() || e.name === item.name);
-            return { id: Date.now() + Math.random(), name: item.name, exercise: item.name, exercise_id: ex?.id, body_part: item.part, sets: Array(item.sets || 4).fill(0).map(() => ({ kg: item.weight || 0, reps: item.reps || 12, isDropSet: false })), completed: false };
-        });
-        const filtered = newItems.filter(newItem => !saved.some(s => s.name === newItem.name));
-        if (filtered.length === 0) { alert('이미 루틴에 추가되어 있습니다.'); return false; }
-        localStorage.setItem(storageKey, JSON.stringify([...saved, ...filtered]));
-        alert(`${filtered.length}개의 운동이 오늘 루틴에 추가되었습니다!`);
-        return true;
-    };
-
     return (
         <div className="flex flex-col h-screen bg-slate-950 max-w-2xl mx-auto border-x border-white/5 pb-20 relative">
             <div className="p-4 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 flex justify-between items-center">
-                <div className="flex items-center gap-2"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /><h2 className="text-sm font-black text-white italic uppercase tracking-tighter">AI PT COACH</h2></div>
-                <button onClick={() => { if(confirm('대화 내역을 초기화할까요?')) { const initial = { id: Date.now(), type: 'ai', text: generateGreeting(profile, recentStats) }; setMessages([initial]); localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify([initial])); } }} className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300">초기화</button>
+                <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <h2 className="text-sm font-black text-white italic uppercase tracking-tighter">AI PT COACH</h2>
+                </div>
+                <button 
+                    onClick={handleManualReset}
+                    className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300"
+                >
+                    초기화
+                </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-32">
-                {messages.map(msg => <ChatMessage key={msg.id} msg={msg} onAddRoutineItem={handleAddRoutineBatch} />)}
+                {messages.map((msg, idx) => {
+                    if (msg.type === 'user') {
+                        return <ChatMessage key={msg.id} msg={msg} />;
+                    }
+
+                    const routine = parseRoutineFromResponse(msg.text);
+                    const textOnly = msg.text.replace(/```json[\s\S]*?```/g, '').trim();
+
+                    return (
+                        <div key={msg.id} className="space-y-3 animate-slide-up">
+                            {textOnly && (
+                                <ChatMessage msg={{ type: 'ai', text: textOnly }} />
+                            )}
+                            
+                            {routine && routine.length > 0 && (
+                                <div className="ml-12 space-y-3">
+                                    <p className="text-xs text-gray-400 flex items-center gap-2">
+                                        <Dumbbell size={14} />
+                                        추천 운동을 탭하여 오늘 루틴에 추가하세요
+                                    </p>
+                                    
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {routine.map((exercise, exIdx) => (
+                                            <button
+                                                key={exIdx}
+                                                onClick={() => addExerciseToRoutine(exercise)}
+                                                className="bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 rounded-lg p-3 text-left group active:scale-95 transition-all"
+                                            >
+                                                <div className="flex items-start justify-between mb-2">
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-medium text-white text-sm truncate">
+                                                            {exercise.name}
+                                                        </p>
+                                                        <p className="text-[10px] text-blue-400 mt-0.5">
+                                                            {exercise.part}
+                                                        </p>
+                                                    </div>
+                                                    <Plus size={16} className="text-blue-400 group-hover:text-blue-300 flex-shrink-0 ml-1" />
+                                                </div>
+                                                
+                                                <div className="text-[10px] text-gray-400 space-y-0.5">
+                                                    <div className="flex items-center gap-1">
+                                                        <span>{exercise.sets?.length || 0}세트</span>
+                                                    </div>
+                                                    {exercise.sets?.[0] && (
+                                                        <div className="flex items-center gap-2">
+                                                            {exercise.sets[0].kg > 0 && (
+                                                                <span>{exercise.sets[0].kg}kg</span>
+                                                            )}
+                                                            <span>×{exercise.sets[0].reps}회</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
                 {isTyping && <div className="text-slate-500 italic text-xs animate-pulse ml-2">코치가 데이터를 분석 중...</div>}
             </div>
             <div className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent space-y-4">
