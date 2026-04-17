@@ -1030,6 +1030,18 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
     const lastDate = new Date(year, month + 1, 0).getDate();
     const calendarDays = [...Array(firstDay).fill(null), ...[...Array(lastDate).keys()].map(i => i + 1)];
     const today = new Date();
+    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+    const isFutureMonth = new Date(year, month, 1) > new Date(today.getFullYear(), today.getMonth(), 1);
+
+    const achievementRate = useMemo(() => {
+        if (isFutureMonth) return null;
+        const denominator = isCurrentMonth ? today.getDate() : lastDate;
+        const workedDays = Object.keys(workoutGroups).filter(key => {
+            const [y, m] = key.split('-').map(Number);
+            return y === year && m === month + 1;
+        }).length;
+        return Math.round((workedDays / denominator) * 100);
+    }, [workoutGroups, year, month, isCurrentMonth, isFutureMonth, lastDate]);
 
     return (
         <div className="bg-slate-800/50 p-6 rounded-[2.5rem] border border-slate-700/50 shadow-2xl">
@@ -1061,8 +1073,8 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
                                 const partsLabel = parts.length === 1 ? parts[0] : parts.length === 2 ? `${parts[0]}·${parts[1]}` : parts.length >= 3 ? `${parts[0]} 외 ${parts.length - 1}` : '';
                                 return (
                                     <>
-                                        <div className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${isToday ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : info ? 'bg-red-500/80' : ''}`}>
-                                            <span className={`text-sm font-black ${isToday || info ? 'text-white' : 'text-white'}`}>{d}</span>
+                                        <div className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${isToday ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : info ? 'border-2 border-red-400' : ''}`}>
+                                            <span className="text-sm font-black text-white">{d}</span>
                                         </div>
                                         {isToday && info && <span className="w-1.5 h-1.5 bg-red-400 rounded-full mt-0.5" />}
                                         {partsLabel && <span className="text-[9px] text-gray-400 mt-0.5 text-center leading-tight px-0.5">{partsLabel}</span>}
@@ -1072,6 +1084,13 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
                         </div>
                     );
                 })}
+            </div>
+            <div className="flex justify-end mt-4 px-2">
+                {achievementRate !== null ? (
+                    <span className="text-xs text-gray-400">운동 달성률 <span className="text-white font-black">{achievementRate}%</span></span>
+                ) : (
+                    <span className="text-xs text-gray-400">운동 달성률 <span className="text-slate-500">-</span></span>
+                )}
             </div>
         </div>
     );
