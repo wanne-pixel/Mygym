@@ -25,8 +25,58 @@ import OpenAI from 'openai';
 import ChatMessage from './src/components/ChatMessage';
 import { BODY_PARTS, PART_MAP, STORAGE_KEYS } from './src/constants/exerciseConstants';
 import { fetchLastExerciseRecord, saveWorkoutLogs } from './src/api/workoutApi';
-import BottomNav from './src/components/BottomNav';
 import Onboarding from './src/components/Onboarding';
+
+const BottomNav = ({ activeTab, onTabChange }) => {
+    const tabs = [
+        { id: '달력', label: '달력', icon: (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+        )},
+        { id: '루틴구성', label: '루틴구성', icon: (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+        )},
+        { id: 'AI코치', label: 'AI코치', icon: (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+        )}
+    ];
+
+    return (
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-xl border-t border-white/10 safe-area-bottom">
+            <div className="max-w-2xl mx-auto flex justify-around items-center h-20">
+                {tabs.map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => onTabChange(tab.id)}
+                            className={`flex flex-col items-center justify-center w-full h-full transition-all duration-300 relative ${
+                                isActive ? 'text-blue-500' : 'text-slate-500 hover:text-slate-300'
+                            }`}
+                        >
+                            {isActive && (
+                                <span className="absolute top-0 w-12 h-1 bg-blue-500 rounded-b-full shadow-lg shadow-blue-500/50 animate-fade-in" />
+                            )}
+                            <div className={`mb-1 transition-transform duration-300 ${isActive ? 'scale-110' : 'scale-100'}`}>
+                                {tab.icon}
+                            </div>
+                            <span className={`text-[10px] font-black uppercase tracking-tighter transition-all ${
+                                isActive ? 'opacity-100 translate-y-0' : 'opacity-80'
+                            }`}>
+                                {tab.label}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+        </nav>
+    );
+};
 
 // OpenAI 인스턴스 생성
 const openai = new OpenAI({
@@ -671,86 +721,6 @@ const WorkoutDetailScreen = () => {
     );
 };
 
-const WorkoutSetupScreen = () => {
-    const [searchParams] = useSearchParams();
-    const [selection, setSelection] = useState({ part: '', exercise: null, manualName: '' });
-    const [setsData, setSetsData] = useState([{ weight: '', reps: '' }]);
-    const [cardioMinutes, setCardioMinutes] = useState('');
-    const [cardioSeconds, setCardioSeconds] = useState('');
-    const [addedExercises, setAddedExercises] = useState([]);
-    const [isSaving, setIsSaving] = useState(false);
-    const queryDate = searchParams.get('date');
-
-    const handleAddOrUpdateExercise = async () => {
-        if (!selection.exercise || isSaving) return;
-        setIsSaving(true);
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            const logData = {
-                user_id: user.id,
-                part: selection.part,
-                type: selection.exercise.equipment,
-                exercise: selection.exercise.name,
-                exercise_id: selection.exercise.id,
-                sets_count: selection.part === 'cardio' ? 1 : setsData.length,
-                sets_data: selection.part === 'cardio' ? [{ duration: `${cardioMinutes}분 ${cardioSeconds}초` }] : setsData,
-                is_completed: true,
-                created_at: queryDate ? new Date(queryDate).toISOString() : new Date().toISOString()
-            };
-            const { error } = await supabase.from('workout_logs').insert([logData]);
-            if (error) throw error;
-            setAddedExercises([...addedExercises, { ...logData, id: Date.now() }]);
-            setSelection({ part: '', exercise: null, manualName: '' });
-            alert('기록 완료!');
-        } catch (e) { alert(e.message); } finally { setIsSaving(false); }
-    };
-
-    return (
-        <div className="p-8 max-w-4xl mx-auto bg-slate-950 min-h-screen pb-24">
-            <h2 className="text-3xl font-black italic text-white uppercase mb-8">루틴 기록</h2>
-            <div className="grid lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                    <ExerciseSelector selection={selection} setSelection={setSelection} />
-                    {selection.exercise && (
-                        <div className="bg-slate-800/30 p-6 rounded-2xl border border-slate-700 space-y-6">
-                            {selection.part === 'cardio' ? (
-                                <div className="flex gap-4">
-                                    <input type="number" placeholder="분" value={cardioMinutes} onChange={e => setCardioMinutes(e.target.value)} className="w-full bg-slate-900 p-3 rounded-lg text-white font-bold" />
-                                    <input type="number" placeholder="초" value={cardioSeconds} onChange={e => setCardioSeconds(e.target.value)} className="w-full bg-slate-900 p-3 rounded-lg text-white font-bold" />
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    {setsData.map((s, idx) => (
-                                        <div key={idx} className="flex gap-2 items-center bg-slate-900 p-2 rounded-xl border border-slate-800">
-                                            <span className="text-[10px] text-slate-500 w-8 text-center">{idx + 1}S</span>
-                                            <input type="number" placeholder="KG" value={s.weight} onChange={e => { const nd = [...setsData]; nd[idx].weight = e.target.value; setSetsData(nd); }} className="flex-1 bg-slate-950 p-2 rounded text-white text-xs outline-none" />
-                                            <input type="number" placeholder="회" value={s.reps} onChange={e => { const nd = [...setsData]; nd[idx].reps = e.target.value; setSetsData(nd); }} className="flex-1 bg-slate-950 p-2 rounded text-white text-xs outline-none" />
-                                            <button onClick={() => setSetsData(setsData.filter((_, i) => i !== idx))} className="text-slate-600 px-2">×</button>
-                                        </div>
-                                    ))}
-                                    <button onClick={() => setSetsData([...setsData, { weight: '', reps: '' }])} className="w-full py-2 bg-slate-800 text-slate-400 text-[10px] rounded-xl">+ 세트 추가</button>
-                                </div>
-                            )}
-                            <button onClick={handleAddOrUpdateExercise} className="w-full py-4 bg-blue-600 text-white font-black rounded-xl italic">기록하기</button>
-                        </div>
-                    )}
-                </div>
-                <div className="bg-slate-900/50 rounded-3xl p-6 border border-slate-800">
-                    <h3 className="text-xl font-bold text-white mb-6">최근 추가됨</h3>
-                    <div className="space-y-4">
-                        {addedExercises.map(ex => (
-                            <div key={ex.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                                <p className="text-[10px] text-blue-400 uppercase font-bold">{PART_MAP[ex.part]} / {ex.type}</p>
-                                <p className="font-bold text-white">{ex.exercise}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const WorkoutPlanScreen = () => {
     const [selection, setSelection] = useState({ part: '', exercise: null, manualName: '' });
     const [planList, setPlanList] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE) || '[]'));
@@ -925,16 +895,11 @@ const CalendarScreen = () => {
                         <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
                     </button>
                     <button 
-                        onClick={() => {
-                          if (window.confirm("로그아웃 하시겠습니까?")) {
-                            localStorage.clear(); // 로컬 데이터 초기화
-                            window.location.reload(); // 새로고침하여 로그인/초기 화면으로 이동
-                          }
-                        }}
+                        onClick={() => { if(window.confirm('로그아웃 하시겠습니까?')) { localStorage.clear(); window.location.reload(); } }}
                         className="p-2 bg-red-900/20 text-red-400 rounded-full hover:bg-red-900/40 transition-all active:scale-95"
                         title="로그아웃"
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                             <polyline points="16 17 21 12 16 7" />
                             <line x1="21" y1="12" x2="9" y2="12" />
@@ -986,11 +951,12 @@ const MainAppLayout = () => {
     const activeTab = searchParams.get('tab') || '달력';
     return (
         <div className="relative min-h-screen bg-slate-950">
-            <main>{activeTab === '달력' && <CalendarScreen />}{activeTab === '루틴기록' && <WorkoutSetupScreen />}{activeTab === '루틴구성' && <WorkoutPlanScreen />}{activeTab === 'AI코치' && <AIRecommendationScreen />}</main>
+            <main>{activeTab === '달력' && <CalendarScreen />}{activeTab === '루틴구성' && <WorkoutPlanScreen />}{activeTab === 'AI코치' && <AIRecommendationScreen />}</main>
             <BottomNav activeTab={activeTab} onTabChange={(tab) => setSearchParams({ tab })} />
         </div>
     );
 };
+
 
 const AppContent = () => {
     const navigate = useNavigate();
