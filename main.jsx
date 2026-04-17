@@ -27,7 +27,7 @@ import OpenAI from 'openai';
 import ChatMessage from './src/components/ChatMessage';
 import { BODY_PARTS, PART_MAP, STORAGE_KEYS } from './src/constants/exerciseConstants';
 import { fetchLastExerciseRecord, saveWorkoutLogs } from './src/api/workoutApi';
-import { translateToKorean } from './src/api/exerciseApi';
+import { translateToKorean, translateExerciseTerm } from './src/api/exerciseApi';
 import BottomNav from './src/components/BottomNav';
 import Onboarding from './src/components/Onboarding';
 
@@ -233,7 +233,12 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const handlePartClick = (p) => {
-        setSelection({ part: p, exercise: null, manualName: '' });
+        setSelection({ ...selection, part: p, equipment: null, exercise: null, manualName: '' });
+        setSearchTerm('');
+    };
+
+    const handleEquipmentClick = (eq) => {
+        setSelection({ ...selection, equipment: eq, exercise: null, manualName: '' });
         setSearchTerm('');
     };
 
@@ -246,9 +251,30 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
         if (onExerciseSelect) onExerciseSelect(ex.name);
     };
 
-    const filteredExercises = useMemo(() => {
+    const handleBack = () => {
+        if (selection.exercise) {
+            setSelection({ ...selection, exercise: null });
+        } else if (selection.equipment) {
+            setSelection({ ...selection, equipment: null });
+        } else if (selection.part) {
+            setSelection({ ...selection, part: null });
+        }
+    };
+
+    const availableEquipments = useMemo(() => {
         if (!selection.part) return [];
-        let list = CURATED_EXERCISES.filter(ex => ex.body_part === selection.part);
+        const equipments = CURATED_EXERCISES
+            .filter(ex => ex.body_part === selection.part)
+            .map(ex => ex.equipment);
+        return [...new Set(equipments)];
+    }, [selection.part]);
+
+    const filteredExercises = useMemo(() => {
+        if (!selection.part || !selection.equipment) return [];
+        let list = CURATED_EXERCISES.filter(ex => 
+            ex.body_part === selection.part && 
+            ex.equipment === selection.equipment
+        );
         if (searchTerm.trim()) {
             list = list.filter(ex => {
                 const searchLower = searchTerm.toLowerCase();
@@ -259,44 +285,81 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             });
         }
         return list;
-    }, [selection.part, searchTerm]);
+    }, [selection.part, selection.equipment, searchTerm]);
 
     return (
         <div className="space-y-8">
-            {/* Selection Summary */}
-            {(selection.part || selection.exercise) && (
-                <div className="p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl animate-fade-in">
-                    <div className="flex flex-wrap items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest">
-                        {selection.part && <span>{BODY_PARTS.find(p => p.key === selection.part)?.label}</span>}
-                        {selection.exercise && (
-                            <>
-                                <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                                <span className="text-white uppercase">{translateToKorean(selection.exercise.name)}</span>
-                            </>
-                        )}
+            {/* Selection Summary & Back Button */}
+            <div className="flex items-center gap-3">
+                {(selection.part || selection.equipment || selection.exercise) && (
+                    <button 
+                        onClick={handleBack}
+                        className="p-2 bg-slate-800 text-slate-400 hover:text-white rounded-xl transition-colors"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                )}
+                {(selection.part || selection.equipment || selection.exercise) && (
+                    <div className="flex-1 p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl animate-fade-in">
+                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                            {selection.part && <span>{BODY_PARTS.find(p => p.key === selection.part)?.label}</span>}
+                            {selection.equipment && (
+                                <>
+                                    <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                                    <span className="text-slate-300">{translateExerciseTerm(selection.equipment)}</span>
+                                </>
+                            )}
+                            {selection.exercise && (
+                                <>
+                                    <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                                    <span className="text-white uppercase">{translateToKorean(selection.exercise.name)}</span>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Step 1: Body Part */}
+            {!selection.part && (
+                <div className="animate-fade-in">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 1. 부위 선택</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {BODY_PARTS.map(p => (
+                            <button 
+                                key={p.key} 
+                                onClick={() => handlePartClick(p.key)} 
+                                className={`py-3 rounded-2xl font-black text-[10px] sm:text-xs tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50`}
+                            >
+                                {p.label.toUpperCase()}
+                            </button>
+                        ))}
                     </div>
                 </div>
             )}
 
-            {/* Step 1: Body Part */}
-            <div>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 1. 부위 선택</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {BODY_PARTS.map(p => (
-                        <button 
-                            key={p.key} 
-                            onClick={() => handlePartClick(p.key)} 
-                            className={`py-3 rounded-2xl font-black text-[10px] sm:text-xs tracking-tighter transition-all duration-300 ${selection.part === p.key ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/30 ring-2 ring-blue-400/50' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50'}`}
-                        >
-                            {p.label.toUpperCase()}
-                        </button>
-                    ))}
+            {/* Step 2: Equipment */}
+            {selection.part && !selection.equipment && (
+                <div className="animate-fade-in">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 2. 기구 선택</label>
+                    <div className="grid grid-cols-2 gap-2">
+                        {availableEquipments.map(eq => (
+                            <button 
+                                key={eq} 
+                                onClick={() => handleEquipmentClick(eq)} 
+                                className={`py-3 rounded-2xl font-black text-[10px] sm:text-xs tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50`}
+                            >
+                                {translateExerciseTerm(eq).toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Step 2: Search and List */}
-            {selection.part && (
+            {/* Step 3: Search and List */}
+            {selection.part && selection.equipment && (
                 <div className="animate-fade-in space-y-4">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block px-1">Step 3. 운동 선택</label>
                     <div className="relative">
                         <input 
                             type="text"
@@ -323,7 +386,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className={`text-xs font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{translateToKorean(ex.name)}</p>
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{ex.equipment}</span>
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{translateExerciseTerm(ex.equipment)}</span>
                                     </div>
                                 </div>
                             ))
