@@ -40,10 +40,11 @@ const translationMap = {
   "upper back": "등 상부",
 
   // Equipment & Common Terms
-  "assisted": "보조 기구",
+  "assisted": "어시스트",
   "band": "밴드",
   "barbell": "바벨",
   "body weight": "맨몸",
+  "bodyweight": "맨몸",
   "bosu ball": "보수볼",
   "cable": "케이블",
   "dumbbell": "덤벨",
@@ -66,7 +67,7 @@ const translationMap = {
   "tire": "타이어",
   "trap bar": "트랩바",
   "upper body ergometer": "상체 에르고미터",
-  "weighted": "중량 추가",
+  "weighted": "중량",
   "wheel roller": "휠 롤러",
   
   // Action & Form Terms
@@ -80,6 +81,40 @@ const translationMap = {
   "lunge": "런지",
   "row": "로우",
   "pulldown": "풀다운",
+  "push": "푸시",
+  "pull": "풀",
+  "kickback": "킥백",
+  "crunch": "크런치",
+  "sit-up": "윗몸일으키기",
+  "situp": "윗몸일으키기",
+  "twist": "트위스트",
+  "lever": "레버",
+  "alternated": "얼터네이트",
+  "alternate": "얼터네이트",
+  "single": "싱글",
+  "double": "더블",
+  "lying": "라이잉",
+  "bent": "벤트",
+  "up": "업",
+  "down": "다운",
+  "around": "어라운드",
+  "world": "월드",
+  "step": "스텝",
+  "jump": "점프",
+  "plank": "플랭크",
+  "hold": "홀드",
+  "stretch": "스트레칭",
+  "cross": "크로스",
+  "variation": "바리에이션",
+  
+  // Body Parts (Additional)
+  "calf": "카프",
+  "wrist": "리스트",
+  "shoulder": "숄더",
+  "leg": "레그",
+  "arm": "팔",
+  
+  // Misc
   "front": "프론트",
   "lateral": "레터럴",
   "reverse": "리버스",
@@ -88,25 +123,19 @@ const translationMap = {
   "standing": "스탠딩",
   "incline": "인클라인",
   "decline": "디클라인",
-  "shoulder": "숄더",
-  "leg": "레그",
-  "arm": "팔",
   "machine": "머신",
   "smith": "스미스",
   "bench": "벤치",
   "pull-up": "풀업",
   "push-up": "푸쉬업",
   "dip": "딥스",
-  "crunch": "크런치",
-  "plank": "플랭크",
   "bent": "벤트",
   "over": "오버",
   "one": "원",
-  "arm": "암",
-  "alternate": "얼터네이트",
   "close": "클로즈",
   "grip": "그립",
   "wide": "와이드",
+  "neutral": "뉴트럴",
   "straight": "스트레이트",
   "behind": "비하인드",
   "the": "",
@@ -126,16 +155,30 @@ const translationMap = {
 export const translateToKorean = (englishName) => {
   if (!englishName) return "";
   
-  // Clean string and split by spaces or hyphens
-  const words = englishName.toLowerCase().replace(/[^a-z0-9-\s]/g, '').split(/[\s-]+/);
+  // Clean string but keep hyphens for words like sit-up
+  const cleanedName = englishName.toLowerCase().replace(/[^a-z0-9-\s]/g, '');
+  
+  // Split by spaces
+  const words = cleanedName.split(/\s+/);
   
   const translatedWords = words.map(word => {
     if (!word) return "";
-    const translated = translationMap[word];
-    // If found in map and not an empty string (like 'the', 'and')
-    if (translated !== undefined) {
-      return translated;
+    
+    // 1. Try whole word (might include hyphens)
+    if (translationMap[word] !== undefined) {
+      return translationMap[word];
     }
+    
+    // 2. If it has hyphens, try splitting by hyphens as well
+    if (word.includes('-')) {
+      const subWords = word.split('-');
+      const translatedSubWords = subWords.map(sw => {
+        if (translationMap[sw] !== undefined) return translationMap[sw];
+        return sw.toUpperCase();
+      });
+      return translatedSubWords.filter(w => w !== "").join(" ");
+    }
+    
     // Otherwise keep as original, uppercase for English words
     return word.toUpperCase();
   });
