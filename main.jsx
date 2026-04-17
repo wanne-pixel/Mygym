@@ -805,7 +805,7 @@ const WorkoutPlanScreen = () => {
         if (url) setModalState({ isOpen: true, gifUrl: url, name });
     };
 
-    const inputCls = "bg-white/5 border border-white/10 rounded-md px-2 py-1 text-sm text-white text-center focus:outline-none focus:border-blue-500 transition-colors";
+    const inputCls = "w-full bg-white/5 border border-white/10 rounded-md px-1.5 py-1 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors";
 
     return (
         <div className="p-6 md:p-12 max-w-6xl mx-auto bg-slate-950 min-h-screen pb-24">
@@ -844,47 +844,60 @@ const WorkoutPlanScreen = () => {
                                         ) : sets.map((set, setIdx) => {
                                             const isLast = setIdx === sets.length - 1;
                                             return (
-                                                <div key={setIdx} className="flex flex-wrap items-center gap-1.5">
-                                                    <span className="text-gray-500 text-xs w-4 shrink-0 text-center">{setIdx + 1}</span>
+                                                <div key={setIdx} style={{display:'grid', gridTemplateColumns:'16px 1fr 56px 40px 28px', gap:'6px', alignItems:'center'}}>
+                                                    {/* 세트번호 */}
+                                                    <span className="text-gray-500 text-xs text-center">{setIdx + 1}</span>
+
+                                                    {/* kg 영역 (1fr) */}
                                                     {cardio ? (
-                                                        <>
-                                                            <span className="text-[10px] text-gray-500 shrink-0">Lv</span>
-                                                            <input type="number" inputMode="decimal" value={set.level} onChange={e => updateSet(exIdx, setIdx, 'level', e.target.value)} className={`w-14 ${inputCls}`} placeholder="5" />
-                                                            <span className="text-gray-600 text-xs shrink-0">·</span>
-                                                            <input type="number" inputMode="numeric" value={set.minutes} onChange={e => updateSet(exIdx, setIdx, 'minutes', e.target.value)} className={`w-16 ${inputCls}`} placeholder="30" />
-                                                            <span className="text-[10px] text-gray-500 shrink-0">분</span>
-                                                        </>
+                                                        <div className="relative">
+                                                            <input type="number" inputMode="decimal" value={set.level} onChange={e => updateSet(exIdx, setIdx, 'level', e.target.value)} className={`${inputCls} pr-6`} placeholder="0" />
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none">Lv</span>
+                                                        </div>
+                                                    ) : set.isDropSet ? (
+                                                        <div className="grid grid-cols-3 gap-1">
+                                                            {[0, 1, 2].map(di => (
+                                                                <input key={di} type="number" inputMode="decimal" value={set.dropKgs[di]} onChange={e => { const d = [...set.dropKgs]; d[di] = e.target.value; updateSet(exIdx, setIdx, 'dropKgs', d); }} className={inputCls} placeholder="-" />
+                                                            ))}
+                                                        </div>
                                                     ) : (
-                                                        <>
-                                                            {set.isDropSet ? (
-                                                                <>
-                                                                    {[0, 1, 2].map(di => (
-                                                                        <React.Fragment key={di}>
-                                                                            <input type="number" inputMode="decimal" value={set.dropKgs[di]} onChange={e => { const d = [...set.dropKgs]; d[di] = e.target.value; updateSet(exIdx, setIdx, 'dropKgs', d); }} className={`w-12 ${inputCls}`} placeholder="kg" />
-                                                                            {di < 2 && <span className="text-gray-600 text-[10px] shrink-0">›</span>}
-                                                                        </React.Fragment>
-                                                                    ))}
-                                                                </>
-                                                            ) : (
-                                                                <input type="number" inputMode="decimal" value={set.kg} onChange={e => updateSet(exIdx, setIdx, 'kg', e.target.value)} className={`w-16 ${inputCls}`} placeholder="kg" />
-                                                            )}
-                                                            <span className="text-gray-600 text-xs shrink-0">×</span>
-                                                            <input type="number" inputMode="numeric" value={set.reps} onChange={e => updateSet(exIdx, setIdx, 'reps', e.target.value)} className={`w-14 ${inputCls}`} placeholder="회" />
-                                                            <label className="flex items-center gap-1 shrink-0">
-                                                                <input type="checkbox" checked={!!set.isDropSet} onChange={() => toggleDropSet(exIdx, setIdx)} className="w-3 h-3 accent-red-500" />
-                                                                <span className="text-[10px] text-gray-400">드롭</span>
-                                                            </label>
-                                                        </>
+                                                        <div className="relative">
+                                                            <input type="number" inputMode="decimal" value={set.kg} onChange={e => updateSet(exIdx, setIdx, 'kg', e.target.value)} className={`${inputCls} pr-6`} placeholder="0" />
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none">kg</span>
+                                                        </div>
                                                     )}
-                                                    <div className="ml-auto shrink-0">
-                                                        {isLast ? (
-                                                            <button onClick={() => addSet(exIdx)} className="w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-500 active:scale-90 text-white flex items-center justify-center text-base leading-none transition-all">+</button>
-                                                        ) : (
-                                                            <button onClick={() => removeSet(exIdx, setIdx)} className="w-7 h-7 rounded-full flex items-center justify-center text-gray-500 hover:text-red-400 transition-colors">
-                                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                            </button>
-                                                        )}
-                                                    </div>
+
+                                                    {/* reps 영역 (56px) */}
+                                                    {cardio ? (
+                                                        <div className="relative">
+                                                            <input type="number" inputMode="numeric" value={set.minutes} onChange={e => updateSet(exIdx, setIdx, 'minutes', e.target.value)} className={`${inputCls} pr-5`} placeholder="0" />
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none">분</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="relative">
+                                                            <input type="number" inputMode="numeric" value={set.reps} onChange={e => updateSet(exIdx, setIdx, 'reps', e.target.value)} className={`${inputCls} pr-7`} placeholder="0" />
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none">reps</span>
+                                                        </div>
+                                                    )}
+
+                                                    {/* 드롭 체크박스 (40px) */}
+                                                    {cardio ? (
+                                                        <div />
+                                                    ) : (
+                                                        <label className="flex items-center gap-0.5 justify-center cursor-pointer">
+                                                            <input type="checkbox" checked={!!set.isDropSet} onChange={() => toggleDropSet(exIdx, setIdx)} className="w-3 h-3 accent-red-500" />
+                                                            <span className="text-[10px] text-gray-400">드롭</span>
+                                                        </label>
+                                                    )}
+
+                                                    {/* + / × 버튼 (28px) */}
+                                                    {isLast ? (
+                                                        <button onClick={() => addSet(exIdx)} className="w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-500 active:scale-90 text-white flex items-center justify-center text-base leading-none transition-all">+</button>
+                                                    ) : (
+                                                        <button onClick={() => removeSet(exIdx, setIdx)} className="w-7 h-7 rounded-full flex items-center justify-center text-gray-500 hover:text-red-400 transition-colors">
+                                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        </button>
+                                                    )}
                                                 </div>
                                             );
                                         })}
