@@ -39,14 +39,9 @@ export const fetchLastExerciseRecord = async (userId, exerciseName) => {
  * @returns {Promise<boolean>} - Whether the save was successful.
  */
 export const saveWorkoutLogs = async (logsData) => {
-    try {
-        const { error } = await supabase
-            .from('workout_logs')
-            .insert(logsData);
-        if (error) throw error;
-        return true;
-    } catch (err) {
-        console.error("Error saving workout logs:", err);
-        return false;
-    }
+    const { error } = await supabase
+        .from('workout_logs')
+        .insert(logsData);
+    if (error) throw error;
+    return true;
 };
