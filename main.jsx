@@ -231,6 +231,7 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
  */
 const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '' });
 
     const handlePartClick = (p) => {
         setSelection({ ...selection, part: p, equipment: null, exercise: null, manualName: '' });
@@ -249,6 +250,14 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             manualName: ''
         });
         if (onExerciseSelect) onExerciseSelect(ex.name);
+    };
+
+    const handlePreviewOpen = (e, ex) => {
+        e.stopPropagation(); // 부모의 onClick(handleExerciseClick) 방지
+        const url = getExerciseGif(null, ex.id);
+        if (url) {
+            setModalState({ isOpen: true, gifUrl: url, name: ex.name });
+        }
     };
 
     const handleBack = () => {
@@ -381,12 +390,23 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                     onClick={() => handleExerciseClick(ex)}
                                     className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${selection.exercise?.id === ex.id ? 'bg-blue-600/20 border-blue-500' : 'bg-slate-800/30 border-white/5 hover:border-slate-600'}`}
                                 >
-                                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-900 shrink-0">
-                                        <GifRenderer exerciseId={ex.id} />
+                                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-900 shrink-0 border border-white/5 shadow-inner">
+                                        <GifRenderer 
+                                            exerciseId={ex.id} 
+                                            onClick={(e) => handlePreviewOpen(e, ex)}
+                                        />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className={`text-xs font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{translateToKorean(ex.name)}</p>
                                         <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{translateExerciseTerm(ex.equipment)}</span>
+                                    </div>
+                                    <div className="shrink-0">
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); handleExerciseClick(ex); }}
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${selection.exercise?.id === ex.id ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-500 hover:text-white'}`}
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                                        </button>
                                     </div>
                                 </div>
                             ))
@@ -394,6 +414,13 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                     </div>
                 </div>
             )}
+
+            <GifModal 
+                isOpen={modalState.isOpen} 
+                onClose={() => setModalState({ ...modalState, isOpen: false })} 
+                gifUrl={modalState.gifUrl} 
+                exerciseName={modalState.name} 
+            />
         </div>
     );
 };
