@@ -2,6 +2,16 @@ import React, { useState } from 'react';
 import EXERCISE_DATASET from '../data/exercises.json';
 import { translateToKorean } from '../api/exerciseApi';
 
+// UX를 해치는 비주류 변형 운동(장비 기준) 필터링 (Curation)
+const EXCLUDED_EQUIPMENT = [
+    'medicine ball', 'exercise ball', 'bosu ball', 'stability ball', 
+    'roller', 'band', 'resistance band', 'kettlebell', 'wheel roller'
+];
+
+const CURATED_EXERCISES = EXERCISE_DATASET.filter(ex => 
+    !EXCLUDED_EQUIPMENT.includes(ex.equipment.toLowerCase())
+);
+
 /**
  * [Utility: Perfect GIF Matching]
  */
@@ -10,13 +20,13 @@ export const getExerciseGif = (nameEn, exerciseId) => {
     
     // 1. ID 매칭
     if (exerciseId) {
-        const ex = EXERCISE_DATASET.find(e => e.id === exerciseId);
+        const ex = CURATED_EXERCISES.find(e => e.id === exerciseId);
         if (ex) return `/${ex.gif_url}`;
     }
     
     // 2. 이름 매칭
     if (nameEn) {
-        const ex = EXERCISE_DATASET.find(e => e.name.toLowerCase() === nameEn.toLowerCase());
+        const ex = CURATED_EXERCISES.find(e => e.name.toLowerCase() === nameEn.toLowerCase());
         if (ex) return `/${ex.gif_url}`;
     }
 

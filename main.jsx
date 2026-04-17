@@ -2,6 +2,17 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
 import EXERCISE_DATASET from './src/data/exercises.json';
+
+// UX를 해치는 비주류 변형 운동(장비 기준) 필터링 (Curation)
+const EXCLUDED_EQUIPMENT = [
+    'medicine ball', 'exercise ball', 'bosu ball', 'stability ball', 
+    'roller', 'band', 'resistance band', 'kettlebell', 'wheel roller'
+];
+
+const CURATED_EXERCISES = EXERCISE_DATASET.filter(ex => 
+    !EXCLUDED_EQUIPMENT.includes(ex.equipment.toLowerCase())
+);
+
 import ApiViewer from './src/components/ApiViewer';
 import { supabase } from './src/api/supabase';
 import OpenAI from 'openai';
@@ -26,13 +37,13 @@ export const getExerciseGif = (nameEn, exerciseId) => {
     
     // 1. ID가 있으면 최우선으로 매칭 (가장 정확)
     if (exerciseId) {
-        const ex = EXERCISE_DATASET.find(e => e.id === exerciseId);
+        const ex = CURATED_EXERCISES.find(e => e.id === exerciseId);
         if (ex) return `/${ex.gif_url}`;
     }
     
     // 2. 이름으로 정확히 일치하는 항목 찾기
     if (nameEn) {
-        const ex = EXERCISE_DATASET.find(e => e.name.toLowerCase() === nameEn.toLowerCase());
+        const ex = CURATED_EXERCISES.find(e => e.name.toLowerCase() === nameEn.toLowerCase());
         if (ex) return `/${ex.gif_url}`;
     }
 
@@ -229,7 +240,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
 
     const filteredExercises = useMemo(() => {
         if (!selection.part) return [];
-        let list = EXERCISE_DATASET.filter(ex => ex.body_part === selection.part);
+        let list = CURATED_EXERCISES.filter(ex => ex.body_part === selection.part);
         if (searchTerm.trim()) {
             list = list.filter(ex => {
                 const searchLower = searchTerm.toLowerCase();
@@ -625,7 +636,8 @@ const AIRecommendationScreen = () => {
         setInputText('');
         setIsTyping(true);
 
-        const EXERCISE_MENU = EXERCISE_DATASET.slice(0, 300).map(ex => ex.name).join(', ');
+        // 필터링된 알짜배기 리스트를 AI 코치에게 전달 (메뉴판 정제)
+        const EXERCISE_MENU = CURATED_EXERCISES.slice(0, 400).map(ex => ex.name).join(', ');
         const systemRole = `너는 전문 PT 코치야. 
         [중요 규칙]
         1. 반드시 아래 [공식 운동 리스트]에 존재하는 영어 이름(name)을 'nameEn' 키값으로 사용해야 한다. 다른 이름은 절대 안 된다.
@@ -649,7 +661,7 @@ const AIRecommendationScreen = () => {
     const handleAddRoutineBatch = (items) => {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE) || '[]');
         const newItems = items.map(item => {
-            const ex = EXERCISE_DATASET.find(e => e.name.toLowerCase() === item.nameEn.toLowerCase());
+            const ex = CURATED_EXERCISES.find(e => e.name.toLowerCase() === item.nameEn.toLowerCase());
             const PART_REVERSE = { '가슴': 'chest', '등': 'back', '어깨': 'shoulders', '하체': 'upper legs', '팔': 'upper arms', '코어': 'waist', '유산소': 'cardio' };
             return {
                 id: Date.now() + Math.random(),
