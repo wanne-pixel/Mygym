@@ -24,6 +24,7 @@ const STEPS = {
 const Onboarding = ({ onComplete }) => {
     const [step, setStep] = useState(STEPS.WELCOME);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [loadingTimeout, setLoadingTimeout] = useState(false);
     const [formData, setFormData] = useState({
         goal: '',
         experience_level: '',
@@ -35,6 +36,17 @@ const Onboarding = ({ onComplete }) => {
         gender: '',
         limitations: []
     });
+
+    useEffect(() => {
+        let timer;
+        if (isGenerating) {
+            timer = setTimeout(() => {
+                setLoadingTimeout(true);
+                console.log('[Onboarding] 30초 경과, 건너뛰기 옵션 활성화');
+            }, 30000);
+        }
+        return () => clearTimeout(timer);
+    }, [isGenerating]);
 
     const updateData = (fields) => setFormData(prev => ({ ...prev, ...fields }));
 
@@ -53,15 +65,17 @@ const Onboarding = ({ onComplete }) => {
     const generateInitialRoutine = async () => {
         setStep(STEPS.GENERATING);
         setIsGenerating(true);
+        console.log('[Onboarding] 시작, formData:', formData);
         
         try {
+            // 1단계: Supabase 프로필 저장
+            console.log('[Onboarding] Step 1: 프로필 저장 시작');
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('로그인이 필요합니다.');
 
-            // 1. Supabase 프로필 저장
             const { error: profileError } = await supabase
                 .from('user_profiles')
-                .insert([{
+                .upsert([{
                     user_id: user.id,
                     goal: formData.goal,
                     experience_level: formData.experience_level,
@@ -74,10 +88,17 @@ const Onboarding = ({ onComplete }) => {
                     limitations: formData.limitations
                 }]);
 
-            if (profileError) throw profileError;
+            if (profileError) {
+                console.error('[Onboarding] 프로필 저장 실패:', profileError);
+                throw profileError;
+            }
+            console.log('[Onboarding] Step 1 완료: 프로필 저장 성공');
 
-            // 2. AI 루틴 생성
-            const prompt = `당신은 경험 많은 퍼스널 트레이너입니다. 사용자의 프로필을 분석해 첫 운동 루틴을 추천하세요.
+            // 2단계: AI 루틴 생성 (Timeout 설정)
+            console.log('[Onboarding] Step 2: AI 루틴 생성 시작');
+            
+            const fetchAIResponse = async () => {
+                const prompt = `당신은 퍼스널 트레이너입니다. 다음 프로필을 분석해 첫 운동 루틴을 추천하세요.
 
 사용자 정보:
 - 목표: ${formData.goal}
@@ -99,21 +120,43 @@ const Onboarding = ({ onComplete }) => {
       "name": "운동 이름",
       "part": "부위(가슴|등|하체|어깨|팔|허리/코어|유산소)",
       "sets": [
-        {"kg": 20, "reps": 12, "isDropSet": false}
+        {"kg": 10, "reps": 12, "isDropSet": false}
       ]
     }
   ]
 }`;
 
-            const response = await openai.chat.completions.create({
-                model: 'gpt-4o-mini',
-                messages: [{ role: 'system', content: 'You are a professional fitness planner.' }, { role: 'user', content: prompt }],
-                response_format: { type: "json_object" }
-            });
+                const response = await openai.chat.completions.create({
+                    model: 'gpt-4o-mini',
+                    messages: [{ role: 'system', content: 'You are a professional fitness planner.' }, { role: 'user', content: prompt }],
+                    response_format: { type: "json_object" }
+                });
+                return JSON.parse(response.choices[0].message.content);
+            };
 
-            const content = JSON.parse(response.choices[0].message.content);
+            // AI 호출에 25초 타임아웃 적용 (AbortController 대신 Promise.race 사용)
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('AI 응답 지연 (Timeout)')), 25000)
+            );
+
+            let content;
+            try {
+                content = await Promise.race([fetchAIResponse(), timeoutPromise]);
+                console.log('[Onboarding] Step 2 완료: AI 루틴 생성 성공:', content);
+            } catch (aiError) {
+                console.error('[Onboarding] AI 루틴 생성 지연 또는 실패:', aiError);
+                content = {
+                    message: "AI 분석이 지연되어 기본 루틴을 제공합니다. 프로필은 저장되었으니 AI 코치 탭에서 맞춤 추천을 받아보세요!",
+                    routine: [
+                        { name: "스쿼트", part: "하체", sets: [{ kg: 10, reps: 12, isDropSet: false }] },
+                        { name: "푸시업", part: "가슴", sets: [{ kg: 0, reps: 10, isDropSet: false }] },
+                        { name: "플랭크", part: "허리/코어", sets: [{ kg: 0, reps: 30, isDropSet: false }] }
+                    ]
+                };
+            }
             
-            // 3. exercises.json 매칭 및 데이터 정제
+            // 3단계: localStorage 저장
+            console.log('[Onboarding] Step 3: localStorage 저장 시작');
             const today = new Date().toISOString().split('T')[0];
             const routineData = content.routine.map(item => {
                 const exMatch = EXERCISE_DATASET.find(e => e.name === item.name);
@@ -127,7 +170,6 @@ const Onboarding = ({ onComplete }) => {
                 };
             });
 
-            // 4. 로컬 스토리지 저장 (오늘의 루틴으로 즉시 반영)
             const storageKey = `mygym_routine_${today}`;
             localStorage.setItem(storageKey, JSON.stringify(routineData.map((d, idx) => ({
                 id: Date.now() + idx,
@@ -136,20 +178,22 @@ const Onboarding = ({ onComplete }) => {
                 sets: d.sets_data,
                 completed: false
             }))));
+            console.log('[Onboarding] Step 3 완료: localStorage 저장 성공');
 
-            alert(content.message || "나만의 맞춤 루틴이 생성되었습니다!");
+            if (content.message) alert(content.message);
             onComplete();
         } catch (error) {
-            console.error('Onboarding Error:', error);
-            alert('루틴 생성 중 오류가 발생했습니다. 기본 루틴으로 시작합니다.');
+            console.error('[Onboarding] 최종 에러 발생:', error);
+            alert(`온보딩 실패: ${error.message}\n기본 화면으로 이동합니다.`);
             onComplete();
+        } finally {
+            setIsGenerating(false);
         }
     };
 
     const renderStep = () => {
         const totalSteps = 7;
         const currentStepNum = step;
-        const progress = (currentStepNum / totalSteps) * 100;
 
         const CardOption = ({ label, subLabel, value, targetField, icon }) => (
             <button
@@ -282,10 +326,19 @@ const Onboarding = ({ onComplete }) => {
 
             case STEPS.GENERATING:
                 return (
-                    <div className="text-center py-12">
+                    <div className="text-center py-12 animate-fade-in">
                         <div className="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-8" />
                         <h2 className="text-2xl font-black text-white italic mb-4">당신만을 위한 첫 루틴 설계 중...</h2>
-                        <p className="text-slate-500 font-bold">AI 코치가 최적의 운동을 선별하고 있습니다.</p>
+                        <p className="text-slate-500 font-bold mb-8">AI 코치가 최적의 운동을 선별하고 있습니다.</p>
+                        
+                        {loadingTimeout && (
+                            <button 
+                                onClick={onComplete}
+                                className="px-6 py-3 bg-slate-800 text-slate-300 rounded-xl font-bold border border-white/5 hover:bg-slate-700 transition-all"
+                            >
+                                분석 생략하고 바로 시작하기
+                            </button>
+                        )}
                     </div>
                 );
 
