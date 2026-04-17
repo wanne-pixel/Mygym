@@ -895,7 +895,7 @@ const CalendarScreen = () => {
                         <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
                     </button>
                     <button 
-                        onClick={() => { if(window.confirm('로그아웃 하시겠습니까?')) { localStorage.clear(); window.location.reload(); } }}
+                        onClick={async () => { if(window.confirm('로그아웃 하시겠습니까?')) { await supabase.auth.signOut(); localStorage.clear(); } }}
                         className="p-2 bg-red-900/20 text-red-400 rounded-full hover:bg-red-900/40 transition-all active:scale-95"
                         title="로그아웃"
                     >
