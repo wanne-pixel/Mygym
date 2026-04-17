@@ -841,6 +841,7 @@ const WorkoutPlanScreen = () => {
                 user_id: user.id,
                 exercise: item.name || item.exercise,
                 part: item.body_part,
+                type: isCardio(item) ? 'cardio' : 'strength',
                 sets_data: item.sets,
                 created_at: savedAt,
             }));

@@ -134,7 +134,7 @@ const Onboarding = ({ onComplete }) => {
             {
                 "user_id": "${user.id}",
                 "part": "가슴" | "등" | "하체" | "어깨" | "팔" | "코어" | "유산소",
-                "type": "기구" | "프리웨이트" | "맨몸" | "유산소" | "스트레칭",
+                "type": "strength" | "cardio",
                 "exercise": "운동 이름 (반드시 한국어)",
                 "nameEn": "English Name of Exercise",
                 "sets_count": number,
