@@ -8,9 +8,17 @@ const EXCLUDED_EQUIPMENT = [
     'roller', 'band', 'resistance band', 'kettlebell', 'wheel roller'
 ];
 
-const CURATED_EXERCISES = EXERCISE_DATASET.filter(ex => 
-    !EXCLUDED_EQUIPMENT.includes(ex.equipment.toLowerCase())
-);
+const CURATED_EXERCISES = EXERCISE_DATASET
+    .filter(ex => 
+        ex.body_part !== 'neck' &&
+        !EXCLUDED_EQUIPMENT.includes(ex.equipment.toLowerCase())
+    )
+    .map(ex => {
+        let consolidatedPart = ex.body_part;
+        if (ex.body_part === 'upper legs' || ex.body_part === 'lower legs') consolidatedPart = 'legs';
+        if (ex.body_part === 'upper arms' || ex.body_part === 'lower arms') consolidatedPart = 'arms';
+        return { ...ex, body_part: consolidatedPart };
+    });
 
 /**
  * [Utility: Perfect GIF Matching]
