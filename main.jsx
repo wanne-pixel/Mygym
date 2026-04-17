@@ -985,7 +985,7 @@ const AppContent = () => {
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => { setSession(session); setIsLoading(false); });
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setSession(session); if (session) navigate('/app', { replace: true }); else navigate('/', { replace: true }); });
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => { setSession(session); if (event === 'SIGNED_IN') navigate('/app', { replace: true }); else if (event === 'SIGNED_OUT') navigate('/', { replace: true }); });
         return () => subscription.unsubscribe();
     }, [navigate]);
 
