@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom';
+import { Target, Flame } from 'lucide-react';
 import EXERCISE_DATASET from './src/data/exercises.json';
 
 const EQUIPMENT_MAP = {
@@ -1001,91 +1002,235 @@ const WorkoutPlanScreen = () => {
     );
 };
 
+import { Target, Flame, Plus } from 'lucide-react';
+
 const AIRecommendationScreen = () => {
-    const [recentLogs, setRecentLogs] = useState([]);
-    const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[{"id":1,"type":"ai","text":"안녕하세요! 공식 운동 메뉴얼을 기반으로 최적의 루틴을 제안해 드립니다. 어떤 운동을 하고 싶으신가요?"}]'));
+    const [profile, setProfile] = useState(null);
+    const [recentStats, setRecentStats] = useState({ totalWorkouts: 0, mostFrequentPart: null });
+    const [greeting, setGreeting] = useState('');
+    const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[]'));
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
 
-    useEffect(() => { localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages)); }, [messages]);
+    const getMostFrequent = (arr) => {
+        if (!arr || arr.length === 0) return null;
+        const counts = {};
+        arr.forEach(item => { if (item) counts[item] = (counts[item] || 0) + 1; });
+        const keys = Object.keys(counts);
+        if (keys.length === 0) return null;
+        return keys.reduce((a, b) => counts[a] > counts[b] ? a : b);
+    };
+
+    const generateGreeting = (profile, stats) => {
+        if (!profile) return "안녕하세요! MyGym AI 코치입니다. 프로필을 설정하시면 더 개인화된 코칭을 받으실 수 있어요. 오늘은 어떤 운동을 하실까요?";
+
+        const { experience_level, goal, weekly_frequency, limitations } = profile;
+        const { totalWorkouts, mostFrequentPart } = stats;
+
+        let greeting = "안녕하세요! ";
+
+        if (experience_level === 'beginner') greeting += "웨이트트레이닝 경험이 많이 없으셔서 걱정되시겠지만, 저만 믿고 따라와 주세요! ";
+        else if (experience_level === 'intermediate') greeting += "꾸준히 운동하고 계시는 걸 알고 있어요. 한 단계 더 성장할 준비가 되셨네요! ";
+        else greeting += "탄탄한 운동 경력을 가지고 계시네요. 더 강해질 준비 되셨죠? ";
+
+        if (goal === 'strength') greeting += "강력한 근력을 만들기 위해 ";
+        else if (goal === 'hypertrophy') greeting += "멋진 근육을 키우기 위해 ";
+        else if (goal === 'weight_loss') greeting += "건강한 체중 감량을 위해 ";
+        else greeting += "건강한 생활을 위해 ";
+
+        greeting += `주 ${weekly_frequency}회 함께 달려볼게요. `;
+
+        if (limitations && limitations.length > 0) {
+            greeting += `${limitations.join(', ')} 부위 부상을 고려해서 안전한 운동으로 구성할게요. `;
+        }
+
+        if (totalWorkouts > 0) {
+            greeting += `\n지난 7일간 ${totalWorkouts}회 운동하셨네요! `;
+            if (mostFrequentPart) greeting += `${mostFrequentPart} 위주로 하셨는데, 오늘은 어떤 부위를 공략해볼까요?`;
+        } else {
+            greeting += "\n오늘부터 다시 활기차게 시작해볼까요? 어떤 운동이 필요하신가요?";
+        }
+
+        return greeting;
+    };
 
     useEffect(() => {
-        const fetchRecent = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
-                setRecentLogs(data || []);
+        const loadInitialData = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+
+                // 1. 프로필 조회
+                const { data: profileData } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+                setProfile(profileData);
+
+                // 2. 최근 7일 운동 기록 조회
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                const { data: logs } = await supabase
+                    .from('workout_logs')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .gte('created_at', sevenDaysAgo.toISOString());
+
+                const stats = {
+                    totalWorkouts: new Set(logs?.map(l => l.created_at.split('T')[0])).size || 0,
+                    mostFrequentPart: getMostFrequent(logs?.map(l => l.part))
+                };
+                setRecentStats(stats);
+
+                // 3. 인사말 생성
+                const greetingText = generateGreeting(profileData, stats);
+                setGreeting(greetingText);
+
+                // 4. 채팅 내역이 비어있으면 인사말 추가
+                if (messages.length === 0) {
+                    setMessages([{ id: Date.now(), type: 'ai', text: greetingText }]);
+                }
+            } catch (e) {
+                console.error('Error loading AI Coach data:', e);
             }
         };
-        fetchRecent();
+        loadInitialData();
     }, []);
+
+    useEffect(() => { localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages)); }, [messages]);
 
     const handleSendMessage = async (text = inputText) => {
         if (!text.trim() || isTyping) return;
-        setMessages([...messages, { id: Date.now(), type: 'user', text }]);
+        
+        const userMsg = { id: Date.now(), type: 'user', text };
+        setMessages(prev => [...prev, userMsg]);
         setInputText('');
         setIsTyping(true);
 
-        // 큐레이션된 전체 리스트를 AI 코치에게 전달
         const EXERCISE_MENU = EXERCISE_DATASET.map(ex => `${ex.name} (${ex.nameEn})`).join(', ');
-        const systemRole = `너는 전문 PT 코치야. 
-        [중요 규칙]
-        1. 반드시 아래 [공식 운동 리스트]에 존재하는 영어 이름을 'nameEn' 키값으로 사용해야 한다.
-        2. [ROUTINE_DATA] JSON 형식으로 답변 끝에 포함하라.
-        3. 'name'에는 해당 운동의 한국어 이름을 넣어야 한다.
-        4. 루틴 항목: { "name": "바벨 벤치 프레스", "nameEn": "barbell bench press", "part": "가슴|등|하체|어깨|팔|허리/코어|유산소", "sets": 4, "reps": 12, "weight": 0 }
+        const systemRole = `너는 MyGym의 전문 PT 코치야. 
+        [사용자 프로필]
+        - 목표: ${profile?.goal || '건강 관리'}
+        - 경험: ${profile?.experience_level || '초보'}
+        - 주당 횟수: ${profile?.weekly_frequency || 3}회
+        - 기구: ${profile?.equipment_access || '헬스장'}
+        - 제한사항: ${profile?.limitations?.join(', ') || '없음'}
+        - 신체: ${profile?.height || '--'}cm, ${profile?.weight || '--'}kg
         
-        [공식 운동 리스트]
+        [최근 7일 기록]
+        - 운동 횟수: ${recentStats.totalWorkouts}회
+        - 집중 부위: ${recentStats.mostFrequentPart || '없음'}
+
+        [중요 규칙]
+        1. 사용자 프로필과 최근 기록을 분석해 개인화된 답변을 제공하라.
+        2. 루틴 추천 시 반드시 답변 끝에 [ROUTINE_DATA: JSON] 형식으로 포함하라.
+        3. 'nameEn'은 아래 [공식 리스트]의 이름을 정확히 사용하라.
+        4. 루틴 항목: { "name": "한국어명", "nameEn": "english name", "part": "부위", "sets": 4, "reps": 12, "weight": 0 }
+        
+        [공식 리스트]
         ${EXERCISE_MENU}`;
 
         try {
             const response = await openai.chat.completions.create({
                 model: 'gpt-4o-mini',
-                messages: [{ role: 'system', content: systemRole }, ...messages.slice(-5).map(m => ({ role: m.type === 'ai' ? 'assistant' : 'user', content: m.text })), { role: 'user', content: text }],
-                temperature: 0.5
+                messages: [
+                    { role: 'system', content: systemRole },
+                    ...messages.slice(-6).map(m => ({ role: m.type === 'ai' ? 'assistant' : 'user', content: m.text })),
+                    { role: 'user', content: text }
+                ],
+                temperature: 0.7
             });
-            setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', text: response.choices[0].message.content }]);
-        } catch (e) { console.error(e); } finally { setIsTyping(false); }
+            const aiText = response.choices[0].message.content;
+            setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', text: aiText }]);
+        } catch (e) {
+            console.error(e);
+            alert('AI 코치와 연결이 원활하지 않습니다.');
+        } finally {
+            setIsTyping(false);
+        }
+    };
+
+    const sendRecommendationRequest = async (mode) => {
+        if (!profile) {
+            alert("프로필 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.");
+            return;
+        }
+        let requestText = '';
+        if (mode === 'balanced') {
+            requestText = "나의 프로필과 최근 기록을 바탕으로 오늘 할 균형잡힌 운동 루틴을 추천해줘. 부족한 부위가 있으면 보완해주고 점진적 과부하 원칙을 적용해줘.";
+        } else if (mode === 'hard') {
+            requestText = "나의 프로필을 바탕으로 강도 높은 하드모드 루틴을 추천해줘. 평소보다 운동 개수를 늘리고 도전적인 무게를 제시해줘.";
+        }
+        handleSendMessage(requestText);
     };
 
     const handleAddRoutineBatch = (items) => {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE) || '[]');
+        const today = new Date().toISOString().split('T')[0];
+        const storageKey = `mygym_routine_${today}`;
+        const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        
         const newItems = items.map(item => {
             const ex = EXERCISE_DATASET.find(e => e.nameEn?.toLowerCase() === item.nameEn?.toLowerCase() || e.name === item.name);
             return {
                 id: Date.now() + Math.random(),
-                exercise: item.name, 
-                exercise_id: ex?.id,
                 name: item.name,
-                nameEn: item.nameEn,
+                exercise: item.name,
+                exercise_id: ex?.id,
                 body_part: item.part,
-                equipment: ex?.equipment || '기타',
-                suggestedSets: item.sets,
-                suggestedReps: item.reps,
-                suggestedWeight: item.weight,
-                isCompleted: false
+                sets: Array(item.sets || 4).fill(0).map(() => ({
+                    kg: item.weight || 0,
+                    reps: item.reps || 12,
+                    isDropSet: item.isDropSet || false
+                })),
+                completed: false
             };
         });
-        localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify([...saved, ...newItems]));
-        alert('루틴에 추가되었습니다!');
-        return true;
+
+        const filteredNewItems = newItems.filter(newItem => !saved.some(s => s.name === newItem.name));
+        if (filteredNewItems.length === 0 && newItems.length > 0) {
+            alert('이미 루틴에 모두 추가되어 있습니다.');
+            return;
+        }
+
+        localStorage.setItem(storageKey, JSON.stringify([...saved, ...filteredNewItems]));
+        alert(`${filteredNewItems.length}개의 운동이 오늘 루틴에 추가되었습니다!`);
     };
 
     return (
         <div className="flex flex-col h-screen bg-slate-950 max-w-2xl mx-auto border-x border-white/5 pb-20 relative">
             <div className="p-4 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 flex justify-between items-center">
-                <h2 className="text-sm font-black text-white italic uppercase tracking-tighter">AI PT COACH</h2>
-                <button onClick={() => { setMessages([{ id: 1, type: 'ai', text: "내역을 초기화했습니다." }]); localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY); }} className="text-[9px] font-bold text-slate-500 uppercase">초기화</button>
+                <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <h2 className="text-sm font-black text-white italic uppercase tracking-tighter">AI PT COACH</h2>
+                </div>
+                <button onClick={() => { if(confirm('대화 내역을 초기화할까요?')) { setMessages([{ id: Date.now(), type: 'ai', text: greeting }]); localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY); } }} className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300">초기화</button>
             </div>
+
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-32">
                 {messages.map(msg => <ChatMessage key={msg.id} msg={msg} onAddRoutineItem={handleAddRoutineBatch} />)}
-                {isTyping && <div className="text-slate-500 italic text-xs animate-pulse">코치가 생각 중...</div>}
+                {isTyping && <div className="text-slate-500 italic text-xs animate-pulse ml-2">코치가 당신의 데이터를 분석 중...</div>}
             </div>
-            <div className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent">
-                <div className="flex gap-2 mb-2"><button onClick={() => handleSendMessage("오늘 가슴 운동 루틴 추천해 줘")} className="text-[10px] bg-slate-900 border border-white/10 px-3 py-1.5 rounded-full text-slate-400">🔥 가슴 루틴</button><button onClick={() => handleSendMessage("유산소 포함 전신 루틴 알려줘")} className="text-[10px] bg-slate-900 border border-white/10 px-3 py-1.5 rounded-full text-slate-400">⚡ 전신 루틴</button></div>
+
+            <div className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent space-y-4">
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => sendRecommendationRequest('balanced')}
+                        className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-600/20"
+                    >
+                        <Target size={16} /> 오늘의 루틴 추천
+                    </button>
+                    <button
+                        onClick={() => sendRecommendationRequest('hard')}
+                        className="flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/20"
+                    >
+                        <Flame size={16} /> 하드모드
+                    </button>
+                </div>
+                
                 <div className="relative">
-                    <input type="text" value={inputText} onChange={e => setInputText(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSendMessage()} placeholder="질문하기..." className="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                    <button onClick={() => handleSendMessage()} className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 text-white rounded-xl font-bold">↑</button>
+                    <input type="text" value={inputText} onChange={e => setInputText(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSendMessage()} placeholder="코치에게 질문하기 (예: 어깨 넓어지는 루틴 짜줘)" className="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-600" />
+                    <button onClick={() => handleSendMessage()} className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 text-white rounded-xl font-bold active:scale-90 transition-transform">↑</button>
                 </div>
             </div>
         </div>
