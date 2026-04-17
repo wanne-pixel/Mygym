@@ -744,9 +744,11 @@ const WorkoutDetailScreen = () => {
 };
 
 const WorkoutPlanScreen = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [selection, setSelection] = useState({ part: '', exercise: null, manualName: '' });
     const [planList, setPlanList] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_ROUTINE) || '[]'));
     const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '' });
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => { localStorage.setItem(STORAGE_KEYS.TODAY_ROUTINE, JSON.stringify(planList)); }, [planList]);
 
@@ -798,6 +800,47 @@ const WorkoutPlanScreen = () => {
                     : { ...s, isDropSet: true, dropKgs: [s.kg, '', ''] };
             })};
         }));
+    };
+
+    const handleSaveWorkout = async () => {
+        if (!window.confirm('오늘 운동을 저장할까요?\n저장 후 오늘의 운동 리스트가 초기화됩니다.')) return;
+        setIsSaving(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('로그인이 필요합니다.');
+
+            const logsToSave = planList
+                .map(item => {
+                    const cardio = isCardio(item);
+                    const filteredSets = (item.sets || []).filter(s => {
+                        if (cardio) return s.level !== '' || s.minutes !== '';
+                        if (s.isDropSet) return s.dropKgs?.some(k => k !== '') || s.reps !== '';
+                        return s.kg !== '' || s.reps !== '';
+                    });
+                    return { ...item, sets: filteredSets };
+                })
+                .filter(item => item.sets.length > 0);
+
+            if (logsToSave.length === 0) { alert('저장할 유효한 세트가 없습니다.'); return; }
+
+            const payload = logsToSave.map(item => ({
+                user_id: user.id,
+                exercise: item.name || item.exercise,
+                part: item.body_part,
+                sets_data: item.sets,
+            }));
+
+            const success = await saveWorkoutLogs(payload);
+            if (!success) throw new Error('저장에 실패했습니다.');
+
+            setPlanList([]);
+            alert('저장 완료! 오늘도 수고하셨습니다.');
+            setSearchParams({ tab: '달력' });
+        } catch (e) {
+            alert('저장 실패: ' + e.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const openPreview = (id, name) => {
@@ -906,6 +949,23 @@ const WorkoutPlanScreen = () => {
                             );
                         })}
                     </div>
+                    {planList.length > 0 && (
+                        <button
+                            onClick={handleSaveWorkout}
+                            disabled={isSaving}
+                            className={`w-full mt-4 py-4 rounded-xl font-bold text-base transition-all active:scale-[0.98] flex items-center justify-center gap-2
+                                ${isSaving ? 'bg-blue-600 opacity-70 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20'}`}
+                        >
+                            {isSaving ? (
+                                <span>저장 중...</span>
+                            ) : (
+                                <>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    오늘 운동 완료
+                                </>
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
             <GifModal isOpen={modalState.isOpen} onClose={() => setModalState({ ...modalState, isOpen: false })} gifUrl={modalState.gifUrl} exerciseName={modalState.name} />
