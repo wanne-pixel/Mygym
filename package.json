@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "release": "npm run build && git add . && git commit -m \"Auto update and deploy\" && git push origin main && firebase deploy"
   },
   "repository": {
     "type": "git",

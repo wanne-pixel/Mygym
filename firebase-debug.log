@@ -1,0 +1,52 @@
+[debug] [2026-04-18T09:04:07.822Z] ----------------------------------------------------------------------
+[debug] [2026-04-18T09:04:07.824Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js init hosting:github
+[debug] [2026-04-18T09:04:07.825Z] CLI Version:   15.1.0
+[debug] [2026-04-18T09:04:07.825Z] Platform:      linux
+[debug] [2026-04-18T09:04:07.825Z] Node Version:  v20.19.1
+[debug] [2026-04-18T09:04:07.825Z] Time:          Sat Apr 18 2026 09:04:07 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-04-18T09:04:07.825Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-18T09:04:09.123Z] Checked if tokens are valid: true, expires at: 1776506120570
+[debug] [2026-04-18T09:04:09.123Z] Checked if tokens are valid: true, expires at: 1776506120570
+[debug] [2026-04-18T09:04:09.127Z] >>> [apiv2][query] GET https://monospace-pa.googleapis.com/v1/workspaces/mygym-39189259 [none]
+[debug] [2026-04-18T09:04:10.257Z] <<< [apiv2][status] GET https://monospace-pa.googleapis.com/v1/workspaces/mygym-39189259 200
+[debug] [2026-04-18T09:04:10.257Z] <<< [apiv2][body] GET https://monospace-pa.googleapis.com/v1/workspaces/mygym-39189259 {"workspaceId":"mygym-39189259","name":"MyGym","workspaceRedirectUrl":"firebase-mygym-1774961143515.cluster-nle52mxuvfhlkrzyrq6g2cwb52.cloudworkstations.dev","status":"WORKSPACE_STATUS_RUNNING","lastAccessDatetime":"2026-04-18T08:54:43.280414Z","workspaceTemplate":"WORKSPACE_TEMPLATE_BLANK_WEB","owner":"SELF","serviceAccountEmail":"msp-3746063561160077039@monospace-per-ws-sa-1.iam.gserviceaccount.com","enableNix":true,"ownerEmail":"wanne.info@gmail.com","workspaceImageUrl":"https://www.gstatic.com/monospace/231115/logo_html.svg","templateArgs":"{\"__agentic_workspace\":true}","templateRepoUrl":"file:///usr/local/monospace/templates/public/blank-web","workstationAccessToken":"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2Nsb3VkLmdvb2dsZS5jb20vd29ya3N0YXRpb25zIiwiYXVkIjoiZmlyZWJhc2UtbXlneW0tMTc3NDk2MTE0MzUxNS5jbHVzdGVyLW5sZTUybXh1dmZobGtyenlycTZnMmN3YjUyLmNsb3Vkd29ya3N0YXRpb25zLmRldiIsImlhdCI6MTc3NjUwMzA1MCwiZXhwIjoxNzc2NTg5NDQ5fQ.gM-m88bXFsRIf12jsFNQ8DHogbBP5tF53kSd8PvWdxD013ot1CI3e6CBf_MHPRRUh5RMZk4bCL49qA67nfX7o31FvdAKtH6w4MNnzLNEzy23LtG9AKXjK7k8o1pp-YaL-effm9-GuH_-GPAZgy_Q_ttROni8Lpnl_HomPsgdQUNqDA7HbSbixEoHruabCbEbHJi3giJ29EEpKujKutshvu_Jlqjxux25Qbf67v1tbWhEWPP7q8O5rsg6Qn2Pw7yb0VFnSTlpoqevB96Iv9atnPD_gJbBrx4_Me4jSrMll3AthBkIlT0nNj9NwP7axhgdpupxjS7UVQbogPHzPpYTTw","firebaseProjectId":"mygym-365"}
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /home/user/mygym
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[debug] [2026-04-18T09:04:10.262Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-04-18T09:04:10.263Z] > authorizing via signed-in user (wanne.info@gmail.com)
+[debug] [2026-04-18T09:04:10.263Z] Checked if tokens are valid: true, expires at: 1776506120570
+[debug] [2026-04-18T09:04:10.263Z] Checked if tokens are valid: true, expires at: 1776506120570
+[debug] [2026-04-18T09:04:10.263Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/mygym-365 [none]
+[debug] [2026-04-18T09:04:10.558Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/mygym-365 200
+[debug] [2026-04-18T09:04:10.558Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/mygym-365 {"projectId":"mygym-365","projectNumber":"440832988275","displayName":"mygym-365","name":"projects/mygym-365","resources":{"hostingSite":"mygym-365"},"state":"ACTIVE","etag":"1_2768016d-5870-42c9-8085-28dcd54d5eaa"}
+[info] i  Using project mygym-365 (mygym-365) . 
+[info] 
+=== Hosting:github Setup
+[info] 
+[info] i  Detected a .git folder at /home/user/mygym 
+[info] i  Authorizing with GitHub to upload your service account to a GitHub repository's secrets store. 
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://github.com/login/oauth/authorize?client_id=89cf50f02ac6aaed3484&state=403093882&redirect_uri=http%3A%2F%2Flocalhost%3A9005&scope=read%3Auser%20repo%20public_repo
+[info] 
+[info] Waiting for authentication...
