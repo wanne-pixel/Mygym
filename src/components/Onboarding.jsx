@@ -112,7 +112,7 @@ const Onboarding = ({ onComplete }) => {
 1. 초보자는 전신 운동 3-4개, 기본 동작 위주.
 2. 제한사항이 있다면 해당 관절에 무리가 가지 않는 대체 운동을 선택하세요.
 3. 운동 이름은 반드시 한국어로 작성하세요.
-4. 반드시 아래 JSON 형식으로만 답변하세요. 다른 설명은 생략합니다.
+4. 반드시 아래 JSON 형식으로만 답변하세요. 어떠한 인사말이나 마크다운(\`\`\`) 기호 없이 순수한 JSON 객체 형식으로만 대답하세요.
 
 {
   "message": "환영 메시지 (2-3문장)",
@@ -129,10 +129,14 @@ const Onboarding = ({ onComplete }) => {
 
                 const response = await openai.chat.completions.create({
                     model: 'gpt-4o-mini',
-                    messages: [{ role: 'system', content: 'You are a professional fitness planner.' }, { role: 'user', content: prompt }],
+                    messages: [{ role: 'system', content: 'You are a professional fitness planner. Respond ONLY with a valid JSON object.' }, { role: 'user', content: prompt }],
                     response_format: { type: "json_object" }
                 });
-                return JSON.parse(response.choices[0].message.content);
+                
+                let content = response.choices[0].message.content;
+                // Robust parsing even with response_format: json_object
+                content = content.replace(/```json/gi, '').replace(/```/gi, '').trim();
+                return JSON.parse(content);
             };
 
             // AI 호출에 25초 타임아웃 적용 (AbortController 대신 Promise.race 사용)

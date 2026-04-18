@@ -22,10 +22,18 @@ const AiRecommendationScreen = () => {
 
     const parseRoutineFromResponse = (content) => {
         try {
-            const jsonMatch = content.match(/```json[\s\S]*?```/);
-            if (!jsonMatch) return null;
-            const jsonStr = jsonMatch[0].replace(/```json|```/g, '').trim();
-            const data = JSON.parse(jsonStr);
+            // Remove markdown code blocks and any leading/trailing whitespace
+            let cleanedContent = content.replace(/```json/gi, '').replace(/```/gi, '').trim();
+            
+            // If the content still has text before the first '{', strip it
+            const firstBrace = cleanedContent.indexOf('{');
+            const lastBrace = cleanedContent.lastIndexOf('}');
+            
+            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                cleanedContent = cleanedContent.substring(firstBrace, lastBrace + 1);
+            }
+
+            const data = JSON.parse(cleanedContent);
             return data.routine || null;
         } catch (e) {
             console.error('Failed to parse JSON routine from AI response', e);
