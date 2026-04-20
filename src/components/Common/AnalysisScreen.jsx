@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Award, Zap, Trophy, ChevronDown, ChevronUp,
-  Loader2, Brain, Lightbulb,
-  BarChart3, PieChart as PieChartIcon
+  Loader2, Brain, Lightbulb, Sparkles,
+  BarChart3, PieChart as PieChartIcon,
+  TrendingUp, Target, Calendar
 } from 'lucide-react';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer
@@ -512,6 +513,8 @@ const AnalysisScreen = () => {
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState('전체');
   const [sortBy, setSortBy] = useState('latest');
   const [showAllPRs, setShowAllPRs] = useState(false);
+  const [aiTrainingAnalysis, setAiTrainingAnalysis] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     console.log('=== AnalysisScreen Debug ===')
@@ -549,6 +552,57 @@ const AnalysisScreen = () => {
     };
     init();
   }, []);
+
+  // ── AI 종합 분석 ─────────────────────────────────────────────────────────
+  const requestAIAnalysis = async () => {
+    setIsAnalyzing(true);
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const recentLogs = logs.filter(log =>
+        new Date(log.created_at) >= thirtyDaysAgo
+      );
+
+      const muscleStats = {};
+      recentLogs.forEach(log => {
+        const muscle = normalizePart(log.part);
+        if (muscle === '기타') return;
+        if (!muscleStats[muscle]) muscleStats[muscle] = { count: 0, volume: 0 };
+        muscleStats[muscle].count += 1;
+        muscleStats[muscle].volume += calcLogVolume(log.sets_data);
+      });
+
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      const dayStats = {};
+      recentLogs.forEach(log => {
+        const dayName = dayNames[new Date(log.created_at).getDay()];
+        dayStats[dayName] = (dayStats[dayName] || 0) + 1;
+      });
+
+      const weeklyFrequency = Math.round(recentLogs.length / 4.3);
+
+      const { data, error } = await supabase.functions.invoke('ai-coach', {
+        body: {
+          type: 'training_analysis',
+          total_workouts: recentLogs.length,
+          muscle_stats: muscleStats,
+          day_stats: dayStats,
+          weekly_frequency: weeklyFrequency,
+          period_days: 30,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (error) throw error;
+      const parsed = JSON.parse(data.content);
+      setAiTrainingAnalysis(parsed);
+    } catch (err) {
+      console.error('AI 분석 실패:', err);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   // ── 데이터 가공 ──────────────────────────────────────────────────────────
   const prList = useMemo(() => {
@@ -675,6 +729,93 @@ const AnalysisScreen = () => {
           {/* ── 전체 탭: 부위별 볼륨 도넛 차트 ── */}
           {selectedMuscleGroup === '전체' && (
             <VolumeDistributionSection logs={logs} />
+          )}
+
+          {/* ── 전체 탭: AI 종합 훈련 분석 ── */}
+          {selectedMuscleGroup === '전체' && (
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <Brain size={16} className="text-purple-400" />
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">AI 훈련 분석</h3>
+                {!aiTrainingAnalysis && (
+                  <button
+                    onClick={requestAIAnalysis}
+                    disabled={isAnalyzing || !token}
+                    className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black text-white disabled:opacity-40 transition-all active:scale-95"
+                    style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}
+                  >
+                    {isAnalyzing ? (
+                      <><Loader2 size={13} className="animate-spin" />분석 중...</>
+                    ) : (
+                      <><Sparkles size={13} />분석 요청</>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {!aiTrainingAnalysis && !isAnalyzing && (
+                <div className="flex flex-col items-center justify-center py-12 gap-3 text-center bg-slate-900 border border-slate-800 rounded-2xl">
+                  <Brain size={36} className="text-slate-700" />
+                  <p className="text-white font-black text-sm">AI가 최근 30일 훈련 패턴을 분석해드립니다</p>
+                  <p className="text-slate-500 text-xs font-bold">운동 빈도, 부위 균형, 개선점 등을 확인하세요</p>
+                </div>
+              )}
+
+              {isAnalyzing && (
+                <div className="flex items-center justify-center gap-3 py-8 bg-slate-900 border border-slate-800 rounded-2xl">
+                  <Loader2 size={18} className="animate-spin text-purple-400" />
+                  <span className="text-slate-400 text-xs font-bold">AI가 훈련 데이터를 분석 중...</span>
+                </div>
+              )}
+
+              {aiTrainingAnalysis && (
+                <div className="space-y-4">
+                  {/* 요약 카드 */}
+                  <div className="rounded-2xl p-5 border border-blue-500/30" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08))' }}>
+                    <div className="text-white font-black text-base mb-2">{aiTrainingAnalysis.title}</div>
+                    <p className="text-slate-300 text-xs leading-relaxed">{aiTrainingAnalysis.summary}</p>
+                  </div>
+
+                  {/* 인사이트 3칸 */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { icon: <TrendingUp size={15} className="text-blue-400" />, label: '훈련 강도', value: aiTrainingAnalysis.intensity },
+                      { icon: <Target size={15} className="text-green-400" />, label: '부위 균형', value: aiTrainingAnalysis.balance },
+                      { icon: <Calendar size={15} className="text-yellow-400" />, label: '일관성', value: aiTrainingAnalysis.consistency },
+                    ].map(({ icon, label, value }) => (
+                      <div key={label} className="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2">
+                        {icon}
+                        <span className="text-slate-500 text-[10px] font-bold">{label}</span>
+                        <span className="text-white font-black text-xs leading-tight">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 개선 제안 */}
+                  {aiTrainingAnalysis.recommendations?.length > 0 && (
+                    <div className="bg-emerald-500/10 border-l-4 border-emerald-500 rounded-r-2xl p-4 space-y-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Lightbulb size={13} className="text-yellow-400" />
+                        <span className="text-xs font-black text-emerald-400">개선 제안</span>
+                      </div>
+                      {aiTrainingAnalysis.recommendations.map((rec, idx) => (
+                        <div key={idx} className="flex items-start gap-2 text-xs text-slate-300 leading-relaxed">
+                          <span className="text-emerald-400 font-black flex-shrink-0">✓</span>
+                          <span>{rec}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={requestAIAnalysis}
+                    className="text-[10px] font-bold text-slate-500 hover:text-slate-300 transition-colors"
+                  >
+                    다시 분석
+                  </button>
+                </div>
+              )}
+            </section>
           )}
 
           {/* ── 특정 부위 탭 ── */}

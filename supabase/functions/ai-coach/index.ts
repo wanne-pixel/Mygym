@@ -239,6 +239,59 @@ ${breakdownText}
         { role: 'user', content: '위 훈련 데이터를 분석하고 맞춤 피드백을 제공해주세요.' },
       ]
 
+    // ── training_analysis: 30일 종합 훈련 분석 ───────────────────────
+    } else if (type === "training_analysis") {
+      const { total_workouts, muscle_stats, day_stats, weekly_frequency, period_days } = body as {
+        total_workouts: number
+        muscle_stats: Record<string, { count: number; volume: number }>
+        day_stats: Record<string, number>
+        weekly_frequency: number
+        period_days: number
+      }
+
+      const muscleLines = Object.entries(muscle_stats)
+        .map(([muscle, stats]) => `  - ${muscle}: ${stats.count}회, ${Math.round(stats.volume / 1000)}톤`)
+        .join('\n')
+
+      const dayLines = Object.entries(day_stats)
+        .map(([day, count]) => `  - ${day}요일: ${count}회`)
+        .join('\n')
+
+      const systemPrompt = `당신은 운동 데이터 분석 전문가입니다.
+
+**중요: 모든 응답은 반드시 한글로 작성하세요.**
+
+사용자의 최근 ${period_days}일 운동 데이터:
+- 총 운동 횟수: ${total_workouts}회
+- 주당 평균: ${weekly_frequency}회
+- 부위별 운동:
+${muscleLines}
+- 요일별 운동:
+${dayLines}
+
+**응답 규칙:**
+1. 모든 내용을 한글로 작성하세요
+2. 영어 용어 금지 (volume → 볼륨, intensity → 강도)
+
+다음 형식으로 JSON만 반환하세요:
+{
+  "title": "전체 평가 한 줄 (예: '균형잡힌 고강도 훈련', '일관성 있는 중급 루틴')",
+  "summary": "2-3문장으로 전반적인 평가 (한글)",
+  "intensity": "훈련 강도 평가 (예: '높음', '적정', '보통')",
+  "balance": "부위 균형 평가 (예: '균형잡힘', '하체 부족', '상체 집중')",
+  "consistency": "일관성 평가 (예: '매우 규칙적', '주 3-4회 안정적', '불규칙')",
+  "recommendations": [
+    "구체적인 개선 제안 1 (한글)",
+    "구체적인 개선 제안 2 (한글)",
+    "구체적인 개선 제안 3 (한글)"
+  ]
+}`
+
+      messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: '위 데이터를 종합 분석해주세요.' },
+      ]
+
     // ── chat: 기존 일반 채팅 ───────────────────────────────────────────
     } else if (type === "chat") {
       const { chatHistory, userPrompt } = body
