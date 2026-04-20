@@ -7,9 +7,48 @@ const MAX_CHAT_HISTORY = 100;
 const SESSION_CHAT_KEY = 'mygym_session_chat';
 
 const callAiCoachFunction = async (payload) => {
-    const { data, error } = await supabase.functions.invoke('ai-coach', { body: payload });
-    if (error) throw error;
-    if (data.error) throw new Error(data.error);
+    console.log('[FRONTEND] Starting AI Coach request')
+    console.log('[FRONTEND] Payload type:', payload?.type)
+
+    // 1. 현재 세션 강제 확인
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+    console.log('[FRONTEND] Session found:', session ? 'YES' : 'NO')
+    console.log('[FRONTEND] Session error:', sessionError)
+
+    if (sessionError || !session) {
+        console.error('[FRONTEND] Session validation failed:', sessionError);
+        throw new Error('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
+    }
+
+    const token = session.access_token;
+    console.log('[FRONTEND] Token extracted:', token ? 'YES' : 'NO')
+    console.log('[FRONTEND] Token length:', token?.length)
+    console.log('[FRONTEND] Token prefix:', token?.substring(0, 20))
+
+    // 2. invoke 호출 시 headers에 토큰 명시적으로 포함
+    console.log('[FRONTEND] Calling supabase.functions.invoke...')
+    const { data, error } = await supabase.functions.invoke('ai-coach', {
+        body: payload,
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    console.log('[FRONTEND] Invoke completed')
+    console.log('[FRONTEND] Data:', data)
+    console.log('[FRONTEND] Error:', error)
+
+    if (error) {
+        console.error('[FRONTEND] Edge Function Invoke Error:', error);
+        throw error;
+    }
+
+    if (data?.error) {
+        console.error('[FRONTEND] Edge Function Business Error:', data.error);
+        throw new Error(data.error);
+    }
+
     return data.content;
 };
 
@@ -185,6 +224,30 @@ ${recordsText}
         await callOpenAI(aiPrompt, updatedHistory);
     };
 
+    const callRecommendation = async (mode, hardModeType = null) => {
+        setIsTyping(true);
+        const displayText = mode === 'hard'
+            ? `🔥 하드모드 루틴 추천 (${hardModeType?.replace(/_/g, ' ')})`
+            : '🎯 오늘의 루틴 추천';
+        const userMsg = { id: Date.now(), type: 'user', text: displayText };
+        setMessages(prev => [...prev, userMsg]);
+        try {
+            const aiText = await callAiCoachFunction({
+                type: 'recommendation',
+                exercises: EXERCISE_DATASET,
+                profile,
+                mode,
+                hardModeType,
+            });
+            setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', text: aiText }]);
+        } catch (e) {
+            console.error('[callRecommendation]', e);
+            alert('AI 코치와 연결이 원활하지 않습니다.');
+        } finally {
+            setIsTyping(false);
+        }
+    };
+
     const handleManualReset = () => {
         if (!confirm('채팅 기록을 모두 삭제하고 새로 시작할까요?')) return;
         const greetingText = generateGreeting(profile, recentStats);
@@ -196,7 +259,9 @@ ${recordsText}
     const addExerciseToRoutine = (exercise, isHardMode = false) => {
         const today = new Date().toISOString().split('T')[0];
         const storageKey = `mygym_routine_${today}`;
-        let fullExercise = EXERCISE_DATASET?.find(e => e.name === exercise.name);
+        let fullExercise = exercise.exercise_id
+            ? EXERCISE_DATASET?.find(e => e.id === exercise.exercise_id)
+            : EXERCISE_DATASET?.find(e => e.name === exercise.name);
         
         const cleanedSets = isHardMode 
             ? exercise.sets?.map(set => ({ kg: set.kg, reps: set.reps, isDropSet: set.isDropSet || false, dropKgs: set.dropKgs || ['', '', ''] }))
@@ -208,5 +273,5 @@ ${recordsText}
         localStorage.setItem(storageKey, JSON.stringify([...existingRoutine, exerciseToAdd]));
     };
 
-    return { profile, recentStats, messages, setMessages, isTyping, handleSendMessage, handleManualReset, addExerciseToRoutine, callOpenAI };
+    return { profile, recentStats, messages, setMessages, isTyping, handleSendMessage, handleManualReset, addExerciseToRoutine, callOpenAI, callRecommendation };
 };

@@ -132,7 +132,7 @@
     "bodyPart": "가슴",
     "equipment": "leverage machine",
     "nameEn": "assisted chest dip",
-    "name": "kneeling",
+    "name": "어시스트 딥스",
     "gif_url": "videos/0009-PAgTVaK.gif"
   },
   {
@@ -228,7 +228,7 @@
     "bodyPart": "등",
     "equipment": "body weight",
     "nameEn": "pull up",
-    "name": "neutral grip",
+    "name": "뉴트럴 그립 풀업",
     "gif_url": "videos/0651-0V2YQjW.gif"
   },
   {
@@ -316,7 +316,7 @@
     "bodyPart": "등",
     "equipment": "cable",
     "nameEn": "cable seated high row",
-    "name": "v-bar",
+    "name": "케이블 V바 하이 로우",
     "gif_url": "videos/0213-pwt0pnM.gif"
   },
   {
@@ -468,7 +468,7 @@
     "bodyPart": "어깨",
     "equipment": "cable",
     "nameEn": "cable rear delt row",
-    "name": "with rope",
+    "name": "케이블 리어 델트 로우",
     "gif_url": "videos/0203-wqNPGCg.gif"
   },
   {
@@ -716,7 +716,7 @@
     "bodyPart": "하체",
     "equipment": "body weight",
     "nameEn": "forward lunge",
-    "name": "male",
+    "name": "포워드 런지",
     "gif_url": "videos/3470-kMzUs9Y.gif"
   },
   {
@@ -756,7 +756,7 @@
     "bodyPart": "하체",
     "equipment": "body weight",
     "nameEn": "glute bridge two legs on bench",
-    "name": "male",
+    "name": "글루트 브리지 (벤치)",
     "gif_url": "videos/3523-aWedzZX.gif"
   },
   {
@@ -764,7 +764,7 @@
     "bodyPart": "하체",
     "equipment": "cable",
     "nameEn": "cable pull through",
-    "name": "with rope",
+    "name": "케이블 풀 스루",
     "gif_url": "videos/0196-OM46QHm.gif"
   },
   {
@@ -1084,7 +1084,7 @@
     "bodyPart": "팔",
     "equipment": "body weight",
     "nameEn": "bench dip",
-    "name": "knees bent",
+    "name": "벤치 딥스",
     "gif_url": "videos/0129-RrLske5.gif"
   },
   {
@@ -1124,7 +1124,7 @@
     "bodyPart": "팔",
     "equipment": "cable",
     "nameEn": "cable hammer curl",
-    "name": "with rope",
+    "name": "케이블 해머 컬",
     "gif_url": "videos/0165-HPlPoQA.gif"
   },
   {
@@ -1156,7 +1156,7 @@
     "bodyPart": "팔",
     "equipment": "cable",
     "nameEn": "cable pushdown",
-    "name": "with rope attachment",
+    "name": "케이블 로프 푸시다운",
     "gif_url": "videos/0200-dU605di.gif"
   },
   {
@@ -1164,7 +1164,7 @@
     "bodyPart": "팔",
     "equipment": "cable",
     "nameEn": "cable triceps pushdown",
-    "name": "v-bar",
+    "name": "케이블 V바 트라이셉스 푸시다운",
     "gif_url": "videos/0241-gAwDzB3.gif"
   },
   {
@@ -1172,7 +1172,7 @@
     "bodyPart": "팔",
     "equipment": "cable",
     "nameEn": "cable overhead triceps extension",
-    "name": "rope attachment",
+    "name": "케이블 오버헤드 트라이셉스 익스텐션",
     "gif_url": "videos/0194-2IxROQ1.gif"
   },
   {
@@ -1252,7 +1252,7 @@
     "bodyPart": "팔",
     "equipment": "dumbbell",
     "nameEn": "dumbbell one arm triceps extension",
-    "name": "on bench",
+    "name": "덤벨 원암 트라이셉스 익스텐션",
     "gif_url": "videos/0362-nAuHPcD.gif"
   },
   {
