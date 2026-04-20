@@ -277,15 +277,13 @@ const DonutLegend = ({ items, colorMap }) => (
 
 const VolumeDistributionSection = ({ logs }) => {
   const data = useMemo(() => {
-    console.log('Calculating muscleGroupVolumes...')
     const volMap = {};
     logs.forEach(log => {
-      console.log('Processing log:', log)
       const group = normalizePart(log.part);
       if (group === '기타') return;
       volMap[group] = (volMap[group] || 0) + calcLogVolume(log.sets_data);
     });
-    console.log('Final volumes:', volMap)
+
     const total = Object.values(volMap).reduce((s, v) => s + v, 0);
     if (total === 0) return [];
     return MUSCLE_TABS
@@ -516,12 +514,6 @@ const AnalysisScreen = () => {
   const [aiTrainingAnalysis, setAiTrainingAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  useEffect(() => {
-    console.log('=== AnalysisScreen Debug ===')
-    console.log('logs:', logs)
-    console.log('logs length:', logs?.length)
-    console.log('selectedMuscleGroup:', selectedMuscleGroup)
-  }, [logs, selectedMuscleGroup]);
 
   useEffect(() => {
     setShowAllPRs(false);
