@@ -27,7 +27,7 @@
   },
   {
     "id": "0003",
-    "name": "바벨 디클라인 PULLOVER",
+    "name": "바벨 디클라인 풀오버",
     "bodyPart": "가슴",
     "equipment": "바벨",
     "target": "가슴",
@@ -53,7 +53,7 @@
   },
   {
     "id": "0005",
-    "name": "바벨 프론트 레이즈 PULLOVER",
+    "name": "바벨 프론트 레이즈 풀오버",
     "bodyPart": "가슴",
     "equipment": "바벨",
     "target": "가슴",
@@ -66,7 +66,7 @@
   },
   {
     "id": "0006",
-    "name": "바벨 GUILLOTINE 벤치 프레스",
+    "name": "바벨 기요틴 벤치 프레스",
     "bodyPart": "가슴",
     "equipment": "바벨",
     "target": "가슴",
@@ -157,7 +157,7 @@
   },
   {
     "id": "0013",
-    "name": "FLOOR 플라이 바벨",
+    "name": "플로어 플라이 바벨",
     "bodyPart": "가슴",
     "equipment": "바벨",
     "target": "가슴",
@@ -170,7 +170,7 @@
   },
   {
     "id": "0014",
-    "name": "ARCHER 푸시 업",
+    "name": "아처 푸시 업",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -235,7 +235,7 @@
   },
   {
     "id": "0019",
-    "name": "CLAP 푸시 업",
+    "name": "클랩 푸시 업",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -248,7 +248,7 @@
   },
   {
     "id": "0020",
-    "name": "CLOCK 푸시 업",
+    "name": "클락 푸시 업",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -274,7 +274,7 @@
   },
   {
     "id": "0022",
-    "name": "DROP 푸시 업",
+    "name": "드롭 푸시 업",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -287,7 +287,7 @@
   },
   {
     "id": "0023",
-    "name": "FULL PLANCHE 푸시 업",
+    "name": "풀 PLANCHE 푸시 업",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -300,7 +300,7 @@
   },
   {
     "id": "0024",
-    "name": "인클라인 푸시 업 DEPTH 점프",
+    "name": "인클라인 푸시 업 뎁스 점프",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -339,7 +339,7 @@
   },
   {
     "id": "0027",
-    "name": "인클라인 SCAPULA 푸시 업",
+    "name": "인클라인 견갑골 푸시 업",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -352,7 +352,7 @@
   },
   {
     "id": "0028",
-    "name": "ISOMETRIC 가슴 SQUEEZE",
+    "name": "아이소메트릭 가슴 스퀴즈",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -365,7 +365,7 @@
   },
   {
     "id": "0029",
-    "name": "ISOMETRIC WIPERS",
+    "name": "아이소메트릭 와이퍼",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -378,7 +378,7 @@
   },
   {
     "id": "0030",
-    "name": "KOREAN DIPS",
+    "name": "KOREAN 딥스",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -391,7 +391,7 @@
   },
   {
     "id": "0031",
-    "name": "PLYO 푸시 업",
+    "name": "플라이오 푸시 업",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -443,7 +443,7 @@
   },
   {
     "id": "0035",
-    "name": "케이블 크로스 OVER 바리에이션",
+    "name": "케이블 크로스 오버 바리에이션",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -469,7 +469,7 @@
   },
   {
     "id": "0037",
-    "name": "케이블 디클라인 원 팔 프레스",
+    "name": "케이블 디클라인 원 암 프레스",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "하부 가슴",
@@ -521,7 +521,7 @@
   },
   {
     "id": "0041",
-    "name": "케이블 LOW 플라이",
+    "name": "케이블 로우 플라이",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -560,7 +560,7 @@
   },
   {
     "id": "0044",
-    "name": "케이블 원 팔 디클라인 가슴 플라이",
+    "name": "케이블 원 암 디클라인 가슴 플라이",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -573,7 +573,7 @@
   },
   {
     "id": "0045",
-    "name": "케이블 원 팔 인클라인 프레스",
+    "name": "케이블 원 암 인클라인 프레스",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "상부 가슴",
@@ -586,7 +586,7 @@
   },
   {
     "id": "0046",
-    "name": "케이블 원 팔 레터럴 벤트 OVER",
+    "name": "케이블 원 암 레터럴 벤트 오버",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -625,7 +625,7 @@
   },
   {
     "id": "0049",
-    "name": "케이블 스탠딩 업 스트레이트 CROSSOVERS",
+    "name": "케이블 스탠딩 업 스트레이트 크로스오버",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -638,7 +638,7 @@
   },
   {
     "id": "0050",
-    "name": "케이블 UPPER 가슴 CROSSOVERS",
+    "name": "케이블 상부 가슴 크로스오버",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -651,7 +651,7 @@
   },
   {
     "id": "0051",
-    "name": "케이블 인클라인 플라이 STABILITY BALL",
+    "name": "케이블 인클라인 플라이 스테빌리티 볼",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -664,7 +664,7 @@
   },
   {
     "id": "0052",
-    "name": "케이블 원 팔 플라이 EXERCISE BALL",
+    "name": "케이블 원 암 플라이 엑서사이즈 볼",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -677,7 +677,7 @@
   },
   {
     "id": "0053",
-    "name": "케이블 원 팔 인클라인 플라이 EXERCISE BALL",
+    "name": "케이블 원 암 인클라인 플라이 엑서사이즈 볼",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -703,7 +703,7 @@
   },
   {
     "id": "0055",
-    "name": "덤벨 어라운드 PULLOVER",
+    "name": "덤벨 어라운드 풀오버",
     "bodyPart": "가슴",
     "equipment": "덤벨",
     "target": "가슴",
@@ -768,7 +768,7 @@
   },
   {
     "id": "0060",
-    "name": "덤벨 디클라인 원 팔 플라이",
+    "name": "덤벨 디클라인 원 암 플라이",
     "bodyPart": "가슴",
     "equipment": "덤벨",
     "target": "가슴",
@@ -872,7 +872,7 @@
   },
   {
     "id": "0068",
-    "name": "덤벨 인클라인 원 팔 플라이",
+    "name": "덤벨 인클라인 원 암 플라이",
     "bodyPart": "가슴",
     "equipment": "덤벨",
     "target": "가슴",
@@ -885,7 +885,7 @@
   },
   {
     "id": "0069",
-    "name": "덤벨 인클라인 원 팔 프레스",
+    "name": "덤벨 인클라인 원 암 프레스",
     "bodyPart": "가슴",
     "equipment": "덤벨",
     "target": "상부 가슴",
@@ -924,7 +924,7 @@
   },
   {
     "id": "0072",
-    "name": "덤벨 인클라인 TWISTED FLYES",
+    "name": "덤벨 인클라인 트위스트ED 플라이ES",
     "bodyPart": "가슴",
     "equipment": "덤벨",
     "target": "가슴",
@@ -950,7 +950,7 @@
   },
   {
     "id": "0074",
-    "name": "어시스트 가슴 딥스 KNEELING",
+    "name": "어시스트 가슴 딥스 닐링",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "가슴",
@@ -963,7 +963,7 @@
   },
   {
     "id": "0075",
-    "name": "어시스트 와이드 그립 가슴 딥스 KNEELING",
+    "name": "어시스트 와이드 그립 가슴 딥스 닐링",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "가슴",
@@ -1028,7 +1028,7 @@
   },
   {
     "id": "0080",
-    "name": "레버 인클라인 가슴 프레스 V. 2",
+    "name": "레버 인클라인 가슴 프레스",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "상부 가슴",
@@ -1067,7 +1067,7 @@
   },
   {
     "id": "0083",
-    "name": "머신 INNER 가슴 프레스",
+    "name": "머신 이너 가슴 프레스",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "가슴",
@@ -1145,7 +1145,7 @@
   },
   {
     "id": "0089",
-    "name": "스미스 인클라인 숄더 RAISES",
+    "name": "스미스 인클라인 숄더 레이즈",
     "bodyPart": "가슴",
     "equipment": "스미스 머신",
     "target": "가슴",
@@ -1210,7 +1210,7 @@
   },
   {
     "id": "0094",
-    "name": "바벨 벤트 팔 PULLOVER",
+    "name": "바벨 벤트 팔 풀오버",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "등",
@@ -1223,7 +1223,7 @@
   },
   {
     "id": "0095",
-    "name": "바벨 벤트 OVER 로우",
+    "name": "바벨 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "광배근",
@@ -1239,7 +1239,7 @@
   },
   {
     "id": "0096",
-    "name": "바벨 디클라인 벤트 팔 PULLOVER",
+    "name": "바벨 디클라인 벤트 팔 풀오버",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "등",
@@ -1252,7 +1252,7 @@
   },
   {
     "id": "0097",
-    "name": "바벨 디클라인 와이드 그립 PULLOVER",
+    "name": "바벨 디클라인 와이드 그립 풀오버",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "등",
@@ -1281,7 +1281,7 @@
   },
   {
     "id": "0099",
-    "name": "바벨 원 팔 벤트 OVER 로우",
+    "name": "바벨 원 암 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "광배근",
@@ -1313,7 +1313,7 @@
   },
   {
     "id": "0101",
-    "name": "바벨 PULLOVER",
+    "name": "바벨 풀오버",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "등",
@@ -1326,7 +1326,7 @@
   },
   {
     "id": "0102",
-    "name": "바벨 PULLOVER 프레스",
+    "name": "바벨 풀오버 프레스",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "등",
@@ -1339,7 +1339,7 @@
   },
   {
     "id": "0103",
-    "name": "바벨 리버스 그립 벤트 OVER 로우",
+    "name": "바벨 리버스 그립 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "광배근",
@@ -1371,7 +1371,7 @@
   },
   {
     "id": "0105",
-    "name": "바벨 SHRUG",
+    "name": "바벨 슈러그",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "등",
@@ -1400,7 +1400,7 @@
   },
   {
     "id": "0107",
-    "name": "레버 벤트 OVER 로우",
+    "name": "레버 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "광배근",
@@ -1416,7 +1416,7 @@
   },
   {
     "id": "0108",
-    "name": "레버 원 팔 벤트 OVER 로우",
+    "name": "레버 원 암 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "광배근",
@@ -1432,7 +1432,7 @@
   },
   {
     "id": "0109",
-    "name": "ARCHER 풀 업",
+    "name": "아처 풀 업",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "등",
@@ -1471,7 +1471,7 @@
   },
   {
     "id": "0112",
-    "name": "벤치 풀 UPS",
+    "name": "벤치 풀 업S",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "등",
@@ -1484,7 +1484,7 @@
   },
   {
     "id": "0113",
-    "name": "맨몸 SQUATTING 로우",
+    "name": "맨몸 스쿼트TING 로우",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "광배근",
@@ -1500,7 +1500,7 @@
   },
   {
     "id": "0114",
-    "name": "맨몸 스탠딩 클로즈 그립 원 팔 로우",
+    "name": "맨몸 스탠딩 클로즈 그립 원 암 로우",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "광배근",
@@ -1532,7 +1532,7 @@
   },
   {
     "id": "0116",
-    "name": "맨몸 스탠딩 원 팔 로우",
+    "name": "맨몸 스탠딩 원 암 로우",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "광배근",
@@ -1564,7 +1564,7 @@
   },
   {
     "id": "0118",
-    "name": "CHIN 업",
+    "name": "친 업",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "등",
@@ -1577,7 +1577,7 @@
   },
   {
     "id": "0119",
-    "name": "CHIN UPS NARROW PARALLEL 그립",
+    "name": "친 업S 내로우 PARALLEL 그립",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "광배근",
@@ -1593,7 +1593,7 @@
   },
   {
     "id": "0120",
-    "name": "클로즈 그립 CHIN 업",
+    "name": "클로즈 그립 친 업",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "등",
@@ -1645,7 +1645,7 @@
   },
   {
     "id": "0124",
-    "name": "GIRONDA STERNUM CHIN",
+    "name": "지론다 스터넘 친",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "등",
@@ -1658,7 +1658,7 @@
   },
   {
     "id": "0125",
-    "name": "HYPEREXTENSION",
+    "name": "HYPER익스텐션",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "등",
@@ -1671,7 +1671,7 @@
   },
   {
     "id": "0126",
-    "name": "HYPEREXTENSION 벤치",
+    "name": "HYPER익스텐션 벤치",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "등",
@@ -1742,7 +1742,7 @@
   },
   {
     "id": "0131",
-    "name": "케이블 크로스 OVER 레터럴 풀다운",
+    "name": "케이블 크로스 오버 레터럴 풀다운",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1771,7 +1771,7 @@
   },
   {
     "id": "0133",
-    "name": "케이블 FLOOR 시티드 와이드 그립 로우",
+    "name": "케이블 플로어 시티드 와이드 그립 로우",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "광배근",
@@ -1787,7 +1787,7 @@
   },
   {
     "id": "0134",
-    "name": "케이블 HIGH 로우 KNEELING",
+    "name": "케이블 하이 로우 닐링",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "광배근",
@@ -1819,7 +1819,7 @@
   },
   {
     "id": "0136",
-    "name": "케이블 인클라인 PUSHDOWN",
+    "name": "케이블 인클라인 PUSH다운",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1832,7 +1832,7 @@
   },
   {
     "id": "0137",
-    "name": "케이블 LAT 풀다운 FULL RANGE MOTION",
+    "name": "케이블 광배근 풀다운 풀 레인지 모션",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1845,7 +1845,7 @@
   },
   {
     "id": "0138",
-    "name": "케이블 레터럴 풀다운 로프 ATTACHMENT",
+    "name": "케이블 레터럴 풀다운 로프 어태치먼트",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1871,7 +1871,7 @@
   },
   {
     "id": "0140",
-    "name": "케이블 LOW 시티드 로우",
+    "name": "케이블 로우 시티드 로우",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "광배근",
@@ -1887,7 +1887,7 @@
   },
   {
     "id": "0141",
-    "name": "케이블 라이잉 익스텐션 PULLOVER 로프 ATTACHMENT",
+    "name": "케이블 라이잉 익스텐션 풀오버 로프 어태치먼트",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1900,7 +1900,7 @@
   },
   {
     "id": "0142",
-    "name": "케이블 원 팔 벤트 OVER 로우",
+    "name": "케이블 원 암 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "광배근",
@@ -1916,7 +1916,7 @@
   },
   {
     "id": "0143",
-    "name": "케이블 원 팔 풀다운",
+    "name": "케이블 원 암 풀다운",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1929,7 +1929,7 @@
   },
   {
     "id": "0144",
-    "name": "케이블 원 팔 스트레이트 등 HIGH 로우 KNEELING",
+    "name": "케이블 원 암 스트레이트 등 하이 로우 닐링",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "광배근",
@@ -1974,7 +1974,7 @@
   },
   {
     "id": "0147",
-    "name": "케이블 풀다운 PRO LAT 바",
+    "name": "케이블 풀다운 PRO 광배근 바",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1987,7 +1987,7 @@
   },
   {
     "id": "0148",
-    "name": "케이블 REAR 풀다운",
+    "name": "케이블 후면 풀다운",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -2000,7 +2000,7 @@
   },
   {
     "id": "0149",
-    "name": "덤벨 벤트 OVER 로우",
+    "name": "덤벨 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "광배근",
@@ -2016,7 +2016,7 @@
   },
   {
     "id": "0150",
-    "name": "덤벨 디클라인 SHRUG",
+    "name": "덤벨 디클라인 슈러그",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "등",
@@ -2029,7 +2029,7 @@
   },
   {
     "id": "0151",
-    "name": "덤벨 디클라인 SHRUG V. 2",
+    "name": "덤벨 디클라인 슈러그",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "등",
@@ -2058,7 +2058,7 @@
   },
   {
     "id": "0153",
-    "name": "덤벨 인클라인 SHRUG",
+    "name": "덤벨 인클라인 슈러그",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "등",
@@ -2084,7 +2084,7 @@
   },
   {
     "id": "0155",
-    "name": "덤벨 라이잉 REAR DELT 로우",
+    "name": "덤벨 라이잉 후면 삼각근 로우",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "광배근",
@@ -2100,7 +2100,7 @@
   },
   {
     "id": "0156",
-    "name": "덤벨 원 팔 벤트 OVER 로우",
+    "name": "덤벨 원 암 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "광배근",
@@ -2116,7 +2116,7 @@
   },
   {
     "id": "0157",
-    "name": "덤벨 PALM ROTATIONAL 벤트 OVER 로우",
+    "name": "덤벨 PALM ROTATIONAL 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "광배근",
@@ -2132,7 +2132,7 @@
   },
   {
     "id": "0158",
-    "name": "덤벨 리버스 그립 인클라인 벤치 원 팔 로우",
+    "name": "덤벨 리버스 그립 인클라인 벤치 원 암 로우",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "광배근",
@@ -2164,7 +2164,7 @@
   },
   {
     "id": "0160",
-    "name": "덤벨 리버스 그립 로우 FEMALE",
+    "name": "덤벨 리버스 그립 로우",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "광배근",
@@ -2180,7 +2180,7 @@
   },
   {
     "id": "0161",
-    "name": "덤벨 SHRUG",
+    "name": "덤벨 슈러그",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "등",
@@ -2193,7 +2193,7 @@
   },
   {
     "id": "0162",
-    "name": "덤벨 SIDE 플랭크 REAR 플라이",
+    "name": "덤벨 사이드 플랭크 후면 플라이",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "가슴",
@@ -2232,7 +2232,7 @@
   },
   {
     "id": "0165",
-    "name": "어시스트 스탠딩 CHIN 업",
+    "name": "어시스트 스탠딩 친 업",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "등",
@@ -2258,7 +2258,7 @@
   },
   {
     "id": "0167",
-    "name": "레버 ALTERNATING NARROW 그립 시티드 로우",
+    "name": "레버 얼터네이트 내로우 그립 시티드 로우",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "광배근",
@@ -2274,7 +2274,7 @@
   },
   {
     "id": "0168",
-    "name": "레버 어시스트 CHIN 업",
+    "name": "레버 어시스트 친 업",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "등",
@@ -2300,7 +2300,7 @@
   },
   {
     "id": "0170",
-    "name": "레버 벤트 OVER 로우 V 바",
+    "name": "레버 벤트 오버 로우 V 바",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "광배근",
@@ -2329,7 +2329,7 @@
   },
   {
     "id": "0172",
-    "name": "레버 GRIPLESS SHRUG",
+    "name": "레버 그립LESS 슈러그",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "등",
@@ -2342,7 +2342,7 @@
   },
   {
     "id": "0173",
-    "name": "레버 HIGH 로우",
+    "name": "레버 하이 로우",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "광배근",
@@ -2358,7 +2358,7 @@
   },
   {
     "id": "0174",
-    "name": "레버 NARROW 그립 시티드 로우",
+    "name": "레버 내로우 그립 시티드 로우",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "광배근",
@@ -2374,7 +2374,7 @@
   },
   {
     "id": "0175",
-    "name": "레버 원 팔 레터럴 HIGH 로우",
+    "name": "레버 원 암 레터럴 하이 로우",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "광배근",
@@ -2390,7 +2390,7 @@
   },
   {
     "id": "0176",
-    "name": "레버 원 팔 레터럴 와이드 풀다운",
+    "name": "레버 원 암 레터럴 와이드 풀다운",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "등",
@@ -2403,7 +2403,7 @@
   },
   {
     "id": "0177",
-    "name": "레버 PULLOVER",
+    "name": "레버 풀오버",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "등",
@@ -2477,7 +2477,7 @@
   },
   {
     "id": "0182",
-    "name": "레버 SHRUG",
+    "name": "레버 슈러그",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "등",
@@ -2490,7 +2490,7 @@
   },
   {
     "id": "0183",
-    "name": "스미스 등 SHRUG",
+    "name": "스미스 등 슈러그",
     "bodyPart": "등",
     "equipment": "스미스 머신",
     "target": "등",
@@ -2503,7 +2503,7 @@
   },
   {
     "id": "0184",
-    "name": "스미스 벤트 OVER 로우",
+    "name": "스미스 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "스미스 머신",
     "target": "광배근",
@@ -2519,7 +2519,7 @@
   },
   {
     "id": "0185",
-    "name": "스미스 NARROW 로우",
+    "name": "스미스 내로우 로우",
     "bodyPart": "등",
     "equipment": "스미스 머신",
     "target": "광배근",
@@ -2535,7 +2535,7 @@
   },
   {
     "id": "0186",
-    "name": "스미스 원 팔 로우",
+    "name": "스미스 원 암 로우",
     "bodyPart": "등",
     "equipment": "스미스 머신",
     "target": "광배근",
@@ -2551,7 +2551,7 @@
   },
   {
     "id": "0187",
-    "name": "스미스 리버스 그립 벤트 OVER 로우",
+    "name": "스미스 리버스 그립 벤트 오버 로우",
     "bodyPart": "등",
     "equipment": "스미스 머신",
     "target": "광배근",
@@ -2567,7 +2567,7 @@
   },
   {
     "id": "0188",
-    "name": "스미스 SHRUG",
+    "name": "스미스 슈러그",
     "bodyPart": "등",
     "equipment": "스미스 머신",
     "target": "등",
@@ -2593,7 +2593,7 @@
   },
   {
     "id": "0190",
-    "name": "바벨 원 팔 SNATCH",
+    "name": "바벨 원 암 스내치",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "어깨",
@@ -2606,7 +2606,7 @@
   },
   {
     "id": "0191",
-    "name": "바벨 REAR DELT 레이즈",
+    "name": "바벨 후면 삼각근 레이즈",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "어깨",
@@ -2619,7 +2619,7 @@
   },
   {
     "id": "0192",
-    "name": "바벨 REAR DELT 로우",
+    "name": "바벨 후면 삼각근 로우",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "광배근",
@@ -2635,7 +2635,7 @@
   },
   {
     "id": "0193",
-    "name": "바벨 시티드 비하인드 HEAD MILITARY 프레스",
+    "name": "바벨 시티드 비하인드 헤드 밀리터리 프레스",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "전면 삼각근",
@@ -2708,7 +2708,7 @@
   },
   {
     "id": "0198",
-    "name": "바벨 스탠딩 클로즈 그립 MILITARY 프레스",
+    "name": "바벨 스탠딩 클로즈 그립 밀리터리 프레스",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "전면 삼각근",
@@ -2723,7 +2723,7 @@
   },
   {
     "id": "0199",
-    "name": "바벨 스탠딩 프론트 레이즈 OVER HEAD",
+    "name": "바벨 스탠딩 프론트 레이즈 오버 헤드",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "어깨",
@@ -2736,7 +2736,7 @@
   },
   {
     "id": "0200",
-    "name": "바벨 스탠딩 와이드 MILITARY 프레스",
+    "name": "바벨 스탠딩 와이드 밀리터리 프레스",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "전면 삼각근",
@@ -2764,7 +2764,7 @@
   },
   {
     "id": "0202",
-    "name": "바벨 UPRIGHT 로우",
+    "name": "바벨 업RIGHT 로우",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "광배근",
@@ -2780,7 +2780,7 @@
   },
   {
     "id": "0203",
-    "name": "바벨 UPRIGHT 로우 V. 2",
+    "name": "바벨 업RIGHT 로우",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "광배근",
@@ -2796,7 +2796,7 @@
   },
   {
     "id": "0204",
-    "name": "바벨 UPRIGHT 로우 V. 3",
+    "name": "바벨 업RIGHT 로우",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "광배근",
@@ -2812,7 +2812,7 @@
   },
   {
     "id": "0205",
-    "name": "바벨 와이드 그립 UPRIGHT 로우",
+    "name": "바벨 와이드 그립 업RIGHT 로우",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "광배근",
@@ -2869,7 +2869,7 @@
   },
   {
     "id": "0209",
-    "name": "REAR 삼각근 스트레칭",
+    "name": "후면 삼각근 스트레칭",
     "bodyPart": "어깨",
     "equipment": "맨몸",
     "target": "어깨",
@@ -2897,7 +2897,7 @@
   },
   {
     "id": "0211",
-    "name": "케이블 크로스 OVER REVERS 플라이",
+    "name": "케이블 크로스 오버 REVERS 플라이",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "가슴",
@@ -2949,7 +2949,7 @@
   },
   {
     "id": "0215",
-    "name": "케이블 KNEELING REAR DELT 로우 로프 MALE",
+    "name": "케이블 닐링 후면 삼각근 로우 로프",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "광배근",
@@ -2978,7 +2978,7 @@
   },
   {
     "id": "0217",
-    "name": "케이블 원 팔 레터럴 레이즈",
+    "name": "케이블 원 암 레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "어깨",
@@ -2991,7 +2991,7 @@
   },
   {
     "id": "0218",
-    "name": "케이블 REAR DELT 로우 STIRRUPS",
+    "name": "케이블 후면 삼각근 로우 STIRR업S",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "광배근",
@@ -3007,7 +3007,7 @@
   },
   {
     "id": "0219",
-    "name": "케이블 REAR DELT 로우 로프",
+    "name": "케이블 후면 삼각근 로우 로프",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "광배근",
@@ -3023,7 +3023,7 @@
   },
   {
     "id": "0220",
-    "name": "케이블 시티드 REAR 레터럴 레이즈",
+    "name": "케이블 시티드 후면 레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "어깨",
@@ -3064,7 +3064,7 @@
   },
   {
     "id": "0223",
-    "name": "케이블 스탠딩 크로스 OVER HIGH 리버스 플라이",
+    "name": "케이블 스탠딩 크로스 오버 하이 리버스 플라이",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "가슴",
@@ -3077,7 +3077,7 @@
   },
   {
     "id": "0224",
-    "name": "케이블 스탠딩 REAR DELT 로우 로프",
+    "name": "케이블 스탠딩 후면 삼각근 로우 로프",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "광배근",
@@ -3106,7 +3106,7 @@
   },
   {
     "id": "0226",
-    "name": "케이블 SUPINE 리버스 플라이",
+    "name": "케이블 S업INE 리버스 플라이",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "가슴",
@@ -3119,7 +3119,7 @@
   },
   {
     "id": "0227",
-    "name": "케이블 UPRIGHT 로우",
+    "name": "케이블 업RIGHT 로우",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "광배근",
@@ -3135,7 +3135,7 @@
   },
   {
     "id": "0228",
-    "name": "덤벨 얼터네이트 SIDE 프레스",
+    "name": "덤벨 얼터네이트 사이드 프레스",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "전면 삼각근",
@@ -3208,7 +3208,7 @@
   },
   {
     "id": "0233",
-    "name": "덤벨 FULL CAN 레터럴 레이즈",
+    "name": "덤벨 풀 CAN 레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3221,7 +3221,7 @@
   },
   {
     "id": "0234",
-    "name": "덤벨 인클라인 원 팔 레터럴 레이즈",
+    "name": "덤벨 인클라인 원 암 레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3247,7 +3247,7 @@
   },
   {
     "id": "0236",
-    "name": "덤벨 인클라인 REAR 레터럴 레이즈",
+    "name": "덤벨 인클라인 후면 레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3325,7 +3325,7 @@
   },
   {
     "id": "0242",
-    "name": "덤벨 라이잉 FLOOR REAR DELT 레이즈",
+    "name": "덤벨 라이잉 플로어 후면 삼각근 레이즈",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3338,7 +3338,7 @@
   },
   {
     "id": "0243",
-    "name": "덤벨 라이잉 원 팔 삼각근 REAR",
+    "name": "덤벨 라이잉 원 암 삼각근 후면",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3351,7 +3351,7 @@
   },
   {
     "id": "0244",
-    "name": "덤벨 라이잉 원 팔 REAR 레터럴 레이즈",
+    "name": "덤벨 라이잉 원 암 후면 레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3364,7 +3364,7 @@
   },
   {
     "id": "0245",
-    "name": "덤벨 라이잉 REAR 레터럴 레이즈",
+    "name": "덤벨 라이잉 후면 레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3377,7 +3377,7 @@
   },
   {
     "id": "0246",
-    "name": "덤벨 원 팔 레터럴 레이즈",
+    "name": "덤벨 원 암 레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3390,7 +3390,7 @@
   },
   {
     "id": "0247",
-    "name": "덤벨 원 팔 레터럴 레이즈 SUPPORT",
+    "name": "덤벨 원 암 레터럴 레이즈 서포트",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3416,7 +3416,7 @@
   },
   {
     "id": "0249",
-    "name": "레버 MILITARY 프레스",
+    "name": "레버 밀리터리 프레스",
     "bodyPart": "어깨",
     "equipment": "머신",
     "target": "전면 삼각근",
@@ -3431,7 +3431,7 @@
   },
   {
     "id": "0250",
-    "name": "레버 원 팔 숄더 프레스",
+    "name": "레버 원 암 숄더 프레스",
     "bodyPart": "어깨",
     "equipment": "머신",
     "target": "전면 삼각근",
@@ -3487,7 +3487,7 @@
   },
   {
     "id": "0254",
-    "name": "레버 숄더 프레스 V. 2",
+    "name": "레버 숄더 프레스",
     "bodyPart": "어깨",
     "equipment": "머신",
     "target": "전면 삼각근",
@@ -3502,7 +3502,7 @@
   },
   {
     "id": "0255",
-    "name": "레버 숄더 프레스 V. 3",
+    "name": "레버 숄더 프레스",
     "bodyPart": "어깨",
     "equipment": "머신",
     "target": "전면 삼각근",
@@ -3532,7 +3532,7 @@
   },
   {
     "id": "0257",
-    "name": "스미스 REAR DELT 로우",
+    "name": "스미스 후면 삼각근 로우",
     "bodyPart": "어깨",
     "equipment": "스미스 머신",
     "target": "광배근",
@@ -3578,7 +3578,7 @@
   },
   {
     "id": "0260",
-    "name": "스미스 스탠딩 비하인드 HEAD MILITARY 프레스",
+    "name": "스미스 스탠딩 비하인드 헤드 밀리터리 프레스",
     "bodyPart": "어깨",
     "equipment": "스미스 머신",
     "target": "전면 삼각근",
@@ -3593,7 +3593,7 @@
   },
   {
     "id": "0261",
-    "name": "스미스 스탠딩 MILITARY 프레스",
+    "name": "스미스 스탠딩 밀리터리 프레스",
     "bodyPart": "어깨",
     "equipment": "스미스 머신",
     "target": "전면 삼각근",
@@ -3608,7 +3608,7 @@
   },
   {
     "id": "0262",
-    "name": "스미스 UPRIGHT 로우",
+    "name": "스미스 업RIGHT 로우",
     "bodyPart": "어깨",
     "equipment": "스미스 머신",
     "target": "광배근",
@@ -3656,7 +3656,7 @@
   },
   {
     "id": "0265",
-    "name": "바벨 CLEAN 프레스",
+    "name": "바벨 클린 프레스",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "하체",
@@ -3669,7 +3669,7 @@
   },
   {
     "id": "0266",
-    "name": "바벨 CLEAN 그립 프론트 스쿼트",
+    "name": "바벨 클린 그립 프론트 스쿼트",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "대퇴사두근",
@@ -3701,7 +3701,7 @@
   },
   {
     "id": "0268",
-    "name": "바벨 FLOOR 종아리 레이즈",
+    "name": "바벨 플로어 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "하체",
@@ -3746,7 +3746,7 @@
   },
   {
     "id": "0271",
-    "name": "바벨 FULL 스쿼트",
+    "name": "바벨 풀 스쿼트",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "대퇴사두근",
@@ -3762,7 +3762,7 @@
   },
   {
     "id": "0272",
-    "name": "바벨 FULL 스쿼트 등 POV",
+    "name": "바벨 풀 스쿼트 등 POV",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "대퇴사두근",
@@ -3778,7 +3778,7 @@
   },
   {
     "id": "0273",
-    "name": "바벨 FULL 스쿼트 SIDE POV",
+    "name": "바벨 풀 스쿼트 사이드 POV",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "대퇴사두근",
@@ -3794,7 +3794,7 @@
   },
   {
     "id": "0274",
-    "name": "바벨 FULL ZERCHER 스쿼트",
+    "name": "바벨 풀 ZERCHER 스쿼트",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "대퇴사두근",
@@ -3810,7 +3810,7 @@
   },
   {
     "id": "0275",
-    "name": "바벨 둔근 BRIDGE",
+    "name": "바벨 둔근 브릿지",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "하체",
@@ -3852,7 +3852,7 @@
   },
   {
     "id": "0278",
-    "name": "바벨 HIGH 바 스쿼트",
+    "name": "바벨 하이 바 스쿼트",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "대퇴사두근",
@@ -3915,7 +3915,7 @@
   },
   {
     "id": "0282",
-    "name": "바벨 LOW 바 스쿼트",
+    "name": "바벨 로우 바 스쿼트",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "대퇴사두근",
@@ -3931,7 +3931,7 @@
   },
   {
     "id": "0283",
-    "name": "ALL FOURS SQUAD 스트레칭",
+    "name": "ALL FOURS S대퇴사두 스트레칭",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "하체",
@@ -3957,7 +3957,7 @@
   },
   {
     "id": "0285",
-    "name": "BACKWARD 점프",
+    "name": "백WARD 점프",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "하체",
@@ -3983,7 +3983,7 @@
   },
   {
     "id": "0287",
-    "name": "벤치 HIP 익스텐션",
+    "name": "벤치 힙 익스텐션",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "대퇴사두근",
@@ -3996,7 +3996,7 @@
   },
   {
     "id": "0288",
-    "name": "맨몸 DROP 점프 스쿼트",
+    "name": "맨몸 드롭 점프 스쿼트",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "대퇴사두근",
@@ -4012,7 +4012,7 @@
   },
   {
     "id": "0289",
-    "name": "맨몸 스탠딩 종아리 레이즈",
+    "name": "맨몸 스탠딩 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "하체",
@@ -4038,7 +4038,7 @@
   },
   {
     "id": "0291",
-    "name": "BUTTERFLY YOGA POSE",
+    "name": "BUTTER플라이 YOGA POSE",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "가슴",
@@ -4051,7 +4051,7 @@
   },
   {
     "id": "0292",
-    "name": "종아리 푸시 스트레칭 HANDS AGAINST WALL",
+    "name": "카프 푸시 스트레칭 HANDS AGAINST WALL",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "하체",
@@ -4064,7 +4064,7 @@
   },
   {
     "id": "0293",
-    "name": "종아리 스트레칭 HANDS AGAINST WALL",
+    "name": "카프 스트레칭 HANDS AGAINST WALL",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "하체",
@@ -4119,7 +4119,7 @@
   },
   {
     "id": "0297",
-    "name": "DONKEY 종아리 레이즈",
+    "name": "DONKEY 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "하체",
@@ -4132,7 +4132,7 @@
   },
   {
     "id": "0298",
-    "name": "FLUTTER KICKS",
+    "name": "FLUTTER 킥S",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "하체",
@@ -4158,7 +4158,7 @@
   },
   {
     "id": "0300",
-    "name": "둔근 BRIDGE MARCH",
+    "name": "둔근 브릿지 MARCH",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "하체",
@@ -4184,7 +4184,7 @@
   },
   {
     "id": "0302",
-    "name": "HAMSTRING 스트레칭",
+    "name": "햄스트링 스트레칭",
     "bodyPart": "하체",
     "equipment": "맨몸",
     "target": "하체",
@@ -4226,7 +4226,7 @@
   },
   {
     "id": "0305",
-    "name": "케이블 HIP ADDUCTION",
+    "name": "케이블 힙 ADDUCTION",
     "bodyPart": "하체",
     "equipment": "케이블",
     "target": "하체",
@@ -4252,7 +4252,7 @@
   },
   {
     "id": "0307",
-    "name": "케이블 스탠딩 종아리 레이즈",
+    "name": "케이블 스탠딩 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "케이블",
     "target": "하체",
@@ -4265,7 +4265,7 @@
   },
   {
     "id": "0308",
-    "name": "케이블 스탠딩 HIP 익스텐션",
+    "name": "케이블 스탠딩 힙 익스텐션",
     "bodyPart": "하체",
     "equipment": "케이블",
     "target": "대퇴사두근",
@@ -4278,7 +4278,7 @@
   },
   {
     "id": "0309",
-    "name": "케이블 스탠딩 원 레그 종아리 레이즈",
+    "name": "케이블 스탠딩 원 레그 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "케이블",
     "target": "하체",
@@ -4307,7 +4307,7 @@
   },
   {
     "id": "0311",
-    "name": "덤벨 CLEAN",
+    "name": "덤벨 클린",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "하체",
@@ -4320,7 +4320,7 @@
   },
   {
     "id": "0312",
-    "name": "덤벨 CONTRALATERAL FORWARD 런지",
+    "name": "덤벨 CONTRA광배근ERAL FORWARD 런지",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "대퇴사두근",
@@ -4395,7 +4395,7 @@
   },
   {
     "id": "0317",
-    "name": "덤벨 원 팔 SNATCH",
+    "name": "덤벨 원 암 스내치",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "하체",
@@ -4408,7 +4408,7 @@
   },
   {
     "id": "0318",
-    "name": "덤벨 PLYO 스쿼트",
+    "name": "덤벨 플라이오 스쿼트",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "대퇴사두근",
@@ -4424,7 +4424,7 @@
   },
   {
     "id": "0319",
-    "name": "덤벨 REAR 런지",
+    "name": "덤벨 후면 런지",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "대퇴사두근",
@@ -4455,7 +4455,7 @@
   },
   {
     "id": "0321",
-    "name": "덤벨 시티드 종아리 레이즈",
+    "name": "덤벨 시티드 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "하체",
@@ -4468,7 +4468,7 @@
   },
   {
     "id": "0322",
-    "name": "덤벨 시티드 원 레그 종아리 레이즈",
+    "name": "덤벨 시티드 원 레그 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "하체",
@@ -4481,7 +4481,7 @@
   },
   {
     "id": "0323",
-    "name": "덤벨 시티드 원 레그 종아리 레이즈 해머 머신 그립",
+    "name": "덤벨 시티드 원 레그 카프 레이즈 해머 머신 그립",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "하체",
@@ -4494,7 +4494,7 @@
   },
   {
     "id": "0324",
-    "name": "덤벨 시티드 원 레그 종아리 레이즈 PALM 업",
+    "name": "덤벨 시티드 원 레그 카프 레이즈 PALM 업",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "하체",
@@ -4507,7 +4507,7 @@
   },
   {
     "id": "0325",
-    "name": "덤벨 싱글 레그 종아리 레이즈",
+    "name": "덤벨 싱글 레그 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "하체",
@@ -4536,7 +4536,7 @@
   },
   {
     "id": "0327",
-    "name": "덤벨 싱글 레그 데드리프트 STEPBOX SUPPORT",
+    "name": "덤벨 싱글 레그 데드리프트 STEPBOX 서포트",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "햄스트링",
@@ -4597,7 +4597,7 @@
   },
   {
     "id": "0331",
-    "name": "레버 종아리 프레스",
+    "name": "레버 카프 프레스",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4626,7 +4626,7 @@
   },
   {
     "id": "0333",
-    "name": "레버 DONKEY 종아리 레이즈",
+    "name": "레버 DONKEY 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4639,7 +4639,7 @@
   },
   {
     "id": "0334",
-    "name": "레버 HIP 익스텐션 V. 2",
+    "name": "레버 힙 익스텐션",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "대퇴사두근",
@@ -4665,7 +4665,7 @@
   },
   {
     "id": "0336",
-    "name": "레버 KNEELING 레그 컬",
+    "name": "레버 닐링 레그 컬",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "이두근",
@@ -4717,7 +4717,7 @@
   },
   {
     "id": "0340",
-    "name": "레버 리버스 HYPEREXTENSION",
+    "name": "레버 리버스 HYPER익스텐션",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "대퇴사두근",
@@ -4730,7 +4730,7 @@
   },
   {
     "id": "0341",
-    "name": "레버 ROTARY 종아리",
+    "name": "레버 ROTARY 카프",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4743,7 +4743,7 @@
   },
   {
     "id": "0342",
-    "name": "레버 시티드 종아리 프레스",
+    "name": "레버 시티드 카프 프레스",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4756,7 +4756,7 @@
   },
   {
     "id": "0343",
-    "name": "레버 시티드 종아리 레이즈",
+    "name": "레버 시티드 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4782,7 +4782,7 @@
   },
   {
     "id": "0345",
-    "name": "레버 시티드 HIP ABDUCTION",
+    "name": "레버 시티드 힙 ABDUCTION",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4795,7 +4795,7 @@
   },
   {
     "id": "0346",
-    "name": "레버 시티드 HIP ADDUCTION",
+    "name": "레버 시티드 힙 ADDUCTION",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4821,7 +4821,7 @@
   },
   {
     "id": "0348",
-    "name": "레버 시티드 스쿼트 종아리 레이즈 레그 프레스 머신",
+    "name": "레버 시티드 스쿼트 카프 레이즈 레그 프레스 머신",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4834,7 +4834,7 @@
   },
   {
     "id": "0349",
-    "name": "레버 스탠딩 종아리 레이즈",
+    "name": "레버 스탠딩 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4847,7 +4847,7 @@
   },
   {
     "id": "0350",
-    "name": "종아리 스트레칭 로프",
+    "name": "카프 스트레칭 로프",
     "bodyPart": "하체",
     "equipment": "로프",
     "target": "하체",
@@ -4860,7 +4860,7 @@
   },
   {
     "id": "0351",
-    "name": "INTERMEDIATE HIP FLEXOR QUAD 스트레칭",
+    "name": "INTERMEDIATE 힙 FLEXOR 대퇴사두 스트레칭",
     "bodyPart": "하체",
     "equipment": "로프",
     "target": "하체",
@@ -4873,7 +4873,7 @@
   },
   {
     "id": "0352",
-    "name": "PERONEALS 스트레칭",
+    "name": "비골근 스트레칭",
     "bodyPart": "하체",
     "equipment": "로프",
     "target": "하체",
@@ -4912,7 +4912,7 @@
   },
   {
     "id": "0355",
-    "name": "스탠딩 HAMSTRING 종아리 스트레칭 STRAP",
+    "name": "스탠딩 햄스트링 카프 스트레칭 S승모근",
     "bodyPart": "하체",
     "equipment": "로프",
     "target": "하체",
@@ -4925,7 +4925,7 @@
   },
   {
     "id": "0356",
-    "name": "HACK 종아리 레이즈",
+    "name": "HACK 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "하체",
@@ -4938,7 +4938,7 @@
   },
   {
     "id": "0357",
-    "name": "HACK 원 레그 종아리 레이즈",
+    "name": "HACK 원 레그 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "하체",
@@ -4964,7 +4964,7 @@
   },
   {
     "id": "0359",
-    "name": "슬레드 45В° 종아리 프레스",
+    "name": "슬레드 45В° 카프 프레스",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "하체",
@@ -5003,7 +5003,7 @@
   },
   {
     "id": "0362",
-    "name": "슬레드 45° 레그 프레스 SIDE POV",
+    "name": "슬레드 45° 레그 프레스 사이드 POV",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "하체",
@@ -5029,7 +5029,7 @@
   },
   {
     "id": "0364",
-    "name": "슬레드 종아리 프레스 레그 프레스",
+    "name": "슬레드 카프 프레스 레그 프레스",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "하체",
@@ -5058,7 +5058,7 @@
   },
   {
     "id": "0366",
-    "name": "슬레드 FORWARD ANGLED 종아리 레이즈",
+    "name": "슬레드 FORWARD ANGLED 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "하체",
@@ -5087,7 +5087,7 @@
   },
   {
     "id": "0368",
-    "name": "슬레드 라이잉 종아리 프레스",
+    "name": "슬레드 라이잉 카프 프레스",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "하체",
@@ -5116,7 +5116,7 @@
   },
   {
     "id": "0370",
-    "name": "슬레드 원 레그 종아리 프레스 레그 프레스",
+    "name": "슬레드 원 레그 카프 프레스 레그 프레스",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "하체",
@@ -5174,7 +5174,7 @@
   },
   {
     "id": "0374",
-    "name": "스미스 프론트 스쿼트 CLEAN 그립",
+    "name": "스미스 프론트 스쿼트 클린 그립",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "대퇴사두근",
@@ -5190,7 +5190,7 @@
   },
   {
     "id": "0375",
-    "name": "스미스 FULL 스쿼트",
+    "name": "스미스 풀 스쿼트",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "대퇴사두근",
@@ -5235,7 +5235,7 @@
   },
   {
     "id": "0378",
-    "name": "스미스 LOW 바 스쿼트",
+    "name": "스미스 로우 바 스쿼트",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "대퇴사두근",
@@ -5251,7 +5251,7 @@
   },
   {
     "id": "0379",
-    "name": "스미스 원 레그 FLOOR 종아리 레이즈",
+    "name": "스미스 원 레그 플로어 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "하체",
@@ -5264,7 +5264,7 @@
   },
   {
     "id": "0380",
-    "name": "스미스 리버스 종아리 RAISES",
+    "name": "스미스 리버스 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "하체",
@@ -5277,7 +5277,7 @@
   },
   {
     "id": "0381",
-    "name": "스미스 리버스 종아리 RAISES",
+    "name": "스미스 리버스 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "하체",
@@ -5290,7 +5290,7 @@
   },
   {
     "id": "0382",
-    "name": "스미스 시티드 원 레그 종아리 레이즈",
+    "name": "스미스 시티드 원 레그 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "하체",
@@ -5350,7 +5350,7 @@
   },
   {
     "id": "0386",
-    "name": "스미스 스탠딩 레그 종아리 레이즈",
+    "name": "스미스 스탠딩 레그 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "하체",
@@ -5405,7 +5405,7 @@
   },
   {
     "id": "0390",
-    "name": "TRAP 바 데드리프트",
+    "name": "승모근 바 데드리프트",
     "bodyPart": "하체",
     "equipment": "트랩바",
     "target": "햄스트링",
@@ -5421,7 +5421,7 @@
   },
   {
     "id": "0391",
-    "name": "어시스트 스탠딩 삼두근 익스텐션 TOWEL",
+    "name": "어시스트 스탠딩 삼두 익스텐션 TOWEL",
     "bodyPart": "팔",
     "equipment": "어시스트",
     "target": "삼두근",
@@ -5434,7 +5434,7 @@
   },
   {
     "id": "0392",
-    "name": "바벨 얼터네이트 이두근 컬",
+    "name": "바벨 얼터네이트 이두 컬",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "이두근",
@@ -5447,7 +5447,7 @@
   },
   {
     "id": "0393",
-    "name": "바벨 이두근 컬 팔 BLASTER",
+    "name": "바벨 이두 컬 팔 BLASTER",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "이두근",
@@ -5551,7 +5551,7 @@
   },
   {
     "id": "0401",
-    "name": "바벨 라이잉 등 HEAD TRICEP 익스텐션",
+    "name": "바벨 라이잉 등 헤드 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "삼두근",
@@ -5577,7 +5577,7 @@
   },
   {
     "id": "0403",
-    "name": "바벨 라이잉 클로즈 그립 삼두근 익스텐션",
+    "name": "바벨 라이잉 클로즈 그립 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "삼두근",
@@ -5603,7 +5603,7 @@
   },
   {
     "id": "0405",
-    "name": "바벨 라이잉 PREACHER 컬",
+    "name": "바벨 라이잉 프리처 컬",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "이두근",
@@ -5616,7 +5616,7 @@
   },
   {
     "id": "0406",
-    "name": "바벨 라이잉 삼두근 익스텐션",
+    "name": "바벨 라이잉 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "삼두근",
@@ -5629,7 +5629,7 @@
   },
   {
     "id": "0407",
-    "name": "바벨 라이잉 삼두근 익스텐션 SKULL CRUSHER",
+    "name": "바벨 라이잉 삼두 익스텐션 SKULL CRUSHER",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "삼두근",
@@ -5642,7 +5642,7 @@
   },
   {
     "id": "0408",
-    "name": "바벨 원 팔 FLOOR 프레스",
+    "name": "바벨 원 암 플로어 프레스",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "팔",
@@ -5655,7 +5655,7 @@
   },
   {
     "id": "0409",
-    "name": "바벨 PALMS 다운 리스트 컬 OVER A 벤치",
+    "name": "바벨 PALMS 다운 리스트 컬 오버 A 벤치",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "이두근",
@@ -5668,7 +5668,7 @@
   },
   {
     "id": "0410",
-    "name": "바벨 PALMS 업 리스트 컬 OVER A 벤치",
+    "name": "바벨 PALMS 업 리스트 컬 오버 A 벤치",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "이두근",
@@ -5681,7 +5681,7 @@
   },
   {
     "id": "0411",
-    "name": "바벨 PIN PRESSES",
+    "name": "바벨 PIN 프레스ES",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "팔",
@@ -5707,7 +5707,7 @@
   },
   {
     "id": "0413",
-    "name": "벤치 딥스 FLOOR",
+    "name": "벤치 딥스 플로어",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "팔",
@@ -5720,7 +5720,7 @@
   },
   {
     "id": "0414",
-    "name": "이두근 레그 CONCENTRATION 컬",
+    "name": "이두 레그 컨센트레이션 컬",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "이두근",
@@ -5733,7 +5733,7 @@
   },
   {
     "id": "0415",
-    "name": "이두근 NARROW 풀 UPS",
+    "name": "이두 내로우 풀 업S",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "광배근",
@@ -5749,7 +5749,7 @@
   },
   {
     "id": "0416",
-    "name": "이두근 풀 업",
+    "name": "이두 풀 업",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "팔",
@@ -5775,7 +5775,7 @@
   },
   {
     "id": "0418",
-    "name": "맨몸 KNEELING 삼두근 익스텐션",
+    "name": "맨몸 닐링 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "삼두근",
@@ -5788,7 +5788,7 @@
   },
   {
     "id": "0419",
-    "name": "맨몸 SIDE 라이잉 이두근 컬",
+    "name": "맨몸 사이드 라이잉 이두 컬",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "이두근",
@@ -5840,7 +5840,7 @@
   },
   {
     "id": "0423",
-    "name": "ELBOW DIPS",
+    "name": "ELBOW 딥스",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "팔",
@@ -5879,7 +5879,7 @@
   },
   {
     "id": "0426",
-    "name": "IMPOSSIBLE DIPS",
+    "name": "IMPOSSIBLE 딥스",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "팔",
@@ -5905,7 +5905,7 @@
   },
   {
     "id": "0428",
-    "name": "MODIFIED 푸시 업 LOWER ARMS",
+    "name": "MODIFIED 푸시 업 로우ER ARMS",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "팔",
@@ -5918,7 +5918,7 @@
   },
   {
     "id": "0429",
-    "name": "원 팔 딥스",
+    "name": "원 암 딥스",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "팔",
@@ -5931,7 +5931,7 @@
   },
   {
     "id": "0430",
-    "name": "오버헤드 삼두근 스트레칭",
+    "name": "오버헤드 삼두 스트레칭",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "팔",
@@ -5944,7 +5944,7 @@
   },
   {
     "id": "0431",
-    "name": "푸시 업 LOWER ARMS",
+    "name": "푸시 업 로우ER ARMS",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "팔",
@@ -5957,7 +5957,7 @@
   },
   {
     "id": "0432",
-    "name": "케이블 얼터네이트 삼두근 익스텐션",
+    "name": "케이블 얼터네이트 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "삼두근",
@@ -5983,7 +5983,7 @@
   },
   {
     "id": "0434",
-    "name": "케이블 CONCENTRATION 컬",
+    "name": "케이블 컨센트레이션 컬",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "이두근",
@@ -5996,7 +5996,7 @@
   },
   {
     "id": "0435",
-    "name": "케이블 CONCENTRATION 익스텐션 KNEE",
+    "name": "케이블 컨센트레이션 익스텐션 KNEE",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "삼두근",
@@ -6048,7 +6048,7 @@
   },
   {
     "id": "0439",
-    "name": "케이블 HIGH PULLEY 오버헤드 TRICEP 익스텐션",
+    "name": "케이블 하이 풀EY 오버헤드 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "삼두근",
@@ -6061,7 +6061,7 @@
   },
   {
     "id": "0440",
-    "name": "케이블 인클라인 삼두근 익스텐션",
+    "name": "케이블 인클라인 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "삼두근",
@@ -6087,7 +6087,7 @@
   },
   {
     "id": "0442",
-    "name": "케이블 KNEELING 삼두근 익스텐션",
+    "name": "케이블 닐링 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "삼두근",
@@ -6100,7 +6100,7 @@
   },
   {
     "id": "0443",
-    "name": "케이블 라이잉 BICEP 컬",
+    "name": "케이블 라이잉 이두 컬",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "이두근",
@@ -6126,7 +6126,7 @@
   },
   {
     "id": "0445",
-    "name": "케이블 원 팔 컬",
+    "name": "케이블 원 암 컬",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "이두근",
@@ -6139,7 +6139,7 @@
   },
   {
     "id": "0446",
-    "name": "케이블 원 팔 PREACHER 컬",
+    "name": "케이블 원 암 프리처 컬",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "이두근",
@@ -6152,7 +6152,7 @@
   },
   {
     "id": "0447",
-    "name": "케이블 원 팔 리버스 PREACHER 컬",
+    "name": "케이블 원 암 리버스 프리처 컬",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "이두근",
@@ -6165,7 +6165,7 @@
   },
   {
     "id": "0448",
-    "name": "케이블 원 팔 TRICEP PUSHDOWN",
+    "name": "케이블 원 암 삼두 PUSH다운",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "팔",
@@ -6191,7 +6191,7 @@
   },
   {
     "id": "0450",
-    "name": "케이블 오버헤드 삼두근 익스텐션 로프 ATTACHMENT",
+    "name": "케이블 오버헤드 삼두 익스텐션 로프 어태치먼트",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "삼두근",
@@ -6204,7 +6204,7 @@
   },
   {
     "id": "0451",
-    "name": "케이블 PREACHER 컬",
+    "name": "케이블 프리처 컬",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "이두근",
@@ -6217,7 +6217,7 @@
   },
   {
     "id": "0452",
-    "name": "덤벨 얼터네이트 이두근 컬",
+    "name": "덤벨 얼터네이트 이두 컬",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6230,7 +6230,7 @@
   },
   {
     "id": "0453",
-    "name": "덤벨 얼터네이트 이두근 컬 팔 BLASTER",
+    "name": "덤벨 얼터네이트 이두 컬 팔 BLASTER",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6243,7 +6243,7 @@
   },
   {
     "id": "0454",
-    "name": "덤벨 얼터네이트 해머 머신 PREACHER 컬",
+    "name": "덤벨 얼터네이트 해머 머신 프리처 컬",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6256,7 +6256,7 @@
   },
   {
     "id": "0455",
-    "name": "덤벨 얼터네이트 PREACHER 컬",
+    "name": "덤벨 얼터네이트 프리처 컬",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6282,7 +6282,7 @@
   },
   {
     "id": "0457",
-    "name": "덤벨 BICEP 컬 런지 BOWLING MOTION",
+    "name": "덤벨 이두 컬 런지 BOWLING 모션",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6295,7 +6295,7 @@
   },
   {
     "id": "0458",
-    "name": "덤벨 BICEP 컬 STORK STANCE",
+    "name": "덤벨 이두 컬 STORK STANCE",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6308,7 +6308,7 @@
   },
   {
     "id": "0459",
-    "name": "덤벨 이두근 컬",
+    "name": "덤벨 이두 컬",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6321,7 +6321,7 @@
   },
   {
     "id": "0460",
-    "name": "덤벨 이두근 컬 팔 BLASTER",
+    "name": "덤벨 이두 컬 팔 BLASTER",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6334,7 +6334,7 @@
   },
   {
     "id": "0461",
-    "name": "덤벨 이두근 컬 리버스",
+    "name": "덤벨 이두 컬 리버스",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6347,7 +6347,7 @@
   },
   {
     "id": "0462",
-    "name": "덤벨 이두근 컬 스쿼트",
+    "name": "덤벨 이두 컬 스쿼트",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6360,7 +6360,7 @@
   },
   {
     "id": "0463",
-    "name": "덤벨 이두근 컬 V SIT BOSU BALL",
+    "name": "덤벨 이두 컬 V SIT BOSU 볼",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6399,7 +6399,7 @@
   },
   {
     "id": "0466",
-    "name": "덤벨 CONCENTRATION 컬",
+    "name": "덤벨 컨센트레이션 컬",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6425,7 +6425,7 @@
   },
   {
     "id": "0468",
-    "name": "덤벨 디클라인 원 팔 해머 머신 프레스",
+    "name": "덤벨 디클라인 원 암 해머 머신 프레스",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "하부 가슴",
@@ -6438,7 +6438,7 @@
   },
   {
     "id": "0469",
-    "name": "덤벨 디클라인 삼두근 익스텐션",
+    "name": "덤벨 디클라인 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "삼두근",
@@ -6451,7 +6451,7 @@
   },
   {
     "id": "0470",
-    "name": "덤벨 FINGER CURLS",
+    "name": "덤벨 FINGER 컬",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6464,7 +6464,7 @@
   },
   {
     "id": "0471",
-    "name": "덤벨 FORWARD 런지 삼두근 익스텐션",
+    "name": "덤벨 FORWARD 런지 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "삼두근",
@@ -6477,7 +6477,7 @@
   },
   {
     "id": "0472",
-    "name": "EZ 바 FRENCH 프레스 EXERCISE BALL",
+    "name": "EZ 바 FRENCH 프레스 엑서사이즈 볼",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "팔",
@@ -6490,7 +6490,7 @@
   },
   {
     "id": "0473",
-    "name": "EZ 바 라이잉 클로즈 그립 삼두근 익스텐션 비하인드 HEAD",
+    "name": "EZ 바 라이잉 클로즈 그립 삼두 익스텐션 비하인드 헤드",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "삼두근",
@@ -6503,7 +6503,7 @@
   },
   {
     "id": "0474",
-    "name": "EZ 바 시티드 클로즈 그립 CONCENTRATION 컬",
+    "name": "EZ 바 시티드 클로즈 그립 컨센트레이션 컬",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "이두근",
@@ -6529,7 +6529,7 @@
   },
   {
     "id": "0476",
-    "name": "EZ 바벨 클로즈 그립 PREACHER 컬",
+    "name": "EZ 바벨 클로즈 그립 프리처 컬",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "이두근",
@@ -6581,7 +6581,7 @@
   },
   {
     "id": "0480",
-    "name": "EZ 바벨 디클라인 삼두근 익스텐션",
+    "name": "EZ 바벨 디클라인 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "삼두근",
@@ -6594,7 +6594,7 @@
   },
   {
     "id": "0481",
-    "name": "EZ 바벨 인클라인 삼두근 익스텐션",
+    "name": "EZ 바벨 인클라인 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "삼두근",
@@ -6633,7 +6633,7 @@
   },
   {
     "id": "0484",
-    "name": "EZ 바벨 리버스 그립 PREACHER 컬",
+    "name": "EZ 바벨 리버스 그립 프리처 컬",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "이두근",
@@ -6646,7 +6646,7 @@
   },
   {
     "id": "0485",
-    "name": "EZ 바벨 시티드 CURLS",
+    "name": "EZ 바벨 시티드 컬",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "이두근",
@@ -6659,7 +6659,7 @@
   },
   {
     "id": "0486",
-    "name": "EZ 바벨 시티드 삼두근 익스텐션",
+    "name": "EZ 바벨 시티드 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "삼두근",
@@ -6698,7 +6698,7 @@
   },
   {
     "id": "0489",
-    "name": "EZ 바 이두근 컬 팔 BLASTER",
+    "name": "EZ 바 이두 컬 팔 BLASTER",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "이두근",
@@ -6724,7 +6724,7 @@
   },
   {
     "id": "0491",
-    "name": "EZ 바벨 스탠딩 와이드 그립 이두근 컬",
+    "name": "EZ 바벨 스탠딩 와이드 그립 이두 컬",
     "bodyPart": "팔",
     "equipment": "EZ바",
     "target": "이두근",
@@ -6737,7 +6737,7 @@
   },
   {
     "id": "0492",
-    "name": "어시스트 삼두근 딥스 KNEELING",
+    "name": "어시스트 삼두 딥스 닐링",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "팔",
@@ -6750,7 +6750,7 @@
   },
   {
     "id": "0493",
-    "name": "레버 BICEP 컬",
+    "name": "레버 이두 컬",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "이두근",
@@ -6763,7 +6763,7 @@
   },
   {
     "id": "0494",
-    "name": "레버 GRIPPER HANDS",
+    "name": "레버 그립PER HANDS",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "팔",
@@ -6776,7 +6776,7 @@
   },
   {
     "id": "0495",
-    "name": "레버 해머 머신 그립 PREACHER 컬",
+    "name": "레버 해머 머신 그립 프리처 컬",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "이두근",
@@ -6789,7 +6789,7 @@
   },
   {
     "id": "0496",
-    "name": "레버 OVERHAND 삼두근 딥스",
+    "name": "레버 오버HAND 삼두 딥스",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "팔",
@@ -6802,7 +6802,7 @@
   },
   {
     "id": "0497",
-    "name": "레버 PREACHER 컬",
+    "name": "레버 프리처 컬",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "이두근",
@@ -6815,7 +6815,7 @@
   },
   {
     "id": "0498",
-    "name": "레버 PREACHER 컬 V. 2",
+    "name": "레버 프리처 컬",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "이두근",
@@ -6828,7 +6828,7 @@
   },
   {
     "id": "0499",
-    "name": "레버 리버스 그립 PREACHER 컬",
+    "name": "레버 리버스 그립 프리처 컬",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "이두근",
@@ -6854,7 +6854,7 @@
   },
   {
     "id": "0501",
-    "name": "레버 삼두근 익스텐션",
+    "name": "레버 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "삼두근",
@@ -6880,7 +6880,7 @@
   },
   {
     "id": "0503",
-    "name": "스미스 머신 BICEP 컬",
+    "name": "스미스 머신 이두 컬",
     "bodyPart": "팔",
     "equipment": "스미스 머신",
     "target": "이두근",
@@ -6906,7 +6906,7 @@
   },
   {
     "id": "0505",
-    "name": "스미스 머신 인클라인 TRICEP 익스텐션",
+    "name": "스미스 머신 인클라인 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "스미스 머신",
     "target": "삼두근",
@@ -6958,7 +6958,7 @@
   },
   {
     "id": "0509",
-    "name": "어시스트 HANGING KNEE 레이즈 THROW 다운",
+    "name": "어시스트 HANGING KNEE 레이즈 TH로우 다운",
     "bodyPart": "허리/코어",
     "equipment": "어시스트",
     "target": "광배근",
@@ -6974,7 +6974,7 @@
   },
   {
     "id": "0510",
-    "name": "어시스트 라이잉 레그 레이즈 레터럴 THROW 다운",
+    "name": "어시스트 라이잉 레그 레이즈 레터럴 TH로우 다운",
     "bodyPart": "허리/코어",
     "equipment": "어시스트",
     "target": "광배근",
@@ -6990,7 +6990,7 @@
   },
   {
     "id": "0511",
-    "name": "어시스트 라이잉 레그 레이즈 THROW 다운",
+    "name": "어시스트 라이잉 레그 레이즈 TH로우 다운",
     "bodyPart": "허리/코어",
     "equipment": "어시스트",
     "target": "광배근",
@@ -7084,7 +7084,7 @@
   },
   {
     "id": "0518",
-    "name": "바벨 SIDE 벤트 V. 2",
+    "name": "바벨 사이드 벤트",
     "bodyPart": "허리/코어",
     "equipment": "바벨",
     "target": "허리/코어",
@@ -7110,7 +7110,7 @@
   },
   {
     "id": "0520",
-    "name": "바벨 SITTED 얼터네이트 레그 레이즈 FEMALE",
+    "name": "바벨 SITTED 얼터네이트 레그 레이즈",
     "bodyPart": "허리/코어",
     "equipment": "바벨",
     "target": "허리/코어",
@@ -7175,7 +7175,7 @@
   },
   {
     "id": "0525",
-    "name": "45° SIDE BEND",
+    "name": "45° 사이드 BEND",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7214,7 +7214,7 @@
   },
   {
     "id": "0528",
-    "name": "팔 SLINGERS HANGING 벤트 KNEE LEGS",
+    "name": "팔 SLINGERS HANGING 벤트 KNEE 레그S",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7227,7 +7227,7 @@
   },
   {
     "id": "0529",
-    "name": "팔 SLINGERS HANGING 스트레이트 LEGS",
+    "name": "팔 SLINGERS HANGING 스트레이트 레그S",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7240,7 +7240,7 @@
   },
   {
     "id": "0530",
-    "name": "맨몸 인클라인 SIDE 플랭크",
+    "name": "맨몸 인클라인 사이드 플랭크",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7266,7 +7266,7 @@
   },
   {
     "id": "0532",
-    "name": "BRIDGE MOUNTAIN CLIMBER 크로스 BODY",
+    "name": "브릿지 MOUNTAIN CLIMBER 크로스 BODY",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7279,7 +7279,7 @@
   },
   {
     "id": "0533",
-    "name": "BUTT UPS",
+    "name": "BUTT 업S",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7357,7 +7357,7 @@
   },
   {
     "id": "0539",
-    "name": "크런치 FLOOR",
+    "name": "크런치 플로어",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "복직근",
@@ -7435,7 +7435,7 @@
   },
   {
     "id": "0545",
-    "name": "케이블 KNEELING 크런치",
+    "name": "케이블 닐링 크런치",
     "bodyPart": "허리/코어",
     "equipment": "케이블",
     "target": "복직근",
@@ -7461,7 +7461,7 @@
   },
   {
     "id": "0547",
-    "name": "케이블 RUSSIAN TWISTS STABILITY BALL",
+    "name": "케이블 RUSSIAN 트위스트S 스테빌리티 볼",
     "bodyPart": "허리/코어",
     "equipment": "케이블",
     "target": "허리/코어",
@@ -7500,7 +7500,7 @@
   },
   {
     "id": "0550",
-    "name": "케이블 SIDE BEND",
+    "name": "케이블 사이드 BEND",
     "bodyPart": "허리/코어",
     "equipment": "케이블",
     "target": "허리/코어",
@@ -7513,7 +7513,7 @@
   },
   {
     "id": "0551",
-    "name": "케이블 SIDE BEND 크런치 BOSU BALL",
+    "name": "케이블 사이드 BEND 크런치 BOSU 볼",
     "bodyPart": "허리/코어",
     "equipment": "케이블",
     "target": "복직근",
@@ -7526,7 +7526,7 @@
   },
   {
     "id": "0552",
-    "name": "케이블 SIDE 크런치",
+    "name": "케이블 사이드 크런치",
     "bodyPart": "허리/코어",
     "equipment": "케이블",
     "target": "복직근",
@@ -7552,7 +7552,7 @@
   },
   {
     "id": "0554",
-    "name": "케이블 스탠딩 크런치 로프 ATTACHMENT",
+    "name": "케이블 스탠딩 크런치 로프 어태치먼트",
     "bodyPart": "허리/코어",
     "equipment": "케이블",
     "target": "복직근",
@@ -7617,7 +7617,7 @@
   },
   {
     "id": "0559",
-    "name": "덤벨 SIDE BEND",
+    "name": "덤벨 사이드 BEND",
     "bodyPart": "허리/코어",
     "equipment": "덤벨",
     "target": "허리/코어",
@@ -7643,7 +7643,7 @@
   },
   {
     "id": "0561",
-    "name": "스미스 HIP 레이즈",
+    "name": "스미스 힙 레이즈",
     "bodyPart": "허리/코어",
     "equipment": "스미스 머신",
     "target": "허리/코어",
@@ -7708,7 +7708,7 @@
   },
   {
     "id": "0566",
-    "name": "중량 HANGING 레그 HIP 레이즈",
+    "name": "중량 HANGING 레그 힙 레이즈",
     "bodyPart": "허리/코어",
     "equipment": "중량",
     "target": "허리/코어",
@@ -7721,7 +7721,7 @@
   },
   {
     "id": "0567",
-    "name": "중량 오버헤드 크런치 STABILITY BALL",
+    "name": "중량 오버헤드 크런치 스테빌리티 볼",
     "bodyPart": "허리/코어",
     "equipment": "중량",
     "target": "복직근",
@@ -7747,7 +7747,7 @@
   },
   {
     "id": "0569",
-    "name": "중량 RUSSIAN 트위스트 LEGS 업",
+    "name": "중량 RUSSIAN 트위스트 레그S 업",
     "bodyPart": "허리/코어",
     "equipment": "중량",
     "target": "허리/코어",
@@ -7760,7 +7760,7 @@
   },
   {
     "id": "0570",
-    "name": "중량 RUSSIAN 트위스트 V. 2",
+    "name": "중량 RUSSIAN 트위스트",
     "bodyPart": "허리/코어",
     "equipment": "중량",
     "target": "허리/코어",
@@ -7773,7 +7773,7 @@
   },
   {
     "id": "0571",
-    "name": "중량 시티드 트위스트 STABILITY BALL",
+    "name": "중량 시티드 트위스트 스테빌리티 볼",
     "bodyPart": "허리/코어",
     "equipment": "중량",
     "target": "허리/코어",
@@ -7786,7 +7786,7 @@
   },
   {
     "id": "0572",
-    "name": "중량 SIDE BEND STABILITY BALL",
+    "name": "중량 사이드 BEND 스테빌리티 볼",
     "bodyPart": "허리/코어",
     "equipment": "중량",
     "target": "허리/코어",
@@ -7825,7 +7825,7 @@
   },
   {
     "id": "0575",
-    "name": "BURPEE",
+    "name": "버피",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "유산소",
@@ -7838,7 +7838,7 @@
   },
   {
     "id": "0576",
-    "name": "HIGH KNEE AGAINST WALL",
+    "name": "하이 KNEE AGAINST WALL",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "유산소",
@@ -7851,7 +7851,7 @@
   },
   {
     "id": "0577",
-    "name": "JACK BURPEE",
+    "name": "JACK 버피",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "유산소",
@@ -7955,7 +7955,7 @@
   },
   {
     "id": "0585",
-    "name": "SWING 360",
+    "name": "스윙 360",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "유산소",
@@ -7968,7 +7968,7 @@
   },
   {
     "id": "0586",
-    "name": "WALKING HIGH KNEES 런지",
+    "name": "WALKING 하이 KNEES 런지",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "대퇴사두근",
@@ -7996,7 +7996,7 @@
   },
   {
     "id": "0588",
-    "name": "ASTRIDE JUMPS MALE",
+    "name": "ASTRIDE 점프S",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "유산소",
@@ -8009,7 +8009,7 @@
   },
   {
     "id": "0589",
-    "name": "HALF KNEE BENDS MALE",
+    "name": "HALF KNEE BENDS",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "유산소",
@@ -8022,7 +8022,7 @@
   },
   {
     "id": "0590",
-    "name": "JACK 점프 MALE",
+    "name": "JACK 점프",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "유산소",
@@ -8035,7 +8035,7 @@
   },
   {
     "id": "0591",
-    "name": "SCISSOR JUMPS MALE",
+    "name": "SCISSOR 점프S",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "유산소",
@@ -8048,7 +8048,7 @@
   },
   {
     "id": "0592",
-    "name": "SEMI 스쿼트 점프 MALE",
+    "name": "SEMI 스쿼트 점프",
     "bodyPart": "유산소",
     "equipment": "맨몸",
     "target": "대퇴사두근",
@@ -8129,7 +8129,7 @@
   },
   {
     "id": "0598",
-    "name": "STATIONARY BIKE RUN V. 3",
+    "name": "STATIONARY BIKE RUN",
     "bodyPart": "유산소",
     "equipment": "실내 자전거",
     "target": "유산소",

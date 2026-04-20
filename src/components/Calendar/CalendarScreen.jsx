@@ -35,25 +35,47 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
             if (!session.session) throw new Error('로그인이 필요합니다.');
             const userId = session.session.user.id;
 
+            // 1. Auth Metadata 업데이트 (일부 정보 중복 보관)
             await supabase.auth.updateUser({
-                data: { ...profile }
+                data: { 
+                    goal: profile.goal,
+                    age: profile.age,
+                    gender: profile.gender,
+                    height: profile.height,
+                    weight: profile.weight
+                }
             });
+
+            // 2. user_profiles 테이블 업데이트
+            // 400 에러 방지를 위해 존재하는 컬럼만 명확한 타입으로 전송
+            const updatePayload = {
+                goal: profile.goal,
+                weekly_frequency: parseInt(profile.weekly_frequency) || 3,
+                height: profile.height ? parseInt(profile.height) : null,
+                weight: profile.weight ? parseFloat(profile.weight) : null,
+                age: profile.age ? parseInt(profile.age) : null,
+                gender: profile.gender || null,
+                // 기존 데이터 유지 (누락 방지)
+                experience_level: userData?.experience_level || 'beginner',
+                equipment_access: userData?.equipment_access || 'full_gym',
+                limitations: userData?.limitations || []
+            };
+
+            // 인바디 정보는 DB에 컬럼이 있을 때만 포함 (현재는 400 에러 원인으로 지목됨)
+            // 만약 나중에 컬럼을 추가한다면 아래 주석을 해제하세요.
+            /*
+            Object.assign(updatePayload, {
+                skeletal_muscle_mass: profile.skeletal_muscle_mass ? parseFloat(profile.skeletal_muscle_mass) : null,
+                body_fat_mass: profile.body_fat_mass ? parseFloat(profile.body_fat_mass) : null,
+                body_fat_percentage: profile.body_fat_percentage ? parseFloat(profile.body_fat_percentage) : null,
+                bmr: profile.bmr ? parseInt(profile.bmr) : null,
+                visceral_fat_level: profile.visceral_fat_level ? parseInt(profile.visceral_fat_level) : null
+            });
+            */
 
             const { error: profileError } = await supabase
                 .from('user_profiles')
-                .update({
-                    goal: profile.goal,
-                    weekly_frequency: parseInt(profile.weekly_frequency),
-                    height: profile.height ? parseInt(profile.height) : null,
-                    weight: profile.weight ? parseFloat(profile.weight) : null,
-                    age: profile.age ? parseInt(profile.age) : null,
-                    gender: profile.gender || null,
-                    skeletal_muscle_mass: profile.skeletal_muscle_mass ? parseFloat(profile.skeletal_muscle_mass) : null,
-                    body_fat_mass: profile.body_fat_mass ? parseFloat(profile.body_fat_mass) : null,
-                    body_fat_percentage: profile.body_fat_percentage ? parseFloat(profile.body_fat_percentage) : null,
-                    bmr: profile.bmr ? parseInt(profile.bmr) : null,
-                    visceral_fat_level: profile.visceral_fat_level ? parseInt(profile.visceral_fat_level) : null
-                })
+                .update(updatePayload)
                 .eq('user_id', userId);
 
             if (profileError) throw profileError;
@@ -63,7 +85,8 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
             onUpdate();
             onClose();
         } catch (error) {
-            alert('저장 실패: ' + error.message);
+            console.error('Update Error:', error);
+            alert('저장 실패: ' + (error.message || '알 수 없는 에러가 발생했습니다.'));
         } finally {
             setIsSaving(false);
         }
@@ -156,7 +179,7 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
 
                     <div className="pt-6 flex gap-3">
                         <button onClick={onClose} className="flex-1 py-4 bg-slate-800 text-white font-black rounded-xl transition-all hover:bg-slate-700 text-xs italic uppercase tracking-widest">취소</button>
-                        <button onClick={handleSave} disabled={isSaving} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:bg-blue-500 disabled:opacity-50 text-xs italic uppercase tracking-widest">{isSaving ? 'SAVING...' : 'SAVE CHANGES'}</button>
+                        <button onClick={handleSave} disabled={isSaving} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:bg-blue-500 disabled:opacity-50 text-xs italic uppercase tracking-widest">{isSaving ? 'SAVING...' : '수정'}</button>
                     </div>
                 </div>
             </div>
