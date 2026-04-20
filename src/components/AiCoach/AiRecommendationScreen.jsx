@@ -46,7 +46,12 @@ const AiRecommendationScreen = () => {
             const jsonMatch = content.match(/\{[\s\S]*\}/);
             if (!jsonMatch) return null;
             const data = JSON.parse(jsonMatch[0]);
-            if (Array.isArray(data.recommendations)) return { type: 'recommendations', items: data.recommendations };
+            if (Array.isArray(data.recommendations)) return {
+                type: 'recommendations',
+                items: data.recommendations,
+                intro: data.intro || null,
+                tip: data.tip || null,
+            };
             if (Array.isArray(data.routine)) return { type: 'routine', items: data.routine };
             if (Array.isArray(data.exercises)) return { type: 'routine', items: data.exercises };
             return null;
@@ -67,9 +72,10 @@ const AiRecommendationScreen = () => {
             alert("프로필 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
             return;
         }
+        const option = HARD_MODE_OPTIONS.find(o => o.value === hardModeType);
         setCurrentRecommendationMode('hard');
         setShowHardModeOptions(false);
-        await callRecommendation('hard', hardModeType);
+        await callRecommendation('hard', hardModeType, option?.label);
     };
 
     const onSendMessage = () => {
@@ -129,7 +135,13 @@ const AiRecommendationScreen = () => {
                                 )}
 
                                 {parsed && parsed.items.length > 0 && (
-                                    <div className="space-y-4">
+                                    <div className="bg-purple-600/10 border border-purple-500/30 rounded-2xl p-4 space-y-4">
+                                        {/* 앞 멘트 */}
+                                        {parsed.intro && (
+                                            <p className="text-sm text-slate-200 leading-relaxed font-medium">{parsed.intro}</p>
+                                        )}
+
+                                        {/* 헤더 */}
                                         <div className="flex items-center justify-between border-b border-white/10 pb-2">
                                             <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1.5 uppercase tracking-widest">
                                                 <Dumbbell size={14} className="text-blue-500" /> 맞춤 운동 루틴
@@ -137,7 +149,8 @@ const AiRecommendationScreen = () => {
                                             <span className="text-[10px] text-blue-500 font-black italic">{parsed.items.length} EXERCISES</span>
                                         </div>
 
-                                        <div className="space-y-3">
+                                        {/* 운동 카드 */}
+                                        <div className="space-y-2">
                                             {parsed.items.map((exercise, exIdx) => {
                                                 const isAdded = addedExercises.has(exercise.name);
                                                 const isRecommendation = parsed.type === 'recommendations';
@@ -145,37 +158,38 @@ const AiRecommendationScreen = () => {
 
                                                 return (
                                                     <div key={exIdx} className={`bg-slate-800/40 rounded-xl p-3 border transition-colors ${isAdded ? 'border-green-500/40' : 'border-white/5 hover:border-blue-500/30'}`}>
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <div>
-                                                                <h4 className="text-sm font-black text-white italic uppercase">{exercise.name}</h4>
-                                                                <p className="text-[10px] text-blue-500 font-bold uppercase">{exercise.part}</p>
+                                                        {/* 운동명 + 부위|기록 + 버튼 */}
+                                                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                                                            <h4 className="text-sm font-black text-white italic uppercase truncate">{exercise.name}</h4>
+                                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span className="text-[10px] text-blue-500 font-bold uppercase">{exercise.part}</span>
+                                                                    {isRecommendation && (
+                                                                        <>
+                                                                            <span className="text-slate-600 text-[10px]">|</span>
+                                                                            <span className={`text-[10px] font-black ${hasRecord ? 'text-yellow-400' : 'text-slate-600'}`}>
+                                                                                {exercise.best_record || '기록없음'}
+                                                                            </span>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => handleAddExercise(exercise, currentRecommendationMode === 'hard')}
+                                                                    disabled={isAdded}
+                                                                    className={`p-1.5 rounded-lg text-white transition-all active:scale-90 flex-shrink-0 ${
+                                                                        isAdded
+                                                                            ? 'bg-green-600 cursor-default'
+                                                                            : 'bg-blue-600 hover:bg-blue-500'
+                                                                    }`}
+                                                                >
+                                                                    {isAdded ? <Check size={14} /> : <Plus size={14} />}
+                                                                </button>
                                                             </div>
-                                                            <button
-                                                                onClick={() => handleAddExercise(exercise, currentRecommendationMode === 'hard')}
-                                                                disabled={isAdded}
-                                                                className={`p-1.5 rounded-lg text-white transition-all active:scale-90 ${
-                                                                    isAdded
-                                                                        ? 'bg-green-600 cursor-default'
-                                                                        : 'bg-blue-600 hover:bg-blue-500'
-                                                                }`}
-                                                            >
-                                                                {isAdded ? <Check size={14} /> : <Plus size={14} />}
-                                                            </button>
                                                         </div>
-
-                                                        {/* recommendations 타입: best_record 표시 */}
-                                                        {isRecommendation && (
-                                                            <div className="mb-2">
-                                                                <span className="text-[10px] text-slate-500 uppercase font-bold mr-1">최고 기록</span>
-                                                                <span className={`text-[11px] font-black ${hasRecord ? 'text-yellow-400' : 'text-slate-600'}`}>
-                                                                    {exercise.best_record || '기록없음'}
-                                                                </span>
-                                                            </div>
-                                                        )}
 
                                                         {/* routine 타입: sets 표시 */}
                                                         {!isRecommendation && exercise.sets?.length > 0 && (
-                                                            <div className="flex gap-2 mb-2">
+                                                            <div className="flex gap-2 mb-1.5">
                                                                 {exercise.sets.map((set, sIdx) => (
                                                                     <div key={sIdx} className="bg-slate-900/60 px-2 py-1 rounded text-[10px] text-slate-300 font-medium border border-white/5">
                                                                         {set.kg ? `${set.kg}kg × ` : ''}{set.reps}회
@@ -197,6 +211,11 @@ const AiRecommendationScreen = () => {
                                         <p className="text-[9px] text-slate-500 text-center font-bold animate-pulse uppercase tracking-widest">
                                             각 운동의 + 버튼을 눌러 루틴에 추가하세요
                                         </p>
+
+                                        {/* 뒤 멘트 */}
+                                        {parsed.tip && (
+                                            <p className="text-sm text-slate-200 leading-relaxed font-medium">💪 {parsed.tip}</p>
+                                        )}
                                     </div>
                                 )}
 
@@ -220,6 +239,7 @@ const AiRecommendationScreen = () => {
                     </div>
                     {showHardModeOptions && (
                         <div className="bg-slate-900/80 border border-rose-500/30 rounded-2xl p-3 space-y-3 animate-slide-up shadow-2xl backdrop-blur-md">
+                            <p className="text-[10px] text-slate-500 font-bold text-center">데이터가 2주 이상 쌓여야 정확한 하드모드 추천이 가능합니다.</p>
                             <div className="grid grid-cols-2 gap-2">
                                 {HARD_MODE_OPTIONS.map(({ label, value, description }) => (
                                     <button key={value} onClick={() => sendHardModeRequest(value)} className="bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 rounded-xl py-3 px-4 text-left active:scale-95 transition-all">

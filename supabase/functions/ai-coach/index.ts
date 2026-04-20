@@ -100,7 +100,7 @@ serve(async (req) => {
       }
       console.log('[AUTH] User authenticated:', user.id)
 
-      const { exercises, profile, mode, hardModeType } = body
+      const { exercises, profile, mode, hardModeType, recentWorkouts } = body
 
       // workout_logs에서 사용자 최고 기록 추출 (운동명 기준)
       const { data: logs } = await supabase
@@ -123,6 +123,22 @@ serve(async (req) => {
       })
       console.log('[DB] Best records loaded for', Object.keys(bestRecords).length, 'exercises')
 
+      // 프론트에서 전달된 최근 7일 운동 기록으로 이력 텍스트 생성
+      type WorkoutDay = { date: string; parts: string[]; exercises: string[] }
+      const workoutDays = (recentWorkouts as WorkoutDay[] | undefined) || []
+      const today = new Date().toISOString().split('T')[0]
+      const todayEntry = workoutDays.find(w => w.date === today)
+      const todayParts = todayEntry?.parts ?? []
+
+      const recentPartLines = workoutDays.length > 0
+        ? workoutDays.map(w => {
+            const d = new Date(w.date)
+            const label = `${d.getMonth() + 1}월 ${d.getDate()}일(${['일','월','화','수','목','금','토'][d.getDay()]})`
+            const exStr = w.exercises.slice(0, 4).join(', ') + (w.exercises.length > 4 ? ' 외' : '')
+            return `- ${label}: ${w.parts.join(', ')} (${exStr})`
+          }).join('\n')
+        : '최근 운동 기록 없음'
+
       // 운동 목록 문자열 생성
       const exerciseList = (exercises as Array<{
         id: string; name: string; nameEn: string; bodyPart: string; equipment: string
@@ -136,31 +152,96 @@ serve(async (req) => {
         ? `하드모드(${(hardModeType as string)?.replace(/_/g, ' ')})`
         : '균형잡힌 루틴'
 
+      // ── 프로필 필드 조건부 정리 ──────────────────────────────────────
+      const p = profile as Record<string, unknown> | null
+      const age = p?.age ? `${p.age}세` : null
+      const gender = p?.gender === 'male' ? '남성' : p?.gender === 'female' ? '여성' : null
+      const physique = (p?.height || p?.weight)
+        ? `키 ${p?.height ?? '?'}cm, 몸무게 ${p?.weight ?? '?'}kg`
+        : null
+      const inbody = [
+        p?.skeletal_muscle_mass != null ? `골격근량 ${p.skeletal_muscle_mass}kg` : null,
+        p?.body_fat_mass != null        ? `체지방량 ${p.body_fat_mass}kg`        : null,
+        p?.body_fat_percentage != null  ? `체지방률 ${p.body_fat_percentage}%`   : null,
+        p?.bmr != null                  ? `기초대사량 ${p.bmr}kcal`              : null,
+        p?.visceral_fat_level != null   ? `내장지방 ${p.visceral_fat_level}단계` : null,
+      ].filter(Boolean).join(', ')
+
+      const ageNum = p?.age ? Number(p.age) : null
+      const ageNote = ageNum
+        ? ageNum >= 50 ? '50대 이상: 관절 보호 최우선, 중량보다 자세와 범위 강조'
+        : ageNum >= 40 ? '40대: 관절 부하 최소화, 회복 중시'
+        : ageNum >= 20 ? '20~30대: 고강도 훈련 가능'
+        : null
+        : null
+
+      const fatPct = p?.body_fat_percentage != null ? Number(p.body_fat_percentage) : null
+      const muscleKg = p?.skeletal_muscle_mass != null ? Number(p.skeletal_muscle_mass) : null
+      const inbodyNote = [
+        fatPct != null && fatPct >= 25 ? '체지방률이 높음 → 유산소 또는 복합 운동 비중 증가' : null,
+        muscleKg != null && muscleKg < 30 ? '골격근량이 낮음 → 근력 운동 위주로 구성' : null,
+      ].filter(Boolean).join(', ')
+
+      const level = String(p?.experience_level || '')
+      const freq = Number(p?.weekly_frequency || 0)
+      const isAdvanced = level === 'intermediate' || level === 'advanced'
+      const splitStrategy = level === 'beginner'
+        ? '2분할 (상체 / 하체) — 전신을 고르게 자극하는 기초 루틴'
+        : isAdvanced && freq >= 4
+        ? '3~4분할 추천 — 예: 가슴+삼두 / 등+이두 / 어깨 / 하체'
+        : isAdvanced
+        ? '2~3분할 추천 — 예: 상체(가슴·어깨·팔) / 하체 / 등·코어'
+        : '2분할 (상체 / 하체)'
+
       const systemPrompt = `당신은 전문 퍼스널 트레이너입니다.
 
 **중요: 모든 응답은 반드시 한글로 작성하세요.**
 
-사용자 프로필:
-- 목표: ${profile?.goal || '없음'}
-- 경험: ${profile?.experience_level || '없음'}
-- 주당 횟수: ${profile?.weekly_frequency || 0}회
-- 장비: ${profile?.equipment_access || '없음'}
-- 제한사항: ${(profile?.limitations as string[])?.join(', ') || '없음'}
+사용자 정보:
+- 목표: ${p?.goal || '없음'}
+- 경험: ${p?.experience_level || '없음'}
+- 주당 횟수: ${freq}회${age ? `\n- 나이: ${age}${ageNote ? ` (${ageNote})` : ''}` : ''}${gender ? `\n- 성별: ${gender}` : ''}${physique ? `\n- 신체: ${physique}` : ''}${inbody ? `\n- 인바디: ${inbody}${inbodyNote ? ` → ${inbodyNote}` : ''}` : ''}
+- 운동 환경: ${p?.equipment_access || '없음'}
+- 제한사항: ${(p?.limitations as string[])?.join(', ') || '없음'}
+
+분할 전략 (반드시 적용):
+${splitStrategy}${todayParts.length > 0 ? `\n\n⚠️ 오늘 이미 운동한 부위: ${todayParts.join(', ')}\n→ 위 부위는 오늘 추천에서 반드시 제외하세요. 쉬고 있는 부위 위주로 선택하세요.` : ''}
+
+최근 7일 운동 이력 (날짜: 부위 / 운동명):
+${recentPartLines}
 
 운동 목록 (이 목록에서만 선택):
 ${exerciseList}
 
 **응답 규칙:**
 1. 위 운동 리스트에서만 선택하세요
-2. 추천 이유는 한글로 작성하세요
-3. 모든 운동 용어, 설명, 조언을 한글로 작성하세요
-4. "Low Weight High Reps" 같은 영어 표현을 사용하지 마세요
-   - 대신 "낮은 중량 높은 반복" 또는 "저중량 고반복" 사용
-5. "Strength", "Hypertrophy" 같은 영어 단어 금지
-   - 대신 "근력", "근비대" 사용
+2. 분할 전략을 반드시 적용하세요. 경험·빈도에 맞는 분할 수를 지켜주세요
+3. 오늘 이미 운동한 부위가 있으면 절대 포함하지 마세요
+4. 최근 자주 한 부위는 피하고, 오랫동안 안 한 부위를 우선 추천하세요
+5. 나이·인바디 정보가 있으면 강도와 중량 제안에 반영하세요
+6. 영어 표현 금지: "Low Weight High Reps" → "저중량 고반복", "Strength" → "근력", "Hypertrophy" → "근비대"
+
+**intro 작성 규칙:**
+- 최근 운동 이력을 분석해서 오늘 어떤 부위 차례인지 설명하세요
+- 오늘 이미 운동한 부위가 있으면 그것을 제외했다고 자연스럽게 언급하세요
+- 분할 전략과 인바디 등 개인 정보를 반영한 구성 방향을 자연스럽게 언급하세요
+- 예시: "오늘 이미 가슴과 팔을 하셨네요! 분할 전략에 따라 오늘 남은 등+어깨 위주로 구성해봤어요."
+- 운동 기록이 없으면: "아직 운동 기록이 없네요! 기초부터 차근차근 시작해봐요."
+
+**tip 작성 규칙:**
+- 이번에 추천한 주요 부위에 맞는 부상 예방 팁 1문장
+- 반드시 "오늘도 화이팅!" 으로 마무리
+- 부위별 예시:
+  - 가슴: "운동 중 어깨가 말리지 않도록 주의하세요. 오늘도 화이팅!"
+  - 등: "견갑골을 충분히 수축하며 천천히 동작하세요. 오늘도 화이팅!"
+  - 하체: "무릎이 발끝을 넘지 않도록 주의하세요. 오늘도 화이팅!"
+  - 어깨: "가벼운 무게로 정확한 자세를 유지하세요. 오늘도 화이팅!"
+  - 팔: "손목이 꺾이지 않도록 그립을 단단히 유지하세요. 오늘도 화이팅!"
+  - 코어: "허리가 아치형으로 꺾이지 않도록 복압을 유지하세요. 오늘도 화이팅!"
 
 반드시 JSON 형식으로만 응답하세요:
 {
+  "intro": "최근 데이터 분석 결과와 이번 루틴 방향 설명 (한글, 1-2문장)",
   "recommendations": [
     {
       "exercise_id": "운동ID (문자열, 위 목록의 ID 그대로)",
@@ -169,7 +250,8 @@ ${exerciseList}
       "best_record": "60kg × 10회" 또는 "기록없음",
       "advice": "이 운동을 추천하는 이유 (한글로만 작성)"
     }
-  ]
+  ],
+  "tip": "부위별 부상 예방 팁 + 오늘도 화이팅! (한글, 1문장)"
 }`
 
       messages = [

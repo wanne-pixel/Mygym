@@ -224,20 +224,52 @@ ${recordsText}
         await callOpenAI(aiPrompt, updatedHistory);
     };
 
-    const callRecommendation = async (mode, hardModeType = null) => {
+    const callRecommendation = async (mode, hardModeType = null, hardModeLabel = null) => {
         setIsTyping(true);
         const displayText = mode === 'hard'
-            ? `🔥 하드모드 루틴 추천 (${hardModeType?.replace(/_/g, ' ')})`
+            ? `🔥 하드모드 루틴 추천 (${hardModeLabel || hardModeType?.replace(/_/g, ' ')})`
             : '🎯 오늘의 루틴 추천';
         const userMsg = { id: Date.now(), type: 'user', text: displayText };
         setMessages(prev => [...prev, userMsg]);
         try {
+            // 최근 7일 운동 기록 조회 (날짜별 부위 + 운동명)
+            let recentWorkouts = [];
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+                const { data: logs } = await supabase
+                    .from('workout_logs')
+                    .select('exercise, part, created_at')
+                    .eq('user_id', session.user.id)
+                    .gte('created_at', sevenDaysAgo)
+                    .order('created_at', { ascending: false });
+
+                if (logs?.length) {
+                    // 날짜별로 그룹화
+                    const byDate = {};
+                    logs.forEach(log => {
+                        const date = log.created_at.split('T')[0];
+                        if (!byDate[date]) byDate[date] = { parts: new Set(), exercises: [] };
+                        if (log.part) byDate[date].parts.add(log.part);
+                        if (log.exercise) byDate[date].exercises.push(log.exercise);
+                    });
+                    recentWorkouts = Object.entries(byDate)
+                        .sort(([a], [b]) => b.localeCompare(a))
+                        .map(([date, { parts, exercises }]) => ({
+                            date,
+                            parts: [...parts],
+                            exercises: [...new Set(exercises)],
+                        }));
+                }
+            }
+
             const aiText = await callAiCoachFunction({
                 type: 'recommendation',
                 exercises: EXERCISE_DATASET,
                 profile,
                 mode,
                 hardModeType,
+                recentWorkouts,
             });
             setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', text: aiText }]);
         } catch (e) {
