@@ -1,42 +1,58 @@
 import React, { useState } from 'react';
 import { supabase } from '../../api/supabase';
 
+const MIN_PASSWORD_LENGTH = 8;
+
 const LoginScreen = () => {
     const [isSignup, setIsSignup] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+
+    const REDIRECT_URL = `${window.location.origin}/app`;
+
+    const validatePassword = (pw) => {
+        if (pw.length < MIN_PASSWORD_LENGTH) return `비밀번호는 ${MIN_PASSWORD_LENGTH}자 이상이어야 합니다.`;
+        return null;
+    };
 
     const handleLogin = async () => {
-        if (!email || !password) {
-            alert('이메일과 비밀번호를 입력해주세요.');
-            return;
-        }
+        setErrorMsg('');
+        if (!email || !password) { setErrorMsg('이메일과 비밀번호를 입력해주세요.'); return; }
         setIsLoading(true);
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         setIsLoading(false);
-        if (error) alert('로그인 실패: ' + error.message);
+        if (error) setErrorMsg('이메일 또는 비밀번호가 올바르지 않습니다.');
     };
 
     const handleGoogleLogin = async () => {
-        const { error } = await supabase.auth.signInWithOAuth({ 
+        setErrorMsg('');
+        const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin }
+            options: { redirectTo: REDIRECT_URL }
         });
-        if (error) alert('구글 로그인 실패: ' + error.message);
+        if (error) setErrorMsg('구글 로그인에 실패했습니다. 다시 시도해주세요.');
     };
 
     const handleSignupComplete = async () => {
-        if (!email || !password) { alert('이메일과 비밀번호는 필수입니다.'); return; }
-        if (password !== passwordConfirm) { alert('비밀번호가 일치하지 않습니다.'); return; }
-        
+        setErrorMsg('');
+        if (!email || !password) { setErrorMsg('이메일과 비밀번호는 필수입니다.'); return; }
+        const pwError = validatePassword(password);
+        if (pwError) { setErrorMsg(pwError); return; }
+        if (password !== passwordConfirm) { setErrorMsg('비밀번호가 일치하지 않습니다.'); return; }
+
         setIsLoading(true);
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { emailRedirectTo: REDIRECT_URL }
+        });
         setIsLoading(false);
 
         if (error) {
-            alert('회원가입 실패: ' + error.message);
+            setErrorMsg('회원가입에 실패했습니다. 다시 시도해주세요.');
         } else {
             alert('가입하신 이메일로 인증 메일이 발송되었습니다!');
             setIsSignup(false);
@@ -56,8 +72,9 @@ const LoginScreen = () => {
                     </div>
                     <div className="space-y-4 bg-slate-900/50 p-8 rounded-3xl border border-slate-800">
                         <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                        <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="password" placeholder={`비밀번호 (${MIN_PASSWORD_LENGTH}자 이상)`} value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
                         <input type="password" placeholder="비밀번호 확인" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                        {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
                         <button onClick={handleSignupComplete} disabled={isLoading} className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl active:scale-95 transition-all">가입 완료</button>
                     </div>
                 </div>
@@ -74,9 +91,10 @@ const LoginScreen = () => {
             <div className="w-full max-sm space-y-4">
                 <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-4 bg-slate-800 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none" />
                 <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-4 bg-slate-800 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
                 <div className="flex gap-3">
                     <button onClick={handleLogin} disabled={isLoading} className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-xl active:scale-95 transition-all">로그인</button>
-                    <button onClick={() => setIsSignup(true)} className="flex-1 py-4 bg-slate-700 text-white font-bold rounded-xl active:scale-95 transition-all">회원가입</button>
+                    <button onClick={() => { setIsSignup(true); setErrorMsg(''); }} className="flex-1 py-4 bg-slate-700 text-white font-bold rounded-xl active:scale-95 transition-all">회원가입</button>
                 </div>
                 <button onClick={handleGoogleLogin} className="w-full py-4 bg-white text-slate-900 font-bold rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-all">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="G" /> Google로 시작하기

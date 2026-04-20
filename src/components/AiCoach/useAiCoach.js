@@ -1,19 +1,29 @@
 import { useState, useEffect } from 'react';
-import OpenAI from 'openai';
 import { supabase } from '../../api/supabase';
 import { STORAGE_KEYS } from '../../constants/exerciseConstants';
 import EXERCISE_DATASET from '../../data/exercises.json';
 
-const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-    dangerouslyAllowBrowser: true
-});
+const MAX_CHAT_HISTORY = 100;
+const SESSION_CHAT_KEY = 'mygym_session_chat';
+
+const callAiCoachFunction = async (payload) => {
+    const { data, error } = await supabase.functions.invoke('ai-coach', { body: payload });
+    if (error) throw error;
+    if (data.error) throw new Error(data.error);
+    return data.content;
+};
 
 export const useAiCoach = () => {
     const [profile, setProfile] = useState(null);
     const [recentStats, setRecentStats] = useState({ totalWorkouts: 0, mostFrequentPart: null });
     const [personalRecords, setPersonalRecords] = useState({});
-    const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY) || '[]'));
+    const [messages, setMessages] = useState(() => {
+        try {
+            return JSON.parse(sessionStorage.getItem(SESSION_CHAT_KEY) || '[]');
+        } catch {
+            return [];
+        }
+    });
     const [isTyping, setIsTyping] = useState(false);
 
     const getMostFrequent = (arr) => {
@@ -71,7 +81,7 @@ export const useAiCoach = () => {
 
     useEffect(() => {
         const initializeChat = async () => {
-            const lastResetTime = localStorage.getItem('aiCoachLastReset');
+            const lastResetTime = sessionStorage.getItem('aiCoachLastReset');
             const now = Date.now();
             const twelveHours = 12 * 60 * 60 * 1000;
             let shouldReset = !lastResetTime || (now - parseInt(lastResetTime) >= twelveHours);
@@ -95,14 +105,17 @@ export const useAiCoach = () => {
                     const greetingText = generateGreeting(profileData, stats);
                     const initialMessage = { id: Date.now(), type: 'ai', text: greetingText };
                     setMessages([initialMessage]);
-                    localStorage.setItem('aiCoachLastReset', now.toString());
+                    sessionStorage.setItem('aiCoachLastReset', now.toString());
                 }
             } catch (e) { console.error('Error initializing AI Coach:', e); }
         };
         initializeChat();
     }, []);
 
-    useEffect(() => { localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages)); }, [messages]);
+    useEffect(() => {
+        const trimmed = messages.slice(-MAX_CHAT_HISTORY);
+        sessionStorage.setItem(SESSION_CHAT_KEY, JSON.stringify(trimmed));
+    }, [messages]);
 
     const callOpenAI = async (userPrompt, currentHistory) => {
         setIsTyping(true);
@@ -110,9 +123,7 @@ export const useAiCoach = () => {
             ? Object.entries(personalRecords).map(([name, r]) => `- ${name}: ${r.kg}kg × ${r.reps}회`).join('\n')
             : '없음 (초보자)';
 
-        const systemMessage = {
-            role: 'system',
-            content: `당신은 MyGym의 퍼스널 트레이너 AI입니다.
+        const systemMessage = `당신은 MyGym의 전문 퍼스널 트레이너 AI 코치입니다.
 
 사용자 프로필:
 - 목표: ${profile?.goal || '없음'}
@@ -128,23 +139,35 @@ export const useAiCoach = () => {
 운동별 최고 기록:
 ${recordsText}
 
-응답 형식 (5단계 구조, 반드시 준수):
-... (기존 main.jsx와 동일 생략) ...
+[응답 규칙 - 매우 중요]
+1. 반드시 어떠한 인사말이나 마크다운 (\`\`\`json) 기호 없이, 순수한 JSON 객체 형식으로만 응답하십시오.
+2. 사용자의 현재 상태를 분석한 짧은 코멘트(plain text)를 JSON 외부에 포함하지 말고, JSON 내부의 특정 필드에 넣거나 오직 JSON만 반환하십시오.
+3. 운동 루틴은 반드시 'routine' 배열 필드에 담아야 합니다. 각 운동은 name, part, sets(kg, reps 포함), description 필드를 가져야 합니다.
+4. 한국어로 응답하십시오.
 
-중요: 반드시 어떠한 인사말이나 마크다운(\`\`\`) 기호 없이, 순수한 JSON 객체 형식으로만 대답해.`
-        };
+응답 JSON 구조 예시:
+{
+  "analysis": "사용자의 현재 상태 분석 및 오늘 운동의 방향성",
+  "routine": [
+    {
+      "name": "벤치프레스",
+      "part": "가슴",
+      "sets": [{ "kg": 40, "reps": 10 }, { "kg": 40, "reps": 10 }],
+      "description": "가슴 중앙부를 타겟팅하며 바를 천천히 내리세요."
+    }
+  ]
+}`;
 
         try {
-            const response = await openai.chat.completions.create({
-                model: 'gpt-4o-mini',
-                messages: [
-                    { role: 'system', content: systemMessage.content },
-                    ...currentHistory.slice(-6).map(m => ({ role: m.type === 'ai' ? 'assistant' : 'user', content: m.text })),
-                    { role: 'user', content: userPrompt }
-                ],
-                temperature: 0.7
+            const aiText = await callAiCoachFunction({
+                type: 'chat',
+                systemMessage,
+                chatHistory: currentHistory.slice(-6).map(m => ({
+                    role: m.type === 'ai' ? 'assistant' : 'user',
+                    content: m.text,
+                })),
+                userPrompt,
             });
-            const aiText = response.choices[0].message.content;
             setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', text: aiText }]);
         } catch (e) {
             console.error(e);
@@ -167,7 +190,7 @@ ${recordsText}
         const greetingText = generateGreeting(profile, recentStats);
         const initialMessage = { id: Date.now(), type: 'ai', text: greetingText };
         setMessages([initialMessage]);
-        localStorage.setItem('aiCoachLastReset', Date.now().toString());
+        sessionStorage.setItem('aiCoachLastReset', Date.now().toString());
     };
 
     const addExerciseToRoutine = (exercise, isHardMode = false) => {

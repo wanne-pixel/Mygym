@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { supabase } from './src/api/supabase';
-import Onboarding from './src/components/Onboarding';
-import BottomNav from './src/components/BottomNav';
-import AIRecommendationScreen from './src/components/AiCoach/AiRecommendationScreen';
-import WorkoutPlanScreen from './src/components/WorkoutPlan/WorkoutPlanScreen';
-import CalendarScreen from './src/components/Calendar/CalendarScreen';
-import LoginScreen from './src/components/Auth/LoginScreen';
-import AnalysisScreen from './src/components/Common/AnalysisScreen';
-import DayDetailView from './src/components/Calendar/DayDetailView';
+import { supabase } from './api/supabase';
+import Onboarding from './components/Onboarding';
+import BottomNav from './components/BottomNav';
+import AIRecommendationScreen from './components/AiCoach/AiRecommendationScreen';
+import WorkoutPlanScreen from './components/WorkoutPlan/WorkoutPlanScreen';
+import CalendarScreen from './components/Calendar/CalendarScreen';
+import LoginScreen from './components/Auth/LoginScreen';
+import AnalysisScreen from './components/Common/AnalysisScreen';
+import DayDetailView from './components/Calendar/DayDetailView';
 
 const MainAppLayout = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -70,7 +70,7 @@ const AppContent = () => {
         });
 
         return () => subscription.unsubscribe();
-    }, [navigate]);
+    }, []);
 
     if (isLoading) return <div className="flex items-center justify-center min-h-screen text-white font-black italic animate-pulse">MYGYM LOADING...</div>;
     if (!session) return <LoginScreen />;

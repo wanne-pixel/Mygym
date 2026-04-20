@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import OpenAI from 'openai';
 import { supabase } from '../api/supabase';
 import { saveWorkoutLogs } from '../api/workoutApi';
 import { STORAGE_KEYS } from '../constants/exerciseConstants';
 import EXERCISE_DATASET from '../data/exercises.json';
-
-const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-    dangerouslyAllowBrowser: true
-});
 
 const STEPS = {
     WELCOME: 1,
@@ -70,7 +64,6 @@ const Onboarding = ({ onComplete }) => {
         
         try {
             // 1단계: Supabase 프로필 저장
-            console.log('[Onboarding] Step 1: 프로필 저장 시작');
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('로그인이 필요합니다.');
 
@@ -93,10 +86,8 @@ const Onboarding = ({ onComplete }) => {
                 console.error('[Onboarding] 프로필 저장 실패:', profileError);
                 throw profileError;
             }
-            console.log('[Onboarding] Step 1 완료: 프로필 저장 성공');
 
             // 2단계: AI 루틴 생성 (Timeout 설정)
-            console.log('[Onboarding] Step 2: AI 루틴 생성 시작');
             
             const fetchAIResponse = async () => {
                 const prompt = `당신은 퍼스널 트레이너입니다. 다음 프로필을 분석해 첫 운동 루틴을 추천하세요.
@@ -127,16 +118,12 @@ const Onboarding = ({ onComplete }) => {
   ]
 }`;
 
-                const response = await openai.chat.completions.create({
-                    model: 'gpt-4o-mini',
-                    messages: [{ role: 'system', content: 'You are a professional fitness planner. Respond ONLY with a valid JSON object.' }, { role: 'user', content: prompt }],
-                    response_format: { type: "json_object" }
+                const { data, error } = await supabase.functions.invoke('ai-coach', {
+                    body: { type: 'onboarding', prompt },
                 });
-                
-                let content = response.choices[0].message.content;
-                // Robust parsing even with response_format: json_object
-                content = content.replace(/```json/gi, '').replace(/```/gi, '').trim();
-                return JSON.parse(content);
+                if (error) throw error;
+                if (data.error) throw new Error(data.error);
+                return JSON.parse(data.content);
             };
 
             // AI 호출에 25초 타임아웃 적용 (AbortController 대신 Promise.race 사용)

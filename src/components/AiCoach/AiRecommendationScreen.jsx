@@ -22,19 +22,19 @@ const AiRecommendationScreen = () => {
 
     const parseRoutineFromResponse = (content) => {
         try {
-            // Remove markdown code blocks and any leading/trailing whitespace
-            let cleanedContent = content.replace(/```json/gi, '').replace(/```/gi, '').trim();
+            // 정규식을 사용하여 첫 번째 '{'부터 마지막 '}'까지 추출
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) return null;
             
-            // If the content still has text before the first '{', strip it
-            const firstBrace = cleanedContent.indexOf('{');
-            const lastBrace = cleanedContent.lastIndexOf('}');
+            const jsonString = jsonMatch[0];
+            const data = JSON.parse(jsonString);
             
-            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-                cleanedContent = cleanedContent.substring(firstBrace, lastBrace + 1);
-            }
-
-            const data = JSON.parse(cleanedContent);
-            return data.routine || null;
+            // 루틴 데이터가 배열인지 확인 (다양한 JSON 구조 대응)
+            if (Array.isArray(data.routine)) return data.routine;
+            if (Array.isArray(data.exercises)) return data.exercises;
+            if (Array.isArray(data)) return data;
+            
+            return null;
         } catch (e) {
             console.error('Failed to parse JSON routine from AI response', e);
             return null;
@@ -45,7 +45,7 @@ const AiRecommendationScreen = () => {
         if (!profile) { alert("프로필 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요."); return; }
         setCurrentRecommendationMode('balanced');
         let displayMessage = '🎯 오늘의 루틴 추천';
-        let aiPrompt = "나의 프로필과 최근 운동 기록을 분석해서 오늘 할 균형잡힌 운동 루틴을 추천해줘. 부족한 부위가 있으면 보완하고 점진적 과부하 원칙을 적용해줘. 오늘 하루 루틴만 3-5개 운동으로 구성해서 JSON 형식으로 응답해줘.";
+        let aiPrompt = "나의 프로필과 최근 운동 기록을 분석해서 오늘 할 균형잡힌 운동 루틴을 추천해줘. 부족한 부위가 있으면 보완하고 점진적 과부하 원칙을 적용해줘. 오늘 하루 루틴만 3-5개 운동으로 구성해서 반드시 JSON 형식으로만 응답해줘. JSON 구조: { \"routine\": [ { \"name\": \"운동이름\", \"part\": \"부위\", \"sets\": [ { \"kg\": 0, \"reps\": 10 } ], \"description\": \"설명\" } ] }";
         
         await handleSendMessage(displayMessage, aiPrompt);
     };
@@ -67,14 +67,14 @@ const AiRecommendationScreen = () => {
         };
 
         const modeInstructions = {
-            low_weight_high_reps: `저중량 고반복 하드모드...`,
-            high_weight_low_reps: `고중량 저반복 하드모드...`,
-            progressive_overload: `점진적 중량증가 하드모드...`,
-            drop_sets: `드롭세트 하드모드...`
+            low_weight_high_reps: `저중량 고반복 하드모드 루틴을 추천해줘.`,
+            high_weight_low_reps: `고중량 저반복 하드모드 루틴을 추천해줘.`,
+            progressive_overload: `점진적 중량증가 하드모드 루틴을 추천해줘.`,
+            drop_sets: `드롭세트 하드모드 루틴을 추천해줘.`
         };
 
         let displayMessage = modeLabels[hardModeType];
-        let aiPrompt = `나의 프로필과 최근 운동 기록, 최고 기록을 분석해서 다음 하드모드 루틴을 추천해줘:\n\n${modeInstructions[hardModeType]}\n\n중요: ... (생략 동일 로직) ...`;
+        let aiPrompt = `나의 프로필과 최근 운동 기록을 분석해서 다음 하드모드 루틴을 추천해줘: ${modeInstructions[hardModeType]}. 반드시 JSON 형식으로만 응답해줘. JSON 구조: { \"routine\": [ { \"name\": \"운동이름\", \"part\": \"부위\", \"sets\": [ { \"kg\": 0, \"reps\": 10 } ], \"description\": \"설명\" } ] }`;
 
         await handleSendMessage(displayMessage, aiPrompt);
     };
@@ -107,33 +107,74 @@ const AiRecommendationScreen = () => {
                     }
 
                     const routine = parseRoutineFromResponse(msg.text);
-                    const sections = msg.text.split(/\*\*\d\.\s*/);
-                    const analysis = sections[1]?.split('\n')[0] || '';
-                    const direction = sections[2]?.split('\n')[0] || '';
-                    const caution = sections[4]?.split('\n')[0] || '';
-                    const motivation = sections[5]?.split('\n')[0] || '';
+                    // JSON을 제외한 일반 텍스트 설명 부분 추출 (정규식으로 JSON 블록 제거)
+                    const plainText = msg.text.replace(/\{[\s\S]*\}/, '').replace(/```json/gi, '').replace(/```/gi, '').trim();
 
                     return (
                         <div key={msg.id} className="flex items-start gap-3 mb-4 animate-slide-up">
                             <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg shadow-blue-900/20">AI</div>
-                            <div className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 space-y-3 max-w-[85%] shadow-xl overflow-hidden">
-                                {analysis && (
+                            <div className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 space-y-4 max-w-[85%] shadow-xl overflow-hidden">
+                                
+                                {plainText && (
                                     <div className="bg-blue-600/10 border-l-4 border-blue-500 pl-3 py-2 rounded-r">
-                                        <p className="text-[10px] text-blue-400 font-black mb-1 uppercase tracking-widest flex items-center gap-1.5"><TrendingUp size={12} /> 📊 상태분석</p>
-                                        <p className="text-sm text-slate-200 leading-relaxed font-medium">{analysis}</p>
+                                        <p className="text-[10px] text-blue-400 font-black mb-1 uppercase tracking-widest flex items-center gap-1.5"><TrendingUp size={12} /> 📊 코치 가이드</p>
+                                        <p className="text-sm text-slate-200 leading-relaxed font-medium whitespace-pre-line">{plainText}</p>
                                     </div>
                                 )}
+
                                 {routine && routine.length > 0 && (
-                                    <div className="space-y-2 pt-2">
-                                        <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1.5 uppercase tracking-widest"><Dumbbell size={12} className="text-blue-500" /> 운동을 탭하여 추가</p>
-                                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                                            <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1.5 uppercase tracking-widest">
+                                                <Dumbbell size={14} className="text-blue-500" /> 맞춤 운동 루틴
+                                            </p>
+                                            <span className="text-[10px] text-blue-500 font-black italic">{routine.length} EXERCISES</span>
+                                        </div>
+                                        
+                                        <div className="space-y-3">
                                             {routine.map((exercise, exIdx) => (
-                                                <AiExerciseCard key={exIdx} exercise={exercise} mode={currentRecommendationMode} onAdd={addExerciseToRoutine} />
+                                                <div key={exIdx} className="bg-slate-800/40 rounded-xl p-3 border border-white/5 hover:border-blue-500/30 transition-colors">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div>
+                                                            <h4 className="text-sm font-black text-white italic uppercase">{exercise.name}</h4>
+                                                            <p className="text-[10px] text-blue-500 font-bold uppercase">{exercise.part}</p>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => addExerciseToRoutine(exercise, currentRecommendationMode === 'hard')}
+                                                            className="p-1.5 bg-blue-600 rounded-lg text-white hover:bg-blue-500 active:scale-90 transition-all"
+                                                        >
+                                                            <Plus size={14} />
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <div className="flex gap-2 mb-2">
+                                                        {exercise.sets?.map((set, sIdx) => (
+                                                            <div key={sIdx} className="bg-slate-900/60 px-2 py-1 rounded text-[10px] text-slate-300 font-medium border border-white/5">
+                                                                {set.kg ? `${set.kg}kg × ` : ''}{set.reps}회
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    
+                                                    {exercise.description && (
+                                                        <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2 italic">
+                                                            "{exercise.description}"
+                                                        </p>
+                                                    )}
+                                                </div>
                                             ))}
                                         </div>
+                                        
+                                        <p className="text-[9px] text-slate-500 text-center font-bold animate-pulse uppercase tracking-widest">
+                                            각 운동의 + 버튼을 눌러 루틴에 추가하세요
+                                        </p>
                                     </div>
                                 )}
-                                {!analysis && !routine && <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-medium">{msg.text}</p>}
+
+                                {!plainText && !routine && (
+                                    <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-medium">
+                                        {msg.text}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     );
