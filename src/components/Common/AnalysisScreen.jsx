@@ -388,7 +388,12 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
         body: {
           type: 'muscle_analysis',
           muscle_group: muscleGroup,
-          breakdown: subCategoryData,
+          breakdown: subCategoryData.map(d => ({
+            category: d.name,
+            volume: d.value,
+            count: d.count,
+            percentage: d.percentage,
+          })),
           total_exercises: subCategoryData.reduce((s, d) => s + d.count, 0),
         },
         headers: { Authorization: `Bearer ${token}` },
