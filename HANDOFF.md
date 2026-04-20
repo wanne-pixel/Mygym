@@ -1,8 +1,8 @@
 # 📝 HANDOFF.md
 
 > 마지막 업데이트: 2026-04-20
-> 브랜치: `main` — **미커밋 변경사항 3개 파일 존재** (커밋·푸시 필요)
-> 최신 커밋: `c78cc12` Fix: 특정 부위 선택 시 AI 분석 실패 문제 수정
+> 브랜치: `main` — **모든 변경사항 커밋 및 푸시 완료**
+> 최신 커밋: `5b852bc` Feat: AI 코치 개인정보·운동이력 반영 및 UI 개선
 
 ---
 
@@ -14,14 +14,20 @@
 |------|------|
 | 인증 (Supabase Auth) | 안정 |
 | 라우팅 / 탭 구조 | 안정 |
-| AI 코치 Edge Function | ⚠️ **미커밋 + 미배포** — 이번 세션 수정 반영 필요 |
-| AI 코치 프론트엔드 | ⚠️ **미커밋** — 이번 세션 수정 반영 필요 |
+| AI 코치 Edge Function | ⚠️ **배포 필요** — 이번 세션 수정 반영 대기 중 |
+| AI 코치 프론트엔드 | 안정 (커밋됨) |
 | AnalysisScreen | 안정 (커밋됨) |
 | Cloudflare 배포 | push 시 자동 재배포 |
 
 ---
 
 ## ✅ 이번 세션에서 완료한 작업 (최신순)
+
+### 0. 커밋 및 푸시 완료 (`5b852bc`)
+- `src/components/AiCoach/AiRecommendationScreen.jsx`
+- `src/components/AiCoach/useAiCoach.js`
+- `supabase/functions/ai-coach/index.ts`
+- 위 파일들의 모든 개선사항이 로컬 및 원격 저장소에 반영됨.
 
 ### 1. Edge Function TDZ 버그 수정 (`index.ts`)
 - 원인: `recommendation` 블록 안에 `const body`가 두 번 선언되어 TDZ(Temporal Dead Zone) 에러 발생
@@ -71,33 +77,11 @@
 
 ---
 
-## ⛔ 지금 멈춘 지점
-
-**이번 세션의 변경사항 3개 파일이 커밋·푸시되지 않은 상태.**
-
-미커밋 파일:
-- `src/components/AiCoach/AiRecommendationScreen.jsx`
-- `src/components/AiCoach/useAiCoach.js`
-- `supabase/functions/ai-coach/index.ts`
-
-또한 **Edge Function은 미배포 상태** — 이번 세션의 모든 AI 관련 개선사항이 운영에 미반영.
-
----
-
 ## 🐛 현재 알려진 문제 / 확인 필요 사항
 
-### [P1] ⚠️ 미커밋 + Edge Function 미배포 (즉시 처리 필요)
+### [P1] ⚠️ Edge Function 미배포 (즉시 처리 필요)
 
-**① 커밋·푸시:**
-```bash
-git add src/components/AiCoach/AiRecommendationScreen.jsx
-git add src/components/AiCoach/useAiCoach.js
-git add supabase/functions/ai-coach/index.ts
-git commit -m "Feat: AI 코치 개인정보·운동이력 반영 및 UI 개선"
-git push
-```
-
-**② Edge Function 재배포:**
+**Edge Function 재배포:**
 ```bash
 npx supabase functions deploy ai-coach --no-verify-jwt
 ```
@@ -117,7 +101,7 @@ npx supabase functions deploy ai-coach --no-verify-jwt
 
 ## 🚀 다음에 해야 할 작업 (우선순위)
 
-### P1 — 커밋·푸시 + Edge Function 재배포 (즉시)
+### P1 — Edge Function 재배포 (즉시)
 위 [P1] 섹션 명령어 참조.
 
 ### P2 — AI 코치 추천 end-to-end 검증
@@ -134,116 +118,3 @@ npx supabase functions deploy ai-coach --no-verify-jwt
 1. 분석 탭 → 전체 탭 → 도넛 차트 렌더링 확인
 2. "분석 요청" → 결과가 한글인지 확인
 3. 특정 부위(예: 가슴) 탭 → 서브카테고리 도넛 차트 → "AI 훈련 분석 요청" 클릭 → 결과 표시 확인
-
----
-
-## 📂 관련 파일 및 역할
-
-- `src/components/AiCoach/useAiCoach.js`
-  → AI 코치 훅. `callRecommendation()`에서 최근 7일 운동 기록 조회 후 Edge Function 전달.
-  → `callRecommendation(mode, hardModeType, hardModeLabel)` — 세 번째 인자 추가됨
-
-- `src/components/AiCoach/AiRecommendationScreen.jsx`
-  → AI 코치 UI. 추천 결과를 보라색 박스 하나로 통합.
-  → `parseResponseJSON`: `intro`, `tip` 추출 포함
-  → `sendHardModeRequest`: `HARD_MODE_OPTIONS`에서 label 찾아 전달
-
-- `supabase/functions/ai-coach/index.ts`
-  → Deno Edge Function. 5개 타입: `recommendation`, `muscle_analysis`, `training_analysis`, `chat`, `onboarding`
-  → `recommendation` 타입: `recentWorkouts` body 파라미터 추가, 개인정보 전체 반영, 분할 전략 자동 결정
-
-- `src/components/Common/AnalysisScreen.jsx`
-  → 분석 탭. 도넛 차트, PR 카드, AI 종합 분석. 디버그 로그 제거 완료.
-
-- `src/components/Onboarding.jsx`
-  → 첫 로그인 8단계 플로우. `user_profiles` upsert.
-
-- `src/components/Calendar/CalendarScreen.jsx`
-  → 달력 탭. 우측 상단 "개인정보" 버튼 → 프로필 수정 모달 (인바디 포함).
-
-- `src/api/workoutApi.js`
-  → workout_logs CRUD. 실제 DB 컬럼명 참조용.
-
-- `src/data/exercises.json`
-  → 운동 마스터 데이터 (204개). `id`는 문자열(`"0025"`), `bodyPart` 필드 사용.
-
-- `supabase/migrations/`
-  → DB 마이그레이션 SQL (미적용 상태 가능).
-
----
-
-## 🛠 수정 시 주의사항
-
-### Edge Function (`supabase/functions/ai-coach/index.ts`)
-- 수정 후 반드시 `npx supabase functions deploy ai-coach --no-verify-jwt` 재배포
-- `CORS_HEADERS` 객체와 `OPTIONS` 처리 블록 항상 함께 유지
-- `Deno.env.get` 앞에 `// @ts-ignore` 주석 필요
-- `createClient`는 `https://esm.sh/@supabase/supabase-js@2`에서 import
-- `chat` 타입은 body의 `systemMessage`를 무시 — 서버 측 한글 프롬프트 사용
-- **`recommendation` 블록 내 변수명 주의**: 신체 정보 문자열 변수는 `physique` (과거 `body`로 선언 → TDZ 에러 발생 이력)
-
-### `recommendation` 타입 body 구조
-프론트엔드 → Edge Function 전달 필드:
-```javascript
-{
-  type: 'recommendation',
-  exercises: EXERCISE_DATASET,   // 204개 운동 마스터
-  profile,                        // user_profiles 전체
-  mode,                           // 'balanced' | 'hard'
-  hardModeType,                   // 'high_weight_low_reps' 등 영어 value
-  recentWorkouts,                 // [{ date, parts: [], exercises: [] }, ...]
-}
-```
-
-### AnalysisScreen 데이터 구조
-- `logs` 구조: `{ id, exercise(운동명), part(부위), sets_data(JSON), created_at }`
-- `sets_data` 파싱: `typeof setsData === 'string'` 분기 처리 필요
-- `normalizePart(log.part)` → `'가슴' | '등' | '어깨' | '하체' | '팔' | '코어' | '기타'`
-- `runAnalysis`에서 Edge Function에 보내는 breakdown 필드명: `category`, `volume` (recharts용 `name`/`value`와 다름 — 변환 map 필수)
-
-### exercises.json
-- `id` 필드는 숫자가 아닌 문자열 (`"0025"`)
-- `bodyPart` 필드 사용 (DB의 `part` 컬럼명과 다름)
-
-### Cloudflare 배포
-- `package-lock.json` 커밋 금지 (`.gitignore`에 없음 — 실수 주의)
-- `git push` 시 Cloudflare 자동 재배포
-
-### 환경변수
-- `.env` (로컬): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
-- Supabase Secrets: `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`
-
----
-
-## 🔍 검증 방법
-
-### AI 코치 추천 (최근 운동 반영)
-```
-1. 오늘 이미 가슴 운동을 한 상태에서 "오늘의 루틴 추천" 클릭
-2. intro 텍스트에 "오늘 가슴 하셨네요" 류 언급 확인
-3. 추천 카드에 가슴 운동이 없는지 확인
-4. Supabase Logs에서 인증 성공 + 오류 없음 확인
-```
-
-### AI 코치 추천 (분할 전략)
-```
-1. 프로필: 고급자(advanced) + 주 5회
-2. 추천 결과가 1~2개 부위로만 집중되는지 확인 (전신 운동 없어야 함)
-3. intro에 분할 전략 언급 확인
-```
-
-### AnalysisScreen 특정 부위 AI 분석
-```
-1. 분석 탭 → 가슴 탭 선택
-2. 서브카테고리 도넛 차트 표시 확인
-3. "AI 훈련 분석 요청" 클릭 → 로딩 → 결과 카드 표시
-4. 실패 시 콘솔에서 "AI 분석 실패:" 에러 확인
-   → breakdown 필드 변환 문제이므로 runAnalysis의 map() 로직 재확인
-```
-
-### 하드모드 한글 옵션
-```
-1. AI 코치 탭 → 하드모드 버튼
-2. "고중량 저반복" 클릭
-3. 채팅창에 "🔥 하드모드 루틴 추천 (고중량 저반복)" 표시 확인 (영어 아님)
-```

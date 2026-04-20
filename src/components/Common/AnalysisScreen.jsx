@@ -6,7 +6,7 @@ import {
   TrendingUp, Target, Calendar
 } from 'lucide-react';
 import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer
+  PieChart, Pie, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { supabase } from '../../api/supabase';
 
@@ -292,6 +292,7 @@ const VolumeDistributionSection = ({ logs }) => {
         name: tab,
         value: Math.round(volMap[tab]),
         percentage: Math.round((volMap[tab] / total) * 100),
+        fill: MUSCLE_COLORS[tab] || '#94a3b8',
       }))
       .sort((a, b) => b.value - a.value);
   }, [logs]);
@@ -318,11 +319,7 @@ const VolumeDistributionSection = ({ logs }) => {
               dataKey="value"
               label={({ name, percentage }) => `${name} ${percentage}%`}
               labelLine={true}
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={MUSCLE_COLORS[entry.name] || '#94a3b8'} />
-              ))}
-            </Pie>
+            />
             <Tooltip
               formatter={(value) => `${value.toLocaleString()}kg`}
               contentStyle={{
@@ -375,6 +372,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
         value: Math.round(vol),
         count: cntMap[cat],
         percentage: Math.round((vol / total) * 100),
+        fill: SUB_CAT_COLORS[cat] || '#94a3b8',
       }))
       .sort((a, b) => b.percentage - a.percentage);
   }, [muscleGroup, logs]);
@@ -432,11 +430,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
               dataKey="value"
               label={({ name, percentage }) => `${name} ${percentage}%`}
               labelLine={true}
-            >
-              {subCategoryData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={SUB_CAT_COLORS[entry.name] || '#94a3b8'} />
-              ))}
-            </Pie>
+            />
             <Tooltip
               formatter={(value) => `${value.toLocaleString()}kg`}
               contentStyle={{
