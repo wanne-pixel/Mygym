@@ -27,7 +27,7 @@ const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cov
     );
 };
 
-const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
+const ExerciseSelector = ({ selection, setSelection, onExerciseSelect, hiddenExercises = [], onHideExercise }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '', isDirectInput: false });
     const [customName, setCustomName] = useState('');
@@ -94,9 +94,10 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
 
     const filteredExercises = useMemo(() => {
         if (!selection.part || !selection.equipment) return [];
-        let list = EXERCISE_DATASET.filter(ex => 
-            ex.bodyPart === selection.part && 
-            ex.equipment === selection.equipment
+        let list = EXERCISE_DATASET.filter(ex =>
+            ex.bodyPart === selection.part &&
+            ex.equipment === selection.equipment &&
+            !hiddenExercises.includes(ex.id)
         );
         if (searchTerm.trim()) {
             list = list.filter(ex => {
@@ -107,7 +108,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             });
         }
         return list;
-    }, [selection.part, selection.equipment, searchTerm]);
+    }, [selection.part, selection.equipment, searchTerm, hiddenExercises]);
 
     return (
         <div className="space-y-8">
@@ -214,8 +215,17 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                             <p className={`text-xs font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
                                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{EQUIPMENT_MAP[ex.equipment] || ex.equipment}</span>
                                         </div>
-                                        <div className="shrink-0">
-                                            <button 
+                                        <div className="shrink-0 flex items-center gap-1.5">
+                                            {onHideExercise && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onHideExercise(ex.id, ex.name); }}
+                                                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all bg-slate-800 text-slate-600 hover:text-orange-400 hover:bg-slate-700"
+                                                    title="이 운동 숨기기"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                                                </button>
+                                            )}
+                                            <button
                                                 onClick={(e) => { e.stopPropagation(); handleExerciseClick(ex); }}
                                                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${selection.exercise?.id === ex.id ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-500 hover:text-white'}`}
                                             >

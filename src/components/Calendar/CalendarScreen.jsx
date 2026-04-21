@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { User, X } from 'lucide-react';
+import { User, X, EyeOff } from 'lucide-react';
+import EXERCISE_DATASET from '../../data/exercises.json';
 import { supabase } from '../../api/supabase';
 import { STORAGE_KEYS } from '../../constants/exerciseConstants';
 import MonthlyCalendar from './MonthlyCalendar';
@@ -187,12 +188,66 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate }) => {
     );
 };
 
+const HiddenExercisesModal = ({ isOpen, onClose, hiddenExercises, onRestore }) => {
+    if (!isOpen) return null;
+
+    const hiddenList = hiddenExercises
+        .map(id => EXERCISE_DATASET.find(ex => ex.id === id))
+        .filter(Boolean);
+
+    return (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={onClose}></div>
+            <div className="relative bg-slate-900 border border-white/10 w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-2xl font-black text-white italic text-shadow">숨긴 운동 관리</h3>
+                    <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+                        <X size={24} />
+                    </button>
+                </div>
+                <p className="text-xs text-slate-500 mb-6">숨긴 운동을 복구하면 운동 선택 목록에 다시 표시됩니다.</p>
+
+                {hiddenList.length === 0 ? (
+                    <div className="text-center py-12 text-slate-600">
+                        <EyeOff className="mx-auto mb-3 opacity-30" size={36} />
+                        <p className="text-sm font-bold">숨긴 운동이 없습니다.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-2">
+                        {hiddenList.map(ex => (
+                            <div key={ex.id} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl border border-white/5">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-black text-white truncate">{ex.name}</p>
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest">{ex.bodyPart} · {ex.equipment}</p>
+                                </div>
+                                <button
+                                    onClick={() => onRestore(ex.id)}
+                                    className="shrink-0 px-3 py-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 font-black text-xs rounded-lg transition-all border border-blue-500/20"
+                                >
+                                    복구
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <div className="pt-6 border-t border-slate-800 mt-6">
+                    <button onClick={onClose} className="w-full py-3 bg-slate-800 text-white font-black rounded-xl hover:bg-slate-700 transition-all text-xs uppercase tracking-widest">닫기</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const CalendarScreen = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
     const [workoutGroups, setWorkoutGroups] = useState({});
     const [userData, setUserData] = useState(null);
     const [showProfileEdit, setShowProfileEdit] = useState(false);
+    const [showHiddenExercises, setShowHiddenExercises] = useState(false);
+    const [hiddenExercises, setHiddenExercises] = useState([]);
+    const [currentUserId, setCurrentUserId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(null);
 
@@ -202,6 +257,8 @@ const CalendarScreen = () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
             
+            setCurrentUserId(user.id);
+
             const { data: profile } = await supabase
                 .from('user_profiles')
                 .select('*')
@@ -209,6 +266,7 @@ const CalendarScreen = () => {
                 .maybeSingle();
 
             setUserData({ ...user.user_metadata, ...profile });
+            setHiddenExercises(profile?.hidden_exercises || []);
 
             const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id);
             const groups = {};
@@ -222,7 +280,20 @@ const CalendarScreen = () => {
         } catch (e) { console.error(e); } finally { setIsLoading(false); }
     };
 
-    useEffect(() => { fetchLogs(); }, []);
+    useEffect(() => {
+        localStorage.removeItem('availableEquipment');
+        fetchLogs();
+    }, []);
+
+    const handleRestoreExercise = async (exerciseId) => {
+        if (!currentUserId) return;
+        const updated = hiddenExercises.filter(id => id !== exerciseId);
+        setHiddenExercises(updated);
+        await supabase
+            .from('user_profiles')
+            .update({ hidden_exercises: updated })
+            .eq('user_id', currentUserId);
+    };
 
     const handleMonthChange = (off) => {
         setCurrentViewDate(new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + off, 1));
@@ -233,6 +304,16 @@ const CalendarScreen = () => {
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">MY GYM</h2>
                 <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => setShowHiddenExercises(true)}
+                        className="text-xs font-bold text-slate-400 hover:text-slate-300 flex items-center gap-1.5 bg-slate-500/10 px-3 py-2 rounded-xl transition-all border border-slate-500/20"
+                    >
+                        <EyeOff size={14} />
+                        숨긴 운동
+                        {hiddenExercises.length > 0 && (
+                            <span className="ml-0.5 bg-slate-600 text-slate-300 text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">{hiddenExercises.length}</span>
+                        )}
+                    </button>
                     <button
                         onClick={() => setShowProfileEdit(true)}
                         className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1.5 bg-blue-500/10 px-3 py-2 rounded-xl transition-all border border-blue-500/20"
@@ -269,11 +350,17 @@ const CalendarScreen = () => {
                 />
             )}
             
-            <UserProfileModal 
-                isOpen={showProfileEdit} 
-                onClose={() => setShowProfileEdit(false)} 
-                userData={userData} 
-                onUpdate={fetchLogs} 
+            <HiddenExercisesModal
+                isOpen={showHiddenExercises}
+                onClose={() => setShowHiddenExercises(false)}
+                hiddenExercises={hiddenExercises}
+                onRestore={handleRestoreExercise}
+            />
+            <UserProfileModal
+                isOpen={showProfileEdit}
+                onClose={() => setShowProfileEdit(false)}
+                userData={userData}
+                onUpdate={fetchLogs}
             />
         </div>
     );

@@ -10,6 +10,7 @@ import CalendarScreen from './components/Calendar/CalendarScreen';
 import LoginScreen from './components/Auth/LoginScreen';
 import AnalysisScreen from './components/Common/AnalysisScreen';
 import DayDetailView from './components/Calendar/DayDetailView';
+import ExerciseNameEditor from './components/Admin/ExerciseNameEditor';
 
 const MainAppLayout = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -165,6 +166,7 @@ const AppContent = () => {
                     ) : <Navigate to="/" replace />
                 } 
             />
+            <Route path="/admin/exercise-editor" element={<ExerciseNameEditor />} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
