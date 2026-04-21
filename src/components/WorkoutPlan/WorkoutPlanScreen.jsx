@@ -5,8 +5,10 @@ import { PART_MAP } from '../../constants/exerciseConstants';
 import { saveWorkoutLogs } from '../../api/workoutApi';
 import ExerciseSelector from '../Exercise/ExerciseSelector';
 import { GifModal, GifRenderer } from '../Common/GifUI';
+import { useWindowSize } from '../../hooks/useWindowSize';
 
 const WorkoutPlanScreen = () => {
+    const { isMobile } = useWindowSize();
     const [searchParams, setSearchParams] = useSearchParams();
     const dateParam = searchParams.get('date');
     const targetDate = dateParam || new Date().toISOString().split('T')[0];
@@ -193,7 +195,7 @@ const WorkoutPlanScreen = () => {
     const inputCls = "w-full bg-white/5 border border-white/10 rounded-md px-1.5 py-1 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors";
 
     return (
-        <div className="p-6 md:p-12 max-w-6xl mx-auto bg-slate-950 min-h-screen pb-24">
+        <div className={`${isMobile ? 'p-4' : 'p-8 max-w-6xl mx-auto'} bg-slate-950 min-h-screen pb-24`}>
             <h2 className="text-3xl font-black italic text-white uppercase underline decoration-indigo-500 decoration-4 underline-offset-8 mb-1">루틴 구성</h2>
             {!isToday && (
                 <p className="text-blue-400 font-bold text-sm mb-8">{new Date(targetDate + 'T12:00:00').toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })} 기록</p>
@@ -224,10 +226,10 @@ const WorkoutPlanScreen = () => {
                                             <GifRenderer exerciseId={item.id} onClick={() => openPreview(item.id, item.name)} />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-[10px] font-bold text-indigo-400 uppercase">{PART_MAP[item.body_part]}</p>
-                                            <h4 className="text-sm font-bold text-white uppercase truncate">{item.name || item.exercise}</h4>
+                                            <p className="text-xs font-bold text-indigo-400 uppercase">{PART_MAP[item.body_part]}</p>
+                                            <h4 className={`font-bold text-white uppercase truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{item.name || item.exercise}</h4>
                                             {pr && (
-                                                <p className="text-[10px] text-green-400 font-bold mt-0.5">
+                                                <p className="text-xs text-green-400 font-bold mt-0.5">
                                                     🏆 최고: {pr.kg}kg × {pr.reps}회
                                                 </p>
                                             )}
@@ -259,7 +261,7 @@ const WorkoutPlanScreen = () => {
                                                     {cardio ? (
                                                         <div className="relative">
                                                             <input type="number" inputMode="decimal" value={set.level} onChange={e => updateSet(exIdx, setIdx, 'level', e.target.value)} className={`${inputCls} pr-6`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none">Lv</span>
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">Lv</span>
                                                         </div>
                                                     ) : set.isDropSet ? (
                                                         <div className="grid grid-cols-3 gap-1">
@@ -270,7 +272,7 @@ const WorkoutPlanScreen = () => {
                                                     ) : (
                                                         <div className="relative">
                                                             <input type="number" inputMode="decimal" value={set.kg} onChange={e => updateSet(exIdx, setIdx, 'kg', e.target.value)} className={`${inputCls} pr-6`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none">kg</span>
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">kg</span>
                                                         </div>
                                                     )}
 
@@ -278,12 +280,12 @@ const WorkoutPlanScreen = () => {
                                                     {cardio ? (
                                                         <div className="relative">
                                                             <input type="number" inputMode="numeric" value={set.minutes} onChange={e => updateSet(exIdx, setIdx, 'minutes', e.target.value)} className={`${inputCls} pr-5`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none">분</span>
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">분</span>
                                                         </div>
                                                     ) : (
                                                         <div className="relative">
                                                             <input type="number" inputMode="numeric" value={set.reps} onChange={e => updateSet(exIdx, setIdx, 'reps', e.target.value)} className={`${inputCls} pr-7`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none">reps</span>
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">reps</span>
                                                         </div>
                                                     )}
 
@@ -293,7 +295,7 @@ const WorkoutPlanScreen = () => {
                                                     ) : (
                                                         <label className="flex items-center gap-0.5 justify-center cursor-pointer">
                                                             <input type="checkbox" checked={!!set.isDropSet} onChange={() => toggleDropSet(exIdx, setIdx)} className="w-3 h-3 accent-red-500" />
-                                                            <span className="text-[10px] text-gray-400">드롭</span>
+                                                            <span className="text-xs text-gray-400">드롭</span>
                                                         </label>
                                                     )}
 

@@ -11,19 +11,27 @@ import LoginScreen from './components/Auth/LoginScreen';
 import AnalysisScreen from './components/Common/AnalysisScreen';
 import DayDetailView from './components/Calendar/DayDetailView';
 import ExerciseNameEditor from './components/Admin/ExerciseNameEditor';
+import SideNav from './components/SideNav';
 
 const MainAppLayout = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || '달력';
+    const handleTabChange = (tab) => setSearchParams({ tab });
     return (
         <div className="relative min-h-screen bg-slate-950">
-            <main>
+            {/* PC: 좌측 사이드바 */}
+            <div className="hidden lg:block">
+                <SideNav activeTab={activeTab} onTabChange={handleTabChange} />
+            </div>
+            {/* 메인 콘텐츠: PC에서 사이드바 너비만큼 밀어냄 */}
+            <main className="lg:ml-56">
                 {activeTab === '달력' && <CalendarScreen />}
                 {activeTab === '루틴구성' && <WorkoutPlanScreen />}
                 {activeTab === 'AI코치' && <AIRecommendationScreen />}
                 {activeTab === 'analysis' && <AnalysisScreen />}
             </main>
-            <BottomNav activeTab={activeTab} onTabChange={(tab) => setSearchParams({ tab })} />
+            {/* 모바일: 하단 탭바 (lg 이상에서 숨김은 BottomNav 내부에서 처리) */}
+            <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
         </div>
     );
 };

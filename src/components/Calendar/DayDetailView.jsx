@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../api/supabase';
 import { PART_MAP } from '../../constants/exerciseConstants';
 
-const DayDetailView = ({ date, onBack, onGoToRoutine }) => {
+const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
     const [logs, setLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -55,18 +55,18 @@ const DayDetailView = ({ date, onBack, onGoToRoutine }) => {
                 ) : (
                     <>
                         {logs.map(log => (
-                            <div key={log.id} className="bg-slate-900/40 border border-white/5 p-6 rounded-[1.5rem] relative overflow-hidden">
+                            <div key={log.id} className={`bg-slate-900/40 border border-white/5 p-6 rounded-[1.5rem] relative overflow-hidden ${isMobile ? 'mb-3' : 'mb-4'}`}>
                                 <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
                                         <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase text-white mb-1 inline-block">{PART_MAP[log.part] || log.part}</span>
-                                        <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">{log.exercise}</h3>
+                                        <h3 className={`font-black italic text-white uppercase tracking-tighter ${isMobile ? 'text-lg' : 'text-xl'}`}>{log.exercise}</h3>
                                     </div>
                                     <button onClick={() => handleDelete(log.id)} className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                 </div>
                                 <div className="space-y-1">
                                     {log.sets_data?.map((s, idx) => (
-                                        <div key={idx} className="flex justify-between py-1 px-3 bg-slate-950/50 rounded-lg text-xs font-bold">
+                                        <div key={idx} className={`flex justify-between py-1 px-3 bg-slate-950/50 rounded-lg font-bold ${isMobile ? 'text-sm' : 'text-xs'}`}>
                                             <span className="text-slate-500">{idx + 1} SET</span>
                                             <span className="text-white">
                                                 {s.isDropSet ? s.dropKgs?.filter(k=>k!=='').join(' › ') + ' kg' : s.kg ? `${s.kg}kg` : ''}{s.reps ? ` × ${s.reps}회` : ''}{s.level ? `Lv ${s.level}` : ''}{s.minutes ? ` ${s.minutes}분` : ''}

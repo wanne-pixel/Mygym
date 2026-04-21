@@ -4,8 +4,7 @@ export const BODY_PARTS = [
     { key: '어깨', label: '어깨' },
     { key: '하체', label: '하체' },
     { key: '팔', label: '팔' },
-    { key: '허리/코어', label: '허리/코어' },
-    { key: '유산소', label: '유산소' }
+    { key: '허리/코어', label: '허리/코어' }
 ];
 
 export const PART_MAP = {
@@ -28,6 +27,7 @@ export const PART_MAP = {
 export const EQUIPMENT_MAP = {
     'barbell': '바벨',
     'body weight': '맨몸',
+    '맨몸': '프리웨이트',
     'cable': '케이블',
     'dumbbell': '덤벨',
     'leverage machine': '레버리지 머신',

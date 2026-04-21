@@ -26,60 +26,8 @@
     "gif_url": "videos/0033-GrO65fd.gif"
   },
   {
-    "id": "0003",
-    "name": "바벨 디클라인 풀오버",
-    "bodyPart": "가슴",
-    "equipment": "바벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1255-9sgNE2O.gif"
-  },
-  {
-    "id": "0004",
-    "name": "바벨 디클라인 와이드 그립 프레스",
-    "bodyPart": "가슴",
-    "equipment": "바벨",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0036-hl8DUh8.gif"
-  },
-  {
-    "id": "0005",
-    "name": "바벨 프론트 레이즈 풀오버",
-    "bodyPart": "가슴",
-    "equipment": "바벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0040-33AzZeV.gif"
-  },
-  {
-    "id": "0006",
-    "name": "바벨 기요틴 벤치 프레스",
-    "bodyPart": "가슴",
-    "equipment": "바벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0045-GXoaSgn.gif"
-  },
-  {
     "id": "0007",
-    "name": "바벨 인클라인 벤치 프레스",
+    "name": "바벨인클라인 벤치 프레스",
     "bodyPart": "가슴",
     "equipment": "바벨",
     "target": "상부 가슴",
@@ -91,21 +39,8 @@
     "gif_url": "videos/0047-3TZduzM.gif"
   },
   {
-    "id": "0008",
-    "name": "바벨 인클라인 숄더 레이즈",
-    "bodyPart": "가슴",
-    "equipment": "바벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0050-xi0yckC.gif"
-  },
-  {
     "id": "0009",
-    "name": "바벨 리버스 그립 디클라인 벤치 프레스",
+    "name": "리버스 그립 디클라인 벤치 프레스",
     "bodyPart": "가슴",
     "equipment": "바벨",
     "target": "하부 가슴",
@@ -118,7 +53,7 @@
   },
   {
     "id": "0010",
-    "name": "바벨 리버스 그립 인클라인 벤치 프레스",
+    "name": "리버스 그립 인클라인 벤치 프레스",
     "bodyPart": "가슴",
     "equipment": "바벨",
     "target": "상부 가슴",
@@ -128,45 +63,6 @@
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
     "gif_url": "videos/1257-DU7I633.gif"
-  },
-  {
-    "id": "0011",
-    "name": "바벨 와이드 벤치 프레스",
-    "bodyPart": "가슴",
-    "equipment": "바벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0122-JsKq9so.gif"
-  },
-  {
-    "id": "0012",
-    "name": "바벨 와이드 리버스 그립 벤치 프레스",
-    "bodyPart": "가슴",
-    "equipment": "바벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1258-945zpRg.gif"
-  },
-  {
-    "id": "0013",
-    "name": "플로어 플라이 바벨",
-    "bodyPart": "가슴",
-    "equipment": "바벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/0458-neonEDL.gif"
   },
   {
     "id": "0014",
@@ -182,21 +78,8 @@
     "gif_url": "videos/3294-A9qxk2F.gif"
   },
   {
-    "id": "0015",
-    "name": "가슴 프론트 숄더 스트레칭",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1271-Uto7l43.gif"
-  },
-  {
     "id": "0016",
-    "name": "가슴 딥스",
+    "name": "딥스",
     "bodyPart": "가슴",
     "equipment": "맨몸",
     "target": "가슴",
@@ -206,58 +89,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/0251-9WTm7dq.gif"
-  },
-  {
-    "id": "0017",
-    "name": "가슴 딥스 딥스 풀 업 CAGE",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1430-XgWyAiA.gif"
-  },
-  {
-    "id": "0018",
-    "name": "가슴 딥스 스트레이트 바",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2462-LQFOrMn.gif"
-  },
-  {
-    "id": "0019",
-    "name": "클랩 푸시 업",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1273-wigSg76.gif"
-  },
-  {
-    "id": "0020",
-    "name": "클락 푸시 업",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0258-CMAxnsG.gif"
   },
   {
     "id": "0021",
@@ -273,45 +104,6 @@
     "gif_url": "videos/0279-i5cEhka.gif"
   },
   {
-    "id": "0022",
-    "name": "드롭 푸시 업",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1275-Q497lAE.gif"
-  },
-  {
-    "id": "0023",
-    "name": "풀 PLANCHE 푸시 업",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3327-gw9PqGk.gif"
-  },
-  {
-    "id": "0024",
-    "name": "인클라인 푸시 업 뎁스 점프",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0492-CB8WET1.gif"
-  },
-  {
     "id": "0025",
     "name": "인클라인 푸시 업",
     "bodyPart": "가슴",
@@ -325,97 +117,6 @@
     "gif_url": "videos/0493-B1EVP9F.gif"
   },
   {
-    "id": "0026",
-    "name": "인클라인 리버스 그립 푸시 업",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0494-XaaRnRn.gif"
-  },
-  {
-    "id": "0027",
-    "name": "인클라인 견갑골 푸시 업",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3011-GdMa1ET.gif"
-  },
-  {
-    "id": "0028",
-    "name": "아이소메트릭 가슴 스퀴즈",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1297-HbSG1Pw.gif"
-  },
-  {
-    "id": "0029",
-    "name": "아이소메트릭 와이퍼",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0500-11wrviz.gif"
-  },
-  {
-    "id": "0030",
-    "name": "KOREAN 딥스",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3288-rWoBmi5.gif"
-  },
-  {
-    "id": "0031",
-    "name": "플라이오 푸시 업",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1306-Snj1wSv.gif"
-  },
-  {
-    "id": "0032",
-    "name": "푸시 풀 맨몸",
-    "bodyPart": "가슴",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1689-wXvUZC8.gif"
-  },
-  {
     "id": "0033",
     "name": "푸시 업",
     "bodyPart": "가슴",
@@ -427,84 +128,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/0662-I4hDWkc.gif"
-  },
-  {
-    "id": "0034",
-    "name": "케이블 벤치 프레스",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0151-7xI5MXA.gif"
-  },
-  {
-    "id": "0035",
-    "name": "케이블 크로스 오버 바리에이션",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0155-0CXGHya.gif"
-  },
-  {
-    "id": "0036",
-    "name": "케이블 디클라인 플라이",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/0158-7saC5zz.gif"
-  },
-  {
-    "id": "0037",
-    "name": "케이블 디클라인 원 암 프레스",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1260-KHGNa16.gif"
-  },
-  {
-    "id": "0038",
-    "name": "케이블 디클라인 프레스",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1261-2Pya1cP.gif"
-  },
-  {
-    "id": "0039",
-    "name": "케이블 인클라인 벤치 프레스",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0169-Vh0GsK4.gif"
   },
   {
     "id": "0040",
@@ -533,21 +156,8 @@
     "gif_url": "videos/0179-FVmZVhk.gif"
   },
   {
-    "id": "0042",
-    "name": "케이블 라이잉 플라이",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/0185-lJJ7Yq8.gif"
-  },
-  {
     "id": "0043",
-    "name": "케이블 MIDDLE 플라이",
+    "name": "케이블 미들 플라이",
     "bodyPart": "가슴",
     "equipment": "케이블",
     "target": "가슴",
@@ -557,58 +167,6 @@
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
     "gif_url": "videos/0188-xLYSdtg.gif"
-  },
-  {
-    "id": "0044",
-    "name": "케이블 원 암 디클라인 가슴 플라이",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/1262-w4dLzSx.gif"
-  },
-  {
-    "id": "0045",
-    "name": "케이블 원 암 인클라인 프레스",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1265-GKEH6jj.gif"
-  },
-  {
-    "id": "0046",
-    "name": "케이블 원 암 레터럴 벤트 오버",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0191-dB07vDu.gif"
-  },
-  {
-    "id": "0047",
-    "name": "케이블 시티드 가슴 프레스",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/2144-nIR4Rwl.gif"
   },
   {
     "id": "0048",
@@ -624,19 +182,6 @@
     "gif_url": "videos/0227-Pr9Rhf4.gif"
   },
   {
-    "id": "0049",
-    "name": "케이블 스탠딩 업 스트레이트 크로스오버",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1269-UKWTJWR.gif"
-  },
-  {
     "id": "0050",
     "name": "케이블 상부 가슴 크로스오버",
     "bodyPart": "가슴",
@@ -648,58 +193,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/1270-j7XMAyn.gif"
-  },
-  {
-    "id": "0051",
-    "name": "케이블 인클라인 플라이 스테빌리티 볼",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/0170-27NNGFr.gif"
-  },
-  {
-    "id": "0052",
-    "name": "케이블 원 암 플라이 엑서사이즈 볼",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/1263-hHy8tQG.gif"
-  },
-  {
-    "id": "0053",
-    "name": "케이블 원 암 인클라인 플라이 엑서사이즈 볼",
-    "bodyPart": "가슴",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/1264-P14Dz9D.gif"
-  },
-  {
-    "id": "0054",
-    "name": "DEEP 푸시 업",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1274-vptOQ4N.gif"
   },
   {
     "id": "0055",
@@ -767,32 +260,6 @@
     "gif_url": "videos/0303-1qrWgZ2.gif"
   },
   {
-    "id": "0060",
-    "name": "덤벨 디클라인 원 암 플라이",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/1276-NL6YBwN.gif"
-  },
-  {
-    "id": "0061",
-    "name": "덤벨 디클라인 트위스트 플라이",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/0307-reFHapa.gif"
-  },
-  {
     "id": "0062",
     "name": "덤벨 플라이",
     "bodyPart": "가슴",
@@ -804,19 +271,6 @@
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
     "gif_url": "videos/0308-yz9nUhF.gif"
-  },
-  {
-    "id": "0063",
-    "name": "덤벨 인클라인 얼터네이트 프레스",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/3545-TVdivgY.gif"
   },
   {
     "id": "0064",
@@ -832,19 +286,6 @@
     "gif_url": "videos/0314-ns0SIbU.gif"
   },
   {
-    "id": "0065",
-    "name": "덤벨 인클라인 BREEDING",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0316-B3Rxp6L.gif"
-  },
-  {
     "id": "0066",
     "name": "덤벨 인클라인 플라이",
     "bodyPart": "가슴",
@@ -856,58 +297,6 @@
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
     "gif_url": "videos/0319-ESOd5Pl.gif"
-  },
-  {
-    "id": "0067",
-    "name": "덤벨 인클라인 해머 머신 프레스",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0321-PG1kcIb.gif"
-  },
-  {
-    "id": "0068",
-    "name": "덤벨 인클라인 원 암 플라이",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/1279-Gw2HFvW.gif"
-  },
-  {
-    "id": "0069",
-    "name": "덤벨 인클라인 원 암 프레스",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1281-rDAiRf9.gif"
-  },
-  {
-    "id": "0070",
-    "name": "덤벨 인클라인 PALM IN 프레스",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0324-OVLmUuL.gif"
   },
   {
     "id": "0071",
@@ -923,34 +312,8 @@
     "gif_url": "videos/0328-6e2DcYX.gif"
   },
   {
-    "id": "0072",
-    "name": "덤벨 인클라인 트위스트ED 플라이ES",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/0331-1PLE8e9.gif"
-  },
-  {
-    "id": "0073",
-    "name": "덤벨 라이잉 해머 머신 프레스",
-    "bodyPart": "가슴",
-    "equipment": "덤벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0340-7gdLIXa.gif"
-  },
-  {
     "id": "0074",
-    "name": "어시스트 가슴 딥스 닐링",
+    "name": "어시스트 딥스",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "가슴",
@@ -962,21 +325,8 @@
     "gif_url": "videos/0009-PAgTVaK.gif"
   },
   {
-    "id": "0075",
-    "name": "어시스트 와이드 그립 가슴 딥스 닐링",
-    "bodyPart": "가슴",
-    "equipment": "머신",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2364-PnZJIrk.gif"
-  },
-  {
     "id": "0076",
-    "name": "레버 가슴 프레스",
+    "name": "시티드 가슴 프레스",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "가슴",
@@ -989,7 +339,7 @@
   },
   {
     "id": "0077",
-    "name": "레버 가슴 프레스",
+    "name": "시티드 인클라인 프레스",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "가슴",
@@ -1002,7 +352,7 @@
   },
   {
     "id": "0078",
-    "name": "레버 디클라인 가슴 프레스",
+    "name": "디클라인 가슴 프레스",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "하부 가슴",
@@ -1014,34 +364,8 @@
     "gif_url": "videos/1300-vsVoPHt.gif"
   },
   {
-    "id": "0079",
-    "name": "레버 인클라인 가슴 프레스",
-    "bodyPart": "가슴",
-    "equipment": "머신",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1299-jHAnWmT.gif"
-  },
-  {
-    "id": "0080",
-    "name": "레버 인클라인 가슴 프레스",
-    "bodyPart": "가슴",
-    "equipment": "머신",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1479-o17Jfkt.gif"
-  },
-  {
     "id": "0081",
-    "name": "레버 시티드 플라이",
+    "name": "시티드 플라이",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "가슴",
@@ -1053,21 +377,8 @@
     "gif_url": "videos/0596-v3xmPAR.gif"
   },
   {
-    "id": "0082",
-    "name": "레버 스탠딩 가슴 프레스",
-    "bodyPart": "가슴",
-    "equipment": "머신",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/3758-WbNq5Xu.gif"
-  },
-  {
     "id": "0083",
-    "name": "머신 이너 가슴 프레스",
+    "name": "이너 가슴 프레스",
     "bodyPart": "가슴",
     "equipment": "머신",
     "target": "가슴",
@@ -1105,19 +416,6 @@
     "gif_url": "videos/0753-ETZfAbZ.gif"
   },
   {
-    "id": "0086",
-    "name": "스미스 디클라인 리버스 그립 프레스",
-    "bodyPart": "가슴",
-    "equipment": "스미스 머신",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0754-MY9P1WA.gif"
-  },
-  {
     "id": "0087",
     "name": "스미스 인클라인 벤치 프레스",
     "bodyPart": "가슴",
@@ -1129,19 +427,6 @@
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
     "gif_url": "videos/0757-5v7KYld.gif"
-  },
-  {
-    "id": "0088",
-    "name": "스미스 인클라인 리버스 그립 프레스",
-    "bodyPart": "가슴",
-    "equipment": "스미스 머신",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0758-78VqWQK.gif"
   },
   {
     "id": "0089",
@@ -1157,73 +442,8 @@
     "gif_url": "videos/0759-ayAHcEm.gif"
   },
   {
-    "id": "0090",
-    "name": "스미스 머신 리버스 디클라인 클로즈 그립 벤치 프레스",
-    "bodyPart": "가슴",
-    "equipment": "스미스 머신",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1626-QyO6Uma.gif"
-  },
-  {
-    "id": "0091",
-    "name": "스미스 리버스 그립 프레스",
-    "bodyPart": "가슴",
-    "equipment": "스미스 머신",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0764-zK8Fu1W.gif"
-  },
-  {
-    "id": "0092",
-    "name": "스미스 와이드 그립 벤치 프레스",
-    "bodyPart": "가슴",
-    "equipment": "스미스 머신",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1308-zoOvPcx.gif"
-  },
-  {
-    "id": "0093",
-    "name": "스미스 와이드 그립 디클라인 벤치 프레스",
-    "bodyPart": "가슴",
-    "equipment": "스미스 머신",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1309-wi2H9QX.gif"
-  },
-  {
-    "id": "0094",
-    "name": "바벨 벤트 팔 풀오버",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1316-cA9FuWG.gif"
-  },
-  {
     "id": "0095",
-    "name": "바벨 벤트 오버 로우",
+    "name": "바벨 로우",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "광배근",
@@ -1238,66 +458,8 @@
     "gif_url": "videos/0027-eZyBC3j.gif"
   },
   {
-    "id": "0096",
-    "name": "바벨 디클라인 벤트 팔 풀오버",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0034-hMEptv0.gif"
-  },
-  {
-    "id": "0097",
-    "name": "바벨 디클라인 와이드 그립 풀오버",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0037-Hj4FOCd.gif"
-  },
-  {
-    "id": "0098",
-    "name": "바벨 인클라인 로우",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0049-dmgMp3n.gif"
-  },
-  {
-    "id": "0099",
-    "name": "바벨 원 암 벤트 오버 로우",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0064-Jsgsc27.gif"
-  },
-  {
     "id": "0100",
-    "name": "바벨 PENDLAY 로우",
+    "name": "바벨 펜들레이 로우",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "광배근",
@@ -1325,21 +487,8 @@
     "gif_url": "videos/0073-i6LWjok.gif"
   },
   {
-    "id": "0102",
-    "name": "바벨 풀오버 프레스",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0022-znLogoF.gif"
-  },
-  {
     "id": "0103",
-    "name": "바벨 리버스 그립 벤트 오버 로우",
+    "name": "리버스 그립 바벨 로우",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "광배근",
@@ -1352,22 +501,6 @@
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
     "gif_url": "videos/0118-SzX3uzM.gif"
-  },
-  {
-    "id": "0104",
-    "name": "바벨 리버스 그립 인클라인 벤치 로우",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1317-8d8qJQI.gif"
   },
   {
     "id": "0105",
@@ -1383,186 +516,6 @@
     "gif_url": "videos/0095-dG7tG5y.gif"
   },
   {
-    "id": "0106",
-    "name": "CAMBERED 바 라이잉 로우",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0248-R5swFnc.gif"
-  },
-  {
-    "id": "0107",
-    "name": "레버 벤트 오버 로우",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0574-X3cqyXz.gif"
-  },
-  {
-    "id": "0108",
-    "name": "레버 원 암 벤트 오버 로우",
-    "bodyPart": "등",
-    "equipment": "바벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0589-Fhdtwf3.gif"
-  },
-  {
-    "id": "0109",
-    "name": "아처 풀 업",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3293-72BC5Za.gif"
-  },
-  {
-    "id": "0110",
-    "name": "등 레버",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3297-GaSzzuh.gif"
-  },
-  {
-    "id": "0111",
-    "name": "등 가슴 스트레칭",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1405-chfnQnM.gif"
-  },
-  {
-    "id": "0112",
-    "name": "벤치 풀 업S",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3019-mExgrF9.gif"
-  },
-  {
-    "id": "0113",
-    "name": "맨몸 스쿼트TING 로우",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/3168-3xK09Sk.gif"
-  },
-  {
-    "id": "0114",
-    "name": "맨몸 스탠딩 클로즈 그립 원 암 로우",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/3156-v2DfH14.gif"
-  },
-  {
-    "id": "0115",
-    "name": "맨몸 스탠딩 클로즈 그립 로우",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/3158-tig3PXb.gif"
-  },
-  {
-    "id": "0116",
-    "name": "맨몸 스탠딩 원 암 로우",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/3162-xbkPfaw.gif"
-  },
-  {
-    "id": "0117",
-    "name": "맨몸 스탠딩 로우",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/3166-wd4ds3s.gif"
-  },
-  {
     "id": "0118",
     "name": "친 업",
     "bodyPart": "등",
@@ -1574,22 +527,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/1326-T2mxWqc.gif"
-  },
-  {
-    "id": "0119",
-    "name": "친 업S 내로우 PARALLEL 그립",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0253-G70mEAJ.gif"
   },
   {
     "id": "0120",
@@ -1605,60 +542,8 @@
     "gif_url": "videos/1327-VnfUNW7.gif"
   },
   {
-    "id": "0121",
-    "name": "ELBOW LIFT 리버스 푸시 업",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1772-wbUYILZ.gif"
-  },
-  {
-    "id": "0122",
-    "name": "ELEVATOR",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3292-zYmNaoY.gif"
-  },
-  {
-    "id": "0123",
-    "name": "프론트 레버 REPS",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3295-hbY9wqG.gif"
-  },
-  {
-    "id": "0124",
-    "name": "지론다 스터넘 친",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0466-IL0JUxR.gif"
-  },
-  {
     "id": "0125",
-    "name": "HYPER익스텐션",
+    "name": "하이퍼 익스텐션",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "등",
@@ -1670,21 +555,8 @@
     "gif_url": "videos/0489-zhMwOwE.gif"
   },
   {
-    "id": "0126",
-    "name": "HYPER익스텐션 벤치",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0488-zkgRrbK.gif"
-  },
-  {
     "id": "0127",
-    "name": "INVERTED 로우",
+    "name": "인버티드 로우",
     "bodyPart": "등",
     "equipment": "맨몸",
     "target": "광배근",
@@ -1699,50 +571,8 @@
     "gif_url": "videos/0499-bZGHsAZ.gif"
   },
   {
-    "id": "0128",
-    "name": "INVERTED 로우 벤트 KNEES",
-    "bodyPart": "등",
-    "equipment": "맨몸",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/2300-VPPtusI.gif"
-  },
-  {
-    "id": "0129",
-    "name": "얼터네이트 레터럴 풀다운",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0007-4IKbhHV.gif"
-  },
-  {
-    "id": "0130",
-    "name": "케이블 바 레터럴 풀다운",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0150-eYnzaCm.gif"
-  },
-  {
     "id": "0131",
-    "name": "케이블 크로스 오버 레터럴 풀다운",
+    "name": "렛풀다운",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1754,40 +584,8 @@
     "gif_url": "videos/0153-OQ1otBN.gif"
   },
   {
-    "id": "0132",
-    "name": "케이블 디클라인 시티드 와이드 그립 로우",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0159-kesXOpB.gif"
-  },
-  {
-    "id": "0133",
-    "name": "케이블 플로어 시티드 와이드 그립 로우",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0160-veXwo0D.gif"
-  },
-  {
     "id": "0134",
-    "name": "케이블 하이 로우 닐링",
+    "name": "케이블 하이 다운",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "광배근",
@@ -1818,34 +616,8 @@
     "gif_url": "videos/1318-yaMIo4D.gif"
   },
   {
-    "id": "0136",
-    "name": "케이블 인클라인 PUSH다운",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0172-1PK5Uo3.gif"
-  },
-  {
-    "id": "0137",
-    "name": "케이블 광배근 풀다운 풀 레인지 모션",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2330-LEprlgG.gif"
-  },
-  {
     "id": "0138",
-    "name": "케이블 레터럴 풀다운 로프 어태치먼트",
+    "name": "클로우즈 그립 렛풀다운",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1857,21 +629,8 @@
     "gif_url": "videos/0177-CuaWCmC.gif"
   },
   {
-    "id": "0139",
-    "name": "케이블 레터럴 풀다운 V 바",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2616-4c9BhzB.gif"
-  },
-  {
     "id": "0140",
-    "name": "케이블 로우 시티드 로우",
+    "name": "시티드 로우",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "광배근",
@@ -1886,95 +645,8 @@
     "gif_url": "videos/0180-hvV79Si.gif"
   },
   {
-    "id": "0141",
-    "name": "케이블 라이잉 익스텐션 풀오버 로프 어태치먼트",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0184-Q2Eu1Ax.gif"
-  },
-  {
-    "id": "0142",
-    "name": "케이블 원 암 벤트 오버 로우",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0189-EIsE3u8.gif"
-  },
-  {
-    "id": "0143",
-    "name": "케이블 원 암 풀다운",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3563-U5INZY6.gif"
-  },
-  {
-    "id": "0144",
-    "name": "케이블 원 암 스트레이트 등 하이 로우 닐링",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0193-WrYPP2g.gif"
-  },
-  {
-    "id": "0145",
-    "name": "케이블 PALM ROTATIONAL 로우",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1319-OmQ8w0p.gif"
-  },
-  {
-    "id": "0146",
-    "name": "케이블 풀다운",
-    "bodyPart": "등",
-    "equipment": "케이블",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0198-RVwzP10.gif"
-  },
-  {
     "id": "0147",
-    "name": "케이블 풀다운 PRO 광배근 바",
+    "name": "와이드그립 렛풀다운",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -1987,7 +659,7 @@
   },
   {
     "id": "0148",
-    "name": "케이블 후면 풀다운",
+    "name": "비하인드 렛풀다운",
     "bodyPart": "등",
     "equipment": "케이블",
     "target": "등",
@@ -2000,7 +672,7 @@
   },
   {
     "id": "0149",
-    "name": "덤벨 벤트 오버 로우",
+    "name": "덤벨 벤트 로우",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "광배근",
@@ -2013,61 +685,6 @@
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
     "gif_url": "videos/0293-BJ0Hz5L.gif"
-  },
-  {
-    "id": "0150",
-    "name": "덤벨 디클라인 슈러그",
-    "bodyPart": "등",
-    "equipment": "덤벨",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0305-cwsAI4G.gif"
-  },
-  {
-    "id": "0151",
-    "name": "덤벨 디클라인 슈러그",
-    "bodyPart": "등",
-    "equipment": "덤벨",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0304-bRlbdjK.gif"
-  },
-  {
-    "id": "0152",
-    "name": "덤벨 인클라인 로우",
-    "bodyPart": "등",
-    "equipment": "덤벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0327-7vG5o25.gif"
-  },
-  {
-    "id": "0153",
-    "name": "덤벨 인클라인 슈러그",
-    "bodyPart": "등",
-    "equipment": "덤벨",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0329-JymLInS.gif"
   },
   {
     "id": "0154",
@@ -2083,24 +700,8 @@
     "gif_url": "videos/3541-PbzNu7c.gif"
   },
   {
-    "id": "0155",
-    "name": "덤벨 라이잉 후면 삼각근 로우",
-    "bodyPart": "등",
-    "equipment": "덤벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1328-XUUD0Fs.gif"
-  },
-  {
     "id": "0156",
-    "name": "덤벨 원 암 벤트 오버 로우",
+    "name": "덤벨 원 암 로우",
     "bodyPart": "등",
     "equipment": "덤벨",
     "target": "광배근",
@@ -2113,54 +714,6 @@
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
     "gif_url": "videos/0292-C0MA9bC.gif"
-  },
-  {
-    "id": "0157",
-    "name": "덤벨 PALM ROTATIONAL 벤트 오버 로우",
-    "bodyPart": "등",
-    "equipment": "덤벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1329-wt6rwjk.gif"
-  },
-  {
-    "id": "0158",
-    "name": "덤벨 리버스 그립 인클라인 벤치 원 암 로우",
-    "bodyPart": "등",
-    "equipment": "덤벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1330-ZIViNh1.gif"
-  },
-  {
-    "id": "0159",
-    "name": "덤벨 리버스 그립 인클라인 벤치 TWO 팔 로우",
-    "bodyPart": "등",
-    "equipment": "덤벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1331-9pQSkH8.gif"
   },
   {
     "id": "0160",
@@ -2192,32 +745,6 @@
     "gif_url": "videos/0406-NJzBsGJ.gif"
   },
   {
-    "id": "0162",
-    "name": "덤벨 사이드 플랭크 후면 플라이",
-    "bodyPart": "등",
-    "equipment": "덤벨",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/3664-X6ytgYZ.gif"
-  },
-  {
-    "id": "0163",
-    "name": "어시스트 PARALLEL 클로즈 그립 풀 업",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0015-vrhHa6D.gif"
-  },
-  {
     "id": "0164",
     "name": "어시스트 풀 업",
     "bodyPart": "등",
@@ -2229,61 +756,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/0017-kiJ4Z2K.gif"
-  },
-  {
-    "id": "0165",
-    "name": "어시스트 스탠딩 친 업",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1431-7OeHptV.gif"
-  },
-  {
-    "id": "0166",
-    "name": "어시스트 스탠딩 풀 업",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1432-f4xtKBj.gif"
-  },
-  {
-    "id": "0167",
-    "name": "레버 얼터네이트 내로우 그립 시티드 로우",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0571-w2oRpuH.gif"
-  },
-  {
-    "id": "0168",
-    "name": "레버 어시스트 친 업",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0572-MaMuGH6.gif"
   },
   {
     "id": "0169",
@@ -2300,7 +772,7 @@
   },
   {
     "id": "0170",
-    "name": "레버 벤트 오버 로우 V 바",
+    "name": "T바 로우",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "광배근",
@@ -2315,34 +787,8 @@
     "gif_url": "videos/3200-LuBEORI.gif"
   },
   {
-    "id": "0171",
-    "name": "레버 프론트 풀다운",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0579-7F1DVzn.gif"
-  },
-  {
-    "id": "0172",
-    "name": "레버 그립LESS 슈러그",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0580-f91FwXG.gif"
-  },
-  {
     "id": "0173",
-    "name": "레버 하이 로우",
+    "name": "프론트 렛풀다운",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "광배근",
@@ -2358,7 +804,7 @@
   },
   {
     "id": "0174",
-    "name": "레버 내로우 그립 시티드 로우",
+    "name": "내로우 그립 시티드 로우",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "광배근",
@@ -2373,37 +819,8 @@
     "gif_url": "videos/0588-IGjKj1v.gif"
   },
   {
-    "id": "0175",
-    "name": "레버 원 암 레터럴 하이 로우",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1356-OIFMAp1.gif"
-  },
-  {
-    "id": "0176",
-    "name": "레버 원 암 레터럴 와이드 풀다운",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1347-tTuZSDT.gif"
-  },
-  {
     "id": "0177",
-    "name": "레버 풀오버",
+    "name": "풀오버 머신",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "등",
@@ -2415,37 +832,8 @@
     "gif_url": "videos/2285-4U7iLb5.gif"
   },
   {
-    "id": "0178",
-    "name": "레버 리버스 그립 레터럴 풀다운",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2736-ky8FLU8.gif"
-  },
-  {
-    "id": "0179",
-    "name": "레버 리버스 그립 VERTICAL 로우",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1348-ZqNOWQ6.gif"
-  },
-  {
     "id": "0180",
-    "name": "레버 리버스 T 바 로우",
+    "name": "T 바 로우 머신",
     "bodyPart": "등",
     "equipment": "머신",
     "target": "광배근",
@@ -2458,48 +846,6 @@
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
     "gif_url": "videos/1349-BgljGjd.gif"
-  },
-  {
-    "id": "0181",
-    "name": "레버 시티드 로우",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1350-7I6LNUG.gif"
-  },
-  {
-    "id": "0182",
-    "name": "레버 슈러그",
-    "bodyPart": "등",
-    "equipment": "머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0604-ZZKbeMw.gif"
-  },
-  {
-    "id": "0183",
-    "name": "스미스 등 슈러그",
-    "bodyPart": "등",
-    "equipment": "스미스 머신",
-    "target": "등",
-    "secondaryMuscles": [],
-    "instructions": [
-      "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0746-MzNnwx9.gif"
   },
   {
     "id": "0184",
@@ -2516,54 +862,6 @@
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
     "gif_url": "videos/1359-ZX9UZmj.gif"
-  },
-  {
-    "id": "0185",
-    "name": "스미스 내로우 로우",
-    "bodyPart": "등",
-    "equipment": "스미스 머신",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0761-JGKowMS.gif"
-  },
-  {
-    "id": "0186",
-    "name": "스미스 원 암 로우",
-    "bodyPart": "등",
-    "equipment": "스미스 머신",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1360-Q4DSJPC.gif"
-  },
-  {
-    "id": "0187",
-    "name": "스미스 리버스 그립 벤트 오버 로우",
-    "bodyPart": "등",
-    "equipment": "스미스 머신",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/1361-aaxA3cm.gif"
   },
   {
     "id": "0188",
@@ -2590,32 +888,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/0041-b2Uoz54.gif"
-  },
-  {
-    "id": "0190",
-    "name": "바벨 원 암 스내치",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0067-xHKN2s8.gif"
-  },
-  {
-    "id": "0191",
-    "name": "바벨 후면 삼각근 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0075-Ln9iTbU.gif"
   },
   {
     "id": "0192",
@@ -2649,21 +921,6 @@
     "gif_url": "videos/0086-ngPpyRS.gif"
   },
   {
-    "id": "0194",
-    "name": "바벨 시티드 BRADFORD ROCKY 프레스",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0087-0dCyly0.gif"
-  },
-  {
     "id": "0195",
     "name": "바벨 시티드 오버헤드 프레스",
     "bodyPart": "어깨",
@@ -2677,62 +934,6 @@
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
     "gif_url": "videos/0091-kTbSH9h.gif"
-  },
-  {
-    "id": "0196",
-    "name": "바벨 SKIER",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0100-4Leypho.gif"
-  },
-  {
-    "id": "0197",
-    "name": "바벨 스탠딩 BRADFORD 프레스",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0105-dCPESfR.gif"
-  },
-  {
-    "id": "0198",
-    "name": "바벨 스탠딩 클로즈 그립 밀리터리 프레스",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1456-wdRZISl.gif"
-  },
-  {
-    "id": "0199",
-    "name": "바벨 스탠딩 프론트 레이즈 오버 헤드",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0107-S8mo30S.gif"
   },
   {
     "id": "0200",
@@ -2750,21 +951,8 @@
     "gif_url": "videos/1457-Kyd9Rz5.gif"
   },
   {
-    "id": "0201",
-    "name": "바벨 THRUSTER",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3305-f7Y9eDZ.gif"
-  },
-  {
     "id": "0202",
-    "name": "바벨 업RIGHT 로우",
+    "name": "바벨 업라이트 로우",
     "bodyPart": "어깨",
     "equipment": "바벨",
     "target": "광배근",
@@ -2779,125 +967,8 @@
     "gif_url": "videos/0120-UDlhcO8.gif"
   },
   {
-    "id": "0203",
-    "name": "바벨 업RIGHT 로우",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0119-83HoW9X.gif"
-  },
-  {
-    "id": "0204",
-    "name": "바벨 업RIGHT 로우",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0121-fI18Rbc.gif"
-  },
-  {
-    "id": "0205",
-    "name": "바벨 와이드 그립 업RIGHT 로우",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0123-RgJDRR1.gif"
-  },
-  {
-    "id": "0206",
-    "name": "LANDMINE 레터럴 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3237-eXMFHww.gif"
-  },
-  {
-    "id": "0207",
-    "name": "스탠딩 비하인드 목 프레스",
-    "bodyPart": "어깨",
-    "equipment": "바벨",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0788-xDh0lJr.gif"
-  },
-  {
-    "id": "0208",
-    "name": "LEFT HOOK. BOXING",
-    "bodyPart": "어깨",
-    "equipment": "맨몸",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2271-hoXt6wv.gif"
-  },
-  {
-    "id": "0209",
-    "name": "후면 삼각근 스트레칭",
-    "bodyPart": "어깨",
-    "equipment": "맨몸",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/0669-xifhB5W.gif"
-  },
-  {
-    "id": "0210",
-    "name": "케이블 얼터네이트 숄더 프레스",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "케이블을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0148-KHPZL0b.gif"
-  },
-  {
     "id": "0211",
-    "name": "케이블 크로스 오버 REVERS 플라이",
+    "name": "케이블 크로스 오버",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "가슴",
@@ -2907,19 +978,6 @@
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
     "gif_url": "videos/0154-aqvSOQE.gif"
-  },
-  {
-    "id": "0212",
-    "name": "케이블 FORWARD 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0161-hvHhCv8.gif"
   },
   {
     "id": "0213",
@@ -2935,21 +993,8 @@
     "gif_url": "videos/0162-u2X71Np.gif"
   },
   {
-    "id": "0214",
-    "name": "케이블 프론트 숄더 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0164-mTT3KLn.gif"
-  },
-  {
     "id": "0215",
-    "name": "케이블 닐링 후면 삼각근 로우 로프",
+    "name": "페이스풀",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "광배근",
@@ -2977,77 +1022,6 @@
     "gif_url": "videos/0178-goJ6ezq.gif"
   },
   {
-    "id": "0217",
-    "name": "케이블 원 암 레터럴 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0192-wEulIzp.gif"
-  },
-  {
-    "id": "0218",
-    "name": "케이블 후면 삼각근 로우 STIRR업S",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0202-yUdIGNs.gif"
-  },
-  {
-    "id": "0219",
-    "name": "케이블 후면 삼각근 로우 로프",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0203-wqNPGCg.gif"
-  },
-  {
-    "id": "0220",
-    "name": "케이블 시티드 후면 레터럴 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0215-x825CZm.gif"
-  },
-  {
-    "id": "0221",
-    "name": "케이블 시티드 숄더 INTERNAL ROTATION",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0216-YPoVrBi.gif"
-  },
-  {
     "id": "0222",
     "name": "케이블 숄더 프레스",
     "bodyPart": "어깨",
@@ -3064,7 +1038,7 @@
   },
   {
     "id": "0223",
-    "name": "케이블 스탠딩 크로스 오버 하이 리버스 플라이",
+    "name": "케이블 벤트오버",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "가슴",
@@ -3077,7 +1051,7 @@
   },
   {
     "id": "0224",
-    "name": "케이블 스탠딩 후면 삼각근 로우 로프",
+    "name": "페이스풀",
     "bodyPart": "어깨",
     "equipment": "케이블",
     "target": "광배근",
@@ -3092,65 +1066,8 @@
     "gif_url": "videos/0233-ZfyAGhK.gif"
   },
   {
-    "id": "0225",
-    "name": "케이블 스탠딩 숄더 EXTERNAL ROTATION",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0235-FWdVhcW.gif"
-  },
-  {
-    "id": "0226",
-    "name": "케이블 S업INE 리버스 플라이",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/0240-PQcUlDi.gif"
-  },
-  {
-    "id": "0227",
-    "name": "케이블 업RIGHT 로우",
-    "bodyPart": "어깨",
-    "equipment": "케이블",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0246-cALKspW.gif"
-  },
-  {
-    "id": "0228",
-    "name": "덤벨 얼터네이트 사이드 프레스",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0286-izMnLqz.gif"
-  },
-  {
     "id": "0229",
-    "name": "덤벨 ARNOLD 프레스",
+    "name": "아놀드 프레스",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "전면 삼각근",
@@ -3165,7 +1082,7 @@
   },
   {
     "id": "0230",
-    "name": "덤벨 벤치 시티드 프레스",
+    "name": "덤벨 숄더 프레스",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "전면 삼각근",
@@ -3179,21 +1096,6 @@
     "gif_url": "videos/0290-3d7wHyd.gif"
   },
   {
-    "id": "0231",
-    "name": "덤벨 CUBAN 프레스",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0299-QfAKy1G.gif"
-  },
-  {
     "id": "0232",
     "name": "덤벨 프론트 레이즈",
     "bodyPart": "어깨",
@@ -3205,32 +1107,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/0310-3eGE2JC.gif"
-  },
-  {
-    "id": "0233",
-    "name": "덤벨 풀 CAN 레터럴 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0311-AQ0mC4Y.gif"
-  },
-  {
-    "id": "0234",
-    "name": "덤벨 인클라인 원 암 레터럴 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0323-aTNKZiC.gif"
   },
   {
     "id": "0235",
@@ -3259,34 +1135,8 @@
     "gif_url": "videos/0326-vYk8lqw.gif"
   },
   {
-    "id": "0237",
-    "name": "덤벨 인클라인 T 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3542-jgbvVJ0.gif"
-  },
-  {
-    "id": "0238",
-    "name": "덤벨 IRON 크로스",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0332-cALkHHX.gif"
-  },
-  {
     "id": "0239",
-    "name": "덤벨 레터럴 레이즈",
+    "name": "사이드 레트럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3298,73 +1148,8 @@
     "gif_url": "videos/0334-DsgkuIt.gif"
   },
   {
-    "id": "0240",
-    "name": "덤벨 레터럴 프론트 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0335-xMjBKwn.gif"
-  },
-  {
-    "id": "0241",
-    "name": "덤벨 라이잉 EXTERNAL 숄더 ROTATION",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0863-bmBf7LN.gif"
-  },
-  {
-    "id": "0242",
-    "name": "덤벨 라이잉 플로어 후면 삼각근 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2470-Ion0XWz.gif"
-  },
-  {
-    "id": "0243",
-    "name": "덤벨 라이잉 원 암 삼각근 후면",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0341-gSw59a4.gif"
-  },
-  {
-    "id": "0244",
-    "name": "덤벨 라이잉 원 암 후면 레터럴 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0345-KwFGiEP.gif"
-  },
-  {
     "id": "0245",
-    "name": "덤벨 라이잉 후면 레터럴 레이즈",
+    "name": "덤벨 후면 레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "덤벨",
     "target": "어깨",
@@ -3376,34 +1161,8 @@
     "gif_url": "videos/0348-53Ttlck.gif"
   },
   {
-    "id": "0246",
-    "name": "덤벨 원 암 레터럴 레이즈",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0355-n5cWCsI.gif"
-  },
-  {
-    "id": "0247",
-    "name": "덤벨 원 암 레터럴 레이즈 서포트",
-    "bodyPart": "어깨",
-    "equipment": "덤벨",
-    "target": "어깨",
-    "secondaryMuscles": [],
-    "instructions": [
-      "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0356-Yg7MJAT.gif"
-  },
-  {
     "id": "0248",
-    "name": "레버 레터럴 레이즈",
+    "name": "레터럴 레이즈",
     "bodyPart": "어깨",
     "equipment": "머신",
     "target": "어깨",
@@ -3416,7 +1175,7 @@
   },
   {
     "id": "0249",
-    "name": "레버 밀리터리 프레스",
+    "name": "밀리터리 프레스",
     "bodyPart": "어깨",
     "equipment": "머신",
     "target": "전면 삼각근",
@@ -3430,23 +1189,8 @@
     "gif_url": "videos/0587-CggQhII.gif"
   },
   {
-    "id": "0250",
-    "name": "레버 원 암 숄더 프레스",
-    "bodyPart": "어깨",
-    "equipment": "머신",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0590-2KGnL6M.gif"
-  },
-  {
     "id": "0251",
-    "name": "레버 시티드 리버스 플라이",
+    "name": "시티드 리버스 플라이",
     "bodyPart": "어깨",
     "equipment": "머신",
     "target": "가슴",
@@ -3456,49 +1200,6 @@
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
     "gif_url": "videos/0602-myfUsKf.gif"
-  },
-  {
-    "id": "0252",
-    "name": "레버 시티드 리버스 플라이 PARALLEL 그립",
-    "bodyPart": "어깨",
-    "equipment": "머신",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/0601-xiHiJcA.gif"
-  },
-  {
-    "id": "0253",
-    "name": "레버 숄더 프레스",
-    "bodyPart": "어깨",
-    "equipment": "머신",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0603-67n3r98.gif"
-  },
-  {
-    "id": "0254",
-    "name": "레버 숄더 프레스",
-    "bodyPart": "어깨",
-    "equipment": "머신",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0869-vqsbmL0.gif"
   },
   {
     "id": "0255",
@@ -3547,21 +1248,6 @@
     "gif_url": "videos/0762-nFUwqG6.gif"
   },
   {
-    "id": "0258",
-    "name": "스미스 시티드 숄더 프레스",
-    "bodyPart": "어깨",
-    "equipment": "스미스 머신",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0765-xUwnBMT.gif"
-  },
-  {
     "id": "0259",
     "name": "스미스 숄더 프레스",
     "bodyPart": "어깨",
@@ -3577,38 +1263,8 @@
     "gif_url": "videos/0766-903mzG8.gif"
   },
   {
-    "id": "0260",
-    "name": "스미스 스탠딩 비하인드 헤드 밀리터리 프레스",
-    "bodyPart": "어깨",
-    "equipment": "스미스 머신",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0772-ht8xDrP.gif"
-  },
-  {
-    "id": "0261",
-    "name": "스미스 스탠딩 밀리터리 프레스",
-    "bodyPart": "어깨",
-    "equipment": "스미스 머신",
-    "target": "전면 삼각근",
-    "secondaryMuscles": [
-      "삼두근"
-    ],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0774-jjUPrze.gif"
-  },
-  {
     "id": "0262",
-    "name": "스미스 업RIGHT 로우",
+    "name": "스미스 업라이트 로우",
     "bodyPart": "어깨",
     "equipment": "스미스 머신",
     "target": "광배근",
@@ -3621,22 +1277,6 @@
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
     "gif_url": "videos/0775-1DN3iz4.gif"
-  },
-  {
-    "id": "0263",
-    "name": "바벨 벤치 프론트 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0024-Y7YcmIJ.gif"
   },
   {
     "id": "0264",
@@ -3655,21 +1295,8 @@
     "gif_url": "videos/0026-W9pFVv1.gif"
   },
   {
-    "id": "0265",
-    "name": "바벨 클린 프레스",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0028-SGY8Zui.gif"
-  },
-  {
     "id": "0266",
-    "name": "바벨 클린 그립 프론트 스쿼트",
+    "name": "바벨 프론트 스쿼트",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "대퇴사두근",
@@ -3701,7 +1328,7 @@
   },
   {
     "id": "0268",
-    "name": "바벨 플로어 카프 레이즈",
+    "name": "바벨 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "하체",
@@ -3711,38 +1338,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/1370-2IHEa2T.gif"
-  },
-  {
-    "id": "0269",
-    "name": "바벨 프론트 가슴 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0039-IeTIEqg.gif"
-  },
-  {
-    "id": "0270",
-    "name": "바벨 프론트 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0042-zG0zs85.gif"
   },
   {
     "id": "0271",
@@ -3761,56 +1356,8 @@
     "gif_url": "videos/0043-qXTaZnJ.gif"
   },
   {
-    "id": "0272",
-    "name": "바벨 풀 스쿼트 등 POV",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/1461-DhMl549.gif"
-  },
-  {
-    "id": "0273",
-    "name": "바벨 풀 스쿼트 사이드 POV",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/1462-iYzB0Cz.gif"
-  },
-  {
-    "id": "0274",
-    "name": "바벨 풀 ZERCHER 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/1545-vR1vold.gif"
-  },
-  {
     "id": "0275",
-    "name": "바벨 둔근 브릿지",
+    "name": "바벨 힙쓰러스트",
     "bodyPart": "하체",
     "equipment": "바벨",
     "target": "하체",
@@ -3820,474 +1367,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/1409-qKBpF7I.gif"
-  },
-  {
-    "id": "0276",
-    "name": "바벨 GOOD MORNING",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0044-XlZ4lAC.gif"
-  },
-  {
-    "id": "0277",
-    "name": "바벨 HACK 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0046-5VCj6iH.gif"
-  },
-  {
-    "id": "0278",
-    "name": "바벨 하이 바 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/1436-Gnfo4FM.gif"
-  },
-  {
-    "id": "0279",
-    "name": "바벨 JEFFERSON 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0051-pkSoCW9.gif"
-  },
-  {
-    "id": "0280",
-    "name": "바벨 점프 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0053-1gFNTZV.gif"
-  },
-  {
-    "id": "0281",
-    "name": "바벨 레터럴 런지",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근"
-    ],
-    "instructions": [
-      "한쪽 발을 앞으로 내딛으며 양쪽 무릎이 90도가 되도록 내려갑니다.",
-      "앞발의 뒤꿈치에 힘을 주어 다시 돌아옵니다."
-    ],
-    "gif_url": "videos/1410-py1HSzx.gif"
-  },
-  {
-    "id": "0282",
-    "name": "바벨 로우 바 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "바벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/1435-bTpEUcm.gif"
-  },
-  {
-    "id": "0283",
-    "name": "ALL FOURS S대퇴사두 스트레칭",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1512-qBcKorM.gif"
-  },
-  {
-    "id": "0284",
-    "name": "ANKLE CIRCLES",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1368-uL9CsKm.gif"
-  },
-  {
-    "id": "0285",
-    "name": "백WARD 점프",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1473-SaDOwk7.gif"
-  },
-  {
-    "id": "0286",
-    "name": "BALANCE BOARD",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0020-xAySMB0.gif"
-  },
-  {
-    "id": "0287",
-    "name": "벤치 힙 익스텐션",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0130-u27Kcdz.gif"
-  },
-  {
-    "id": "0288",
-    "name": "맨몸 드롭 점프 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/3543-wfotm7S.gif"
-  },
-  {
-    "id": "0289",
-    "name": "맨몸 스탠딩 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1373-bJYHBIN.gif"
-  },
-  {
-    "id": "0290",
-    "name": "BOX 점프 다운 원 레그 STABILIZATION",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1374-iPm26QU.gif"
-  },
-  {
-    "id": "0291",
-    "name": "BUTTER플라이 YOGA POSE",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
-      "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
-    ],
-    "gif_url": "videos/1494-bWlZvXh.gif"
-  },
-  {
-    "id": "0292",
-    "name": "카프 푸시 스트레칭 HANDS AGAINST WALL",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1407-PzNxakt.gif"
-  },
-  {
-    "id": "0293",
-    "name": "카프 스트레칭 HANDS AGAINST WALL",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1377-m0tCHqc.gif"
-  },
-  {
-    "id": "0294",
-    "name": "CHAIR 레그 EXTENDED 스트레칭",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1548-xGgAGPm.gif"
-  },
-  {
-    "id": "0295",
-    "name": "CIRCLES KNEE 스트레칭",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/0257-X7jbxra.gif"
-  },
-  {
-    "id": "0296",
-    "name": "CURTSEY 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/3769-gUjqdei.gif"
-  },
-  {
-    "id": "0297",
-    "name": "DONKEY 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0284-u5ESqzH.gif"
-  },
-  {
-    "id": "0298",
-    "name": "FLUTTER 킥S",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0459-UVo2Qs2.gif"
-  },
-  {
-    "id": "0299",
-    "name": "FORWARD 점프",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1472-uZKq7lo.gif"
-  },
-  {
-    "id": "0300",
-    "name": "둔근 브릿지 MARCH",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3561-GibBPPg.gif"
-  },
-  {
-    "id": "0301",
-    "name": "둔근 HAM 레이즈",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3193-Vvwjz6N.gif"
-  },
-  {
-    "id": "0302",
-    "name": "햄스트링 스트레칭",
-    "bodyPart": "하체",
-    "equipment": "맨몸",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1511-99rWm7w.gif"
-  },
-  {
-    "id": "0303",
-    "name": "케이블 어시스트 INVERSE 레그 컬",
-    "bodyPart": "하체",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/3235-zHEpuuc.gif"
-  },
-  {
-    "id": "0304",
-    "name": "케이블 데드리프트",
-    "bodyPart": "하체",
-    "equipment": "케이블",
-    "target": "햄스트링",
-    "secondaryMuscles": [
-      "둔근",
-      "척추기립근"
-    ],
-    "instructions": [
-      "등의 평평함을 유지하며 힙을 뒤로 빼면서 기구를 내립니다.",
-      "하체와 등의 힘을 동시에 사용하여 일어납니다."
-    ],
-    "gif_url": "videos/0157-eGDudUV.gif"
-  },
-  {
-    "id": "0305",
-    "name": "케이블 힙 ADDUCTION",
-    "bodyPart": "하체",
-    "equipment": "케이블",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0168-hBGWILP.gif"
-  },
-  {
-    "id": "0306",
-    "name": "케이블 풀 THROUGH 로프",
-    "bodyPart": "하체",
-    "equipment": "케이블",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0196-OM46QHm.gif"
-  },
-  {
-    "id": "0307",
-    "name": "케이블 스탠딩 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "케이블",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1375-yl2IYyy.gif"
-  },
-  {
-    "id": "0308",
-    "name": "케이블 스탠딩 힙 익스텐션",
-    "bodyPart": "하체",
-    "equipment": "케이블",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0228-Kpajagk.gif"
-  },
-  {
-    "id": "0309",
-    "name": "케이블 스탠딩 원 레그 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "케이블",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1376-fgc9Xdl.gif"
   },
   {
     "id": "0310",
@@ -4304,34 +1383,6 @@
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
     "gif_url": "videos/0291-mnzcrIB.gif"
-  },
-  {
-    "id": "0311",
-    "name": "덤벨 클린",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0295-7Hg55JG.gif"
-  },
-  {
-    "id": "0312",
-    "name": "덤벨 CONTRA광배근ERAL FORWARD 런지",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근"
-    ],
-    "instructions": [
-      "한쪽 발을 앞으로 내딛으며 양쪽 무릎이 90도가 되도록 내려갑니다.",
-      "앞발의 뒤꿈치에 힘을 주어 다시 돌아옵니다."
-    ],
-    "gif_url": "videos/3635-ecl28tP.gif"
   },
   {
     "id": "0313",
@@ -4351,7 +1402,7 @@
   },
   {
     "id": "0314",
-    "name": "덤벨 GOBLET 스쿼트",
+    "name": "고블린 스쿼트",
     "bodyPart": "하체",
     "equipment": "덤벨",
     "target": "대퇴사두근",
@@ -4381,19 +1432,6 @@
     "gif_url": "videos/0336-RRWFUcw.gif"
   },
   {
-    "id": "0316",
-    "name": "덤벨 라이잉 FEMORAL",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0339-FkBIE6a.gif"
-  },
-  {
     "id": "0317",
     "name": "덤벨 원 암 스내치",
     "bodyPart": "하체",
@@ -4407,53 +1445,6 @@
     "gif_url": "videos/3888-6pTkI99.gif"
   },
   {
-    "id": "0318",
-    "name": "덤벨 플라이오 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0371-S4pwGlc.gif"
-  },
-  {
-    "id": "0319",
-    "name": "덤벨 후면 런지",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근"
-    ],
-    "instructions": [
-      "한쪽 발을 앞으로 내딛으며 양쪽 무릎이 90도가 되도록 내려갑니다.",
-      "앞발의 뒤꿈치에 힘을 주어 다시 돌아옵니다."
-    ],
-    "gif_url": "videos/0381-SSsBDwB.gif"
-  },
-  {
-    "id": "0320",
-    "name": "덤벨 ROMANIAN 데드리프트",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "햄스트링",
-    "secondaryMuscles": [
-      "둔근",
-      "척추기립근"
-    ],
-    "instructions": [
-      "등의 평평함을 유지하며 힙을 뒤로 빼면서 기구를 내립니다.",
-      "하체와 등의 힘을 동시에 사용하여 일어납니다."
-    ],
-    "gif_url": "videos/1459-rR0LJzx.gif"
-  },
-  {
     "id": "0321",
     "name": "덤벨 시티드 카프 레이즈",
     "bodyPart": "하체",
@@ -4465,106 +1456,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/1379-r29jP7S.gif"
-  },
-  {
-    "id": "0322",
-    "name": "덤벨 시티드 원 레그 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0400-Ia7tumC.gif"
-  },
-  {
-    "id": "0323",
-    "name": "덤벨 시티드 원 레그 카프 레이즈 해머 머신 그립",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1380-FxhcxUW.gif"
-  },
-  {
-    "id": "0324",
-    "name": "덤벨 시티드 원 레그 카프 레이즈 PALM 업",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1381-VW88JNd.gif"
-  },
-  {
-    "id": "0325",
-    "name": "덤벨 싱글 레그 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0409-1kB3Wmk.gif"
-  },
-  {
-    "id": "0326",
-    "name": "덤벨 싱글 레그 데드리프트",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "햄스트링",
-    "secondaryMuscles": [
-      "둔근",
-      "척추기립근"
-    ],
-    "instructions": [
-      "등의 평평함을 유지하며 힙을 뒤로 빼면서 기구를 내립니다.",
-      "하체와 등의 힘을 동시에 사용하여 일어납니다."
-    ],
-    "gif_url": "videos/1757-gKozT8X.gif"
-  },
-  {
-    "id": "0327",
-    "name": "덤벨 싱글 레그 데드리프트 STEPBOX 서포트",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "햄스트링",
-    "secondaryMuscles": [
-      "둔근",
-      "척추기립근"
-    ],
-    "instructions": [
-      "등의 평평함을 유지하며 힙을 뒤로 빼면서 기구를 내립니다.",
-      "하체와 등의 힘을 동시에 사용하여 일어납니다."
-    ],
-    "gif_url": "videos/2805-daBmy1Y.gif"
-  },
-  {
-    "id": "0328",
-    "name": "덤벨 싱글 레그 SPLIT 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "덤벨",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0410-qx4fgX7.gif"
   },
   {
     "id": "0329",
@@ -4583,63 +1474,8 @@
     "gif_url": "videos/0411-H6ybluc.gif"
   },
   {
-    "id": "0330",
-    "name": "레버 얼터네이트 레그 프레스",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/2287-V07qpXy.gif"
-  },
-  {
-    "id": "0331",
-    "name": "레버 카프 프레스",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/2289-7B4F5nZ.gif"
-  },
-  {
-    "id": "0332",
-    "name": "레버 데드리프트",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "햄스트링",
-    "secondaryMuscles": [
-      "둔근",
-      "척추기립근"
-    ],
-    "instructions": [
-      "등의 평평함을 유지하며 힙을 뒤로 빼면서 기구를 내립니다.",
-      "하체와 등의 힘을 동시에 사용하여 일어납니다."
-    ],
-    "gif_url": "videos/0578-GUT8I22.gif"
-  },
-  {
-    "id": "0333",
-    "name": "레버 DONKEY 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1253-C9LuR4A.gif"
-  },
-  {
     "id": "0334",
-    "name": "레버 힙 익스텐션",
+    "name": "힙 킥 익스텐션",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "대퇴사두근",
@@ -4651,21 +1487,8 @@
     "gif_url": "videos/2286-OPqShYN.gif"
   },
   {
-    "id": "0335",
-    "name": "레버 HORIZONTAL 원 레그 프레스",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/2611-9KU9TYF.gif"
-  },
-  {
     "id": "0336",
-    "name": "레버 닐링 레그 컬",
+    "name": "원 레그 컬",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "이두근",
@@ -4678,7 +1501,7 @@
   },
   {
     "id": "0337",
-    "name": "레버 레그 익스텐션",
+    "name": "레그 익스텐션",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "대퇴사두근",
@@ -4691,7 +1514,7 @@
   },
   {
     "id": "0338",
-    "name": "레버 라이잉 레그 컬",
+    "name": "레그 컬",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "이두근",
@@ -4703,86 +1526,8 @@
     "gif_url": "videos/0586-17lJ1kr.gif"
   },
   {
-    "id": "0339",
-    "name": "레버 라이잉 TWO 원 레그 컬",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/3195-UXpKJoq.gif"
-  },
-  {
-    "id": "0340",
-    "name": "레버 리버스 HYPER익스텐션",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0593-Krmb3cB.gif"
-  },
-  {
-    "id": "0341",
-    "name": "레버 ROTARY 카프",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2315-MrgP9L6.gif"
-  },
-  {
-    "id": "0342",
-    "name": "레버 시티드 카프 프레스",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/2335-Ie9UGty.gif"
-  },
-  {
-    "id": "0343",
-    "name": "레버 시티드 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0594-bOOdeyc.gif"
-  },
-  {
-    "id": "0344",
-    "name": "레버 시티드 GOOD MORNING",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3759-XsCcxCC.gif"
-  },
-  {
     "id": "0345",
-    "name": "레버 시티드 힙 ABDUCTION",
+    "name": "힙 어브덕션",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4795,7 +1540,7 @@
   },
   {
     "id": "0346",
-    "name": "레버 시티드 힙 ADDUCTION",
+    "name": "힙 어덕션",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "하체",
@@ -4808,7 +1553,7 @@
   },
   {
     "id": "0347",
-    "name": "레버 시티드 레그 컬",
+    "name": "시티드 레그 컬",
     "bodyPart": "하체",
     "equipment": "머신",
     "target": "이두근",
@@ -4820,190 +1565,8 @@
     "gif_url": "videos/0599-Zg3XY7P.gif"
   },
   {
-    "id": "0348",
-    "name": "레버 시티드 스쿼트 카프 레이즈 레그 프레스 머신",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1385-IeDEXTe.gif"
-  },
-  {
-    "id": "0349",
-    "name": "레버 스탠딩 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0605-ykUOVze.gif"
-  },
-  {
-    "id": "0350",
-    "name": "카프 스트레칭 로프",
-    "bodyPart": "하체",
-    "equipment": "로프",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1378-1LVFcEn.gif"
-  },
-  {
-    "id": "0351",
-    "name": "INTERMEDIATE 힙 FLEXOR 대퇴사두 스트레칭",
-    "bodyPart": "하체",
-    "equipment": "로프",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1564-tFGKm99.gif"
-  },
-  {
-    "id": "0352",
-    "name": "비골근 스트레칭",
-    "bodyPart": "하체",
-    "equipment": "로프",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1388-XhfS1DZ.gif"
-  },
-  {
-    "id": "0353",
-    "name": "POSTERIOR TIBIALIS 스트레칭",
-    "bodyPart": "하체",
-    "equipment": "로프",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1389-DEEqoI2.gif"
-  },
-  {
-    "id": "0354",
-    "name": "RECLINING BIG TOE POSE 로프",
-    "bodyPart": "하체",
-    "equipment": "로프",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1582-K5xgdvI.gif"
-  },
-  {
-    "id": "0355",
-    "name": "스탠딩 햄스트링 카프 스트레칭 S승모근",
-    "bodyPart": "하체",
-    "equipment": "로프",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1599-xTjr103.gif"
-  },
-  {
-    "id": "0356",
-    "name": "HACK 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1383-2ORFMoR.gif"
-  },
-  {
-    "id": "0357",
-    "name": "HACK 원 레그 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1384-AxFoqAD.gif"
-  },
-  {
-    "id": "0358",
-    "name": "슬레드 45 DEGREES 원 레그 프레스",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "슬레드 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1425-WWD6FzI.gif"
-  },
-  {
-    "id": "0359",
-    "name": "슬레드 45В° 카프 프레스",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "슬레드 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0738-qCNVnaU.gif"
-  },
-  {
-    "id": "0360",
-    "name": "슬레드 45В° 레그 프레스",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "슬레드 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0739-10Z2DXU.gif"
-  },
-  {
-    "id": "0361",
-    "name": "슬레드 45В° 레그 프레스 등 POV",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "슬레드 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1464-yn2lLSI.gif"
-  },
-  {
     "id": "0362",
-    "name": "슬레드 45° 레그 프레스 사이드 POV",
+    "name": "레그 프레스",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "하체",
@@ -5015,63 +1578,8 @@
     "gif_url": "videos/1463-2Qh2J1e.gif"
   },
   {
-    "id": "0363",
-    "name": "슬레드 45В° 레그 와이드 프레스",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "슬레드 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0740-tj41Nu6.gif"
-  },
-  {
-    "id": "0364",
-    "name": "슬레드 카프 프레스 레그 프레스",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "슬레드 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1391-ykHcWme.gif"
-  },
-  {
-    "id": "0365",
-    "name": "슬레드 CLOSER HACK 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0741-gf3ZjB9.gif"
-  },
-  {
-    "id": "0366",
-    "name": "슬레드 FORWARD ANGLED 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0742-XDOiFns.gif"
-  },
-  {
     "id": "0367",
-    "name": "슬레드 HACK 스쿼트",
+    "name": "Hack 스쿼트",
     "bodyPart": "하체",
     "equipment": "슬레드 머신",
     "target": "대퇴사두근",
@@ -5084,77 +1592,6 @@
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
     "gif_url": "videos/0743-Qa55kX1.gif"
-  },
-  {
-    "id": "0368",
-    "name": "슬레드 라이잉 카프 프레스",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "슬레드 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/2334-g376LuL.gif"
-  },
-  {
-    "id": "0369",
-    "name": "슬레드 라이잉 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0744-9n2149Z.gif"
-  },
-  {
-    "id": "0370",
-    "name": "슬레드 원 레그 카프 프레스 레그 프레스",
-    "bodyPart": "하체",
-    "equipment": "슬레드 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "슬레드 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1392-u0pLNgz.gif"
-  },
-  {
-    "id": "0371",
-    "name": "스미스 벤트 KNEE GOOD MORNING",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0749-1bQkKZK.gif"
-  },
-  {
-    "id": "0372",
-    "name": "스미스 CHAIR 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0750-Gu2rNJd.gif"
   },
   {
     "id": "0373",
@@ -5174,7 +1611,7 @@
   },
   {
     "id": "0374",
-    "name": "스미스 프론트 스쿼트 클린 그립",
+    "name": "스미스 프론트 스쿼트",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "대퇴사두근",
@@ -5189,24 +1626,8 @@
     "gif_url": "videos/1433-lFhb2Rw.gif"
   },
   {
-    "id": "0375",
-    "name": "스미스 풀 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/3281-NNoHCEA.gif"
-  },
-  {
     "id": "0376",
-    "name": "스미스 HACK 스쿼트",
+    "name": "스미스 Hack 스쿼트",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "대퇴사두근",
@@ -5221,105 +1642,8 @@
     "gif_url": "videos/0755-ZuPXtCK.gif"
   },
   {
-    "id": "0377",
-    "name": "스미스 레그 프레스",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0760-7zdxRTl.gif"
-  },
-  {
-    "id": "0378",
-    "name": "스미스 로우 바 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/1434-RGLscZM.gif"
-  },
-  {
-    "id": "0379",
-    "name": "스미스 원 레그 플로어 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1393-9GXrTE6.gif"
-  },
-  {
-    "id": "0380",
-    "name": "스미스 리버스 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0763-ywaNfuh.gif"
-  },
-  {
-    "id": "0381",
-    "name": "스미스 리버스 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1394-Lsqrgh4.gif"
-  },
-  {
-    "id": "0382",
-    "name": "스미스 시티드 원 레그 카프 레이즈",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1395-0S75mYG.gif"
-  },
-  {
-    "id": "0383",
-    "name": "스미스 싱글 레그 SPLIT 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/0768-wWFspEi.gif"
-  },
-  {
     "id": "0384",
-    "name": "스미스 SPRINT 런지",
+    "name": "스미스 런지",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "대퇴사두근",
@@ -5350,7 +1674,7 @@
   },
   {
     "id": "0386",
-    "name": "스미스 스탠딩 레그 카프 레이즈",
+    "name": "스미스 카프 레이즈",
     "bodyPart": "하체",
     "equipment": "스미스 머신",
     "target": "하체",
@@ -5360,103 +1684,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/0773-6MaEjVA.gif"
-  },
-  {
-    "id": "0387",
-    "name": "스미스 SUMO 스쿼트",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/3142-dzz6BiV.gif"
-  },
-  {
-    "id": "0388",
-    "name": "스미스 TOE 레이즈",
-    "bodyPart": "하체",
-    "equipment": "스미스 머신",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1396-Y4QlY8z.gif"
-  },
-  {
-    "id": "0389",
-    "name": "타이어 FLIP",
-    "bodyPart": "하체",
-    "equipment": "타이어",
-    "target": "하체",
-    "secondaryMuscles": [],
-    "instructions": [
-      "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2459-oZjMu1t.gif"
-  },
-  {
-    "id": "0390",
-    "name": "승모근 바 데드리프트",
-    "bodyPart": "하체",
-    "equipment": "트랩바",
-    "target": "햄스트링",
-    "secondaryMuscles": [
-      "둔근",
-      "척추기립근"
-    ],
-    "instructions": [
-      "등의 평평함을 유지하며 힙을 뒤로 빼면서 기구를 내립니다.",
-      "하체와 등의 힘을 동시에 사용하여 일어납니다."
-    ],
-    "gif_url": "videos/0811-jQGwmxN.gif"
-  },
-  {
-    "id": "0391",
-    "name": "어시스트 스탠딩 삼두 익스텐션 TOWEL",
-    "bodyPart": "팔",
-    "equipment": "어시스트",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0018-7HcfMBP.gif"
-  },
-  {
-    "id": "0392",
-    "name": "바벨 얼터네이트 이두 컬",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0023-Yza7XrQ.gif"
-  },
-  {
-    "id": "0393",
-    "name": "바벨 이두 컬 팔 BLASTER",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/2407-aee2Fcj.gif"
   },
   {
     "id": "0394",
@@ -5485,151 +1712,8 @@
     "gif_url": "videos/0031-25GPyDY.gif"
   },
   {
-    "id": "0396",
-    "name": "바벨 디클라인 클로즈 그립 SKULL 프레스",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0035-LMGXZn8.gif"
-  },
-  {
-    "id": "0397",
-    "name": "바벨 DRAG 컬",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0038-IENzBdA.gif"
-  },
-  {
-    "id": "0398",
-    "name": "바벨 인클라인 클로즈 그립 벤치 프레스",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1719-gx7s7uF.gif"
-  },
-  {
-    "id": "0399",
-    "name": "바벨 인클라인 리버스 그립 프레스",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "상부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0048-641mIfk.gif"
-  },
-  {
-    "id": "0400",
-    "name": "바벨 JM 벤치 프레스",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0052-ZsiqXYa.gif"
-  },
-  {
-    "id": "0401",
-    "name": "바벨 라이잉 등 헤드 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/1720-yg8Totb.gif"
-  },
-  {
-    "id": "0402",
-    "name": "바벨 라이잉 클로즈 그립 프레스",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0055-EcaV7aL.gif"
-  },
-  {
-    "id": "0403",
-    "name": "바벨 라이잉 클로즈 그립 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0056-HJ63mSO.gif"
-  },
-  {
-    "id": "0404",
-    "name": "바벨 라이잉 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0057-EMpUwRI.gif"
-  },
-  {
-    "id": "0405",
-    "name": "바벨 라이잉 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0059-SYJ4Bkt.gif"
-  },
-  {
-    "id": "0406",
-    "name": "바벨 라이잉 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0061-iZop9xO.gif"
-  },
-  {
     "id": "0407",
-    "name": "바벨 라이잉 삼두 익스텐션 SKULL CRUSHER",
+    "name": "바벨 익스텐션",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "삼두근",
@@ -5641,21 +1725,8 @@
     "gif_url": "videos/0060-h8LFzo9.gif"
   },
   {
-    "id": "0408",
-    "name": "바벨 원 암 플로어 프레스",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0065-vtusOWT.gif"
-  },
-  {
     "id": "0409",
-    "name": "바벨 PALMS 다운 리스트 컬 오버 A 벤치",
+    "name": "리버스 리스트 컬",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "이두근",
@@ -5668,7 +1739,7 @@
   },
   {
     "id": "0410",
-    "name": "바벨 PALMS 업 리스트 컬 오버 A 벤치",
+    "name": "리스트 컬",
     "bodyPart": "팔",
     "equipment": "바벨",
     "target": "이두근",
@@ -5680,34 +1751,8 @@
     "gif_url": "videos/1412-SJAA2IQ.gif"
   },
   {
-    "id": "0411",
-    "name": "바벨 PIN 프레스ES",
-    "bodyPart": "팔",
-    "equipment": "바벨",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1751-bndCa3Q.gif"
-  },
-  {
-    "id": "0412",
-    "name": "벤치 딥스 KNEES 벤트",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0129-RrLske5.gif"
-  },
-  {
     "id": "0413",
-    "name": "벤치 딥스 플로어",
+    "name": "벤치 딥스",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "팔",
@@ -5719,21 +1764,8 @@
     "gif_url": "videos/1399-9RT8oQW.gif"
   },
   {
-    "id": "0414",
-    "name": "이두 레그 컨센트레이션 컬",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "맨몸을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1770-sJFIDIp.gif"
-  },
-  {
     "id": "0415",
-    "name": "이두 내로우 풀 업S",
+    "name": "이두 내로우 풀 업",
     "bodyPart": "팔",
     "equipment": "맨몸",
     "target": "광배근",
@@ -5761,45 +1793,6 @@
     "gif_url": "videos/0140-guT8YnS.gif"
   },
   {
-    "id": "0417",
-    "name": "BODY 업",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0137-U6G2gk9.gif"
-  },
-  {
-    "id": "0418",
-    "name": "맨몸 닐링 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/1771-s0HKO2I.gif"
-  },
-  {
-    "id": "0419",
-    "name": "맨몸 사이드 라이잉 이두 컬",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "맨몸을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1769-gscGLOU.gif"
-  },
-  {
     "id": "0420",
     "name": "클로즈 그립 푸시 업",
     "bodyPart": "팔",
@@ -5811,84 +1804,6 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/0259-x6KpKpq.gif"
-  },
-  {
-    "id": "0421",
-    "name": "클로즈 그립 푸시 업 KNEES",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2398-v3vLFW0.gif"
-  },
-  {
-    "id": "0422",
-    "name": "DIAMOND 푸시 업",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0283-soIB2rj.gif"
-  },
-  {
-    "id": "0423",
-    "name": "ELBOW 딥스",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3287-LkoAWAE.gif"
-  },
-  {
-    "id": "0424",
-    "name": "HANDSTAND",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3302-XooAdhl.gif"
-  },
-  {
-    "id": "0425",
-    "name": "HANDSTAND 푸시 업",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0471-rQxwMxO.gif"
-  },
-  {
-    "id": "0426",
-    "name": "IMPOSSIBLE 딥스",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3289-05Cf2v8.gif"
   },
   {
     "id": "0427",
@@ -5904,32 +1819,6 @@
     "gif_url": "videos/0490-1YB40kg.gif"
   },
   {
-    "id": "0428",
-    "name": "MODIFIED 푸시 업 로우ER ARMS",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1421-arvaszz.gif"
-  },
-  {
-    "id": "0429",
-    "name": "원 암 딥스",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0639-FAoIFMw.gif"
-  },
-  {
     "id": "0430",
     "name": "오버헤드 삼두 스트레칭",
     "bodyPart": "팔",
@@ -5943,21 +1832,8 @@
     "gif_url": "videos/0643-Z5YStHW.gif"
   },
   {
-    "id": "0431",
-    "name": "푸시 업 로우ER ARMS",
-    "bodyPart": "팔",
-    "equipment": "맨몸",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1467-4Jt8QsQ.gif"
-  },
-  {
     "id": "0432",
-    "name": "케이블 얼터네이트 삼두 익스텐션",
+    "name": "케이블 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "삼두근",
@@ -5967,45 +1843,6 @@
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
     "gif_url": "videos/0149-Gchi5Tr.gif"
-  },
-  {
-    "id": "0433",
-    "name": "케이블 클로즈 그립 컬",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1630-BCGQ6J5.gif"
-  },
-  {
-    "id": "0434",
-    "name": "케이블 컨센트레이션 컬",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1631-NvfE43H.gif"
-  },
-  {
-    "id": "0435",
-    "name": "케이블 컨센트레이션 익스텐션 KNEE",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0152-Db7eEgw.gif"
   },
   {
     "id": "0436",
@@ -6021,21 +1858,8 @@
     "gif_url": "videos/0868-G08RZcQ.gif"
   },
   {
-    "id": "0437",
-    "name": "케이블 DRAG 컬",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1632-dXz8zjF.gif"
-  },
-  {
     "id": "0438",
-    "name": "케이블 해머 머신 컬 로프",
+    "name": "케이블 해머 컬",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "이두근",
@@ -6048,7 +1872,7 @@
   },
   {
     "id": "0439",
-    "name": "케이블 하이 풀EY 오버헤드 삼두 익스텐션",
+    "name": "케이블 오버헤드 삼두 익스텐션",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "삼두근",
@@ -6058,71 +1882,6 @@
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
     "gif_url": "videos/1722-1xHyxys.gif"
-  },
-  {
-    "id": "0440",
-    "name": "케이블 인클라인 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0173-Hx1WC8I.gif"
-  },
-  {
-    "id": "0441",
-    "name": "케이블 킥백",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0860-HEJ6DIX.gif"
-  },
-  {
-    "id": "0442",
-    "name": "케이블 닐링 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0176-KWdF2JI.gif"
-  },
-  {
-    "id": "0443",
-    "name": "케이블 라이잉 이두 컬",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1634-otqIxU4.gif"
-  },
-  {
-    "id": "0444",
-    "name": "케이블 라이잉 클로즈 그립 컬",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0182-61GrD55.gif"
   },
   {
     "id": "0445",
@@ -6138,34 +1897,8 @@
     "gif_url": "videos/0190-YTur5nR.gif"
   },
   {
-    "id": "0446",
-    "name": "케이블 원 암 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1633-eHBlPsa.gif"
-  },
-  {
-    "id": "0447",
-    "name": "케이블 원 암 리버스 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1635-ZXnjcOQ.gif"
-  },
-  {
     "id": "0448",
-    "name": "케이블 원 암 삼두 PUSH다운",
+    "name": "케이블 원 암 푸시다운",
     "bodyPart": "팔",
     "equipment": "케이블",
     "target": "팔",
@@ -6177,86 +1910,8 @@
     "gif_url": "videos/1723-qRZ5S1N.gif"
   },
   {
-    "id": "0449",
-    "name": "케이블 오버헤드 컬",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1636-wDUqY2u.gif"
-  },
-  {
-    "id": "0450",
-    "name": "케이블 오버헤드 삼두 익스텐션 로프 어태치먼트",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0194-2IxROQ1.gif"
-  },
-  {
-    "id": "0451",
-    "name": "케이블 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "케이블",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0195-P2lNrGL.gif"
-  },
-  {
-    "id": "0452",
-    "name": "덤벨 얼터네이트 이두 컬",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0285-BU15nH4.gif"
-  },
-  {
-    "id": "0453",
-    "name": "덤벨 얼터네이트 이두 컬 팔 BLASTER",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/2403-CfKsRbG.gif"
-  },
-  {
-    "id": "0454",
-    "name": "덤벨 얼터네이트 해머 머신 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1646-fy7Tgy4.gif"
-  },
-  {
     "id": "0455",
-    "name": "덤벨 얼터네이트 프리처 컬",
+    "name": "덤벨 헤머컬",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6269,7 +1924,7 @@
   },
   {
     "id": "0456",
-    "name": "덤벨 얼터네이트 시티드 해머 머신 컬",
+    "name": "덤벨 컬",
     "bodyPart": "팔",
     "equipment": "덤벨",
     "target": "이두근",
@@ -6279,97 +1934,6 @@
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
     "gif_url": "videos/1648-6em2Dxj.gif"
-  },
-  {
-    "id": "0457",
-    "name": "덤벨 이두 컬 런지 BOWLING 모션",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1651-1VpF8db.gif"
-  },
-  {
-    "id": "0458",
-    "name": "덤벨 이두 컬 STORK STANCE",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1653-uSkDMYl.gif"
-  },
-  {
-    "id": "0459",
-    "name": "덤벨 이두 컬",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0294-NbVPDMW.gif"
-  },
-  {
-    "id": "0460",
-    "name": "덤벨 이두 컬 팔 BLASTER",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/2401-nlJsbkW.gif"
-  },
-  {
-    "id": "0461",
-    "name": "덤벨 이두 컬 리버스",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1654-nFc4FyV.gif"
-  },
-  {
-    "id": "0462",
-    "name": "덤벨 이두 컬 스쿼트",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1655-niXESDw.gif"
-  },
-  {
-    "id": "0463",
-    "name": "덤벨 이두 컬 V SIT BOSU 볼",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1656-H1XAdpk.gif"
   },
   {
     "id": "0464",
@@ -6385,19 +1949,6 @@
     "gif_url": "videos/1731-7jGOBF3.gif"
   },
   {
-    "id": "0465",
-    "name": "덤벨 클로즈 그립 프레스",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0296-RxayqAZ.gif"
-  },
-  {
     "id": "0466",
     "name": "덤벨 컨센트레이션 컬",
     "bodyPart": "팔",
@@ -6411,333 +1962,8 @@
     "gif_url": "videos/0297-gvsWLQw.gif"
   },
   {
-    "id": "0467",
-    "name": "덤벨 크로스 BODY 해머 머신 컬",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0298-Qyk5J3p.gif"
-  },
-  {
-    "id": "0468",
-    "name": "덤벨 디클라인 원 암 해머 머신 프레스",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1617-SHUMp5H.gif"
-  },
-  {
-    "id": "0469",
-    "name": "덤벨 디클라인 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0306-OTgkHwR.gif"
-  },
-  {
-    "id": "0470",
-    "name": "덤벨 FINGER 컬",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1437-mtXengz.gif"
-  },
-  {
-    "id": "0471",
-    "name": "덤벨 FORWARD 런지 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "덤벨",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/1732-XalXcvM.gif"
-  },
-  {
-    "id": "0472",
-    "name": "EZ 바 FRENCH 프레스 엑서사이즈 볼",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1747-CFN9P8G.gif"
-  },
-  {
-    "id": "0473",
-    "name": "EZ 바 라이잉 클로즈 그립 삼두 익스텐션 비하인드 헤드",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/1748-6CKUx7o.gif"
-  },
-  {
-    "id": "0474",
-    "name": "EZ 바 시티드 클로즈 그립 컨센트레이션 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1682-Dsfz0Id.gif"
-  },
-  {
-    "id": "0475",
-    "name": "EZ 바 스탠딩 FRENCH 프레스",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1749-1cTf2Ux.gif"
-  },
-  {
-    "id": "0476",
-    "name": "EZ 바벨 클로즈 그립 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1627-hacCyUv.gif"
-  },
-  {
-    "id": "0477",
-    "name": "EZ 바벨 클로즈 그립 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0446-V4ryaZa.gif"
-  },
-  {
-    "id": "0478",
-    "name": "EZ 바벨 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0447-6TG6x2w.gif"
-  },
-  {
-    "id": "0479",
-    "name": "EZ 바벨 디클라인 클로즈 그립 FACE 프레스",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0448-DgZQ11d.gif"
-  },
-  {
-    "id": "0480",
-    "name": "EZ 바벨 디클라인 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/2186-CQHoDm0.gif"
-  },
-  {
-    "id": "0481",
-    "name": "EZ 바벨 인클라인 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0449-KyLtiLT.gif"
-  },
-  {
-    "id": "0482",
-    "name": "EZ 바벨 JM 벤치 프레스",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0450-hnOYgH3.gif"
-  },
-  {
-    "id": "0483",
-    "name": "EZ 바벨 리버스 그립 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0451-Y5X65IB.gif"
-  },
-  {
-    "id": "0484",
-    "name": "EZ 바벨 리버스 그립 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0452-vBNyir7.gif"
-  },
-  {
-    "id": "0485",
-    "name": "EZ 바벨 시티드 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1458-jtFKbt5.gif"
-  },
-  {
-    "id": "0486",
-    "name": "EZ 바벨 시티드 삼두 익스텐션",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "삼두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "근육의 최대 수축 지점까지 천천히 펴줍니다.",
-      "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
-    ],
-    "gif_url": "videos/0453-iaapw0g.gif"
-  },
-  {
-    "id": "0487",
-    "name": "EZ 바벨 SPIDER 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0454-Ye5Qxb0.gif"
-  },
-  {
-    "id": "0488",
-    "name": "EZ 바벨 SPIDER 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1628-2kattbR.gif"
-  },
-  {
-    "id": "0489",
-    "name": "EZ 바 이두 컬 팔 BLASTER",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/2404-tJ5nYqo.gif"
-  },
-  {
-    "id": "0490",
-    "name": "EZ 바 클로즈 그립 벤치 프레스",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/2432-da4cXST.gif"
-  },
-  {
-    "id": "0491",
-    "name": "EZ 바벨 스탠딩 와이드 그립 이두 컬",
-    "bodyPart": "팔",
-    "equipment": "EZ바",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "EZ바을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/2741-OVTZ65k.gif"
-  },
-  {
     "id": "0492",
-    "name": "어시스트 삼두 딥스 닐링",
+    "name": "어시스트 딥스 머신",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "팔",
@@ -6750,7 +1976,7 @@
   },
   {
     "id": "0493",
-    "name": "레버 이두 컬",
+    "name": "이두 컬 머신",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "이두근",
@@ -6762,99 +1988,8 @@
     "gif_url": "videos/0575-q6y3OhV.gif"
   },
   {
-    "id": "0494",
-    "name": "레버 그립PER HANDS",
-    "bodyPart": "팔",
-    "equipment": "머신",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2288-mKwcrHn.gif"
-  },
-  {
-    "id": "0495",
-    "name": "레버 해머 머신 그립 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "머신",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1615-OAguZoG.gif"
-  },
-  {
-    "id": "0496",
-    "name": "레버 오버HAND 삼두 딥스",
-    "bodyPart": "팔",
-    "equipment": "머신",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0591-D5yqP2p.gif"
-  },
-  {
-    "id": "0497",
-    "name": "레버 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "머신",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0592-b6hQYMb.gif"
-  },
-  {
-    "id": "0498",
-    "name": "레버 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "머신",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1614-ye84CTU.gif"
-  },
-  {
-    "id": "0499",
-    "name": "레버 리버스 그립 프리처 컬",
-    "bodyPart": "팔",
-    "equipment": "머신",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "머신을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1616-kj3hy6W.gif"
-  },
-  {
-    "id": "0500",
-    "name": "레버 시티드 딥스",
-    "bodyPart": "팔",
-    "equipment": "머신",
-    "target": "팔",
-    "secondaryMuscles": [],
-    "instructions": [
-      "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1451-BRImeP8.gif"
-  },
-  {
     "id": "0501",
-    "name": "레버 삼두 익스텐션",
+    "name": "삼두 익스텐션 머신",
     "bodyPart": "팔",
     "equipment": "머신",
     "target": "삼두근",
@@ -6879,32 +2014,6 @@
     "gif_url": "videos/0751-WcHl7ru.gif"
   },
   {
-    "id": "0503",
-    "name": "스미스 머신 이두 컬",
-    "bodyPart": "팔",
-    "equipment": "스미스 머신",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1683-zILLZ98.gif"
-  },
-  {
-    "id": "0504",
-    "name": "스미스 머신 디클라인 클로즈 그립 벤치 프레스",
-    "bodyPart": "팔",
-    "equipment": "스미스 머신",
-    "target": "하부 가슴",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/1625-yB9SvIF.gif"
-  },
-  {
     "id": "0505",
     "name": "스미스 머신 인클라인 삼두 익스텐션",
     "bodyPart": "팔",
@@ -6918,251 +2027,8 @@
     "gif_url": "videos/1752-o8aOcrz.gif"
   },
   {
-    "id": "0506",
-    "name": "스미스 시티드 리스트 컬",
-    "bodyPart": "팔",
-    "equipment": "스미스 머신",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/1426-B6dAO1t.gif"
-  },
-  {
-    "id": "0507",
-    "name": "스미스 스탠딩 등 리스트 컬",
-    "bodyPart": "팔",
-    "equipment": "스미스 머신",
-    "target": "이두근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "스미스 머신을(를) 들어 올리며 이두근을 수축시킵니다.",
-      "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
-    ],
-    "gif_url": "videos/0771-hfmQ0Tz.gif"
-  },
-  {
-    "id": "0508",
-    "name": "어시스트 HANGING KNEE 레이즈",
-    "bodyPart": "허리/코어",
-    "equipment": "어시스트",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0011-03lzqwk.gif"
-  },
-  {
-    "id": "0509",
-    "name": "어시스트 HANGING KNEE 레이즈 TH로우 다운",
-    "bodyPart": "허리/코어",
-    "equipment": "어시스트",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0010-8K0w2yA.gif"
-  },
-  {
-    "id": "0510",
-    "name": "어시스트 라이잉 레그 레이즈 레터럴 TH로우 다운",
-    "bodyPart": "허리/코어",
-    "equipment": "어시스트",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0012-UGhRD1A.gif"
-  },
-  {
-    "id": "0511",
-    "name": "어시스트 라이잉 레그 레이즈 TH로우 다운",
-    "bodyPart": "허리/코어",
-    "equipment": "어시스트",
-    "target": "광배근",
-    "secondaryMuscles": [
-      "이두근",
-      "승모근"
-    ],
-    "instructions": [
-      "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
-      "상체가 흔들리지 않도록 코어에 힘을 줍니다."
-    ],
-    "gif_url": "videos/0013-VX5YKR5.gif"
-  },
-  {
-    "id": "0512",
-    "name": "어시스트 PRONE RECTUS FEMORIS 스트레칭",
-    "bodyPart": "허리/코어",
-    "equipment": "어시스트",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
-      "15~30초간 호흡하며 자세를 유지합니다."
-    ],
-    "gif_url": "videos/1714-2Ryn564.gif"
-  },
-  {
-    "id": "0513",
-    "name": "어시스트 SIT 업",
-    "bodyPart": "허리/코어",
-    "equipment": "어시스트",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1758-aumB2IV.gif"
-  },
-  {
-    "id": "0514",
-    "name": "바벨 프레스 SIT 업",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
-      "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
-    ],
-    "gif_url": "videos/0071-wnEscH8.gif"
-  },
-  {
-    "id": "0515",
-    "name": "바벨 ROLLEROUT",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0084-7M66AVi.gif"
-  },
-  {
-    "id": "0516",
-    "name": "바벨 ROLLEROUT FROM 벤치",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0083-Gxg9lDc.gif"
-  },
-  {
-    "id": "0517",
-    "name": "바벨 시티드 트위스트",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0094-dFSNDOA.gif"
-  },
-  {
-    "id": "0518",
-    "name": "바벨 사이드 벤트",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0096-i4JkUaL.gif"
-  },
-  {
-    "id": "0519",
-    "name": "바벨 SITTED 얼터네이트 레그 레이즈",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2799-G7xoEzr.gif"
-  },
-  {
-    "id": "0520",
-    "name": "바벨 SITTED 얼터네이트 레그 레이즈",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2800-BCs0G2F.gif"
-  },
-  {
-    "id": "0521",
-    "name": "바벨 스탠딩 AB ROLLEROUT",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0103-xnInPfE.gif"
-  },
-  {
-    "id": "0522",
-    "name": "바벨 스탠딩 트위스트",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0112-yQe5HpE.gif"
-  },
-  {
-    "id": "0523",
-    "name": "LANDMINE 180",
-    "bodyPart": "허리/코어",
-    "equipment": "바벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0562-QYysSLV.gif"
-  },
-  {
     "id": "0524",
-    "name": "3 4 SIT 업",
+    "name": "싯업",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7175,7 +2041,7 @@
   },
   {
     "id": "0525",
-    "name": "45° 사이드 BEND",
+    "name": "사이드밴드",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7188,7 +2054,7 @@
   },
   {
     "id": "0526",
-    "name": "AIR BIKE",
+    "name": "바이시클 크런치",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7201,7 +2067,7 @@
   },
   {
     "id": "0527",
-    "name": "얼터네이트 HEEL TOUCHERS",
+    "name": "힐터치",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7213,34 +2079,8 @@
     "gif_url": "videos/0006-qaZVsGk.gif"
   },
   {
-    "id": "0528",
-    "name": "팔 SLINGERS HANGING 벤트 KNEE 레그S",
-    "bodyPart": "허리/코어",
-    "equipment": "맨몸",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2355-uWpxD4v.gif"
-  },
-  {
-    "id": "0529",
-    "name": "팔 SLINGERS HANGING 스트레이트 레그S",
-    "bodyPart": "허리/코어",
-    "equipment": "맨몸",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2333-PXTIwgu.gif"
-  },
-  {
     "id": "0530",
-    "name": "맨몸 인클라인 사이드 플랭크",
+    "name": "사이드 플랭크",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7252,47 +2092,8 @@
     "gif_url": "videos/3544-5VXmnV5.gif"
   },
   {
-    "id": "0531",
-    "name": "BOTTOMS 업",
-    "bodyPart": "허리/코어",
-    "equipment": "맨몸",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0138-CI6baTY.gif"
-  },
-  {
-    "id": "0532",
-    "name": "브릿지 MOUNTAIN CLIMBER 크로스 BODY",
-    "bodyPart": "허리/코어",
-    "equipment": "맨몸",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2466-9c6T1YX.gif"
-  },
-  {
-    "id": "0533",
-    "name": "BUTT 업S",
-    "bodyPart": "허리/코어",
-    "equipment": "맨몸",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0870-qcNN2FN.gif"
-  },
-  {
     "id": "0534",
-    "name": "CAPTAINS CHAIR 스트레이트 레그 레이즈",
+    "name": "스트레이트 레그레이즈",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7304,34 +2105,8 @@
     "gif_url": "videos/2963-weoDEpH.gif"
   },
   {
-    "id": "0535",
-    "name": "COCOONS",
-    "bodyPart": "허리/코어",
-    "equipment": "맨몸",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0260-SLKj2pX.gif"
-  },
-  {
-    "id": "0536",
-    "name": "CRAB 트위스트 TOE TOUCH",
-    "bodyPart": "허리/코어",
-    "equipment": "맨몸",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1468-xgsGFVM.gif"
-  },
-  {
     "id": "0537",
-    "name": "크로스 BODY 크런치",
+    "name": "크로스바디 크런치",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "복직근",
@@ -7343,21 +2118,8 @@
     "gif_url": "videos/0262-rbu5UUb.gif"
   },
   {
-    "id": "0538",
-    "name": "크런치 HANDS 오버헤드",
-    "bodyPart": "허리/코어",
-    "equipment": "맨몸",
-    "target": "복직근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "복부의 힘을 사용하여 상체를 말아 올립니다.",
-      "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
-    ],
-    "gif_url": "videos/0267-kjJ3VoQ.gif"
-  },
-  {
     "id": "0539",
-    "name": "크런치 플로어",
+    "name": "크런치",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "복직근",
@@ -7382,19 +2144,6 @@
     "gif_url": "videos/3016-g2oKspu.gif"
   },
   {
-    "id": "0541",
-    "name": "DEAD BUG",
-    "bodyPart": "허리/코어",
-    "equipment": "맨몸",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0276-iny3m5y.gif"
-  },
-  {
     "id": "0542",
     "name": "디클라인 크런치",
     "bodyPart": "허리/코어",
@@ -7409,7 +2158,7 @@
   },
   {
     "id": "0543",
-    "name": "디클라인 SIT 업",
+    "name": "디클라인 싯업",
     "bodyPart": "허리/코어",
     "equipment": "맨몸",
     "target": "허리/코어",
@@ -7421,21 +2170,8 @@
     "gif_url": "videos/0282-QLL2gdc.gif"
   },
   {
-    "id": "0544",
-    "name": "케이블 JUDO FLIP",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0174-MvQPqVW.gif"
-  },
-  {
     "id": "0545",
-    "name": "케이블 닐링 크런치",
+    "name": "케이블 크런치",
     "bodyPart": "허리/코어",
     "equipment": "케이블",
     "target": "복직근",
@@ -7445,45 +2181,6 @@
       "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
     ],
     "gif_url": "videos/0175-WW95auq.gif"
-  },
-  {
-    "id": "0546",
-    "name": "케이블 리버스 크런치",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "복직근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "복부의 힘을 사용하여 상체를 말아 올립니다.",
-      "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
-    ],
-    "gif_url": "videos/0873-RqOtqD7.gif"
-  },
-  {
-    "id": "0547",
-    "name": "케이블 RUSSIAN 트위스트S 스테빌리티 볼",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0211-d9Xaxq6.gif"
-  },
-  {
-    "id": "0548",
-    "name": "케이블 시티드 크런치",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "복직근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "복부의 힘을 사용하여 상체를 말아 올립니다.",
-      "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
-    ],
-    "gif_url": "videos/0212-8xUv4J7.gif"
   },
   {
     "id": "0549",
@@ -7499,58 +2196,6 @@
     "gif_url": "videos/2399-UEjSrKI.gif"
   },
   {
-    "id": "0550",
-    "name": "케이블 사이드 BEND",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0222-wPypxFY.gif"
-  },
-  {
-    "id": "0551",
-    "name": "케이블 사이드 BEND 크런치 BOSU 볼",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "복직근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "복부의 힘을 사용하여 상체를 말아 올립니다.",
-      "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
-    ],
-    "gif_url": "videos/0221-qatbkEd.gif"
-  },
-  {
-    "id": "0552",
-    "name": "케이블 사이드 크런치",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "복직근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "복부의 힘을 사용하여 상체를 말아 올립니다.",
-      "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
-    ],
-    "gif_url": "videos/0223-q2ADGqV.gif"
-  },
-  {
-    "id": "0553",
-    "name": "케이블 스탠딩 크런치",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "복직근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "복부의 힘을 사용하여 상체를 말아 올립니다.",
-      "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
-    ],
-    "gif_url": "videos/0226-jpgqxiS.gif"
-  },
-  {
     "id": "0554",
     "name": "케이블 스탠딩 크런치 로프 어태치먼트",
     "bodyPart": "허리/코어",
@@ -7564,60 +2209,8 @@
     "gif_url": "videos/0874-XU3ePuv.gif"
   },
   {
-    "id": "0555",
-    "name": "케이블 스탠딩 LIFT",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0230-qFpAkpP.gif"
-  },
-  {
-    "id": "0556",
-    "name": "케이블 TUCK 리버스 크런치",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "복직근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "복부의 힘을 사용하여 상체를 말아 올립니다.",
-      "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
-    ],
-    "gif_url": "videos/0242-TXtXc84.gif"
-  },
-  {
-    "id": "0557",
-    "name": "케이블 트위스트",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0243-aVs3BR3.gif"
-  },
-  {
-    "id": "0558",
-    "name": "케이블 트위스트 업 다운",
-    "bodyPart": "허리/코어",
-    "equipment": "케이블",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0862-fhZQPlV.gif"
-  },
-  {
     "id": "0559",
-    "name": "덤벨 사이드 BEND",
+    "name": "덤벨 사이드 밴드",
     "bodyPart": "허리/코어",
     "equipment": "덤벨",
     "target": "허리/코어",
@@ -7627,530 +2220,5 @@
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
     "gif_url": "videos/0407-IpONWYv.gif"
-  },
-  {
-    "id": "0560",
-    "name": "SPELL CASTER",
-    "bodyPart": "허리/코어",
-    "equipment": "덤벨",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0777-p9cCe2r.gif"
-  },
-  {
-    "id": "0561",
-    "name": "스미스 힙 레이즈",
-    "bodyPart": "허리/코어",
-    "equipment": "스미스 머신",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0756-CqhoytW.gif"
-  },
-  {
-    "id": "0562",
-    "name": "OTIS 업",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0641-UVL20oz.gif"
-  },
-  {
-    "id": "0563",
-    "name": "중량 크런치",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "복직근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "복부의 힘을 사용하여 상체를 말아 올립니다.",
-      "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
-    ],
-    "gif_url": "videos/0832-s8nrDXF.gif"
-  },
-  {
-    "id": "0564",
-    "name": "중량 디클라인 SIT 업",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3670-EZeDVzO.gif"
-  },
-  {
-    "id": "0565",
-    "name": "중량 프론트 플랭크",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2135-VBAWRPG.gif"
-  },
-  {
-    "id": "0566",
-    "name": "중량 HANGING 레그 힙 레이즈",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0866-QOA0FD0.gif"
-  },
-  {
-    "id": "0567",
-    "name": "중량 오버헤드 크런치 스테빌리티 볼",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "복직근",
-    "secondaryMuscles": [],
-    "instructions": [
-      "복부의 힘을 사용하여 상체를 말아 올립니다.",
-      "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
-    ],
-    "gif_url": "videos/0840-xmM75XG.gif"
-  },
-  {
-    "id": "0568",
-    "name": "중량 RUSSIAN 트위스트",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0846-fZFZ704.gif"
-  },
-  {
-    "id": "0569",
-    "name": "중량 RUSSIAN 트위스트 레그S 업",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0845-WU9BLIs.gif"
-  },
-  {
-    "id": "0570",
-    "name": "중량 RUSSIAN 트위스트",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2371-YIUAtYf.gif"
-  },
-  {
-    "id": "0571",
-    "name": "중량 시티드 트위스트 스테빌리티 볼",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0849-s34Y4LR.gif"
-  },
-  {
-    "id": "0572",
-    "name": "중량 사이드 BEND 스테빌리티 볼",
-    "bodyPart": "허리/코어",
-    "equipment": "중량",
-    "target": "허리/코어",
-    "secondaryMuscles": [],
-    "instructions": [
-      "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0850-6bOA1Oi.gif"
-  },
-  {
-    "id": "0573",
-    "name": "등 FORTH 스텝",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3672-fNGumX0.gif"
-  },
-  {
-    "id": "0574",
-    "name": "BEAR CRAWL",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3360-0Yz8WdV.gif"
-  },
-  {
-    "id": "0575",
-    "name": "버피",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/1160-dK9394r.gif"
-  },
-  {
-    "id": "0576",
-    "name": "하이 KNEE AGAINST WALL",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3636-ealLwvX.gif"
-  },
-  {
-    "id": "0577",
-    "name": "JACK 버피",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0501-mr7pkqP.gif"
-  },
-  {
-    "id": "0578",
-    "name": "MOUNTAIN CLIMBER",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0630-RJgzwny.gif"
-  },
-  {
-    "id": "0579",
-    "name": "푸시 RUN",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3638-PrQbjvB.gif"
-  },
-  {
-    "id": "0580",
-    "name": "RUN",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0685-oLrKqDH.gif"
-  },
-  {
-    "id": "0581",
-    "name": "RUN EQUIPMENT",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0684-y5p0H8a.gif"
-  },
-  {
-    "id": "0582",
-    "name": "SHORT STRIDE RUN",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3656-CcWEoWV.gif"
-  },
-  {
-    "id": "0583",
-    "name": "SKATER HOPS",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3361-zfNHMN9.gif"
-  },
-  {
-    "id": "0584",
-    "name": "SKI 스텝",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3671-5MRH8H2.gif"
-  },
-  {
-    "id": "0585",
-    "name": "스윙 360",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3318-tnaj0mT.gif"
-  },
-  {
-    "id": "0586",
-    "name": "WALKING 하이 KNEES 런지",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근"
-    ],
-    "instructions": [
-      "한쪽 발을 앞으로 내딛으며 양쪽 무릎이 90도가 되도록 내려갑니다.",
-      "앞발의 뒤꿈치에 힘을 주어 다시 돌아옵니다."
-    ],
-    "gif_url": "videos/3655-J9zIWig.gif"
-  },
-  {
-    "id": "0587",
-    "name": "WHEEL RUN",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3637-km2Ljzj.gif"
-  },
-  {
-    "id": "0588",
-    "name": "ASTRIDE 점프S",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3220-f9lVSSI.gif"
-  },
-  {
-    "id": "0589",
-    "name": "HALF KNEE BENDS",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3221-ia6kIIl.gif"
-  },
-  {
-    "id": "0590",
-    "name": "JACK 점프",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3224-1g5bPpA.gif"
-  },
-  {
-    "id": "0591",
-    "name": "SCISSOR 점프S",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3219-Eh2v5Iu.gif"
-  },
-  {
-    "id": "0592",
-    "name": "SEMI 스쿼트 점프",
-    "bodyPart": "유산소",
-    "equipment": "맨몸",
-    "target": "대퇴사두근",
-    "secondaryMuscles": [
-      "둔근",
-      "햄스트링"
-    ],
-    "instructions": [
-      "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
-      "하체의 힘으로 지면을 밀어내며 일어납니다."
-    ],
-    "gif_url": "videos/3222-6FMU51h.gif"
-  },
-  {
-    "id": "0593",
-    "name": "WALK ELLIPTICAL 크로스 TRAINER",
-    "bodyPart": "유산소",
-    "equipment": "엘립티컬",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2141-rjtuP6X.gif"
-  },
-  {
-    "id": "0594",
-    "name": "CYCLE 크로스 TRAINER",
-    "bodyPart": "유산소",
-    "equipment": "머신",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2331-XSCHmiI.gif"
-  },
-  {
-    "id": "0595",
-    "name": "STATIONARY BIKE WALK",
-    "bodyPart": "유산소",
-    "equipment": "머신",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/0798-a8VDgLw.gif"
-  },
-  {
-    "id": "0596",
-    "name": "WALKING 인클라인 TREADMILL",
-    "bodyPart": "유산소",
-    "equipment": "머신",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/3666-rjiM4L3.gif"
-  },
-  {
-    "id": "0597",
-    "name": "점프 로프",
-    "bodyPart": "유산소",
-    "equipment": "로프",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2612-e1e76I2.gif"
-  },
-  {
-    "id": "0598",
-    "name": "STATIONARY BIKE RUN",
-    "bodyPart": "유산소",
-    "equipment": "실내 자전거",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2138-H1PESYI.gif"
-  },
-  {
-    "id": "0599",
-    "name": "WALKING STEPMILL",
-    "bodyPart": "유산소",
-    "equipment": "스텝밀",
-    "target": "유산소",
-    "secondaryMuscles": [],
-    "instructions": [
-      "유산소 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
-      "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
-    ],
-    "gif_url": "videos/2311-j9Q5crt.gif"
   }
 ]

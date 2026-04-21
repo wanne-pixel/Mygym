@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayClick }) => {
+const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayClick, isMobile }) => {
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const year = currentViewDate.getFullYear();
     const month = currentViewDate.getMonth();
@@ -22,7 +22,7 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
     }, [workoutGroups, year, month, isCurrentMonth, isFutureMonth, lastDate]);
 
     return (
-        <div className="bg-slate-800/50 p-6 rounded-[2.5rem] border border-slate-700/50 shadow-2xl">
+        <div className={`bg-slate-800/50 rounded-[2.5rem] border border-slate-700/50 shadow-2xl ${isMobile ? 'p-4 text-sm' : 'p-6 text-base'}`}>
             <div className="flex justify-between items-center mb-6 px-2">
                 <button
                     onClick={() => onMonthChange(-1)}
@@ -44,7 +44,7 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
                         <div
                             key={i}
                             onClick={() => d && onDayClick(dateStr)}
-                            className={`h-20 flex flex-col items-center justify-center rounded-2xl relative transition-all ${d ? 'cursor-pointer hover:bg-slate-700/50 active:scale-90 active:bg-slate-600/50' : ''}`}
+                            className={`flex flex-col items-center justify-center rounded-2xl relative transition-all ${isMobile ? 'h-16' : 'h-20'} ${d ? 'cursor-pointer hover:bg-slate-700/50 active:scale-90 active:bg-slate-600/50' : ''}`}
                         >
                             {d && (() => {
                                 const parts = info ? [...new Set(info.logs.map(l => l.part))] : [];

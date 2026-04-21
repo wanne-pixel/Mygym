@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import EXERCISE_DATASET from '../../data/exercises.json';
 import { BODY_PARTS, EQUIPMENT_MAP } from '../../constants/exerciseConstants';
 import { getExerciseGif } from '../../utils/exerciseUtils';
+import { useWindowSize } from '../../hooks/useWindowSize';
 
 const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cover", onClick }) => {
     const gifUrl = getExerciseGif(nameEn, exerciseId);
@@ -28,6 +29,7 @@ const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cov
 };
 
 const ExerciseSelector = ({ selection, setSelection, onExerciseSelect, hiddenExercises = [], onHideExercise }) => {
+    const { isMobile } = useWindowSize();
     const [searchTerm, setSearchTerm] = useState('');
     const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '', isDirectInput: false });
     const [customName, setCustomName] = useState('');
@@ -124,7 +126,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect, hiddenExe
                 )}
                 {(selection.part || selection.equipment || selection.exercise) && (
                     <div className="flex-1 p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl animate-fade-in">
-                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-black text-blue-400 uppercase tracking-widest">
                             {selection.part && <span>{BODY_PARTS.find(p => p.key === selection.part)?.label}</span>}
                             {selection.equipment && (
                                 <>
@@ -146,13 +148,13 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect, hiddenExe
             {/* Step 1: Body Part */}
             {!selection.part && (
                 <div className="animate-fade-in">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 1. 부위 선택</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 1. 부위 선택</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                         {BODY_PARTS.map(p => (
-                            <button 
-                                key={p.key} 
-                                onClick={() => handlePartClick(p.key)} 
-                                className={`py-3 rounded-2xl font-black text-[10px] sm:text-xs tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50`}
+                            <button
+                                key={p.key}
+                                onClick={() => handlePartClick(p.key)}
+                                className={`rounded-2xl font-black text-sm tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50 ${isMobile ? 'py-4' : 'py-3'}`}
                             >
                                 {p.label.toUpperCase()}
                             </button>
@@ -164,13 +166,13 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect, hiddenExe
             {/* Step 2: Equipment */}
             {selection.part && !selection.equipment && (
                 <div className="animate-fade-in">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 2. 기구 선택</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 2. 기구 선택</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                         {availableEquipments.map(eq => (
-                            <button 
-                                key={eq} 
-                                onClick={() => handleEquipmentClick(eq)} 
-                                className={`py-3 rounded-2xl font-black text-[10px] sm:text-xs tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50`}
+                            <button
+                                key={eq}
+                                onClick={() => handleEquipmentClick(eq)}
+                                className={`rounded-2xl font-black text-sm tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50 ${isMobile ? 'py-4' : 'py-3'}`}
                             >
                                 {(EQUIPMENT_MAP[eq] || eq).toUpperCase()}
                             </button>
@@ -182,21 +184,21 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect, hiddenExe
             {/* Step 3: Search and List */}
             {selection.part && selection.equipment && (
                 <div className="animate-fade-in space-y-4">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block px-1">Step 3. 운동 선택</label>
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] block px-1">Step 3. 운동 선택</label>
                     <div className="relative">
-                        <input 
+                        <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="운동 명칭 검색 (한글/English)..."
-                            className="w-full bg-slate-900 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            className={`w-full bg-slate-900 border border-white/10 rounded-xl pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${isMobile ? 'py-4 text-base' : 'py-3 text-sm'}`}
                         />
                         <svg className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
 
-                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[400px] md:max-h-[560px] overflow-y-auto pr-2 custom-scrollbar">
                         {filteredExercises.length === 0 ? (
-                            <p className="text-center py-10 text-slate-500 italic text-xs">검색 결과가 없습니다.</p>
+                            <p className="col-span-full text-center py-10 text-slate-500 italic text-xs">검색 결과가 없습니다.</p>
                         ) : (
                             <>
                                 {filteredExercises.map((ex) => (
@@ -212,8 +214,8 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect, hiddenExe
                                             />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className={`text-xs font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
-                                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{EQUIPMENT_MAP[ex.equipment] || ex.equipment}</span>
+                                            <p className={`text-sm font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{EQUIPMENT_MAP[ex.equipment] || ex.equipment}</span>
                                         </div>
                                         <div className="shrink-0 flex items-center gap-1.5">
                                             {onHideExercise && (
@@ -236,16 +238,16 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect, hiddenExe
                                 ))}
                                 
                                 {/* 직접 입력 옵션 */}
-                                <div 
+                                <div
                                     onClick={handleDirectInputOpen}
-                                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border bg-slate-800/10 border-dashed border-slate-700 hover:border-slate-500 mt-4 group"
+                                    className="col-span-full flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border bg-slate-800/10 border-dashed border-slate-700 hover:border-slate-500 mt-2 group"
                                 >
                                     <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-slate-900 shrink-0 border border-white/5">
                                         <svg className="w-5 h-5 text-slate-600 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs font-black italic text-slate-400 group-hover:text-white uppercase tracking-tighter">찾는 운동이 없나요?</p>
-                                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">직접 입력하여 추가하기</p>
+                                        <p className="text-sm font-black italic text-slate-400 group-hover:text-white uppercase tracking-tighter">찾는 운동이 없나요?</p>
+                                        <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">직접 입력하여 추가하기</p>
                                     </div>
                                 </div>
                             </>
