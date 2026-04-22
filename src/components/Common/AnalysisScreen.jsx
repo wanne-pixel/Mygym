@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Award, Zap, Trophy, ChevronDown, ChevronUp,
   Loader2, Brain, Lightbulb, Sparkles,
@@ -9,6 +10,16 @@ import {
   PieChart, Pie, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { supabase } from '../../api/supabase';
+
+const MUSCLE_KEY_MAP = {
+  '전체': 'all',
+  '가슴': 'chest',
+  '등': 'back',
+  '어깨': 'shoulder',
+  '하체': 'lower',
+  '팔': 'arms',
+  '코어': 'core',
+};
 
 // ─── 상수 ─────────────────────────────────────────────────────────────────────
 
@@ -199,6 +210,7 @@ const calcLogVolume = (setsData) => {
 // ─── PRCard ───────────────────────────────────────────────────────────────────
 
 const PRCard = ({ pr }) => {
+  const { t } = useTranslation();
   const days = daysSince(pr.date);
   const isNew = days <= 7;
   const isRecent = days <= 30;
@@ -217,21 +229,21 @@ const PRCard = ({ pr }) => {
         <div className="flex items-center gap-2">
           <span className="text-white font-black text-sm truncate">{pr.exercise}</span>
           {isNew && (
-            <span className="text-[9px] font-black text-blue-400 bg-blue-400/15 px-2 py-0.5 rounded-full uppercase tracking-widest flex-shrink-0">NEW</span>
+            <span className="text-[9px] font-black text-blue-400 bg-blue-400/15 px-2 py-0.5 rounded-full uppercase tracking-widest flex-shrink-0">{t('common.new')}</span>
           )}
           {!isNew && isRecent && (
-            <span className="text-[9px] font-black text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest flex-shrink-0">30일</span>
+            <span className="text-[9px] font-black text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest flex-shrink-0">{t('analysis.last30Days')}</span>
           )}
         </div>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-blue-400 font-black text-base">{pr.weight}kg</span>
-          <span className="text-slate-500 text-xs font-bold">× {pr.reps}회</span>
-          {pr.sets > 1 && <span className="text-slate-600 text-xs">/ {pr.sets}세트</span>}
+          <span className="text-slate-500 text-xs font-bold">× {pr.reps}{t('dayDetail.repsUnit')}</span>
+          {pr.sets > 1 && <span className="text-slate-600 text-xs">/ {pr.sets}{t('workout.sets')}</span>}
         </div>
       </div>
       <div className="text-right flex-shrink-0">
         <div className="text-slate-500 text-xs font-bold">{formatDateFull(pr.date)}</div>
-        <div className="text-slate-600 text-[11px] mt-0.5">1RM ≈ {calc1RM(pr.weight, pr.reps)}kg</div>
+        <div className="text-slate-600 text-[11px] mt-0.5">{t('analysis.oneRepMax')}{calc1RM(pr.weight, pr.reps)}kg</div>
       </div>
     </div>
   );
@@ -245,14 +257,17 @@ const Skeleton = ({ className }) => (
 
 // ─── 더보기 버튼 ──────────────────────────────────────────────────────────────
 
-const ShowMoreBtn = ({ expanded, count, onClick }) => (
-  <button
-    onClick={onClick}
-    className="mt-3 w-full flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-slate-900 border border-slate-800 text-blue-400 text-xs font-black hover:bg-slate-800 transition-all active:scale-95"
-  >
-    {expanded ? <><ChevronUp size={15} />접기</> : <><ChevronDown size={15} />더보기 ({count}개)</>}
-  </button>
-);
+const ShowMoreBtn = ({ expanded, count, onClick }) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      onClick={onClick}
+      className="mt-3 w-full flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-slate-900 border border-slate-800 text-blue-400 text-xs font-black hover:bg-slate-800 transition-all active:scale-95"
+    >
+      {expanded ? <><ChevronUp size={15} />{t('common.collapse')}</> : <><ChevronDown size={15} />{t('common.showMore')} ({count})</>}
+    </button>
+  );
+};
 
 // ─── 도넛 차트 범례 ──────────────────────────────────────────────────────────
 
@@ -276,6 +291,7 @@ const DonutLegend = ({ items, colorMap }) => (
 // ─── 부위별 볼륨 분포 (전체 탭) ───────────────────────────────────────────────
 
 const VolumeDistributionSection = ({ logs }) => {
+  const { t } = useTranslation();
   const data = useMemo(() => {
     const volMap = {};
     logs.forEach(log => {
@@ -303,8 +319,8 @@ const VolumeDistributionSection = ({ logs }) => {
     <section>
       <div className="flex items-center gap-2 mb-5">
         <BarChart3 size={16} className="text-blue-400" />
-        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">부위별 볼륨 분포</h3>
-        <span className="text-[10px] font-bold text-slate-600 ml-auto">전체 기간</span>
+        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('analysis.volumeDistribution')}</h3>
+        <span className="text-[10px] font-bold text-slate-600 ml-auto">{t('analysis.allPeriod')}</span>
       </div>
       <div className="my-5">
         <ResponsiveContainer width="100%" height={300}>
@@ -333,7 +349,7 @@ const VolumeDistributionSection = ({ logs }) => {
         <DonutLegend items={data} colorMap={MUSCLE_COLORS} />
       </div>
       <p className="text-slate-600 text-[11px] mt-3 text-center font-bold">
-        전체 운동 {logs.length}개 기록 기준
+        {t('analysis.totalRecords')}{logs.length}{t('analysis.recordsSuffix')}
       </p>
     </section>
   );
@@ -342,6 +358,7 @@ const VolumeDistributionSection = ({ logs }) => {
 // ─── 서브카테고리 분석 + AI 인사이트 ─────────────────────────────────────────
 
 const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
+  const { t } = useTranslation();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [aiError, setAiError] = useState(null);
@@ -400,7 +417,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
       const parsed = JSON.parse(data.content);
       setAiAnalysis(parsed.analysis || parsed);
     } catch (err) {
-      setAiError('AI 분석에 실패했습니다. 다시 시도해주세요.');
+      setAiError(t('analysis.aiFailed'));
     } finally {
       setIsAnalyzing(false);
     }
@@ -414,7 +431,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
       <div className="flex items-center gap-2 mb-4">
         <PieChartIcon size={16} className="text-blue-400" />
         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-          {muscleGroup} 세부 분포
+          {t(`bodyParts.${MUSCLE_KEY_MAP[muscleGroup] || muscleGroup}`, { defaultValue: muscleGroup })} {t('analysis.detailedDistribution')}
         </h3>
       </div>
       <div className="my-5">
@@ -453,14 +470,14 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
             className="w-full flex items-center justify-center gap-2 py-4 bg-purple-600/15 border border-purple-500/30 text-purple-400 text-xs font-black rounded-2xl hover:bg-purple-600/25 transition-all active:scale-95 disabled:opacity-40"
           >
             <Brain size={15} />
-            AI 훈련 분석 요청
+            {t('analysis.aiAnalysisRequest')}
           </button>
         )}
 
         {isAnalyzing && (
           <div className="flex items-center justify-center gap-3 py-6 bg-slate-900 border border-slate-800 rounded-2xl">
             <Loader2 size={18} className="animate-spin text-purple-400" />
-            <span className="text-slate-400 text-xs font-bold">AI가 훈련 패턴을 분석 중...</span>
+            <span className="text-slate-400 text-xs font-bold">{t('analysis.aiAnalyzing')}</span>
           </div>
         )}
 
@@ -471,7 +488,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
                 <Brain size={15} className="text-purple-400" />
               </div>
               <div>
-                <div className="text-[10px] font-black text-purple-400 uppercase tracking-widest">AI 인사이트</div>
+                <div className="text-[10px] font-black text-purple-400 uppercase tracking-widest">{t('analysis.aiInsights')}</div>
                 <div className="text-white font-black text-sm mt-0.5">{aiAnalysis.title}</div>
               </div>
             </div>
@@ -484,7 +501,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
               onClick={runAnalysis}
               className="mt-3 text-[10px] font-bold text-slate-500 hover:text-slate-300 transition-colors"
             >
-              다시 분석
+              {t('analysis.reanalyze')}
             </button>
           </div>
         )}
@@ -503,6 +520,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
 // ─── 메인 컴포넌트 ────────────────────────────────────────────────────────────
 
 const AnalysisScreen = () => {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -522,7 +540,7 @@ const AnalysisScreen = () => {
     const init = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('로그인이 필요합니다.');
+        if (!user) throw new Error(t('common.loginRequired'));
 
         const { data: { session } } = await supabase.auth.getSession();
         setToken(session?.access_token || null);
@@ -650,10 +668,10 @@ const AnalysisScreen = () => {
     <div className="p-4 md:p-8 bg-slate-950 min-h-screen pb-24">
       {/* 헤더 */}
       <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">분석</h2>
+        <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">{t('analysis.title')}</h2>
         {!loading && !error && (
           <span className="text-xs font-bold text-slate-500 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
-            {logs.length}개 기록
+            {logs.length}{t('analysis.recordsCount')}
           </span>
         )}
       </div>
@@ -685,8 +703,8 @@ const AnalysisScreen = () => {
           <div className="w-20 h-20 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800">
             <Zap size={36} className="text-slate-700" />
           </div>
-          <p className="text-white font-black italic text-xl uppercase tracking-tighter">아직 운동 기록이 없어요</p>
-          <p className="text-slate-500 font-bold text-sm">운동을 기록하면 분석 결과가 여기에 표시됩니다</p>
+          <p className="text-white font-black italic text-xl uppercase tracking-tighter">{t('analysis.noData')}</p>
+          <p className="text-slate-500 font-bold text-sm">{t('analysis.noDataDesc')}</p>
         </div>
       )}
 
@@ -697,6 +715,7 @@ const AnalysisScreen = () => {
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
             {visibleTabs.map(tab => {
               const count = tab === '전체' ? prList.length : (muscleGroupCounts[tab] || 0);
+              const tabLabel = t(`bodyParts.${MUSCLE_KEY_MAP[tab] || tab}`, { defaultValue: tab });
               const isActive = selectedMuscleGroup === tab;
               return (
                 <button
@@ -708,7 +727,7 @@ const AnalysisScreen = () => {
                       : 'bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700 hover:text-slate-200 active:scale-95'
                   }`}
                 >
-                  {tab}
+                  {tabLabel}
                   <span className={`ml-1.5 text-[10px] ${isActive ? 'text-blue-200' : 'text-slate-600'}`}>
                     {count}
                   </span>
@@ -727,7 +746,7 @@ const AnalysisScreen = () => {
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <Brain size={16} className="text-purple-400" />
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">AI 훈련 분석</h3>
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('analysis.aiAnalysis')}</h3>
                 {!aiTrainingAnalysis && (
                   <button
                     onClick={requestAIAnalysis}
@@ -736,9 +755,9 @@ const AnalysisScreen = () => {
                     style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}
                   >
                     {isAnalyzing ? (
-                      <><Loader2 size={13} className="animate-spin" />분석 중...</>
+                      <><Loader2 size={13} className="animate-spin" />{t('common.processing')}</>
                     ) : (
-                      <><Sparkles size={13} />분석 요청</>
+                      <><Sparkles size={13} />{t('analysis.aiAnalysisRequest')}</>
                     )}
                   </button>
                 )}
@@ -747,15 +766,15 @@ const AnalysisScreen = () => {
               {!aiTrainingAnalysis && !isAnalyzing && (
                 <div className="flex flex-col items-center justify-center py-12 gap-3 text-center bg-slate-900 border border-slate-800 rounded-2xl">
                   <Brain size={36} className="text-slate-700" />
-                  <p className="text-white font-black text-sm">AI가 최근 30일 훈련 패턴을 분석해드립니다</p>
-                  <p className="text-slate-500 text-xs font-bold">운동 빈도, 부위 균형, 개선점 등을 확인하세요</p>
+                  <p className="text-white font-black text-sm">{t('analysis.aiPrompt')}</p>
+                  <p className="text-slate-500 text-xs font-bold">{t('analysis.aiPromptDesc')}</p>
                 </div>
               )}
 
               {isAnalyzing && (
                 <div className="flex items-center justify-center gap-3 py-8 bg-slate-900 border border-slate-800 rounded-2xl">
                   <Loader2 size={18} className="animate-spin text-purple-400" />
-                  <span className="text-slate-400 text-xs font-bold">AI가 훈련 데이터를 분석 중...</span>
+                  <span className="text-slate-400 text-xs font-bold">{t('analysis.aiAnalyzingFull')}</span>
                 </div>
               )}
 
@@ -770,9 +789,9 @@ const AnalysisScreen = () => {
                   {/* 인사이트 3칸 */}
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { icon: <TrendingUp size={15} className="text-blue-400" />, label: '훈련 강도', value: aiTrainingAnalysis.intensity },
-                      { icon: <Target size={15} className="text-green-400" />, label: '부위 균형', value: aiTrainingAnalysis.balance },
-                      { icon: <Calendar size={15} className="text-yellow-400" />, label: '일관성', value: aiTrainingAnalysis.consistency },
+                      { icon: <TrendingUp size={15} className="text-blue-400" />, label: t('analysis.trainingIntensity'), value: aiTrainingAnalysis.intensity },
+                      { icon: <Target size={15} className="text-green-400" />, label: t('analysis.muscleBalance'), value: aiTrainingAnalysis.balance },
+                      { icon: <Calendar size={15} className="text-yellow-400" />, label: t('analysis.consistency'), value: aiTrainingAnalysis.consistency },
                     ].map(({ icon, label, value }) => (
                       <div key={label} className="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2">
                         {icon}
@@ -787,7 +806,7 @@ const AnalysisScreen = () => {
                     <div className="bg-emerald-500/10 border-l-4 border-emerald-500 rounded-r-2xl p-4 space-y-2">
                       <div className="flex items-center gap-2 mb-1">
                         <Lightbulb size={13} className="text-yellow-400" />
-                        <span className="text-xs font-black text-emerald-400">개선 제안</span>
+                        <span className="text-xs font-black text-emerald-400">{t('analysis.suggestions')}</span>
                       </div>
                       {aiTrainingAnalysis.recommendations.map((rec, idx) => (
                         <div key={idx} className="flex items-start gap-2 text-xs text-slate-300 leading-relaxed">
@@ -802,7 +821,7 @@ const AnalysisScreen = () => {
                     onClick={requestAIAnalysis}
                     className="text-[10px] font-bold text-slate-500 hover:text-slate-300 transition-colors"
                   >
-                    다시 분석
+                    {t('analysis.reanalyze')}
                   </button>
                 </div>
               )}
@@ -817,7 +836,7 @@ const AnalysisScreen = () => {
                 <div className="flex items-center gap-2 mb-4">
                   <Award size={16} className="text-yellow-400" />
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                    개인 최고 기록 (PR)
+                    {t('analysis.personalRecords')}
                   </h3>
                   <div className="ml-auto">
                     <select
@@ -825,9 +844,9 @@ const AnalysisScreen = () => {
                       onChange={e => setSortBy(e.target.value)}
                       className="bg-slate-900 border border-slate-800 text-slate-400 text-xs font-bold rounded-xl px-3 py-1.5 outline-none focus:border-slate-600 cursor-pointer"
                     >
-                      <option value="latest">최신순</option>
-                      <option value="weight">중량 높은순</option>
-                      <option value="name">이름순</option>
+                      <option value="latest">{t('analysis.sortNewest')}</option>
+                      <option value="weight">{t('analysis.sortHeaviest')}</option>
+                      <option value="name">{t('analysis.sortName')}</option>
                     </select>
                   </div>
                 </div>
@@ -852,8 +871,8 @@ const AnalysisScreen = () => {
                     <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center">
                       <Trophy size={22} className="text-slate-600" />
                     </div>
-                    <p className="text-white font-black text-sm">아직 {selectedMuscleGroup} 운동 기록이 없어요</p>
-                    <p className="text-slate-500 text-xs font-bold">{selectedMuscleGroup} 운동을 시작하면 여기에 PR이 표시됩니다</p>
+                    <p className="text-white font-black text-sm">{t('analysis.noPrData')}</p>
+                    <p className="text-slate-500 text-xs font-bold">{t('analysis.noPrDesc')}</p>
                   </div>
                 )}
               </section>

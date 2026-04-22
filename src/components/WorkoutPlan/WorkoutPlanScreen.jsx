@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../api/supabase';
 import { PART_MAP } from '../../constants/exerciseConstants';
 import { saveWorkoutLogs } from '../../api/workoutApi';
@@ -8,6 +9,7 @@ import { GifModal, GifRenderer } from '../Common/GifUI';
 import { useWindowSize } from '../../hooks/useWindowSize';
 
 const WorkoutPlanScreen = () => {
+    const { t, i18n } = useTranslation();
     const { isMobile } = useWindowSize();
     const [searchParams, setSearchParams] = useSearchParams();
     const dateParam = searchParams.get('date');
@@ -27,9 +29,9 @@ const WorkoutPlanScreen = () => {
                 .from('workout_logs')
                 .select('exercise, sets_data')
                 .eq('user_id', userId);
-            
+
             if (!logs || logs.length === 0) return {};
-            
+
             const records = {};
             logs.forEach(log => {
                 const exerciseName = log.exercise;
@@ -122,11 +124,11 @@ const WorkoutPlanScreen = () => {
     };
 
     const handleSaveWorkout = async () => {
-        if (!window.confirm(`${isToday ? '오늘' : targetDate} 운동을 저장할까요?\n저장 후 운동 리스트가 초기화됩니다.`)) return;
+        if (!window.confirm(t('workout.saveConfirm'))) return;
         setIsSaving(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('로그인이 필요합니다.');
+            if (!user) throw new Error(t('common.loginRequired'));
 
             const logsToSave = planList
                 .map(item => {
@@ -140,7 +142,7 @@ const WorkoutPlanScreen = () => {
                 })
                 .filter(item => item.sets.length > 0);
 
-            if (logsToSave.length === 0) { alert('저장할 유효한 세트가 없습니다.'); return; }
+            if (logsToSave.length === 0) { alert(t('workout.noValidSets')); return; }
 
             const savedAt = new Date(`${targetDate}T12:00:00`).toISOString();
             const payload = logsToSave.map(item => ({
@@ -156,11 +158,11 @@ const WorkoutPlanScreen = () => {
 
             localStorage.removeItem(storageKey);
             setPlanList([]);
-            alert('저장 완료! 오늘도 수고하셨습니다.');
+            alert(t('workout.saveSuccess'));
             setSearchParams({ tab: '달력' });
         } catch (e) {
             console.error('[save workout] error:', e);
-            alert('저장 실패: ' + (e?.message || JSON.stringify(e)));
+            alert(t('workout.saveFailed') + (e?.message || JSON.stringify(e)));
         } finally {
             setIsSaving(false);
         }
@@ -173,11 +175,13 @@ const WorkoutPlanScreen = () => {
 
     const inputCls = "w-full bg-white/5 border border-white/10 rounded-md px-1.5 py-1 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors";
 
+    const dateLabelLocale = i18n.language === 'ko' ? 'ko-KR' : 'en-US';
+
     return (
         <div className={`${isMobile ? 'p-4' : 'p-8 max-w-6xl mx-auto'} bg-slate-950 min-h-screen pb-24`}>
-            <h2 className="text-3xl font-black italic text-white uppercase underline decoration-indigo-500 decoration-4 underline-offset-8 mb-1">루틴 구성</h2>
+            <h2 className="text-3xl font-black italic text-white uppercase underline decoration-indigo-500 decoration-4 underline-offset-8 mb-1">{t('workout.title')}</h2>
             {!isToday && (
-                <p className="text-blue-400 font-bold text-sm mb-8">{new Date(targetDate + 'T12:00:00').toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })} 기록</p>
+                <p className="text-blue-400 font-bold text-sm mb-8">{new Date(targetDate + 'T12:00:00').toLocaleDateString(dateLabelLocale, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })} {t('workout.log')}</p>
             )}
             {isToday && <div className="mb-8" />}
             <div className="grid lg:grid-cols-2 gap-10">
@@ -186,10 +190,10 @@ const WorkoutPlanScreen = () => {
                         selection={selection}
                         setSelection={setSelection}
                     />
-                    {selection.exercise && <button onClick={handleAddToList} className="w-full mt-6 py-4 bg-indigo-600 text-white font-black rounded-xl italic active:scale-95 transition-all">리스트에 추가하기</button>}
+                    {selection.exercise && <button onClick={handleAddToList} className="w-full mt-6 py-4 bg-indigo-600 text-white font-black rounded-xl italic active:scale-95 transition-all">{t('workout.addToList')}</button>}
                 </div>
                 <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 min-h-[400px]">
-                    <h3 className="text-xl font-bold text-white mb-6">오늘의 운동 리스트 ({planList.length})</h3>
+                    <h3 className="text-xl font-bold text-white mb-6">{t('workout.todayList')}{planList.length})</h3>
                     <div className="space-y-4">
                         {planList.map((item, exIdx) => {
                             const cardio = isCardio(item);
@@ -197,7 +201,6 @@ const WorkoutPlanScreen = () => {
                             const pr = personalRecords[item.name || item.exercise];
                             return (
                                 <div key={item.id} className={`p-4 border rounded-2xl space-y-3 transition-all ${item.completed ? 'bg-slate-800/30 border-green-500/30 opacity-70' : 'bg-slate-800/60 border-slate-700'}`}>
-                                    {/* 운동 헤더 */}
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-900">
                                             <GifRenderer exerciseId={item.id} onClick={() => openPreview(item.id, item.name)} />
@@ -207,7 +210,7 @@ const WorkoutPlanScreen = () => {
                                             <h4 className={`font-bold text-white uppercase truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{item.name || item.exercise}</h4>
                                             {pr && (
                                                 <p className="text-xs text-green-400 font-bold mt-0.5">
-                                                    🏆 최고: {pr.kg}kg × {pr.reps}회
+                                                    {t('workout.bestRecord')}{pr.kg}kg × {pr.reps}{t('workout.repsUnit')}
                                                 </p>
                                             )}
                                         </div>
@@ -216,29 +219,26 @@ const WorkoutPlanScreen = () => {
                                             className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border transition-all active:scale-95 shrink-0 ${item.completed ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-transparent text-blue-400 border-blue-500'}`}
                                         >
                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
-                                            {item.completed ? 'DONE' : '완료'}
+                                            {item.completed ? t('workout.done') : t('workout.complete')}
                                         </button>
                                         <button onClick={() => setPlanList(prev => prev.filter(p => p.id !== item.id))} className="p-2 text-slate-500 hover:text-white shrink-0 transition-colors">×</button>
                                     </div>
 
-                                    {/* 세트 입력 */}
                                     <div className="space-y-2 pl-1">
                                         {sets.length === 0 ? (
                                             <button onClick={() => addSet(exIdx)} className="w-full py-2 text-xs text-indigo-400 border border-dashed border-indigo-800/60 rounded-xl hover:border-indigo-600 transition-all">
-                                                + 세트 추가
+                                                + {t('workout.addSet')}
                                             </button>
                                         ) : sets.map((set, setIdx) => {
                                             const isLast = setIdx === sets.length - 1;
                                             return (
                                                 <div key={setIdx} style={{display:'grid', gridTemplateColumns:'16px 1fr 56px 40px 28px', gap:'6px', alignItems:'center'}}>
-                                                    {/* 세트번호 */}
                                                     <span className="text-gray-500 text-xs text-center">{setIdx + 1}</span>
 
-                                                    {/* kg 영역 (1fr) */}
                                                     {cardio ? (
                                                         <div className="relative">
                                                             <input type="number" inputMode="decimal" value={set.level} onChange={e => updateSet(exIdx, setIdx, 'level', e.target.value)} className={`${inputCls} pr-6`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">Lv</span>
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">{t('workout.levelPrefix')}</span>
                                                         </div>
                                                     ) : set.isDropSet ? (
                                                         <div className="grid grid-cols-3 gap-1">
@@ -253,30 +253,27 @@ const WorkoutPlanScreen = () => {
                                                         </div>
                                                     )}
 
-                                                    {/* reps 영역 (56px) */}
                                                     {cardio ? (
                                                         <div className="relative">
                                                             <input type="number" inputMode="numeric" value={set.minutes} onChange={e => updateSet(exIdx, setIdx, 'minutes', e.target.value)} className={`${inputCls} pr-5`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">분</span>
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">{t('workout.minuteUnit')}</span>
                                                         </div>
                                                     ) : (
                                                         <div className="relative">
                                                             <input type="number" inputMode="numeric" value={set.reps} onChange={e => updateSet(exIdx, setIdx, 'reps', e.target.value)} className={`${inputCls} pr-7`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">reps</span>
+                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">{t('workout.repsUnit')}</span>
                                                         </div>
                                                     )}
 
-                                                    {/* 드롭 체크박스 (40px) */}
                                                     {cardio ? (
                                                         <div />
                                                     ) : (
                                                         <label className="flex items-center gap-0.5 justify-center cursor-pointer">
                                                             <input type="checkbox" checked={!!set.isDropSet} onChange={() => toggleDropSet(exIdx, setIdx)} className="w-3 h-3 accent-red-500" />
-                                                            <span className="text-xs text-gray-400">드롭</span>
+                                                            <span className="text-xs text-gray-400">{t('workout.drop')}</span>
                                                         </label>
                                                     )}
 
-                                                    {/* + / × 버튼 (28px) */}
                                                     {isLast ? (
                                                         <button onClick={() => addSet(exIdx)} className="w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-500 active:scale-90 text-white flex items-center justify-center text-base leading-none transition-all">+</button>
                                                     ) : (
@@ -300,11 +297,11 @@ const WorkoutPlanScreen = () => {
                                 ${isSaving ? 'bg-blue-600 opacity-70 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20'}`}
                         >
                             {isSaving ? (
-                                <span>저장 중...</span>
+                                <span>{t('common.saving')}</span>
                             ) : (
                                 <>
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
-                                    오늘 운동 완료
+                                    {t('workout.saveWorkout')}
                                 </>
                             )}
                         </button>

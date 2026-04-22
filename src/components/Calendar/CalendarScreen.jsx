@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { User, X } from 'lucide-react';
 import { supabase } from '../../api/supabase';
 import { STORAGE_KEYS } from '../../constants/exerciseConstants';
@@ -7,12 +8,10 @@ import { useWindowSize } from '../../hooks/useWindowSize';
 import MonthlyCalendar from './MonthlyCalendar';
 import DayDetailView from './DayDetailView';
 
-/**
- * [Common: User Profile Modal]
- */
 const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => {
+    const { t } = useTranslation();
     if (!isOpen) return null;
-    
+
     const [profile, setProfile] = useState({
         age: userData?.age || '',
         height: userData?.height || '',
@@ -33,12 +32,11 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
         setIsSaving(true);
         try {
             const { data: session } = await supabase.auth.getSession();
-            if (!session.session) throw new Error('로그인이 필요합니다.');
+            if (!session.session) throw new Error(t('common.loginRequired'));
             const userId = session.session.user.id;
 
-            // 1. Auth Metadata 업데이트 (일부 정보 중복 보관)
             await supabase.auth.updateUser({
-                data: { 
+                data: {
                     goal: profile.goal,
                     age: profile.age,
                     gender: profile.gender,
@@ -47,8 +45,6 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                 }
             });
 
-            // 2. user_profiles 테이블 업데이트
-            // 400 에러 방지를 위해 존재하는 컬럼만 명확한 타입으로 전송
             const updatePayload = {
                 goal: profile.goal,
                 weekly_frequency: parseInt(profile.weekly_frequency) || 3,
@@ -56,23 +52,10 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                 weight: profile.weight ? parseFloat(profile.weight) : null,
                 age: profile.age ? parseInt(profile.age) : null,
                 gender: profile.gender || null,
-                // 기존 데이터 유지 (누락 방지)
                 experience_level: userData?.experience_level || 'beginner',
                 equipment_access: userData?.equipment_access || 'full_gym',
                 limitations: userData?.limitations || []
             };
-
-            // 인바디 정보는 DB에 컬럼이 있을 때만 포함 (현재는 400 에러 원인으로 지목됨)
-            // 만약 나중에 컬럼을 추가한다면 아래 주석을 해제하세요.
-            /*
-            Object.assign(updatePayload, {
-                skeletal_muscle_mass: profile.skeletal_muscle_mass ? parseFloat(profile.skeletal_muscle_mass) : null,
-                body_fat_mass: profile.body_fat_mass ? parseFloat(profile.body_fat_mass) : null,
-                body_fat_percentage: profile.body_fat_percentage ? parseFloat(profile.body_fat_percentage) : null,
-                bmr: profile.bmr ? parseInt(profile.bmr) : null,
-                visceral_fat_level: profile.visceral_fat_level ? parseInt(profile.visceral_fat_level) : null
-            });
-            */
 
             const { error: profileError } = await supabase
                 .from('user_profiles')
@@ -82,12 +65,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
             if (profileError) throw profileError;
 
             localStorage.setItem(STORAGE_KEYS.USER_BODY_INFO, JSON.stringify(profile));
-            alert('개인정보가 수정되었습니다.');
+            alert(t('calendar.profileSaved'));
             onUpdate();
             onClose();
         } catch (error) {
             console.error('Update Error:', error);
-            alert('저장 실패: ' + (error.message || '알 수 없는 에러가 발생했습니다.'));
+            alert(t('calendar.saveFailed') + (error.message || ''));
         } finally {
             setIsSaving(false);
         }
@@ -98,29 +81,29 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
             <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={onClose}></div>
             <div className="relative bg-slate-900 border border-white/10 w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-2xl font-black text-white italic text-shadow">개인정보 수정</h3>
+                    <h3 className="text-2xl font-black text-white italic text-shadow">{t('calendar.editProfile')}</h3>
                     <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
                         <X size={24} />
                     </button>
                 </div>
-                
+
                 <div className="space-y-6">
                     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
                         <div className="col-span-1">
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">운동 목표</label>
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.goal')}</label>
                             <select
                                 value={profile.goal}
                                 onChange={e => setProfile({...profile, goal: e.target.value})}
                                 className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold"
                             >
-                                <option value="strength">근력 증가</option>
-                                <option value="hypertrophy">근육 성장</option>
-                                <option value="weight_loss">체중 감량</option>
-                                <option value="maintenance">현상 유지</option>
+                                <option value="strength">{t('calendar.goals.strength')}</option>
+                                <option value="hypertrophy">{t('calendar.goals.hypertrophy')}</option>
+                                <option value="weight_loss">{t('calendar.goals.weightLoss')}</option>
+                                <option value="maintenance">{t('calendar.goals.maintenance')}</option>
                             </select>
                         </div>
                         <div className="col-span-1">
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">주간 운동 횟수</label>
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.weeklyFrequency')}</label>
                             <input
                                 type="number"
                                 min="1"
@@ -131,56 +114,56 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                             />
                         </div>
                         <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">나이</label>
-                            <input type="number" value={profile.age} onChange={e => setProfile({...profile, age: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder="세" />
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.age')}</label>
+                            <input type="number" value={profile.age} onChange={e => setProfile({...profile, age: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder={t('calendar.profileFields.ageSuffix')} />
                         </div>
                         <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">성별</label>
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.gender')}</label>
                             <select value={profile.gender} onChange={e => setProfile({...profile, gender: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold">
-                                <option value="">선택</option>
-                                <option value="male">남성</option>
-                                <option value="female">여성</option>
+                                <option value="">{t('common.select')}</option>
+                                <option value="male">{t('common.male')}</option>
+                                <option value="female">{t('common.female')}</option>
                             </select>
                         </div>
                         <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">키 (cm)</label>
-                            <input type="number" value={profile.height} onChange={e => setProfile({...profile, height: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder="cm" />
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.height')}</label>
+                            <input type="number" value={profile.height} onChange={e => setProfile({...profile, height: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder={t('calendar.profileFields.heightUnit')} />
                         </div>
                         <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">몸무게 (kg)</label>
-                            <input type="number" value={profile.weight} onChange={e => setProfile({...profile, weight: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder="kg" />
+                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.weight')}</label>
+                            <input type="number" value={profile.weight} onChange={e => setProfile({...profile, weight: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder={t('calendar.profileFields.weightUnit')} />
                         </div>
                     </div>
 
                     <div className="pt-4 border-t border-slate-800">
-                        <label className="text-[10px] font-black text-blue-400 uppercase block mb-4 tracking-widest italic">인바디 정보</label>
+                        <label className="text-[10px] font-black text-blue-400 uppercase block mb-4 tracking-widest italic">{t('calendar.profileFields.inbody')}</label>
                         <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
                             <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">골격근량 (kg)</label>
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.skeletalMuscle')}</label>
                                 <input type="number" value={profile.skeletal_muscle_mass} onChange={e => setProfile({...profile, skeletal_muscle_mass: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">체지방량 (kg)</label>
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.bodyFat')}</label>
                                 <input type="number" value={profile.body_fat_mass} onChange={e => setProfile({...profile, body_fat_mass: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">체지방률 (%)</label>
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.bodyFatPercent')}</label>
                                 <input type="number" value={profile.body_fat_percentage} onChange={e => setProfile({...profile, body_fat_percentage: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">기초대사량 (kcal)</label>
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.bmr')}</label>
                                 <input type="number" value={profile.bmr} onChange={e => setProfile({...profile, bmr: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
                             </div>
                             <div className="col-span-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">내장지방레벨</label>
+                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.visceralFat')}</label>
                                 <input type="number" value={profile.visceral_fat_level} onChange={e => setProfile({...profile, visceral_fat_level: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
                             </div>
                         </div>
                     </div>
 
                     <div className="pt-6 flex gap-3">
-                        <button onClick={onClose} className={`flex-1 bg-slate-800 text-white font-black rounded-xl transition-all hover:bg-slate-700 italic uppercase tracking-widest ${isMobile ? 'py-4 text-sm' : 'py-3 text-xs'}`}>취소</button>
-                        <button onClick={handleSave} disabled={isSaving} className={`flex-1 bg-blue-600 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:bg-blue-500 disabled:opacity-50 italic uppercase tracking-widest ${isMobile ? 'py-4 text-sm' : 'py-3 text-xs'}`}>{isSaving ? 'SAVING...' : '수정'}</button>
+                        <button onClick={onClose} className={`flex-1 bg-slate-800 text-white font-black rounded-xl transition-all hover:bg-slate-700 italic uppercase tracking-widest ${isMobile ? 'py-4 text-sm' : 'py-3 text-xs'}`}>{t('common.cancel')}</button>
+                        <button onClick={handleSave} disabled={isSaving} className={`flex-1 bg-blue-600 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:bg-blue-500 disabled:opacity-50 italic uppercase tracking-widest ${isMobile ? 'py-4 text-sm' : 'py-3 text-xs'}`}>{isSaving ? t('common.saving') : t('common.save')}</button>
                     </div>
                 </div>
             </div>
@@ -189,6 +172,7 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
 };
 
 const CalendarScreen = () => {
+    const { t, i18n } = useTranslation();
     const { isMobile } = useWindowSize();
     const [searchParams, setSearchParams] = useSearchParams();
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
@@ -203,7 +187,7 @@ const CalendarScreen = () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
-            
+
             const { data: profile } = await supabase
                 .from('user_profiles')
                 .select('*')
@@ -236,30 +220,38 @@ const CalendarScreen = () => {
     return (
         <div className={`${isMobile ? 'p-4' : 'p-8 max-w-5xl mx-auto'} flex flex-col bg-slate-950 min-h-screen pb-24`}>
             <div className="flex justify-between items-center mb-8">
-                <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">MY GYM</h2>
-                <div className="flex items-center gap-4">
+                <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">{t('calendar.appName')}</h2>
+                <div className="flex items-center gap-2">
                     <button
                         onClick={() => setShowProfileEdit(true)}
                         className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1.5 bg-blue-500/10 px-3 py-2 rounded-xl transition-all border border-blue-500/20"
                     >
                         <User size={14} />
-                        개인정보
+                        {t('calendar.profile')}
                     </button>
-                    {/* 모바일 전용 로그아웃 버튼 (PC는 우측 상단 고정 버튼 사용) */}
-                    <button
-                        onClick={async () => { if(window.confirm('로그아웃 하시겠습니까?')) { await supabase.auth.signOut(); localStorage.clear(); } }}
-                        className="lg:hidden p-2 bg-red-900/20 text-red-400 rounded-full hover:bg-red-900/40 transition-all active:scale-95"
-                        title="로그아웃"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                            <polyline points="16 17 21 12 16 7" />
-                            <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                    </button>
+                    {/* 모바일 전용: 언어 전환 + 로그아웃 */}
+                    <div className="lg:hidden flex items-center gap-2">
+                        <LangSwitcherMobile />
+                        <button
+                            onClick={async () => {
+                                if (window.confirm(t('nav.logoutConfirm'))) {
+                                    await supabase.auth.signOut();
+                                    localStorage.clear();
+                                }
+                            }}
+                            className="p-2 bg-red-900/20 text-red-400 rounded-full hover:bg-red-900/40 transition-all active:scale-95"
+                            title={t('nav.logout')}
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <polyline points="16 17 21 12 16 7" />
+                                <line x1="21" y1="12" x2="9" y2="12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
-            
+
             {selectedDate ? (
                 <DayDetailView
                     date={selectedDate}
@@ -285,6 +277,23 @@ const CalendarScreen = () => {
                 isMobile={isMobile}
             />
         </div>
+    );
+};
+
+const LangSwitcherMobile = () => {
+    const { i18n } = useTranslation();
+    const toggle = () => {
+        const next = i18n.language === 'ko' ? 'en' : 'ko';
+        i18n.changeLanguage(next);
+        localStorage.setItem('mygym_lang', next);
+    };
+    return (
+        <button
+            onClick={toggle}
+            className="p-2 bg-slate-800 text-slate-400 hover:text-white rounded-full transition-all active:scale-95 text-xs font-bold w-9 h-9 flex items-center justify-center"
+        >
+            {i18n.language === 'ko' ? 'EN' : '한'}
+        </button>
     );
 };
 

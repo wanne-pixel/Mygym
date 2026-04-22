@@ -1,6 +1,19 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+const PART_I18N = {
+    '가슴': 'bodyParts.chest',
+    '등': 'bodyParts.back',
+    '어깨': 'bodyParts.shoulder',
+    '하체': 'bodyParts.lower',
+    '팔': 'bodyParts.arms',
+    '허리/코어': 'bodyParts.core',
+    '코어': 'bodyParts.core',
+    '유산소': 'workout.cardio',
+};
 
 const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayClick, isMobile }) => {
+    const { t, i18n } = useTranslation();
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const year = currentViewDate.getFullYear();
     const month = currentViewDate.getMonth();
@@ -15,6 +28,11 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
     const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
     const isFutureMonth = new Date(year, month, 1) > new Date(today.getFullYear(), today.getMonth(), 1);
 
+    const monthLabel = useMemo(() => {
+        const locale = i18n.language === 'ko' ? 'ko-KR' : 'en-US';
+        return new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long' }).format(new Date(year, month, 1));
+    }, [year, month, i18n.language]);
+
     const achievementRate = useMemo(() => {
         if (isFutureMonth) return null;
         const denominator = isCurrentMonth ? today.getDate() : lastDate;
@@ -25,6 +43,8 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
         return Math.round((workedDays / denominator) * 100);
     }, [workoutGroups, year, month, isCurrentMonth, isFutureMonth, lastDate]);
 
+    const translatePart = (part) => t(PART_I18N[part] || part, { defaultValue: part });
+
     return (
         <div className={`bg-slate-800/50 rounded-[2.5rem] border border-slate-700/50 shadow-2xl ${isMobile ? 'p-4 text-sm' : 'p-6 text-base'}`}>
             <div className="flex justify-between items-center mb-6 px-2">
@@ -32,7 +52,7 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
                     onClick={() => onMonthChange(-1)}
                     className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-700/50 hover:bg-slate-600 active:scale-90 active:bg-slate-500 transition-all text-white text-xl font-bold"
                 >‹</button>
-                <h3 className="text-2xl font-black text-white italic">{year}년 {month + 1}월</h3>
+                <h3 className="text-2xl font-black text-white italic">{monthLabel}</h3>
                 <button
                     onClick={() => onMonthChange(1)}
                     className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-700/50 hover:bg-slate-600 active:scale-90 active:bg-slate-500 transition-all text-white text-xl font-bold"
@@ -52,7 +72,14 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
                         >
                             {d && (() => {
                                 const parts = info ? [...new Set(info.logs.map(l => l.part))] : [];
-                                const partsLabel = parts.length === 1 ? parts[0] : parts.length === 2 ? `${parts[0]}·${parts[1]}` : parts.length >= 3 ? `${parts[0]} 외 ${parts.length - 1}` : '';
+                                const moreLabel = i18n.language === 'ko' ? '외' : '+';
+                                const partsLabel = parts.length === 1
+                                    ? translatePart(parts[0])
+                                    : parts.length === 2
+                                        ? `${translatePart(parts[0])}·${translatePart(parts[1])}`
+                                        : parts.length >= 3
+                                            ? `${translatePart(parts[0])} ${moreLabel} ${parts.length - 1}`
+                                            : '';
                                 return (
                                     <>
                                         <div className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${isToday ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : info ? 'border-2 border-red-400' : ''}`}>
@@ -69,9 +96,9 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
             </div>
             <div className="flex justify-end mt-4 px-2">
                 {achievementRate !== null ? (
-                    <span className="text-xs text-gray-400">운동 달성률 <span className="text-white font-black">{achievementRate}%</span></span>
+                    <span className="text-xs text-gray-400">{t('calendar.achievementRate')} <span className="text-white font-black">{achievementRate}%</span></span>
                 ) : (
-                    <span className="text-xs text-gray-400">운동 달성률 <span className="text-slate-500">-</span></span>
+                    <span className="text-xs text-gray-400">{t('calendar.achievementRate')} <span className="text-slate-500">-</span></span>
                 )}
             </div>
         </div>

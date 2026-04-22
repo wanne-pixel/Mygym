@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../api/supabase';
 import { PART_MAP } from '../../constants/exerciseConstants';
 
 const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
+    const { t } = useTranslation();
     const [logs, setLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -25,7 +27,7 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
     useEffect(() => { fetchLogs(); }, [date]);
 
     const handleDelete = async (id) => {
-        if (!confirm('삭제하시겠습니까?')) return;
+        if (!confirm(t('dayDetail.deleteConfirm'))) return;
         const { error } = await supabase.from('workout_logs').delete().eq('id', id);
         if (!error) fetchLogs();
     };
@@ -34,22 +36,22 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
         <div className="animate-fade-in">
             <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group">
                 <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                <span className="font-bold">달력으로</span>
+                <span className="font-bold">{t('dayDetail.backToCalendar')}</span>
             </button>
-            <h2 className="text-2xl font-black italic text-white mb-6">{date} 트레이닝</h2>
+            <h2 className="text-2xl font-black italic text-white mb-6">{date}{t('dayDetail.trainingSuffix')}</h2>
             <div className="space-y-4">
                 {isLoading ? (
-                    <div className="text-center text-slate-500 italic py-20">로딩 중...</div>
+                    <div className="text-center text-slate-500 italic py-20">{t('common.loading')}</div>
                 ) : logs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-6 text-center">
                         <div className="flex flex-col items-center gap-3">
                             <div className="w-20 h-20 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800">
                                 <svg className="w-10 h-10 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                             </div>
-                            <p className="text-slate-500 font-bold text-sm">이 날의 운동 기록이 없습니다.</p>
+                            <p className="text-slate-500 font-bold text-sm">{t('dayDetail.noRecord')}</p>
                         </div>
                         <button onClick={onGoToRoutine} className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl italic text-sm active:scale-95 transition-all shadow-lg shadow-blue-600/20">
-                            + 운동 추가하기
+                            {t('dayDetail.addExercise')}
                         </button>
                     </div>
                 ) : (
@@ -67,9 +69,9 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                                 <div className="space-y-1">
                                     {log.sets_data?.map((s, idx) => (
                                         <div key={idx} className={`flex justify-between py-1 px-3 bg-slate-950/50 rounded-lg font-bold ${isMobile ? 'text-sm' : 'text-xs'}`}>
-                                            <span className="text-slate-500">{idx + 1} SET</span>
+                                            <span className="text-slate-500">{idx + 1} {t('dayDetail.setLabel')}</span>
                                             <span className="text-white">
-                                                {s.isDropSet ? s.dropKgs?.filter(k=>k!=='').join(' › ') + ' kg' : s.kg ? `${s.kg}kg` : ''}{s.reps ? ` × ${s.reps}회` : ''}{s.level ? `Lv ${s.level}` : ''}{s.minutes ? ` ${s.minutes}분` : ''}
+                                                {s.isDropSet ? s.dropKgs?.filter(k=>k!=='').join(' › ') + ' kg' : s.kg ? `${s.kg}kg` : ''}{s.reps ? ` × ${s.reps}${t('dayDetail.repsUnit')}` : ''}{s.level ? `${t('dayDetail.levelPrefix')}${s.level}` : ''}{s.minutes ? ` ${s.minutes}${t('dayDetail.minuteUnit')}` : ''}
                                             </span>
                                         </div>
                                     ))}
@@ -77,7 +79,7 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                             </div>
                         ))}
                         <button onClick={onGoToRoutine} className="w-full py-3 border border-dashed border-blue-600/50 text-blue-400 text-sm font-bold rounded-2xl hover:border-blue-500 transition-all active:scale-[0.98]">
-                            + 운동 더 추가하기
+                            {t('dayDetail.addMore')}
                         </button>
                     </>
                 )}

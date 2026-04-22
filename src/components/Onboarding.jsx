@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../api/supabase';
 
 const STEPS = {
@@ -14,6 +15,7 @@ const STEPS = {
 };
 
 const Onboarding = ({ onComplete }) => {
+    const { t } = useTranslation();
     const [step, setStep] = useState(STEPS.WELCOME);
     const [formData, setFormData] = useState({
         goals: [],
@@ -53,7 +55,7 @@ const Onboarding = ({ onComplete }) => {
     const handleFinish = async () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('로그인이 필요합니다.');
+            if (!user) throw new Error(t('common.loginRequired'));
 
             const { error: profileError } = await supabase
                 .from('user_profiles')
@@ -105,22 +107,22 @@ const Onboarding = ({ onComplete }) => {
                             <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                         </div>
                         <h1 className="text-4xl font-black text-white italic tracking-tighter mb-4">WELCOME TO MYGYM</h1>
-                        <p className="text-slate-400 font-bold leading-relaxed mb-12">몇 가지 질문으로 당신에게 딱 맞는<br/>최적의 운동 플랜을 설계해 드릴게요.</p>
-                        <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic text-lg shadow-xl shadow-blue-600/20 active:scale-95 transition-all">시작하기</button>
+                        <p className="text-slate-400 font-bold leading-relaxed mb-12">{t('onboarding.subtitle')}</p>
+                        <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic text-lg shadow-xl shadow-blue-600/20 active:scale-95 transition-all">{t('onboarding.start')}</button>
                     </div>
                 );
 
             case STEPS.GOAL: {
                 const goalOptions = [
-                    { label: '근력 증가', subLabel: '더 무거운 무게를 들고 싶어요', value: 'strength', icon: '💪' },
-                    { label: '근육 성장', subLabel: '멋진 몸을 만들고 싶어요', value: 'hypertrophy', icon: '🔥' },
-                    { label: '체중 감량', subLabel: '지방을 태우고 싶어요', value: 'weight_loss', icon: '🏃' },
-                    { label: '현상 유지', subLabel: '건강한 체력을 유지하고 싶어요', value: 'maintenance', icon: '🌿' },
+                    { label: t('onboarding.goal.strength'), subLabel: t('onboarding.goal.strengthDesc'), value: 'strength', icon: '💪' },
+                    { label: t('onboarding.goal.hypertrophy'), subLabel: t('onboarding.goal.hypertrophyDesc'), value: 'hypertrophy', icon: '🔥' },
+                    { label: t('onboarding.goal.weightLoss'), subLabel: t('onboarding.goal.weightLossDesc'), value: 'weight_loss', icon: '🏃' },
+                    { label: t('onboarding.goal.maintenance'), subLabel: t('onboarding.goal.maintenanceDesc'), value: 'maintenance', icon: '🌿' },
                 ];
                 return (
                     <div className="animate-slide-up">
-                        <h2 className="text-2xl font-black text-white italic mb-1">당신의 운동 목표는?</h2>
-                        <p className="text-xs text-slate-500 font-bold mb-8 uppercase tracking-widest">(최대 2개까지 선택 가능)</p>
+                        <h2 className="text-2xl font-black text-white italic mb-1">{t('onboarding.goal.title')}</h2>
+                        <p className="text-xs text-slate-500 font-bold mb-8 uppercase tracking-widest">{t('onboarding.goal.maxSelect')}</p>
                         {goalOptions.map(opt => (
                             <button
                                 key={opt.value}
@@ -146,7 +148,7 @@ const Onboarding = ({ onComplete }) => {
                             disabled={formData.goals.length === 0}
                             className="w-full py-5 mt-2 bg-blue-600 disabled:opacity-30 text-white font-black rounded-2xl italic active:scale-95 transition-all"
                         >
-                            다음 단계
+                            {t('common.next')}
                         </button>
                     </div>
                 );
@@ -155,17 +157,17 @@ const Onboarding = ({ onComplete }) => {
             case STEPS.LEVEL:
                 return (
                     <div className="animate-slide-up">
-                        <h2 className="text-2xl font-black text-white italic mb-8">운동 경험이 어느 정도인가요?</h2>
-                        <CardOption label="초보" subLabel="3개월 미만 (기초부터 차근차근)" value="beginner" targetField="experience_level" icon="🐣" />
-                        <CardOption label="중급" subLabel="3개월 ~ 2년 (익숙한 동작 위주)" value="intermediate" targetField="experience_level" icon="🏋️" />
-                        <CardOption label="고급" subLabel="2년 이상 (고강도 트레이닝)" value="advanced" targetField="experience_level" icon="🏆" />
+                        <h2 className="text-2xl font-black text-white italic mb-8">{t('onboarding.level.title')}</h2>
+                        <CardOption label={t('onboarding.level.beginner')} subLabel={t('onboarding.level.beginnerDesc')} value="beginner" targetField="experience_level" icon="🐣" />
+                        <CardOption label={t('onboarding.level.intermediate')} subLabel={t('onboarding.level.intermediateDesc')} value="intermediate" targetField="experience_level" icon="🏋️" />
+                        <CardOption label={t('onboarding.level.advanced')} subLabel={t('onboarding.level.advancedDesc')} value="advanced" targetField="experience_level" icon="🏆" />
                     </div>
                 );
 
             case STEPS.FREQUENCY:
                 return (
                     <div className="animate-slide-up">
-                        <h2 className="text-2xl font-black text-white italic mb-8">일주일에 몇 번 운동하시나요?</h2>
+                        <h2 className="text-2xl font-black text-white italic mb-8">{t('onboarding.frequency.title')}</h2>
                         <div className="grid grid-cols-3 gap-3 mb-8">
                             {[2, 3, 4, 5, 6, 7].map(num => (
                                 <button
@@ -173,32 +175,32 @@ const Onboarding = ({ onComplete }) => {
                                     onClick={() => updateData({ weekly_frequency: num })}
                                     className={`py-6 rounded-2xl font-black border-2 transition-all ${formData.weekly_frequency === num ? 'border-blue-500 bg-blue-500 text-white' : 'border-white/5 bg-slate-900/50 text-slate-500'}`}
                                 >
-                                    {num}회
+                                    {num}{t('onboarding.frequency.unit')}
                                 </button>
                             ))}
                         </div>
-                        <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic active:scale-95 transition-all">다음 단계</button>
+                        <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic active:scale-95 transition-all">{t('common.next')}</button>
                     </div>
                 );
 
             case STEPS.AVAILABLE_TIME:
                 return (
                     <div className="animate-slide-up">
-                        <h2 className="text-2xl font-black text-white italic mb-8">주중 운동 가능 시간은 얼마나 되나요?</h2>
-                        <CardOption label="30분 이하" subLabel="짧지만 집중적으로" value="30분 이하" targetField="available_time" icon="⚡" />
-                        <CardOption label="30분~1시간" subLabel="적당한 여유로 알차게" value="30분~1시간" targetField="available_time" icon="🕐" />
-                        <CardOption label="1시간~1.5시간" subLabel="충분한 볼륨 트레이닝" value="1시간~1.5시간" targetField="available_time" icon="🕑" />
-                        <CardOption label="1.5시간 이상" subLabel="고강도 풀 루틴 가능" value="1.5시간 이상" targetField="available_time" icon="🏋️" />
+                        <h2 className="text-2xl font-black text-white italic mb-8">{t('onboarding.availableTime.title')}</h2>
+                        <CardOption label={t('onboarding.availableTime.under30')} subLabel={t('onboarding.availableTime.under30Desc')} value="30분 이하" targetField="available_time" icon="⚡" />
+                        <CardOption label={t('onboarding.availableTime.30to60')} subLabel={t('onboarding.availableTime.30to60Desc')} value="30분~1시간" targetField="available_time" icon="🕐" />
+                        <CardOption label={t('onboarding.availableTime.60to90')} subLabel={t('onboarding.availableTime.60to90Desc')} value="1시간~1.5시간" targetField="available_time" icon="🕑" />
+                        <CardOption label={t('onboarding.availableTime.over90')} subLabel={t('onboarding.availableTime.over90Desc')} value="1.5시간 이상" targetField="available_time" icon="🏋️" />
                     </div>
                 );
 
             case STEPS.EQUIPMENT:
                 return (
                     <div className="animate-slide-up">
-                        <h2 className="text-2xl font-black text-white italic mb-8">어떤 환경에서 운동하시나요?</h2>
-                        <CardOption label="집 (맨몸)" subLabel="도구 없이 어디서든" value="home" targetField="equipment_access" icon="🏠" />
-                        <CardOption label="홈짐 (덤벨/벤치)" subLabel="기본적인 장비 보유" value="home_gym" targetField="equipment_access" icon="📦" />
-                        <CardOption label="헬스장" subLabel="모든 기구 사용 가능" value="full_gym" targetField="equipment_access" icon="🏢" />
+                        <h2 className="text-2xl font-black text-white italic mb-8">{t('onboarding.equipment.title')}</h2>
+                        <CardOption label={t('onboarding.equipment.bodyweight')} subLabel={t('onboarding.equipment.bodyweightDesc')} value="home" targetField="equipment_access" icon="🏠" />
+                        <CardOption label={t('onboarding.equipment.homeGym')} subLabel={t('onboarding.equipment.homeGymDesc')} value="home_gym" targetField="equipment_access" icon="📦" />
+                        <CardOption label={t('onboarding.equipment.gym')} subLabel={t('onboarding.equipment.gymDesc')} value="full_gym" targetField="equipment_access" icon="🏢" />
                     </div>
                 );
 
@@ -206,36 +208,36 @@ const Onboarding = ({ onComplete }) => {
                 return (
                     <div className="animate-slide-up">
                         <div className="flex justify-between items-center mb-8">
-                            <h2 className="text-2xl font-black text-white italic">신체 정보 (선택)</h2>
-                            <button onClick={handleNext} className="text-slate-500 font-bold text-sm">건너뛰기</button>
+                            <h2 className="text-2xl font-black text-white italic">{t('onboarding.bodyInfo.title')}</h2>
+                            <button onClick={handleNext} className="text-slate-500 font-bold text-sm">{t('common.skip')}</button>
                         </div>
                         <div className="space-y-4 mb-8">
                             <div className="grid grid-cols-2 gap-4">
-                                <input type="number" placeholder="키 (cm)" value={formData.height} onChange={e => updateData({ height: e.target.value })} className="w-full bg-slate-900 border border-white/5 rounded-2xl p-5 text-white font-bold outline-none focus:border-blue-500" />
-                                <input type="number" placeholder="몸무게 (kg)" value={formData.weight} onChange={e => updateData({ weight: e.target.value })} className="w-full bg-slate-900 border border-white/5 rounded-2xl p-5 text-white font-bold outline-none focus:border-blue-500" />
+                                <input type="number" placeholder={t('onboarding.bodyInfo.height')} value={formData.height} onChange={e => updateData({ height: e.target.value })} className="w-full bg-slate-900 border border-white/5 rounded-2xl p-5 text-white font-bold outline-none focus:border-blue-500" />
+                                <input type="number" placeholder={t('onboarding.bodyInfo.weight')} value={formData.weight} onChange={e => updateData({ weight: e.target.value })} className="w-full bg-slate-900 border border-white/5 rounded-2xl p-5 text-white font-bold outline-none focus:border-blue-500" />
                             </div>
-                            <input type="number" placeholder="나이" value={formData.age} onChange={e => updateData({ age: e.target.value })} className="w-full bg-slate-900 border border-white/5 rounded-2xl p-5 text-white font-bold outline-none focus:border-blue-500" />
+                            <input type="number" placeholder={t('onboarding.bodyInfo.age')} value={formData.age} onChange={e => updateData({ age: e.target.value })} className="w-full bg-slate-900 border border-white/5 rounded-2xl p-5 text-white font-bold outline-none focus:border-blue-500" />
                             <div className="grid grid-cols-2 gap-4">
-                                <button onClick={() => updateData({ gender: 'male' })} className={`py-4 rounded-2xl font-black border-2 ${formData.gender === 'male' ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-white/5 bg-slate-900/50 text-slate-500'}`}>남성</button>
-                                <button onClick={() => updateData({ gender: 'female' })} className={`py-4 rounded-2xl font-black border-2 ${formData.gender === 'female' ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-white/5 bg-slate-900/50 text-slate-500'}`}>여성</button>
+                                <button onClick={() => updateData({ gender: 'male' })} className={`py-4 rounded-2xl font-black border-2 ${formData.gender === 'male' ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-white/5 bg-slate-900/50 text-slate-500'}`}>{t('common.male')}</button>
+                                <button onClick={() => updateData({ gender: 'female' })} className={`py-4 rounded-2xl font-black border-2 ${formData.gender === 'female' ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-white/5 bg-slate-900/50 text-slate-500'}`}>{t('common.female')}</button>
                             </div>
                         </div>
-                        <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic active:scale-95 transition-all">다음 단계</button>
+                        <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic active:scale-95 transition-all">{t('common.next')}</button>
                     </div>
                 );
 
             case STEPS.LIMITATIONS: {
                 const limits = [
-                    { key: 'knee', label: '무릎', icon: '🦵' },
-                    { key: 'back', label: '허리', icon: '🧘' },
-                    { key: 'shoulder', label: '어깨', icon: '💪' },
-                    { key: 'wrist', label: '손목', icon: '✋' }
+                    { key: 'knee', label: t('onboarding.limitations.knee'), icon: '🦵' },
+                    { key: 'back', label: t('onboarding.limitations.lowerBack'), icon: '🧘' },
+                    { key: 'shoulder', label: t('onboarding.limitations.shoulder'), icon: '💪' },
+                    { key: 'wrist', label: t('onboarding.limitations.wrist'), icon: '✋' }
                 ];
                 return (
                     <div className="animate-slide-up">
                         <div className="flex justify-between items-center mb-8">
-                            <h2 className="text-2xl font-black text-white italic">부상/제한사항 (선택)</h2>
-                            <button onClick={handleNext} className="text-slate-500 font-bold text-sm">건너뛰기</button>
+                            <h2 className="text-2xl font-black text-white italic">{t('onboarding.limitations.title')}</h2>
+                            <button onClick={handleNext} className="text-slate-500 font-bold text-sm">{t('common.skip')}</button>
                         </div>
                         <div className="grid grid-cols-2 gap-4 mb-12">
                             {limits.map(l => (
@@ -249,7 +251,7 @@ const Onboarding = ({ onComplete }) => {
                                 </button>
                             ))}
                         </div>
-                        <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic shadow-2xl shadow-blue-600/20 active:scale-95 transition-all uppercase tracking-tighter">다음 단계</button>
+                        <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic shadow-2xl shadow-blue-600/20 active:scale-95 transition-all uppercase tracking-tighter">{t('common.next')}</button>
                     </div>
                 );
             }
@@ -262,15 +264,14 @@ const Onboarding = ({ onComplete }) => {
                         </div>
                         <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">READY TO GO!</h2>
                         <p className="text-slate-400 font-bold leading-relaxed">
-                            모든 준비가 완료되었습니다!<br/>
-                            입력하신 정보는 달력 화면 우측 상단<br/>
-                            '개인정보' 버튼에서 언제든 수정할 수 있습니다.
+                            {t('onboarding.allReady')}<br/>
+                            {t('onboarding.editNote')}
                         </p>
                         <button
                             onClick={handleFinish}
                             className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic text-lg shadow-xl shadow-blue-600/20 active:scale-95 transition-all uppercase tracking-tighter"
                         >
-                            설정 완료
+                            {t('onboarding.complete')}
                         </button>
                     </div>
                 );

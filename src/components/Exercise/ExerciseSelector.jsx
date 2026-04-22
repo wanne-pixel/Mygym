@@ -1,12 +1,22 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import EXERCISE_DATASET from '../../data/exercises.json';
 import { BODY_PARTS, EQUIPMENT_MAP } from '../../constants/exerciseConstants';
 import { getExerciseGif } from '../../utils/exerciseUtils';
 import { useWindowSize } from '../../hooks/useWindowSize';
 
+const BODY_PART_I18N = {
+    '가슴': 'bodyParts.chest',
+    '등': 'bodyParts.back',
+    '어깨': 'bodyParts.shoulder',
+    '하체': 'bodyParts.lower',
+    '팔': 'bodyParts.arms',
+    '허리/코어': 'bodyParts.core',
+};
+
 const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cover", onClick }) => {
     const gifUrl = getExerciseGif(nameEn, exerciseId);
-    
+
     if (!gifUrl) {
         return (
             <div className={`bg-slate-800 flex flex-col items-center justify-center gap-1 ${className}`} onClick={onClick}>
@@ -16,11 +26,11 @@ const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cov
             </div>
         );
     }
-    
+
     return (
-        <img 
-            src={gifUrl} 
-            alt="Exercise Preview" 
+        <img
+            src={gifUrl}
+            alt="Exercise Preview"
             className={`${className} cursor-pointer hover:scale-110 transition-transform duration-500`}
             loading="lazy"
             onClick={onClick}
@@ -29,6 +39,7 @@ const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cov
 };
 
 const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
+    const { t } = useTranslation();
     const { isMobile } = useWindowSize();
     const [searchTerm, setSearchTerm] = useState('');
     const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '', isDirectInput: false });
@@ -45,8 +56,8 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
     };
 
     const handleExerciseClick = (ex) => {
-        setSelection({ 
-            ...selection, 
+        setSelection({
+            ...selection,
             exercise: ex,
             manualName: ''
         });
@@ -54,14 +65,14 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
     };
 
     const handlePreviewOpen = (e, ex) => {
-        e.stopPropagation(); // 부모의 onClick(handleExerciseClick) 방지
+        e.stopPropagation();
         const url = getExerciseGif(null, ex.id);
         setModalState({ isOpen: true, gifUrl: url, name: ex.name, isDirectInput: false });
     };
 
     const handleDirectInputOpen = () => {
         setCustomName('');
-        setModalState({ isOpen: true, gifUrl: '', name: '운동 직접 입력', isDirectInput: true });
+        setModalState({ isOpen: true, gifUrl: '', name: t('exercise.customInput'), isDirectInput: true });
     };
 
     const handleDirectInputSave = () => {
@@ -69,7 +80,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
         const customEx = {
             id: `custom-${Date.now()}`,
             name: customName.trim(),
-            equipment: selection.equipment || '기타',
+            equipment: selection.equipment || t('common.other'),
             bodyPart: selection.part
         };
         handleExerciseClick(customEx);
@@ -111,12 +122,14 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
         return list;
     }, [selection.part, selection.equipment, searchTerm]);
 
+    const getPartLabel = (partKey) => t(BODY_PART_I18N[partKey] || partKey, { defaultValue: partKey });
+
     return (
         <div className="space-y-8">
             {/* Selection Summary & Back Button */}
             <div className="flex items-center gap-3">
                 {(selection.part || selection.equipment || selection.exercise) && (
-                    <button 
+                    <button
                         onClick={handleBack}
                         className="p-2 bg-slate-800 text-slate-400 hover:text-white rounded-xl transition-colors"
                     >
@@ -126,7 +139,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                 {(selection.part || selection.equipment || selection.exercise) && (
                     <div className="flex-1 p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl animate-fade-in">
                         <div className="flex flex-wrap items-center gap-2 text-xs font-black text-blue-400 uppercase tracking-widest">
-                            {selection.part && <span>{BODY_PARTS.find(p => p.key === selection.part)?.label}</span>}
+                            {selection.part && <span>{getPartLabel(selection.part)}</span>}
                             {selection.equipment && (
                                 <>
                                     <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
@@ -147,7 +160,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             {/* Step 1: Body Part */}
             {!selection.part && (
                 <div className="animate-fade-in">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 1. 부위 선택</label>
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">{t('exercise.selectPart')}</label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                         {BODY_PARTS.map(p => (
                             <button
@@ -155,7 +168,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                 onClick={() => handlePartClick(p.key)}
                                 className={`rounded-2xl font-black text-sm tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50 ${isMobile ? 'py-4' : 'py-3'}`}
                             >
-                                {p.label.toUpperCase()}
+                                {getPartLabel(p.key).toUpperCase()}
                             </button>
                         ))}
                     </div>
@@ -165,7 +178,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             {/* Step 2: Equipment */}
             {selection.part && !selection.equipment && (
                 <div className="animate-fade-in">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">Step 2. 기구 선택</label>
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">{t('exercise.selectEquipment')}</label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                         {availableEquipments.map(eq => (
                             <button
@@ -183,13 +196,13 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             {/* Step 3: Search and List */}
             {selection.part && selection.equipment && (
                 <div className="animate-fade-in space-y-4">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] block px-1">Step 3. 운동 선택</label>
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] block px-1">{t('exercise.selectExercise')}</label>
                     <div className="relative">
                         <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="운동 명칭 검색 (한글/English)..."
+                            placeholder={t('exercise.searchPlaceholder')}
                             className={`w-full bg-slate-900 border border-white/10 rounded-xl pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${isMobile ? 'py-4 text-base' : 'py-3 text-sm'}`}
                         />
                         <svg className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -197,18 +210,18 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[400px] md:max-h-[560px] overflow-y-auto pr-2 custom-scrollbar">
                         {filteredExercises.length === 0 ? (
-                            <p className="col-span-full text-center py-10 text-slate-500 italic text-xs">검색 결과가 없습니다.</p>
+                            <p className="col-span-full text-center py-10 text-slate-500 italic text-xs">{t('exercise.noResults')}</p>
                         ) : (
                             <>
                                 {filteredExercises.map((ex) => (
-                                    <div 
+                                    <div
                                         key={ex.id}
                                         onClick={() => handleExerciseClick(ex)}
                                         className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${selection.exercise?.id === ex.id ? 'bg-blue-600/20 border-blue-500' : 'bg-slate-800/30 border-white/5 hover:border-slate-600'}`}
                                     >
                                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-900 shrink-0 border border-white/5 shadow-inner">
-                                            <GifRenderer 
-                                                exerciseId={ex.id} 
+                                            <GifRenderer
+                                                exerciseId={ex.id}
                                                 onClick={(e) => handlePreviewOpen(e, ex)}
                                             />
                                         </div>
@@ -226,8 +239,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                         </div>
                                     </div>
                                 ))}
-                                
-                                {/* 직접 입력 옵션 */}
+
                                 <div
                                     onClick={handleDirectInputOpen}
                                     className="col-span-full flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border bg-slate-800/10 border-dashed border-slate-700 hover:border-slate-500 mt-2 group"
@@ -236,8 +248,8 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                         <svg className="w-5 h-5 text-slate-600 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-sm font-black italic text-slate-400 group-hover:text-white uppercase tracking-tighter">찾는 운동이 없나요?</p>
-                                        <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">직접 입력하여 추가하기</p>
+                                        <p className="text-sm font-black italic text-slate-400 group-hover:text-white uppercase tracking-tighter">{t('exercise.noExerciseFound')}</p>
+                                        <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">{t('exercise.customInputLink')}</p>
                                     </div>
                                 </div>
                             </>
@@ -251,34 +263,34 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                     <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl" onClick={() => setModalState({ ...modalState, isOpen: false })}></div>
                     <div className="relative w-full max-w-2xl bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 animate-scale-up">
                         <div className="absolute top-6 right-6 z-10">
-                            <button 
+                            <button
                                 onClick={() => setModalState({ ...modalState, isOpen: false })}
                                 className="p-3 bg-slate-800/80 hover:bg-slate-700 text-white rounded-full transition-all active:scale-90 border border-white/10"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
-                        
+
                         {modalState.isDirectInput ? (
                             <div className="p-10 pt-16 flex flex-col gap-8">
                                 <div className="space-y-2">
-                                    <h3 className="text-3xl font-black italic text-white uppercase tracking-tighter">운동 직접 입력</h3>
-                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">나만의 커스텀 운동을 루틴에 추가하세요.</p>
+                                    <h3 className="text-3xl font-black italic text-white uppercase tracking-tighter">{t('exercise.customInput')}</h3>
+                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('exercise.customDesc')}</p>
                                 </div>
                                 <div className="space-y-4">
-                                    <input 
+                                    <input
                                         autoFocus
                                         type="text"
                                         value={customName}
                                         onChange={(e) => setCustomName(e.target.value)}
-                                        placeholder="운동 이름을 입력하세요 (예: 힌두 푸쉬업)"
+                                        placeholder={t('exercise.customPlaceholder')}
                                         className="w-full bg-slate-950 border border-white/10 rounded-2xl py-5 px-6 text-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold placeholder:text-slate-800"
                                     />
-                                    <button 
+                                    <button
                                         onClick={handleDirectInputSave}
                                         className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl italic text-lg transition-all active:scale-[0.98] shadow-xl shadow-blue-900/20"
                                     >
-                                        루틴에 추가하기
+                                        {t('exercise.addToRoutine')}
                                     </button>
                                 </div>
                             </div>
@@ -286,9 +298,9 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                             <>
                                 <div className="aspect-square w-full bg-slate-950 flex items-center justify-center p-8">
                                     {modalState.gifUrl ? (
-                                        <img 
-                                            src={modalState.gifUrl} 
-                                            alt={modalState.name} 
+                                        <img
+                                            src={modalState.gifUrl}
+                                            alt={modalState.name}
                                             className="w-full h-full object-contain rounded-2xl shadow-2xl"
                                         />
                                     ) : (
