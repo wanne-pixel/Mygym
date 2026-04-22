@@ -57,7 +57,7 @@ const MainAppLayout = () => {
 
 // 온보딩 완료 여부: experience_level이 있고 goals가 비어있지 않아야 완료로 판단
 const isOnboardingComplete = (p) =>
-    !!(p?.experience_level && (Array.isArray(p?.goals) ? p.goals.length > 0 : !!p?.goal));
+    !!(p?.experience_level && ((Array.isArray(p?.goals) && p.goals.length > 0) || !!p?.goal));
 
 const AppContent = () => {
     const navigate = useNavigate();
