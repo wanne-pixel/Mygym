@@ -22,10 +22,10 @@ const LoginScreen = ({ session, isChecking, onStart }) => {
         setErrorMsg('');
         if (!email || !password) { setErrorMsg('이메일과 비밀번호를 입력해주세요.'); return; }
         setIsLoading(true);
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data: { session: newSession }, error } = await supabase.auth.signInWithPassword({ email, password });
         setIsLoading(false);
         if (error) setErrorMsg('이메일 또는 비밀번호가 올바르지 않습니다.');
-        else if (onStart) onStart(); // 로그인 성공 시 즉시 시작 로직 트리거
+        else if (onStart && newSession) onStart(newSession);
     };
 
     const handleGoogleLogin = async () => {
@@ -63,7 +63,7 @@ const LoginScreen = ({ session, isChecking, onStart }) => {
     if (isSignup) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 animate-fade-in bg-slate-950">
-                <div className="w-full max-sm space-y-8">
+                <div className="w-full lg:max-w-md space-y-8">
                     <button onClick={() => setIsSignup(false)} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4 group">
                         <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
                         <span className="font-medium">돌아가기</span>
@@ -90,7 +90,7 @@ const LoginScreen = ({ session, isChecking, onStart }) => {
                 <p className="mt-2 text-gray-400 font-medium tracking-wide uppercase italic">Level up your limits</p>
             </div>
             
-            <div className="w-full max-sm space-y-4">
+            <div className="w-full lg:max-w-md space-y-4">
                 {session ? (
                     <div className="space-y-4 animate-fade-in">
                         <div className="bg-slate-900/50 p-6 rounded-3xl border border-blue-500/20 text-center">

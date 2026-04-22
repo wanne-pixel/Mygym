@@ -1,29 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../api/supabase';
-import { saveWorkoutLogs } from '../api/workoutApi';
-import { STORAGE_KEYS } from '../constants/exerciseConstants';
-import EXERCISE_DATASET from '../data/exercises.json';
 
 const STEPS = {
     WELCOME: 1,
     GOAL: 2,
     LEVEL: 3,
     FREQUENCY: 4,
-    EQUIPMENT: 5,
-    BODY_INFO: 6,
-    LIMITATIONS: 7,
-    FINISH: 8,
-    GENERATING: 9
+    AVAILABLE_TIME: 5,
+    EQUIPMENT: 6,
+    BODY_INFO: 7,
+    LIMITATIONS: 8,
+    FINISH: 9
 };
 
 const Onboarding = ({ onComplete }) => {
     const [step, setStep] = useState(STEPS.WELCOME);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [loadingTimeout, setLoadingTimeout] = useState(false);
     const [formData, setFormData] = useState({
-        goal: '',
+        goals: [],
         experience_level: '',
         weekly_frequency: 3,
+        available_time: '',
         equipment_access: '',
         height: '',
         weight: '',
@@ -32,21 +28,18 @@ const Onboarding = ({ onComplete }) => {
         limitations: []
     });
 
-    useEffect(() => {
-        let timer;
-        if (isGenerating) {
-            timer = setTimeout(() => {
-                setLoadingTimeout(true);
-                console.log('[Onboarding] 30초 경과, 건너뛰기 옵션 활성화');
-            }, 30000);
-        }
-        return () => clearTimeout(timer);
-    }, [isGenerating]);
-
     const updateData = (fields) => setFormData(prev => ({ ...prev, ...fields }));
-
     const handleNext = () => setStep(prev => prev + 1);
     const handleBack = () => setStep(prev => prev - 1);
+
+    const toggleGoal = (value) => {
+        setFormData(prev => {
+            const isSelected = prev.goals.includes(value);
+            if (isSelected) return { ...prev, goals: prev.goals.filter(g => g !== value) };
+            if (prev.goals.length >= 2) return prev;
+            return { ...prev, goals: [...prev.goals, value] };
+        });
+    };
 
     const toggleLimitation = (limit) => {
         setFormData(prev => ({
@@ -57,13 +50,8 @@ const Onboarding = ({ onComplete }) => {
         }));
     };
 
-    const generateInitialRoutine = async () => {
-        setStep(STEPS.GENERATING);
-        setIsGenerating(true);
-        console.log('[Onboarding] 시작, formData:', formData);
-        
+    const handleFinish = async () => {
         try {
-            // 1단계: Supabase 프로필 저장
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('로그인이 필요합니다.');
 
@@ -71,9 +59,11 @@ const Onboarding = ({ onComplete }) => {
                 .from('user_profiles')
                 .upsert([{
                     user_id: user.id,
-                    goal: formData.goal,
+                    goal: formData.goals[0] || '',
+                    goals: formData.goals,
                     experience_level: formData.experience_level,
                     weekly_frequency: parseInt(formData.weekly_frequency),
+                    available_time: formData.available_time || null,
                     equipment_access: formData.equipment_access,
                     height: formData.height ? parseInt(formData.height) : null,
                     weight: formData.weight ? parseFloat(formData.weight) : null,
@@ -82,111 +72,16 @@ const Onboarding = ({ onComplete }) => {
                     limitations: formData.limitations
                 }]);
 
-            if (profileError) {
-                console.error('[Onboarding] 프로필 저장 실패:', profileError);
-                throw profileError;
-            }
-
-            // 2단계: AI 루틴 생성 (Timeout 설정)
-            
-            const fetchAIResponse = async () => {
-                const prompt = `당신은 퍼스널 트레이너입니다. 다음 프로필을 분석해 첫 운동 루틴을 추천하세요.
-
-사용자 정보:
-- 목표: ${formData.goal}
-- 경험: ${formData.experience_level}
-- 주당 횟수: ${formData.weekly_frequency}회
-- 기구: ${formData.equipment_access}
-- 제한사항: ${formData.limitations.join(', ') || '없음'}
-
-규칙:
-1. 초보자는 전신 운동 3-4개, 기본 동작 위주.
-2. 제한사항이 있다면 해당 관절에 무리가 가지 않는 대체 운동을 선택하세요.
-3. 운동 이름은 반드시 한국어로 작성하세요.
-4. 반드시 아래 JSON 형식으로만 답변하세요. 어떠한 인사말이나 마크다운(\`\`\`) 기호 없이 순수한 JSON 객체 형식으로만 대답하세요.
-
-{
-  "message": "환영 메시지 (2-3문장)",
-  "routine": [
-    {
-      "name": "운동 이름",
-      "part": "부위(가슴|등|하체|어깨|팔|허리/코어|유산소)",
-      "sets": [
-        {"kg": 10, "reps": 12, "isDropSet": false}
-      ]
-    }
-  ]
-}`;
-
-                const { data, error } = await supabase.functions.invoke('ai-coach', {
-                    body: { type: 'onboarding', prompt },
-                });
-                if (error) throw error;
-                if (data.error) throw new Error(data.error);
-                return JSON.parse(data.content);
-            };
-
-            // AI 호출에 25초 타임아웃 적용 (AbortController 대신 Promise.race 사용)
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('AI 응답 지연 (Timeout)')), 25000)
-            );
-
-            let content;
-            try {
-                content = await Promise.race([fetchAIResponse(), timeoutPromise]);
-                console.log('[Onboarding] Step 2 완료: AI 루틴 생성 성공:', content);
-            } catch (aiError) {
-                console.error('[Onboarding] AI 루틴 생성 지연 또는 실패:', aiError);
-                content = {
-                    message: "AI 분석이 지연되어 기본 루틴을 제공합니다. 프로필은 저장되었으니 AI 코치 탭에서 맞춤 추천을 받아보세요!",
-                    routine: [
-                        { name: "스쿼트", part: "하체", sets: [{ kg: 10, reps: 12, isDropSet: false }] },
-                        { name: "푸시업", part: "가슴", sets: [{ kg: 0, reps: 10, isDropSet: false }] },
-                        { name: "플랭크", part: "허리/코어", sets: [{ kg: 0, reps: 30, isDropSet: false }] }
-                    ]
-                };
-            }
-            
-            // 3단계: localStorage 저장
-            console.log('[Onboarding] Step 3: localStorage 저장 시작');
-            const today = new Date().toISOString().split('T')[0];
-            const routineData = content.routine.map(item => {
-                const exMatch = EXERCISE_DATASET.find(e => e.name === item.name);
-                return {
-                    user_id: user.id,
-                    exercise: item.name,
-                    part: item.part,
-                    type: (item.part === '유산소' || item.part === 'cardio') ? 'cardio' : 'strength',
-                    sets_data: item.sets,
-                    created_at: `${today}T12:00:00Z`
-                };
-            });
-
-            const storageKey = `mygym_routine_${today}`;
-            localStorage.setItem(storageKey, JSON.stringify(routineData.map((d, idx) => ({
-                id: Date.now() + idx,
-                name: d.exercise,
-                body_part: d.part,
-                sets: d.sets_data,
-                completed: false
-            }))));
-            console.log('[Onboarding] Step 3 완료: localStorage 저장 성공');
-
-            if (content.message) alert(content.message);
+            if (profileError) throw profileError;
             onComplete();
         } catch (error) {
-            console.error('[Onboarding] 최종 에러 발생:', error);
-            alert(`온보딩 실패: ${error.message}\n기본 화면으로 이동합니다.`);
+            console.error('[Onboarding] 에러:', error);
+            alert(`설정 실패: ${error.message}\n기본 화면으로 이동합니다.`);
             onComplete();
-        } finally {
-            setIsGenerating(false);
         }
     };
 
     const renderStep = () => {
-        const totalSteps = 7;
-        const currentStepNum = step;
-
         const CardOption = ({ label, subLabel, value, targetField, icon }) => (
             <button
                 onClick={() => { updateData({ [targetField]: value }); handleNext(); }}
@@ -215,16 +110,47 @@ const Onboarding = ({ onComplete }) => {
                     </div>
                 );
 
-            case STEPS.GOAL:
+            case STEPS.GOAL: {
+                const goalOptions = [
+                    { label: '근력 증가', subLabel: '더 무거운 무게를 들고 싶어요', value: 'strength', icon: '💪' },
+                    { label: '근육 성장', subLabel: '멋진 몸을 만들고 싶어요', value: 'hypertrophy', icon: '🔥' },
+                    { label: '체중 감량', subLabel: '지방을 태우고 싶어요', value: 'weight_loss', icon: '🏃' },
+                    { label: '현상 유지', subLabel: '건강한 체력을 유지하고 싶어요', value: 'maintenance', icon: '🌿' },
+                ];
                 return (
                     <div className="animate-slide-up">
-                        <h2 className="text-2xl font-black text-white italic mb-8">당신의 운동 목표는?</h2>
-                        <CardOption label="근력 증가" subLabel="더 무거운 무게를 들고 싶어요" value="strength" targetField="goal" icon="💪" />
-                        <CardOption label="근육 성장" subLabel="멋진 몸을 만들고 싶어요" value="hypertrophy" targetField="goal" icon="🔥" />
-                        <CardOption label="체중 감량" subLabel="지방을 태우고 싶어요" value="weight_loss" targetField="goal" icon="🏃" />
-                        <CardOption label="현상 유지" subLabel="건강한 체력을 유지하고 싶어요" value="maintenance" targetField="goal" icon="🌿" />
+                        <h2 className="text-2xl font-black text-white italic mb-1">당신의 운동 목표는?</h2>
+                        <p className="text-xs text-slate-500 font-bold mb-8 uppercase tracking-widest">(최대 2개까지 선택 가능)</p>
+                        {goalOptions.map(opt => (
+                            <button
+                                key={opt.value}
+                                onClick={() => toggleGoal(opt.value)}
+                                className={`w-full p-5 mb-3 rounded-2xl border-2 text-left transition-all ${formData.goals.includes(opt.value) ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900/50 hover:border-slate-700'}`}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <span className="text-2xl">{opt.icon}</span>
+                                    <div className="flex-1">
+                                        <div className="font-black text-white">{opt.label}</div>
+                                        <div className="text-xs text-slate-500 font-bold">{opt.subLabel}</div>
+                                    </div>
+                                    {formData.goals.includes(opt.value) && (
+                                        <span className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+                                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
+                                        </span>
+                                    )}
+                                </div>
+                            </button>
+                        ))}
+                        <button
+                            onClick={handleNext}
+                            disabled={formData.goals.length === 0}
+                            className="w-full py-5 mt-2 bg-blue-600 disabled:opacity-30 text-white font-black rounded-2xl italic active:scale-95 transition-all"
+                        >
+                            다음 단계
+                        </button>
                     </div>
                 );
+            }
 
             case STEPS.LEVEL:
                 return (
@@ -252,6 +178,17 @@ const Onboarding = ({ onComplete }) => {
                             ))}
                         </div>
                         <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic active:scale-95 transition-all">다음 단계</button>
+                    </div>
+                );
+
+            case STEPS.AVAILABLE_TIME:
+                return (
+                    <div className="animate-slide-up">
+                        <h2 className="text-2xl font-black text-white italic mb-8">주중 운동 가능 시간은 얼마나 되나요?</h2>
+                        <CardOption label="30분 이하" subLabel="짧지만 집중적으로" value="30분 이하" targetField="available_time" icon="⚡" />
+                        <CardOption label="30분~1시간" subLabel="적당한 여유로 알차게" value="30분~1시간" targetField="available_time" icon="🕐" />
+                        <CardOption label="1시간~1.5시간" subLabel="충분한 볼륨 트레이닝" value="1시간~1.5시간" targetField="available_time" icon="🕑" />
+                        <CardOption label="1.5시간 이상" subLabel="고강도 풀 루틴 가능" value="1.5시간 이상" targetField="available_time" icon="🏋️" />
                     </div>
                 );
 
@@ -287,7 +224,7 @@ const Onboarding = ({ onComplete }) => {
                     </div>
                 );
 
-            case STEPS.LIMITATIONS:
+            case STEPS.LIMITATIONS: {
                 const limits = [
                     { key: 'knee', label: '무릎', icon: '🦵' },
                     { key: 'back', label: '허리', icon: '🧘' },
@@ -315,6 +252,7 @@ const Onboarding = ({ onComplete }) => {
                         <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic shadow-2xl shadow-blue-600/20 active:scale-95 transition-all uppercase tracking-tighter">다음 단계</button>
                     </div>
                 );
+            }
 
             case STEPS.FINISH:
                 return (
@@ -328,30 +266,12 @@ const Onboarding = ({ onComplete }) => {
                             입력하신 정보는 달력 화면 우측 상단<br/>
                             '개인정보' 버튼에서 언제든 수정할 수 있습니다.
                         </p>
-                        <button 
-                            onClick={generateInitialRoutine} 
+                        <button
+                            onClick={handleFinish}
                             className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic text-lg shadow-xl shadow-blue-600/20 active:scale-95 transition-all uppercase tracking-tighter"
                         >
-                            분석 시작 및 플랜 생성
+                            설정 완료
                         </button>
-                    </div>
-                );
-
-            case STEPS.GENERATING:
-                return (
-                    <div className="text-center py-12 animate-fade-in">
-                        <div className="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-8" />
-                        <h2 className="text-2xl font-black text-white italic mb-4">당신만을 위한 첫 루틴 설계 중...</h2>
-                        <p className="text-slate-500 font-bold mb-8">AI 코치가 최적의 운동을 선별하고 있습니다.</p>
-                        
-                        {loadingTimeout && (
-                            <button 
-                                onClick={onComplete}
-                                className="px-6 py-3 bg-slate-800 text-slate-300 rounded-xl font-bold border border-white/5 hover:bg-slate-700 transition-all"
-                            >
-                                분석 생략하고 바로 시작하기
-                            </button>
-                        )}
                     </div>
                 );
 
@@ -363,16 +283,16 @@ const Onboarding = ({ onComplete }) => {
     return (
         <div className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-6">
             <div className="w-full max-w-md">
-                {step > STEPS.WELCOME && step < STEPS.GENERATING && (
+                {step > STEPS.WELCOME && step < STEPS.FINISH && (
                     <div className="mb-12">
                         <div className="flex justify-between text-[10px] font-black text-slate-600 uppercase mb-2">
-                            <span>Step {step - 1} / 6</span>
-                            <span>{Math.round(((step - 1) / 6) * 100)}%</span>
+                            <span>Step {step - 1} / 7</span>
+                            <span>{Math.round(((step - 1) / 7) * 100)}%</span>
                         </div>
                         <div className="h-1 bg-slate-900 rounded-full overflow-hidden">
-                            <div 
-                                className="h-full bg-blue-600 transition-all duration-500" 
-                                style={{ width: `${((step - 1) / 6) * 100}%` }}
+                            <div
+                                className="h-full bg-blue-600 transition-all duration-500"
+                                style={{ width: `${((step - 1) / 7) * 100}%` }}
                             />
                         </div>
                         <button onClick={handleBack} className="mt-4 text-slate-500 hover:text-white transition-colors">

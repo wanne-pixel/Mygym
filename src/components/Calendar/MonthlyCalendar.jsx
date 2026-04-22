@@ -6,7 +6,11 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
     const month = currentViewDate.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
-    const calendarDays = [...Array(firstDay).fill(null), ...[...Array(lastDate).keys()].map(i => i + 1)];
+    const calendarDays = [
+        ...Array(firstDay).fill(null),
+        ...[...Array(lastDate).keys()].map(i => i + 1),
+        ...Array(Math.max(0, 42 - firstDay - lastDate)).fill(null)
+    ];
     const today = new Date();
     const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
     const isFutureMonth = new Date(year, month, 1) > new Date(today.getFullYear(), today.getMonth(), 1);

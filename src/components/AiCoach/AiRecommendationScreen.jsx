@@ -95,19 +95,17 @@ const AiRecommendationScreen = () => {
                 </div>
             )}
 
-            <div className="p-4 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    <h2 className="text-sm font-black text-white italic uppercase tracking-tighter">AI PT COACH</h2>
-                    {addedCount > 0 && (
-                        <span className="ml-1 bg-green-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
-                            {addedCount}개 선택됨
-                        </span>
-                    )}
-                </div>
+            <div className="p-4 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 flex items-center gap-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <h2 className="text-sm font-black text-white italic uppercase tracking-tighter">AI PT COACH</h2>
+                {addedCount > 0 && (
+                    <span className="bg-green-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
+                        {addedCount}개 선택됨
+                    </span>
+                )}
                 <button
                     onClick={handleManualReset}
-                    className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300"
+                    className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300 ml-1"
                 >
                     초기화
                 </button>

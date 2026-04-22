@@ -245,9 +245,10 @@ const CalendarScreen = () => {
                         <User size={14} />
                         개인정보
                     </button>
+                    {/* 모바일 전용 로그아웃 버튼 (PC는 우측 상단 고정 버튼 사용) */}
                     <button
                         onClick={async () => { if(window.confirm('로그아웃 하시겠습니까?')) { await supabase.auth.signOut(); localStorage.clear(); } }}
-                        className="p-2 bg-red-900/20 text-red-400 rounded-full hover:bg-red-900/40 transition-all active:scale-95"
+                        className="lg:hidden p-2 bg-red-900/20 text-red-400 rounded-full hover:bg-red-900/40 transition-all active:scale-95"
                         title="로그아웃"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

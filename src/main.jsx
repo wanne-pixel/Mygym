@@ -23,6 +23,25 @@ const MainAppLayout = () => {
             <div className="hidden lg:block">
                 <SideNav activeTab={activeTab} onTabChange={handleTabChange} />
             </div>
+            {/* PC: 우측 상단 고정 로그아웃 버튼 */}
+            <div className="hidden lg:block fixed top-4 right-6 z-50">
+                <button
+                    onClick={async () => {
+                        if (window.confirm('로그아웃 하시겠습니까?')) {
+                            await supabase.auth.signOut();
+                            localStorage.clear();
+                        }
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-slate-900/90 backdrop-blur-sm border border-white/10 text-slate-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-900/10 rounded-xl text-xs font-bold transition-all"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    로그아웃
+                </button>
+            </div>
             {/* 메인 콘텐츠: PC에서 사이드바 너비만큼 밀어냄 */}
             <main className="lg:ml-56">
                 {activeTab === '달력' && <CalendarScreen />}
@@ -36,11 +55,16 @@ const MainAppLayout = () => {
     );
 };
 
+// 온보딩 완료 여부: experience_level이 있고 goals가 비어있지 않아야 완료로 판단
+const isOnboardingComplete = (p) =>
+    !!(p?.experience_level && (Array.isArray(p?.goals) ? p.goals.length > 0 : !!p?.goal));
+
 const AppContent = () => {
     const navigate = useNavigate();
     const [session, setSession] = useState(null);
     const [profile, setProfile] = useState(null);
     const [isChecking, setIsChecking] = useState(false);
+    const [isInitializing, setIsInitializing] = useState(true);
 
     // 타임아웃이 포함된 프로필 조회 함수
     const fetchProfileWithTimeout = async (userId) => {
@@ -86,36 +110,43 @@ const AppContent = () => {
         }
     };
 
-    // 사용자가 로그인 화면에서 '시작하기' 또는 로그인을 완료했을 때 호출할 함수
+    // 세션이 확인된 후 프로필을 조회하고 온보딩 완료 여부에 따라 라우팅
     const handleStartApp = async (currentSession) => {
-        if (!currentSession) return;
-        
+        if (!currentSession || isChecking) return;
+
         setIsChecking(true);
         console.log('--- [앱 진입 시도: 세션 확인됨] ---');
-        
+
         try {
             const p = await fetchProfileWithTimeout(currentSession.user.id);
             setProfile(p);
-            
-            if (p) {
-                console.log('--- [기존 유저]: 메인 화면으로 이동 ---');
+
+            if (isOnboardingComplete(p)) {
+                console.log('--- [온보딩 완료 유저]: 메인 화면으로 이동 ---');
                 navigate('/app', { replace: true });
             } else {
-                console.log('--- [신규 유저]: 온보딩 화면으로 이동 ---');
+                console.log('--- [온보딩 미완료 유저]: 온보딩 화면으로 이동 ---');
                 navigate('/onboarding', { replace: true });
             }
         } catch (err) {
             alert('서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.');
         } finally {
             setIsChecking(false);
+            setIsInitializing(false);
         }
     };
 
     useEffect(() => {
-        // 앱 구동 시 세션 유무만 확인 (자동 리다이렉트 제거)
+        // 초기 세션 확인: 세션이 있고 로그인 페이지가 아니면 자동으로 프로필 조회 및 라우팅
+        // (Google OAuth 리다이렉트, 페이지 새로고침 케이스 처리)
         supabase.auth.getSession().then(({ data: { session: s } }) => {
             console.log('--- [초기 세션 체크]:', s ? '세션 존재' : '세션 없음');
             setSession(s);
+            if (s && window.location.pathname !== '/') {
+                handleStartApp(s);
+            } else {
+                setIsInitializing(false);
+            }
         });
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
@@ -123,6 +154,7 @@ const AppContent = () => {
             setSession(s);
             if (!s) {
                 setProfile(null);
+                setIsInitializing(false);
                 navigate('/', { replace: true });
             }
         });
@@ -132,15 +164,15 @@ const AppContent = () => {
 
     return (
         <Routes>
-            <Route 
-                path="/" 
+            <Route
+                path="/"
                 element={
-                    <LoginScreen 
-                        session={session} 
-                        isChecking={isChecking} 
-                        onStart={() => handleStartApp(session)} 
+                    <LoginScreen
+                        session={session}
+                        isChecking={isChecking}
+                        onStart={(s) => handleStartApp(s || session)}
                     />
-                } 
+                }
             />
             <Route 
                 path="/onboarding" 
@@ -154,13 +186,17 @@ const AppContent = () => {
                     ) : <Navigate to="/" replace />
                 } 
             />
-            <Route 
-                path="/app" 
+            <Route
+                path="/app"
                 element={
-                    session ? (
-                        profile ? <MainAppLayout /> : <Navigate to="/onboarding" replace />
+                    isInitializing ? (
+                        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+                            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    ) : session ? (
+                        isOnboardingComplete(profile) ? <MainAppLayout /> : <Navigate to="/onboarding" replace />
                     ) : <Navigate to="/" replace />
-                } 
+                }
             />
             <Route 
                 path="/routine-detail" 

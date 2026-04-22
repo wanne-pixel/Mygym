@@ -162,12 +162,18 @@ export const useAiCoach = () => {
             ? Object.entries(personalRecords).map(([name, r]) => `- ${name}: ${r.kg}kg × ${r.reps}회`).join('\n')
             : '없음 (초보자)';
 
+        const goalLabels = { strength: '근력 증가', hypertrophy: '근육 성장', weight_loss: '체중 감량', maintenance: '현상 유지' };
+        const goalsDisplay = Array.isArray(profile?.goals) && profile.goals.length > 0
+            ? profile.goals.map(g => goalLabels[g] || g).join(', ')
+            : goalLabels[profile?.goal] || profile?.goal || '없음';
+
         const systemMessage = `당신은 MyGym의 전문 퍼스널 트레이너 AI 코치입니다.
 
 사용자 프로필:
-- 목표: ${profile?.goal || '없음'}
+- 목표: ${goalsDisplay}
 - 경험: ${profile?.experience_level || '없음'}
 - 주당 횟수: ${profile?.weekly_frequency || 0}회
+- 1회 운동 가능 시간: ${profile?.available_time || '미설정'}
 - 기구: ${profile?.equipment_access || '없음'}
 - 제한사항: ${profile?.limitations?.join(', ') || '없음'}
 
