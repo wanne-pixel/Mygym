@@ -20,8 +20,6 @@ const WorkoutPlanScreen = () => {
     const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '' });
     const [isSaving, setIsSaving] = useState(false);
     const [personalRecords, setPersonalRecords] = useState({});
-    const [hiddenExercises, setHiddenExercises] = useState([]);
-    const [userId, setUserId] = useState(null);
 
     const fetchExercisePersonalRecords = async (userId) => {
         try {
@@ -56,31 +54,12 @@ const WorkoutPlanScreen = () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 const uid = session.user.id;
-                setUserId(uid);
                 const records = await fetchExercisePersonalRecords(uid);
                 setPersonalRecords(records);
-
-                const { data: profile } = await supabase
-                    .from('user_profiles')
-                    .select('hidden_exercises')
-                    .eq('user_id', uid)
-                    .maybeSingle();
-                setHiddenExercises(profile?.hidden_exercises || []);
             }
         };
         loadData();
     }, []);
-
-    const handleHideExercise = async (exerciseId, exerciseName) => {
-        if (!userId) return;
-        if (!window.confirm(`"${exerciseName}" 운동을 목록에서 숨길까요?\n(캘린더 > 숨긴 운동 관리에서 복구할 수 있습니다)`)) return;
-        const updated = [...hiddenExercises, exerciseId];
-        setHiddenExercises(updated);
-        await supabase
-            .from('user_profiles')
-            .update({ hidden_exercises: updated })
-            .eq('user_id', userId);
-    };
 
     useEffect(() => {
         setPlanList(JSON.parse(localStorage.getItem(storageKey) || '[]'));
@@ -206,8 +185,6 @@ const WorkoutPlanScreen = () => {
                     <ExerciseSelector
                         selection={selection}
                         setSelection={setSelection}
-                        hiddenExercises={hiddenExercises}
-                        onHideExercise={handleHideExercise}
                     />
                     {selection.exercise && <button onClick={handleAddToList} className="w-full mt-6 py-4 bg-indigo-600 text-white font-black rounded-xl italic active:scale-95 transition-all">리스트에 추가하기</button>}
                 </div>

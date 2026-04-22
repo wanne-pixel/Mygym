@@ -56,7 +56,6 @@ export const useAiCoach = () => {
     const [profile, setProfile] = useState(null);
     const [recentStats, setRecentStats] = useState({ totalWorkouts: 0, mostFrequentPart: null });
     const [personalRecords, setPersonalRecords] = useState({});
-    const [visibleExercises, setVisibleExercises] = useState(EXERCISE_DATASET);
     const [messages, setMessages] = useState(() => {
         try {
             return JSON.parse(sessionStorage.getItem(SESSION_CHAT_KEY) || '[]');
@@ -132,8 +131,6 @@ export const useAiCoach = () => {
                 const userId = session.user.id;
                 const { data: profileData } = await supabase.from('user_profiles').select('*').eq('user_id', userId).maybeSingle();
                 setProfile(profileData);
-                const hidden = profileData?.hidden_exercises || [];
-                setVisibleExercises(EXERCISE_DATASET.filter(ex => !hidden.includes(ex.id)));
                 const sevenDaysAgo = new Date();
                 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
                 const { data: logs } = await supabase.from('workout_logs').select('*').eq('user_id', userId).gte('created_at', sevenDaysAgo.toISOString());
@@ -268,7 +265,7 @@ ${recordsText}
 
             const aiText = await callAiCoachFunction({
                 type: 'recommendation',
-                exercises: visibleExercises,
+                exercises: EXERCISE_DATASET,
                 profile,
                 mode,
                 hardModeType,
