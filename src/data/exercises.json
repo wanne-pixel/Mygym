@@ -10,7 +10,10 @@
       "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0025-EIeI8Vf.gif"
+    "gif_url": "videos/0025-EIeI8Vf.gif",
+    "name_en": "Barbell Bench Press",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0002",
@@ -23,7 +26,10 @@
       "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0033-GrO65fd.gif"
+    "gif_url": "videos/0033-GrO65fd.gif",
+    "name_en": "Barbell Decline Bench Press",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0007",
@@ -36,7 +42,10 @@
       "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0047-3TZduzM.gif"
+    "gif_url": "videos/0047-3TZduzM.gif",
+    "name_en": "Barbell Incline Bench Press",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0009",
@@ -49,7 +58,10 @@
       "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/1256-DotAgEF.gif"
+    "gif_url": "videos/1256-DotAgEF.gif",
+    "name_en": "Reverse Grip Decline Bench Press",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0010",
@@ -62,7 +74,10 @@
       "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/1257-DU7I633.gif"
+    "gif_url": "videos/1257-DU7I633.gif",
+    "name_en": "Reverse Grip Incline Bench Press",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0014",
@@ -75,7 +90,10 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/3294-A9qxk2F.gif"
+    "gif_url": "videos/3294-A9qxk2F.gif",
+    "name_en": "Archer Push-Up",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0016",
@@ -88,7 +106,10 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0251-9WTm7dq.gif"
+    "gif_url": "videos/0251-9WTm7dq.gif",
+    "name_en": "Dips",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0021",
@@ -101,7 +122,10 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0279-i5cEhka.gif"
+    "gif_url": "videos/0279-i5cEhka.gif",
+    "name_en": "Decline Push-Up",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0025",
@@ -114,7 +138,10 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0493-B1EVP9F.gif"
+    "gif_url": "videos/0493-B1EVP9F.gif",
+    "name_en": "Incline Push-Up",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0033",
@@ -127,7 +154,10 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0662-I4hDWkc.gif"
+    "gif_url": "videos/0662-I4hDWkc.gif",
+    "name_en": "Push-Up",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0040",
@@ -140,7 +170,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0171-tBWXbIT.gif"
+    "gif_url": "videos/0171-tBWXbIT.gif",
+    "name_en": "Cable Incline Fly",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0041",
@@ -153,7 +186,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0179-FVmZVhk.gif"
+    "gif_url": "videos/0179-FVmZVhk.gif",
+    "name_en": "Cable Low Fly",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0043",
@@ -166,7 +202,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0188-xLYSdtg.gif"
+    "gif_url": "videos/0188-xLYSdtg.gif",
+    "name_en": "Cable Middle Fly",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0048",
@@ -179,7 +218,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0227-Pr9Rhf4.gif"
+    "gif_url": "videos/0227-Pr9Rhf4.gif",
+    "name_en": "Cable Standing Fly",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0050",
@@ -192,7 +234,10 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/1270-j7XMAyn.gif"
+    "gif_url": "videos/1270-j7XMAyn.gif",
+    "name_en": "Cable Upper Chest Crossover",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0055",
@@ -205,7 +250,10 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0288-vi8EhoE.gif"
+    "gif_url": "videos/0288-vi8EhoE.gif",
+    "name_en": "Dumbbell Around Pullover",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0056",
@@ -218,7 +266,10 @@
       "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0289-SpYC0Kp.gif"
+    "gif_url": "videos/0289-SpYC0Kp.gif",
+    "name_en": "Dumbbell Bench Press",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0057",
@@ -231,7 +282,10 @@
       "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0301-DwhEmmE.gif"
+    "gif_url": "videos/0301-DwhEmmE.gif",
+    "name_en": "Dumbbell Decline Bench Press",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0058",
@@ -244,7 +298,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0302-xXm4nYq.gif"
+    "gif_url": "videos/0302-xXm4nYq.gif",
+    "name_en": "Dumbbell Decline Fly",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0059",
@@ -257,7 +314,10 @@
       "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0303-1qrWgZ2.gif"
+    "gif_url": "videos/0303-1qrWgZ2.gif",
+    "name_en": "Dumbbell Decline Hammer Machine Press",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0062",
@@ -270,7 +330,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0308-yz9nUhF.gif"
+    "gif_url": "videos/0308-yz9nUhF.gif",
+    "name_en": "Dumbbell Fly",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0064",
@@ -283,7 +346,10 @@
       "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0314-ns0SIbU.gif"
+    "gif_url": "videos/0314-ns0SIbU.gif",
+    "name_en": "Dumbbell Incline Bench Press",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0066",
@@ -296,7 +362,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0319-ESOd5Pl.gif"
+    "gif_url": "videos/0319-ESOd5Pl.gif",
+    "name_en": "Dumbbell Incline Fly",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0071",
@@ -309,7 +378,10 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0328-6e2DcYX.gif"
+    "gif_url": "videos/0328-6e2DcYX.gif",
+    "name_en": "Dumbbell Incline Shoulder Raise",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0074",
@@ -322,7 +394,10 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0009-PAgTVaK.gif"
+    "gif_url": "videos/0009-PAgTVaK.gif",
+    "name_en": "Assisted Dips",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0076",
@@ -335,7 +410,10 @@
       "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0577-T0yTjgW.gif"
+    "gif_url": "videos/0577-T0yTjgW.gif",
+    "name_en": "Seated Chest Press",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0077",
@@ -348,7 +426,10 @@
       "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0576-DOoWcnA.gif"
+    "gif_url": "videos/0576-DOoWcnA.gif",
+    "name_en": "Seated Incline Press",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0078",
@@ -361,7 +442,10 @@
       "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/1300-vsVoPHt.gif"
+    "gif_url": "videos/1300-vsVoPHt.gif",
+    "name_en": "Decline Chest Press",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0081",
@@ -374,7 +458,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0596-v3xmPAR.gif"
+    "gif_url": "videos/0596-v3xmPAR.gif",
+    "name_en": "Seated Fly",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0083",
@@ -387,7 +474,10 @@
       "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/1301-wDN97Ca.gif"
+    "gif_url": "videos/1301-wDN97Ca.gif",
+    "name_en": "Inner Chest Press",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0084",
@@ -400,7 +490,10 @@
       "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0748-trqKQv2.gif"
+    "gif_url": "videos/0748-trqKQv2.gif",
+    "name_en": "Smith Bench Press",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
   },
   {
     "id": "0085",
@@ -413,7 +506,10 @@
       "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0753-ETZfAbZ.gif"
+    "gif_url": "videos/0753-ETZfAbZ.gif",
+    "name_en": "Smith Decline Bench Press",
+    "subTarget_ko": "하부",
+    "subTarget_en": "Lower"
   },
   {
     "id": "0087",
@@ -426,7 +522,10 @@
       "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0757-5v7KYld.gif"
+    "gif_url": "videos/0757-5v7KYld.gif",
+    "name_en": "Smith Incline Bench Press",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0089",
@@ -439,11 +538,14 @@
       "가슴 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0759-ayAHcEm.gif"
+    "gif_url": "videos/0759-ayAHcEm.gif",
+    "name_en": "Smith Incline Shoulder Raise",
+    "subTarget_ko": "상부",
+    "subTarget_en": "Upper"
   },
   {
     "id": "0095",
-    "name": "바벨 로우",
+    "name": "바벨 벤트오버 로우",
     "bodyPart": "등",
     "equipment": "바벨",
     "target": "광배근",
@@ -455,7 +557,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0027-eZyBC3j.gif"
+    "gif_url": "videos/0027-eZyBC3j.gif",
+    "name_en": "Barbell Bent-Over Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0100",
@@ -471,7 +576,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/3017-r0z6xzQ.gif"
+    "gif_url": "videos/3017-r0z6xzQ.gif",
+    "name_en": "Barbell Pendlay Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0101",
@@ -484,7 +592,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0073-i6LWjok.gif"
+    "gif_url": "videos/0073-i6LWjok.gif",
+    "name_en": "Barbell Pullover",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0103",
@@ -500,7 +611,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0118-SzX3uzM.gif"
+    "gif_url": "videos/0118-SzX3uzM.gif",
+    "name_en": "Reverse Grip Barbell Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0105",
@@ -513,7 +627,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0095-dG7tG5y.gif"
+    "gif_url": "videos/0095-dG7tG5y.gif",
+    "name_en": "Barbell Shrug",
+    "subTarget_ko": "승모근",
+    "subTarget_en": "Traps"
   },
   {
     "id": "0118",
@@ -526,7 +643,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/1326-T2mxWqc.gif"
+    "gif_url": "videos/1326-T2mxWqc.gif",
+    "name_en": "Chin-Up",
+    "subTarget_ko": "넓이",
+    "subTarget_en": "Width"
   },
   {
     "id": "0120",
@@ -539,7 +659,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/1327-VnfUNW7.gif"
+    "gif_url": "videos/1327-VnfUNW7.gif",
+    "name_en": "Close Grip Chin-Up",
+    "subTarget_ko": "넓이",
+    "subTarget_en": "Width"
   },
   {
     "id": "0125",
@@ -552,7 +675,10 @@
       "근육의 최대 수축 지점까지 천천히 펴줍니다.",
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
-    "gif_url": "videos/0489-zhMwOwE.gif"
+    "gif_url": "videos/0489-zhMwOwE.gif",
+    "name_en": "Hyperextension",
+    "subTarget_ko": "하부/기립근",
+    "subTarget_en": "Erector Spinae"
   },
   {
     "id": "0127",
@@ -568,7 +694,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0499-bZGHsAZ.gif"
+    "gif_url": "videos/0499-bZGHsAZ.gif",
+    "name_en": "Inverted Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0131",
@@ -581,7 +710,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0153-OQ1otBN.gif"
+    "gif_url": "videos/0153-OQ1otBN.gif",
+    "name_en": "Lat Pulldown",
+    "subTarget_ko": "넓이",
+    "subTarget_en": "Width"
   },
   {
     "id": "0134",
@@ -597,7 +729,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0167-ZSJNetl.gif"
+    "gif_url": "videos/0167-ZSJNetl.gif",
+    "name_en": "Cable High Pulldown",
+    "subTarget_ko": "넓이",
+    "subTarget_en": "Width"
   },
   {
     "id": "0135",
@@ -613,7 +748,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/1318-yaMIo4D.gif"
+    "gif_url": "videos/1318-yaMIo4D.gif",
+    "name_en": "Cable Incline Bench Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0138",
@@ -626,7 +764,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0177-CuaWCmC.gif"
+    "gif_url": "videos/0177-CuaWCmC.gif",
+    "name_en": "Close Grip Lat Pulldown",
+    "subTarget_ko": "넓이",
+    "subTarget_en": "Width"
   },
   {
     "id": "0140",
@@ -642,7 +783,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0180-hvV79Si.gif"
+    "gif_url": "videos/0180-hvV79Si.gif",
+    "name_en": "Seated Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0147",
@@ -655,7 +799,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0197-qdRxqCj.gif"
+    "gif_url": "videos/0197-qdRxqCj.gif",
+    "name_en": "Wide Grip Lat Pulldown",
+    "subTarget_ko": "넓이",
+    "subTarget_en": "Width"
   },
   {
     "id": "0148",
@@ -668,7 +815,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0205-SpsOSXk.gif"
+    "gif_url": "videos/0205-SpsOSXk.gif",
+    "name_en": "Behind-the-Neck Lat Pulldown",
+    "subTarget_ko": "넓이",
+    "subTarget_en": "Width"
   },
   {
     "id": "0149",
@@ -684,7 +834,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0293-BJ0Hz5L.gif"
+    "gif_url": "videos/0293-BJ0Hz5L.gif",
+    "name_en": "Dumbbell Bent-Over Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0154",
@@ -697,7 +850,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/3541-PbzNu7c.gif"
+    "gif_url": "videos/3541-PbzNu7c.gif",
+    "name_en": "Dumbbell Incline Y-Raise",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0156",
@@ -713,7 +869,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0292-C0MA9bC.gif"
+    "gif_url": "videos/0292-C0MA9bC.gif",
+    "name_en": "Dumbbell One-Arm Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0160",
@@ -729,7 +888,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/2327-Nh3mvOO.gif"
+    "gif_url": "videos/2327-Nh3mvOO.gif",
+    "name_en": "Dumbbell Reverse Grip Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0161",
@@ -742,7 +904,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0406-NJzBsGJ.gif"
+    "gif_url": "videos/0406-NJzBsGJ.gif",
+    "name_en": "Dumbbell Shrug",
+    "subTarget_ko": "승모근",
+    "subTarget_en": "Traps"
   },
   {
     "id": "0164",
@@ -755,7 +920,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0017-kiJ4Z2K.gif"
+    "gif_url": "videos/0017-kiJ4Z2K.gif",
+    "name_en": "Assisted Pull-Up",
+    "subTarget_ko": "넓이",
+    "subTarget_en": "Width"
   },
   {
     "id": "0169",
@@ -768,7 +936,10 @@
       "근육의 최대 수축 지점까지 천천히 펴줍니다.",
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
-    "gif_url": "videos/0573-rUXfn3R.gif"
+    "gif_url": "videos/0573-rUXfn3R.gif",
+    "name_en": "Lever Back Extension",
+    "subTarget_ko": "하부/기립근",
+    "subTarget_en": "Erector Spinae"
   },
   {
     "id": "0170",
@@ -784,7 +955,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/3200-LuBEORI.gif"
+    "gif_url": "videos/3200-LuBEORI.gif",
+    "name_en": "T-Bar Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0173",
@@ -800,7 +974,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0581-nZZZy9m.gif"
+    "gif_url": "videos/0581-nZZZy9m.gif",
+    "name_en": "Front Lat Pulldown",
+    "subTarget_ko": "넓이",
+    "subTarget_en": "Width"
   },
   {
     "id": "0174",
@@ -816,7 +993,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0588-IGjKj1v.gif"
+    "gif_url": "videos/0588-IGjKj1v.gif",
+    "name_en": "Narrow Grip Seated Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0177",
@@ -829,7 +1009,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/2285-4U7iLb5.gif"
+    "gif_url": "videos/2285-4U7iLb5.gif",
+    "name_en": "Pullover Machine",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0180",
@@ -845,7 +1028,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/1349-BgljGjd.gif"
+    "gif_url": "videos/1349-BgljGjd.gif",
+    "name_en": "T-Bar Row Machine",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0184",
@@ -861,7 +1047,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/1359-ZX9UZmj.gif"
+    "gif_url": "videos/1359-ZX9UZmj.gif",
+    "name_en": "Smith Bent-Over Row",
+    "subTarget_ko": "두께",
+    "subTarget_en": "Thickness"
   },
   {
     "id": "0188",
@@ -874,7 +1063,10 @@
       "등 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0767-OUQ0ZyW.gif"
+    "gif_url": "videos/0767-OUQ0ZyW.gif",
+    "name_en": "Smith Shrug",
+    "subTarget_ko": "승모근",
+    "subTarget_en": "Traps"
   },
   {
     "id": "0189",
@@ -887,7 +1079,10 @@
       "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0041-b2Uoz54.gif"
+    "gif_url": "videos/0041-b2Uoz54.gif",
+    "name_en": "Barbell Front Raise",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0192",
@@ -903,7 +1098,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0076-S9zHIvU.gif"
+    "gif_url": "videos/0076-S9zHIvU.gif",
+    "name_en": "Barbell Rear Deltoid Row",
+    "subTarget_ko": "후면",
+    "subTarget_en": "Rear"
   },
   {
     "id": "0193",
@@ -918,7 +1116,10 @@
       "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0086-ngPpyRS.gif"
+    "gif_url": "videos/0086-ngPpyRS.gif",
+    "name_en": "Barbell Seated Behind-Head Military Press",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0195",
@@ -933,7 +1134,10 @@
       "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0091-kTbSH9h.gif"
+    "gif_url": "videos/0091-kTbSH9h.gif",
+    "name_en": "Barbell Seated Overhead Press",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0200",
@@ -948,7 +1152,10 @@
       "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/1457-Kyd9Rz5.gif"
+    "gif_url": "videos/1457-Kyd9Rz5.gif",
+    "name_en": "Barbell Standing Wide Military Press",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0202",
@@ -964,7 +1171,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0120-UDlhcO8.gif"
+    "gif_url": "videos/0120-UDlhcO8.gif",
+    "name_en": "Barbell Upright Row",
+    "subTarget_ko": "측면",
+    "subTarget_en": "Side"
   },
   {
     "id": "0211",
@@ -977,7 +1187,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0154-aqvSOQE.gif"
+    "gif_url": "videos/0154-aqvSOQE.gif",
+    "name_en": "Cable Crossover",
+    "subTarget_ko": "측면",
+    "subTarget_en": "Side"
   },
   {
     "id": "0213",
@@ -990,7 +1203,10 @@
       "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0162-u2X71Np.gif"
+    "gif_url": "videos/0162-u2X71Np.gif",
+    "name_en": "Cable Front Raise",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0215",
@@ -1006,7 +1222,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/3697-G61cXLk.gif"
+    "gif_url": "videos/3697-G61cXLk.gif",
+    "name_en": "Face Pull",
+    "subTarget_ko": "후면",
+    "subTarget_en": "Rear"
   },
   {
     "id": "0216",
@@ -1019,7 +1238,10 @@
       "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0178-goJ6ezq.gif"
+    "gif_url": "videos/0178-goJ6ezq.gif",
+    "name_en": "Cable Lateral Raise",
+    "subTarget_ko": "측면",
+    "subTarget_en": "Side"
   },
   {
     "id": "0222",
@@ -1034,7 +1256,10 @@
       "케이블을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0219-PzQanLE.gif"
+    "gif_url": "videos/0219-PzQanLE.gif",
+    "name_en": "Cable Shoulder Press",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0223",
@@ -1047,7 +1272,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0225-P5p0j8B.gif"
+    "gif_url": "videos/0225-P5p0j8B.gif",
+    "name_en": "Cable Bent-Over",
+    "subTarget_ko": "측면",
+    "subTarget_en": "Side"
   },
   {
     "id": "0224",
@@ -1063,7 +1291,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0233-ZfyAGhK.gif"
+    "gif_url": "videos/0233-ZfyAGhK.gif",
+    "name_en": "Face Pull",
+    "subTarget_ko": "후면",
+    "subTarget_en": "Rear"
   },
   {
     "id": "0229",
@@ -1078,7 +1309,10 @@
       "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/2137-Xy4jlWA.gif"
+    "gif_url": "videos/2137-Xy4jlWA.gif",
+    "name_en": "Arnold Press",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0230",
@@ -1093,7 +1327,10 @@
       "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0290-3d7wHyd.gif"
+    "gif_url": "videos/0290-3d7wHyd.gif",
+    "name_en": "Dumbbell Shoulder Press",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0232",
@@ -1106,7 +1343,10 @@
       "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0310-3eGE2JC.gif"
+    "gif_url": "videos/0310-3eGE2JC.gif",
+    "name_en": "Dumbbell Front Raise",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0235",
@@ -1119,7 +1359,10 @@
       "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0325-nxW6BkN.gif"
+    "gif_url": "videos/0325-nxW6BkN.gif",
+    "name_en": "Dumbbell Incline Raise",
+    "subTarget_ko": "측면",
+    "subTarget_en": "Side"
   },
   {
     "id": "0236",
@@ -1132,7 +1375,10 @@
       "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0326-vYk8lqw.gif"
+    "gif_url": "videos/0326-vYk8lqw.gif",
+    "name_en": "Dumbbell Incline Rear Lateral Raise",
+    "subTarget_ko": "후면",
+    "subTarget_en": "Rear"
   },
   {
     "id": "0239",
@@ -1145,7 +1391,10 @@
       "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0334-DsgkuIt.gif"
+    "gif_url": "videos/0334-DsgkuIt.gif",
+    "name_en": "Side Lateral Raise",
+    "subTarget_ko": "측면",
+    "subTarget_en": "Side"
   },
   {
     "id": "0245",
@@ -1158,7 +1407,10 @@
       "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0348-53Ttlck.gif"
+    "gif_url": "videos/0348-53Ttlck.gif",
+    "name_en": "Dumbbell Rear Lateral Raise",
+    "subTarget_ko": "후면",
+    "subTarget_en": "Rear"
   },
   {
     "id": "0248",
@@ -1171,7 +1423,10 @@
       "어깨 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0584-dRTfGZT.gif"
+    "gif_url": "videos/0584-dRTfGZT.gif",
+    "name_en": "Lateral Raise",
+    "subTarget_ko": "측면",
+    "subTarget_en": "Side"
   },
   {
     "id": "0249",
@@ -1186,7 +1441,10 @@
       "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0587-CggQhII.gif"
+    "gif_url": "videos/0587-CggQhII.gif",
+    "name_en": "Military Press",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0251",
@@ -1199,7 +1457,10 @@
       "가슴 근육을 확장하듯 양옆으로 벌렸다가 다시 모아줍니다.",
       "팔꿈치를 살짝 굽힌 상태를 유지하여 관절의 부담을 줄입니다."
     ],
-    "gif_url": "videos/0602-myfUsKf.gif"
+    "gif_url": "videos/0602-myfUsKf.gif",
+    "name_en": "Seated Reverse Fly",
+    "subTarget_ko": "후면",
+    "subTarget_en": "Rear"
   },
   {
     "id": "0255",
@@ -1214,7 +1475,10 @@
       "머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/2318-dNFYIU1.gif"
+    "gif_url": "videos/2318-dNFYIU1.gif",
+    "name_en": "Lever Shoulder Press",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0256",
@@ -1229,7 +1493,10 @@
       "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0747-Gpn4ADc.gif"
+    "gif_url": "videos/0747-Gpn4ADc.gif",
+    "name_en": "Smith Behind-the-Neck Press",
+    "subTarget_ko": "측면",
+    "subTarget_en": "Side"
   },
   {
     "id": "0257",
@@ -1245,7 +1512,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0762-nFUwqG6.gif"
+    "gif_url": "videos/0762-nFUwqG6.gif",
+    "name_en": "Smith Rear Deltoid Row",
+    "subTarget_ko": "후면",
+    "subTarget_en": "Rear"
   },
   {
     "id": "0259",
@@ -1260,7 +1530,10 @@
       "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0766-903mzG8.gif"
+    "gif_url": "videos/0766-903mzG8.gif",
+    "name_en": "Smith Shoulder Press",
+    "subTarget_ko": "전면",
+    "subTarget_en": "Front"
   },
   {
     "id": "0262",
@@ -1276,7 +1549,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0775-1DN3iz4.gif"
+    "gif_url": "videos/0775-1DN3iz4.gif",
+    "name_en": "Smith Upright Row",
+    "subTarget_ko": "측면",
+    "subTarget_en": "Side"
   },
   {
     "id": "0264",
@@ -1292,7 +1568,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/0026-W9pFVv1.gif"
+    "gif_url": "videos/0026-W9pFVv1.gif",
+    "name_en": "Barbell Bench Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0266",
@@ -1308,7 +1587,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/0029-qi996YS.gif"
+    "gif_url": "videos/0029-qi996YS.gif",
+    "name_en": "Barbell Front Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0267",
@@ -1324,7 +1606,10 @@
       "등의 평평함을 유지하며 힙을 뒤로 빼면서 기구를 내립니다.",
       "하체와 등의 힘을 동시에 사용하여 일어납니다."
     ],
-    "gif_url": "videos/0032-ila4NZS.gif"
+    "gif_url": "videos/0032-ila4NZS.gif",
+    "name_en": "Barbell Deadlift",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0268",
@@ -1337,7 +1622,10 @@
       "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/1370-2IHEa2T.gif"
+    "gif_url": "videos/1370-2IHEa2T.gif",
+    "name_en": "Barbell Calf Raise",
+    "subTarget_ko": "종아리",
+    "subTarget_en": "Calves"
   },
   {
     "id": "0271",
@@ -1353,7 +1641,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/0043-qXTaZnJ.gif"
+    "gif_url": "videos/0043-qXTaZnJ.gif",
+    "name_en": "Barbell Full Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0275",
@@ -1366,7 +1657,10 @@
       "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/1409-qKBpF7I.gif"
+    "gif_url": "videos/1409-qKBpF7I.gif",
+    "name_en": "Barbell Hip Thrust",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0310",
@@ -1382,7 +1676,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/0291-mnzcrIB.gif"
+    "gif_url": "videos/0291-mnzcrIB.gif",
+    "name_en": "Dumbbell Bench Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0313",
@@ -1398,7 +1695,10 @@
       "등의 평평함을 유지하며 힙을 뒤로 빼면서 기구를 내립니다.",
       "하체와 등의 힘을 동시에 사용하여 일어납니다."
     ],
-    "gif_url": "videos/0300-nUwVh7b.gif"
+    "gif_url": "videos/0300-nUwVh7b.gif",
+    "name_en": "Dumbbell Deadlift",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0314",
@@ -1414,7 +1714,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/1760-yn8yg1r.gif"
+    "gif_url": "videos/1760-yn8yg1r.gif",
+    "name_en": "Goblet Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0315",
@@ -1429,7 +1732,10 @@
       "한쪽 발을 앞으로 내딛으며 양쪽 무릎이 90도가 되도록 내려갑니다.",
       "앞발의 뒤꿈치에 힘을 주어 다시 돌아옵니다."
     ],
-    "gif_url": "videos/0336-RRWFUcw.gif"
+    "gif_url": "videos/0336-RRWFUcw.gif",
+    "name_en": "Dumbbell Lunge",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0317",
@@ -1442,7 +1748,10 @@
       "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/3888-6pTkI99.gif"
+    "gif_url": "videos/3888-6pTkI99.gif",
+    "name_en": "Dumbbell One-Arm Snatch",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0321",
@@ -1455,7 +1764,10 @@
       "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/1379-r29jP7S.gif"
+    "gif_url": "videos/1379-r29jP7S.gif",
+    "name_en": "Dumbbell Seated Calf Raise",
+    "subTarget_ko": "종아리",
+    "subTarget_en": "Calves"
   },
   {
     "id": "0329",
@@ -1471,7 +1783,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/0411-H6ybluc.gif"
+    "gif_url": "videos/0411-H6ybluc.gif",
+    "name_en": "Dumbbell Single Leg Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0334",
@@ -1484,7 +1799,10 @@
       "근육의 최대 수축 지점까지 천천히 펴줍니다.",
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
-    "gif_url": "videos/2286-OPqShYN.gif"
+    "gif_url": "videos/2286-OPqShYN.gif",
+    "name_en": "Hip Kick Extension",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0336",
@@ -1497,7 +1815,10 @@
       "머신을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/0582-nnmCTLN.gif"
+    "gif_url": "videos/0582-nnmCTLN.gif",
+    "name_en": "One-Leg Curl",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0337",
@@ -1510,7 +1831,10 @@
       "근육의 최대 수축 지점까지 천천히 펴줍니다.",
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
-    "gif_url": "videos/0585-my33uHU.gif"
+    "gif_url": "videos/0585-my33uHU.gif",
+    "name_en": "Leg Extension",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0338",
@@ -1523,7 +1847,10 @@
       "머신을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/0586-17lJ1kr.gif"
+    "gif_url": "videos/0586-17lJ1kr.gif",
+    "name_en": "Leg Curl",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0345",
@@ -1536,7 +1863,10 @@
       "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0597-CHpahtl.gif"
+    "gif_url": "videos/0597-CHpahtl.gif",
+    "name_en": "Hip Abduction",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0346",
@@ -1549,7 +1879,10 @@
       "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0598-oHsrypV.gif"
+    "gif_url": "videos/0598-oHsrypV.gif",
+    "name_en": "Hip Adduction",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0347",
@@ -1562,7 +1895,10 @@
       "머신을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/0599-Zg3XY7P.gif"
+    "gif_url": "videos/0599-Zg3XY7P.gif",
+    "name_en": "Seated Leg Curl",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0362",
@@ -1575,7 +1911,10 @@
       "슬레드 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/1463-2Qh2J1e.gif"
+    "gif_url": "videos/1463-2Qh2J1e.gif",
+    "name_en": "Leg Press",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0367",
@@ -1591,7 +1930,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/0743-Qa55kX1.gif"
+    "gif_url": "videos/0743-Qa55kX1.gif",
+    "name_en": "Hack Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0373",
@@ -1607,7 +1949,10 @@
       "등의 평평함을 유지하며 힙을 뒤로 빼면서 기구를 내립니다.",
       "하체와 등의 힘을 동시에 사용하여 일어납니다."
     ],
-    "gif_url": "videos/0752-UfePqpx.gif"
+    "gif_url": "videos/0752-UfePqpx.gif",
+    "name_en": "Smith Deadlift",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
   },
   {
     "id": "0374",
@@ -1623,7 +1968,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/1433-lFhb2Rw.gif"
+    "gif_url": "videos/1433-lFhb2Rw.gif",
+    "name_en": "Smith Front Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0376",
@@ -1639,7 +1987,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/0755-ZuPXtCK.gif"
+    "gif_url": "videos/0755-ZuPXtCK.gif",
+    "name_en": "Smith Hack Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0384",
@@ -1654,7 +2005,10 @@
       "한쪽 발을 앞으로 내딛으며 양쪽 무릎이 90도가 되도록 내려갑니다.",
       "앞발의 뒤꿈치에 힘을 주어 다시 돌아옵니다."
     ],
-    "gif_url": "videos/0769-HsjbB1z.gif"
+    "gif_url": "videos/0769-HsjbB1z.gif",
+    "name_en": "Smith Lunge",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0385",
@@ -1670,7 +2024,10 @@
       "허리를 곧게 펴고 무릎이 발끝 방향을 향하도록 앉습니다.",
       "하체의 힘으로 지면을 밀어내며 일어납니다."
     ],
-    "gif_url": "videos/0770-jFtipLl.gif"
+    "gif_url": "videos/0770-jFtipLl.gif",
+    "name_en": "Smith Squat",
+    "subTarget_ko": "대퇴사두근",
+    "subTarget_en": "Quads"
   },
   {
     "id": "0386",
@@ -1683,7 +2040,10 @@
       "하체 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0773-6MaEjVA.gif"
+    "gif_url": "videos/0773-6MaEjVA.gif",
+    "name_en": "Smith Calf Raise",
+    "subTarget_ko": "종아리",
+    "subTarget_en": "Calves"
   },
   {
     "id": "0394",
@@ -1696,7 +2056,10 @@
       "바벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0030-J6Dx1Mu.gif"
+    "gif_url": "videos/0030-J6Dx1Mu.gif",
+    "name_en": "Barbell Close Grip Bench Press",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0395",
@@ -1709,7 +2072,10 @@
       "바벨을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/0031-25GPyDY.gif"
+    "gif_url": "videos/0031-25GPyDY.gif",
+    "name_en": "Barbell Curl",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0407",
@@ -1722,7 +2088,10 @@
       "근육의 최대 수축 지점까지 천천히 펴줍니다.",
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
-    "gif_url": "videos/0060-h8LFzo9.gif"
+    "gif_url": "videos/0060-h8LFzo9.gif",
+    "name_en": "Barbell Extension",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0409",
@@ -1735,7 +2104,10 @@
       "바벨을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/1411-yzYH9pI.gif"
+    "gif_url": "videos/1411-yzYH9pI.gif",
+    "name_en": "Reverse Wrist Curl",
+    "subTarget_ko": "전완근",
+    "subTarget_en": "Forearms"
   },
   {
     "id": "0410",
@@ -1748,7 +2120,10 @@
       "바벨을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/1412-SJAA2IQ.gif"
+    "gif_url": "videos/1412-SJAA2IQ.gif",
+    "name_en": "Wrist Curl",
+    "subTarget_ko": "전완근",
+    "subTarget_en": "Forearms"
   },
   {
     "id": "0413",
@@ -1761,7 +2136,10 @@
       "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/1399-9RT8oQW.gif"
+    "gif_url": "videos/1399-9RT8oQW.gif",
+    "name_en": "Bench Dips",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0415",
@@ -1777,7 +2155,10 @@
       "등 근육의 수축에 집중하며 기구를 몸 쪽으로 당깁니다.",
       "상체가 흔들리지 않도록 코어에 힘을 줍니다."
     ],
-    "gif_url": "videos/0139-50BETrz.gif"
+    "gif_url": "videos/0139-50BETrz.gif",
+    "name_en": "Bicep Narrow Pull-Up",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0416",
@@ -1790,7 +2171,10 @@
       "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0140-guT8YnS.gif"
+    "gif_url": "videos/0140-guT8YnS.gif",
+    "name_en": "Bicep Pull-Up",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0420",
@@ -1803,7 +2187,10 @@
       "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0259-x6KpKpq.gif"
+    "gif_url": "videos/0259-x6KpKpq.gif",
+    "name_en": "Close Grip Push-Up",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0427",
@@ -1816,7 +2203,10 @@
       "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0490-1YB40kg.gif"
+    "gif_url": "videos/0490-1YB40kg.gif",
+    "name_en": "Incline Close Grip Push-Up",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0430",
@@ -1829,7 +2219,10 @@
       "해당 부위의 근육이 시원하게 늘어나는 것을 느낍니다.",
       "15~30초간 호흡하며 자세를 유지합니다."
     ],
-    "gif_url": "videos/0643-Z5YStHW.gif"
+    "gif_url": "videos/0643-Z5YStHW.gif",
+    "name_en": "Overhead Triceps Stretch",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0432",
@@ -1842,7 +2235,10 @@
       "근육의 최대 수축 지점까지 천천히 펴줍니다.",
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
-    "gif_url": "videos/0149-Gchi5Tr.gif"
+    "gif_url": "videos/0149-Gchi5Tr.gif",
+    "name_en": "Cable Triceps Extension",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0436",
@@ -1855,7 +2251,10 @@
       "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/0868-G08RZcQ.gif"
+    "gif_url": "videos/0868-G08RZcQ.gif",
+    "name_en": "Cable Curl",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0438",
@@ -1868,7 +2267,10 @@
       "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/0165-HPlPoQA.gif"
+    "gif_url": "videos/0165-HPlPoQA.gif",
+    "name_en": "Cable Hammer Curl",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0439",
@@ -1881,7 +2283,10 @@
       "근육의 최대 수축 지점까지 천천히 펴줍니다.",
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
-    "gif_url": "videos/1722-1xHyxys.gif"
+    "gif_url": "videos/1722-1xHyxys.gif",
+    "name_en": "Cable Overhead Triceps Extension",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0445",
@@ -1894,7 +2299,10 @@
       "케이블을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/0190-YTur5nR.gif"
+    "gif_url": "videos/0190-YTur5nR.gif",
+    "name_en": "Cable One-Arm Curl",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0448",
@@ -1907,7 +2315,10 @@
       "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/1723-qRZ5S1N.gif"
+    "gif_url": "videos/1723-qRZ5S1N.gif",
+    "name_en": "Cable One-Arm Pushdown",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0455",
@@ -1920,7 +2331,10 @@
       "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/1647-NlfIbzq.gif"
+    "gif_url": "videos/1647-NlfIbzq.gif",
+    "name_en": "Dumbbell Hammer Curl",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0456",
@@ -1933,7 +2347,10 @@
       "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/1648-6em2Dxj.gif"
+    "gif_url": "videos/1648-6em2Dxj.gif",
+    "name_en": "Dumbbell Curl",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0464",
@@ -1946,7 +2363,10 @@
       "덤벨을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/1731-7jGOBF3.gif"
+    "gif_url": "videos/1731-7jGOBF3.gif",
+    "name_en": "Dumbbell Close Grip Press",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0466",
@@ -1959,7 +2379,10 @@
       "덤벨을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/0297-gvsWLQw.gif"
+    "gif_url": "videos/0297-gvsWLQw.gif",
+    "name_en": "Dumbbell Concentration Curl",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0492",
@@ -1972,7 +2395,10 @@
       "팔 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0019-J60bN17.gif"
+    "gif_url": "videos/0019-J60bN17.gif",
+    "name_en": "Assisted Dips Machine",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0493",
@@ -1985,7 +2411,10 @@
       "머신을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/0575-q6y3OhV.gif"
+    "gif_url": "videos/0575-q6y3OhV.gif",
+    "name_en": "Bicep Curl Machine",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
   },
   {
     "id": "0501",
@@ -1998,7 +2427,10 @@
       "근육의 최대 수축 지점까지 천천히 펴줍니다.",
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
-    "gif_url": "videos/0607-Ser9eQp.gif"
+    "gif_url": "videos/0607-Ser9eQp.gif",
+    "name_en": "Triceps Extension Machine",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0502",
@@ -2011,7 +2443,10 @@
       "스미스 머신을(를) 잡고 가슴의 긴장을 유지하며 밀어 올립니다.",
       "천천히 저항을 느끼며 시작 자세로 돌아옵니다."
     ],
-    "gif_url": "videos/0751-WcHl7ru.gif"
+    "gif_url": "videos/0751-WcHl7ru.gif",
+    "name_en": "Smith Close Grip Bench Press",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0505",
@@ -2024,7 +2459,10 @@
       "근육의 최대 수축 지점까지 천천히 펴줍니다.",
       "관절에 무리가 가지 않도록 통제된 동작으로 수행합니다."
     ],
-    "gif_url": "videos/1752-o8aOcrz.gif"
+    "gif_url": "videos/1752-o8aOcrz.gif",
+    "name_en": "Smith Machine Incline Triceps Extension",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   },
   {
     "id": "0524",
@@ -2037,7 +2475,10 @@
       "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0001-2gPfomN.gif"
+    "gif_url": "videos/0001-2gPfomN.gif",
+    "name_en": "Sit-Up",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0525",
@@ -2050,7 +2491,10 @@
       "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0002-Hy9D21L.gif"
+    "gif_url": "videos/0002-Hy9D21L.gif",
+    "name_en": "Side Bend",
+    "subTarget_ko": "복사근/회전",
+    "subTarget_en": "Obliques"
   },
   {
     "id": "0526",
@@ -2063,7 +2507,10 @@
       "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0003-1ZFqTDN.gif"
+    "gif_url": "videos/0003-1ZFqTDN.gif",
+    "name_en": "Bicycle Crunch",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0527",
@@ -2076,7 +2523,10 @@
       "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0006-qaZVsGk.gif"
+    "gif_url": "videos/0006-qaZVsGk.gif",
+    "name_en": "Heel Touch",
+    "subTarget_ko": "복사근/회전",
+    "subTarget_en": "Obliques"
   },
   {
     "id": "0530",
@@ -2089,7 +2539,10 @@
       "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/3544-5VXmnV5.gif"
+    "gif_url": "videos/3544-5VXmnV5.gif",
+    "name_en": "Side Plank",
+    "subTarget_ko": "복사근/회전",
+    "subTarget_en": "Obliques"
   },
   {
     "id": "0534",
@@ -2102,7 +2555,10 @@
       "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/2963-weoDEpH.gif"
+    "gif_url": "videos/2963-weoDEpH.gif",
+    "name_en": "Straight Leg Raise",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0537",
@@ -2115,7 +2571,10 @@
       "복부의 힘을 사용하여 상체를 말아 올립니다.",
       "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
     ],
-    "gif_url": "videos/0262-rbu5UUb.gif"
+    "gif_url": "videos/0262-rbu5UUb.gif",
+    "name_en": "Cross-Body Crunch",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0539",
@@ -2128,7 +2587,10 @@
       "복부의 힘을 사용하여 상체를 말아 올립니다.",
       "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
     ],
-    "gif_url": "videos/0274-TFqbd8t.gif"
+    "gif_url": "videos/0274-TFqbd8t.gif",
+    "name_en": "Crunch",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0540",
@@ -2141,7 +2603,10 @@
       "맨몸을(를) 들어 올리며 이두근을 수축시킵니다.",
       "내릴 때에도 근육의 긴장을 유지하며 천천히 내립니다."
     ],
-    "gif_url": "videos/3016-g2oKspu.gif"
+    "gif_url": "videos/3016-g2oKspu.gif",
+    "name_en": "Curl-Up",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0542",
@@ -2154,7 +2619,10 @@
       "복부의 힘을 사용하여 상체를 말아 올립니다.",
       "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
     ],
-    "gif_url": "videos/0277-9Ap7miY.gif"
+    "gif_url": "videos/0277-9Ap7miY.gif",
+    "name_en": "Decline Crunch",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0543",
@@ -2167,7 +2635,10 @@
       "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0282-QLL2gdc.gif"
+    "gif_url": "videos/0282-QLL2gdc.gif",
+    "name_en": "Decline Sit-Up",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0545",
@@ -2180,7 +2651,10 @@
       "복부의 힘을 사용하여 상체를 말아 올립니다.",
       "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
     ],
-    "gif_url": "videos/0175-WW95auq.gif"
+    "gif_url": "videos/0175-WW95auq.gif",
+    "name_en": "Cable Crunch",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0549",
@@ -2193,7 +2667,10 @@
       "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/2399-UEjSrKI.gif"
+    "gif_url": "videos/2399-UEjSrKI.gif",
+    "name_en": "Cable Seated Twist",
+    "subTarget_ko": "복사근/회전",
+    "subTarget_en": "Obliques"
   },
   {
     "id": "0554",
@@ -2206,7 +2683,10 @@
       "복부의 힘을 사용하여 상체를 말아 올립니다.",
       "허리가 바닥에서 너무 떨어지지 않도록 주의합니다."
     ],
-    "gif_url": "videos/0874-XU3ePuv.gif"
+    "gif_url": "videos/0874-XU3ePuv.gif",
+    "name_en": "Cable Standing Crunch Rope Attachment",
+    "subTarget_ko": "복직근",
+    "subTarget_en": "Rectus Abdominis"
   },
   {
     "id": "0559",
@@ -2219,6 +2699,106 @@
       "허리/코어 부위의 자극에 집중하며 안정적인 자세로 운동을 수행합니다.",
       "부상 방지를 위해 무리하지 않는 무게로 시작하세요."
     ],
-    "gif_url": "videos/0407-IpONWYv.gif"
+    "gif_url": "videos/0407-IpONWYv.gif",
+    "name_en": "Dumbbell Side Bend",
+    "subTarget_ko": "복사근/회전",
+    "subTarget_en": "Obliques"
+  },
+  {
+    "id": "1001",
+    "name": "바벨 루마니안 데드리프트",
+    "bodyPart": "하체",
+    "equipment": "바벨",
+    "target": "햄스트링/둔근",
+    "secondaryMuscles": [
+      "척추기립근"
+    ],
+    "instructions": [
+      "등의 평평함을 유지하며 힙을 뒤로 빼면서 바벨을 내립니다.",
+      "햄스트링의 신장을 느끼며 천천히 수행합니다."
+    ],
+    "gif_url": "videos/0069-gfk9kD4.gif",
+    "name_en": "Barbell Romanian Deadlift",
+    "subTarget_ko": "햄스트링/둔근",
+    "subTarget_en": "Hamstrings/Glutes"
+  },
+  {
+    "id": "1002",
+    "name": "바벨 라이잉 트라이셉스 익스텐션",
+    "bodyPart": "팔",
+    "equipment": "바벨",
+    "target": "삼두근",
+    "secondaryMuscles": [],
+    "instructions": [
+      "벤치에 누워 바벨을 이마 쪽으로 내렸다가 팔을 펴며 삼두근을 수축합니다."
+    ],
+    "gif_url": "videos/0060-h8LFzo9.gif",
+    "name_en": "Barbell Lying Triceps Extension",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
+  },
+  {
+    "id": "1003",
+    "name": "바벨 스컬 크러셔",
+    "bodyPart": "팔",
+    "equipment": "바벨",
+    "target": "삼두근",
+    "secondaryMuscles": [],
+    "instructions": [
+      "바벨을 이마 쪽으로 천천히 내린 후 삼두근의 힘으로 밀어 올립니다."
+    ],
+    "gif_url": "videos/0060-h8LFzo9.gif",
+    "name_en": "Barbell Skull Crusher",
+    "subTarget_ko": "이두근",
+    "subTarget_en": "Biceps"
+  },
+  {
+    "id": "1004",
+    "name": "덤벨 풀오버",
+    "bodyPart": "가슴",
+    "equipment": "덤벨",
+    "target": "중부 가슴",
+    "secondaryMuscles": [
+      "광배근"
+    ],
+    "instructions": [
+      "덤벨을 머리 뒤로 천천히 내렸다가 가슴의 힘으로 다시 가져옵니다."
+    ],
+    "gif_url": "videos/0307-Ff4GgD6.gif",
+    "name_en": "Dumbbell Pullover",
+    "subTarget_ko": "중부",
+    "subTarget_en": "Mid"
+  },
+  {
+    "id": "1006",
+    "name": "케이블 암 풀다운",
+    "bodyPart": "등",
+    "equipment": "케이블",
+    "target": "광배근",
+    "secondaryMuscles": [],
+    "instructions": [
+      "케이블을 마주 보고 서서 어깨너비로 바를 잡고, 팔꿈치를 살짝 굽힌 상태로 단단히 고정합니다.",
+      "광배근의 힘으로 바를 허벅지 쪽으로 끌어내려 수축한 뒤, 저항을 느끼며 천천히 시작 자세로 돌아옵니다."
+    ],
+    "gif_url": "videos/0199-PskORrA.gif",
+    "name_en": "Cable Arm Pulldown",
+    "subTarget_ko": "광배근",
+    "subTarget_en": "Lats"
+  },
+  {
+    "id": "1007",
+    "name": "케이블 푸시다운",
+    "bodyPart": "팔",
+    "equipment": "케이블",
+    "target": "삼두근",
+    "secondaryMuscles": [],
+    "instructions": [
+      "케이블 바를 잡고 팔꿈치를 옆구리에 단단히 고정하여 상체가 흔들리지 않게 준비합니다.",
+      "팔꿈치 위치를 유지한 채 바를 아래로 끝까지 밀어내 삼두근을 수축하고 천천히 돌아옵니다."
+    ],
+    "gif_url": "videos/0200-dU605di.gif",
+    "name_en": "Cable Pushdown",
+    "subTarget_ko": "삼두근",
+    "subTarget_en": "Triceps"
   }
 ]

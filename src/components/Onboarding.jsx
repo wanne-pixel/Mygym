@@ -78,7 +78,7 @@ const Onboarding = ({ onComplete }) => {
             onComplete();
         } catch (error) {
             console.error('[Onboarding] 에러:', error);
-            alert(`설정 실패: ${error.message}\n기본 화면으로 이동합니다.`);
+            alert(`${t('onboarding.setupFailed')}: ${error.message}\n${t('onboarding.goHome')}`);
             onComplete();
         }
     };
@@ -106,7 +106,7 @@ const Onboarding = ({ onComplete }) => {
                         <div className="w-24 h-24 bg-blue-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-blue-600/20">
                             <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                         </div>
-                        <h1 className="text-4xl font-black text-white italic tracking-tighter mb-4">WELCOME TO MYGYM</h1>
+                        <h1 className="text-4xl font-black text-white italic tracking-tighter mb-4">{t('onboarding.welcome')}</h1>
                         <p className="text-slate-400 font-bold leading-relaxed mb-12">{t('onboarding.subtitle')}</p>
                         <button onClick={handleNext} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl italic text-lg shadow-xl shadow-blue-600/20 active:scale-95 transition-all">{t('onboarding.start')}</button>
                     </div>

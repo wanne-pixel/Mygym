@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, Plus } from 'lucide-react';
 
 const AiExerciseCard = ({ exercise, mode, onAdd }) => {
+    const { t } = useTranslation();
     const [isAdded, setIsAdded] = useState(false);
     
     const handleAdd = () => {
@@ -33,12 +35,12 @@ const AiExerciseCard = ({ exercise, mode, onAdd }) => {
             
             {mode !== 'balanced' && (
                 <div className="text-[9px] font-bold text-slate-400 space-y-0.5">
-                    <div>{exercise.sets?.length || 0}세트</div>
+                    <div>{exercise.sets?.length || 0}{t('workout.sets')}</div>
                     {exercise.sets?.[0] && exercise.sets[0].kg > 0 && (
-                        <div>{exercise.sets[0].kg}kg × {exercise.sets[0].reps}회</div>
+                        <div>{exercise.sets[0].kg}kg × {exercise.sets[0].reps}{t('dayDetail.repsUnit')}</div>
                     )}
                     {exercise.sets?.[0] && !exercise.sets[0].kg && exercise.sets[0].reps > 0 && (
-                        <div>{exercise.sets[0].reps}회</div>
+                        <div>{exercise.sets[0].reps}{t('dayDetail.repsUnit')}</div>
                     )}
                 </div>
             )}

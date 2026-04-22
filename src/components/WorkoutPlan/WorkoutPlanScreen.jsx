@@ -6,6 +6,7 @@ import { PART_MAP } from '../../constants/exerciseConstants';
 import { saveWorkoutLogs } from '../../api/workoutApi';
 import ExerciseSelector from '../Exercise/ExerciseSelector';
 import { GifModal, GifRenderer } from '../Common/GifUI';
+import { getLocalizedNameByKo, getExerciseGif, BODY_PART_I18N } from '../../utils/exerciseUtils';
 import { useWindowSize } from '../../hooks/useWindowSize';
 
 const WorkoutPlanScreen = () => {
@@ -206,8 +207,8 @@ const WorkoutPlanScreen = () => {
                                             <GifRenderer exerciseId={item.id} onClick={() => openPreview(item.id, item.name)} />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-bold text-indigo-400 uppercase">{PART_MAP[item.body_part]}</p>
-                                            <h4 className={`font-bold text-white uppercase truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{item.name || item.exercise}</h4>
+                                            <p className="text-xs font-bold text-indigo-400 uppercase">{t(BODY_PART_I18N[item.body_part] || item.body_part, { defaultValue: item.body_part })}</p>
+                                            <h4 className={`font-bold text-white uppercase truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{getLocalizedNameByKo(item.name || item.exercise, i18n.language)}</h4>
                                             {pr && (
                                                 <p className="text-xs text-green-400 font-bold mt-0.5">
                                                     {t('workout.bestRecord')}{pr.kg}kg × {pr.reps}{t('workout.repsUnit')}

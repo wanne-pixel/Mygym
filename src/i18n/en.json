@@ -14,6 +14,7 @@
     "female": "Female",
     "select": "Select",
     "other": "Other",
+    "more": "more",
     "new": "NEW",
     "collapse": "Collapse",
     "showMore": "Show more",
@@ -70,9 +71,12 @@
   },
 
   "onboarding": {
+    "welcome": "WELCOME TO MYGYM",
     "subtitle": "Answer a few questions and we'll design the perfect workout plan just for you.",
     "start": "Get Started",
     "complete": "Complete Setup",
+    "setupFailed": "Setup Failed",
+    "goHome": "Returning to home screen.",
     "editNote": "You can update this information anytime from the 'Profile' button in the top-right of the Calendar screen.",
     "allReady": "You're all set!",
     "goal": {
@@ -221,6 +225,43 @@
     "customInputLink": "Add it manually"
   },
 
+  "equipment": {
+    "바벨": "Barbell",
+    "덤벨": "Dumbbell",
+    "케이블": "Cable",
+    "맨몸": "Bodyweight",
+    "머신": "Machine",
+    "스미스 머신": "Smith Machine",
+    "슬레드 머신": "Sled Machine",
+    "트랩바": "Trap Bar",
+    "EZ바": "EZ Bar",
+    "레버리지 머신": "Leverage Machine",
+    "어시스트": "Assisted",
+    "중량": "Weighted",
+    "로프": "Rope"
+  },
+
+  "subCategories": {
+    "상부": "Upper",
+    "중부": "Mid",
+    "하부": "Lower",
+    "넓이": "Width",
+    "두께": "Thickness",
+    "승모근": "Traps",
+    "전면": "Front",
+    "측면": "Side",
+    "후면": "Rear",
+    "대퇴사두근": "Quads",
+    "햄스트링/둔근": "Hamstrings / Glutes",
+    "종아리": "Calves",
+    "이두근": "Biceps",
+    "삼두근": "Triceps",
+    "전완근": "Forearms",
+    "복직근": "Abs",
+    "복사근/회전": "Obliques / Rotation",
+    "기타": "Other"
+  },
+
   "bodyParts": {
     "all": "All",
     "chest": "Chest",
@@ -285,9 +326,13 @@
     "title": "AI PT COACH",
     "selectedCount": " selected",
     "reset": "Reset",
+    "resetConfirm": "Clear chat history and start over?",
+    "promptRecommend": "🎯 Recommend Today's Routine",
+    "promptHardMode": "🔥 Recommend Hard Mode Routine",
     "analyzing": "Coach is analyzing data...",
     "guideTitle": "📊 Coach Guide",
     "routineTitle": "Custom Routine",
+    "applyAllRoutine": "Apply Entire Routine (Overwrite)",
     "noRecord": "No record",
     "addHint": "Tap the + button on each exercise to add it to your routine",
     "addedToRoutine": " added to routine",
@@ -305,6 +350,34 @@
       "progressiveOverloadDesc": "Steadily increase weight over time",
       "dropSet": "Drop Sets",
       "dropSetDesc": "Reduce weight and push to failure"
+    },
+    "greeting": {
+      "noProfile": "Hello! 😊\n\nI'm MyGym AI Coach. If you set up your profile, I can provide more personalized coaching. What's your workout plan for today?",
+      "welcome": "Hello! 😊\n\n",
+      "beginner": "I see you're new to weight training! Don't worry, I'll guide you step by step. ",
+      "intermediate": "I know you've been working out consistently. You're ready to reach the next level! ",
+      "advanced": "You have a solid workout background. Ready to get even stronger? ",
+      "weeklyFrequency": " to train {{count}} times a week together!\n\n",
+      "limitations": "I'll design safe workouts considering your {{parts}}.\n\n",
+      "stats": "You worked out {{count}} times this week! Which muscle group are we hitting today?",
+      "start": "Shall we start today? Tap the button below for a routine recommendation!"
+    },
+    "prompt": {
+      "systemRole": "You are MyGym's professional Personal Trainer AI Coach.",
+      "userProfile": "User Profile:",
+      "recentStats": "Last 7 Days Stats:",
+      "personalRecords": "Personal Best Records:",
+      "goal": "Goal",
+      "experience": "Experience",
+      "frequency": "Frequency",
+      "time": "Session Time",
+      "equipment": "Equipment",
+      "limitations": "Limitations",
+      "workoutCount": "Workouts",
+      "frequentPart": "Most Frequent Part",
+      "none": "None",
+      "beginnerLevel": "Beginner",
+      "rules": "[Response Rules - VERY IMPORTANT]\n1. Respond ONLY in pure JSON format, without any greetings or markdown (```json) symbols.\n2. Do NOT include any plain text analysis outside the JSON; put it in specific fields within the JSON or return only JSON.\n3. The workout routine must be in a 'routine' array field. Each exercise should have name, part, sets (including kg, reps), and description fields.\n4. Respond in the requested language."
     }
   }
 }

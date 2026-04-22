@@ -1,180 +1,101 @@
-
 const fs = require('fs');
 const path = require('path');
 
-const filePath = path.join(__dirname, 'src/data/exercises.json');
-const exercises = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+const exercisesPath = path.join(__dirname, 'src/data/exercises.json');
+const exercises = JSON.parse(fs.readFileSync(exercisesPath, 'utf8'));
 
-const replacements = [
-  // Plural forms and variants
-  [/KNEELING/gi, '닐링'],
-  [/INNER/gi, '이너'],
-  [/PULLOVERS?/gi, '풀오버'],
-  [/PRESSES?/gi, '프레스'],
-  [/FLYES?|FLY/gi, '플라이'],
-  [/ROWS?/gi, '로우'],
-  [/CURLS?/gi, '컬'],
-  [/EXTENSIONS?/gi, '익스텐션'],
-  [/SQUATS?/gi, '스쿼트'],
-  [/LUNGES?/gi, '런지'],
-  [/DEADLIFTS?/gi, '데드리프트'],
-  [/PUSH\s*UPS?/gi, '푸쉬업'],
-  [/DIPS?/gi, '딥스'],
-  [/RAISES?/gi, '레이즈'],
-  [/SHROUGS?/gi, '슈러그'],
-  [/SHRUGS?/gi, '슈러그'],
-  [/OVERS?/gi, '오버'],
-  [/UNDERS?/gi, '언더'],
-  [/REVERSE/gi, '리버스'],
-  [/WIDE/gi, '와이드'],
-  [/NARROW/gi, '내로우'],
-  [/INCLINE/gi, '인클라인'],
-  [/DECLINE/gi, '디클라인'],
-  [/BENCH/gi, '벤치'],
-  [/CABLE/gi, '케이블'],
-  [/BARBELLS?/gi, '바벨'],
-  [/DUMBELLS?/gi, '덤벨'],
-  [/DUMBBELLS?/gi, '덤벨'],
-  [/MACHINES?/gi, '머신'],
-  [/SEATED/gi, '시티드'],
-  [/STANDING/gi, '스탠딩'],
-  [/LYING/gi, '라이잉'],
-  [/SINGLE\s*ARMS?/gi, '원 암'],
-  [/ONE\s*ARMS?/gi, '원 암'],
-  [/BODYWEIGHT/gi, '맨몸'],
-  [/PERONEALS?/gi, '비골근'],
-  [/SCAPULAE?|SCAPULA/gi, '견갑골'],
-  [/GLUTES?/gi, '둔근'],
-  [/HAMSTRINGS?/gi, '햄스트링'],
-  [/TRICEPS?/gi, '삼두'],
-  [/BICEPS?/gi, '이두'],
-  [/DELTOIDS?/gi, '삼각근'],
-  [/QUADS?/gi, '대퇴사두'],
-  [/TRAPS?/gi, '승모근'],
-  [/LATS?/gi, '광배근'],
-  [/CORE/gi, '코어'],
-  [/Pectorals?/gi, '가슴'],
-  [/CALF|CALVES/gi, '카프'],
+const updatedExercises = exercises.map(ex => {
+  let subTarget_ko = '';
+  let subTarget_en = '';
 
-  // Korean specific corrections
-  [/원 팔/g, '원 암'],
-  [/삼두근/g, '삼두'],
-  [/이두근/g, '이두'],
-  [/종아리/g, '카프'],
-  
-  // Versions and Genders
-  [/v\.\s*\d+/gi, ''],
-  [/V\.\s*\d+/gi, ''],
-  [/\(male\)/gi, ''],
-  [/\(female\)/gi, ''],
-  
-  // Clean up corrupted ones from previous run
-  [/삼두S/gi, '삼두'],
-  [/이두S/gi, '이두'],
-  [/레이즈S/gi, '레이즈'],
-  [/프레스S/gi, '프레스'],
-  [/플라이S/gi, '플라이'],
-  [/로우S/gi, '로우'],
-  [/컬S/gi, '컬'],
-  [/익스텐션S/gi, '익스텐션'],
-  [/스쿼트S/gi, '스쿼트'],
-  [/런지S/gi, '런지'],
-  [/데드리프트S/gi, '데드리프트'],
-  [/푸쉬업S/gi, '푸쉬업'],
-  [/딥스S/gi, '딥스'],
-  [/슈러그S/gi, '슈러그'],
-  [/오버S/gi, '오버'],
-  [/언더S/gi, '언더'],
-  [/리버스S/gi, '리버스'],
-  [/와이드S/gi, '와이드'],
-  [/내로우S/gi, '내로우'],
-  [/인클라인S/gi, '인클라인'],
-  [/디클라인S/gi, '디클라인'],
-  [/벤치S/gi, '벤치'],
-  [/케이블S/gi, '케이블'],
-  [/바벨S/gi, '바벨'],
-  [/덤벨S/gi, '덤벨'],
-  [/머신S/gi, '머신'],
-  [/시티드S/gi, '시티드'],
-  [/스탠딩S/gi, '스탠딩'],
-  [/라이잉S/gi, '라이잉'],
-  [/원 암S/gi, '원 암'],
-  [/맨몸S/gi, '맨몸'],
-  [/비골근S/gi, '비골근'],
-  [/견갑골S/gi, '견갑골'],
-  [/둔근S/gi, '둔근'],
-  [/햄스트링S/gi, '햄스트링'],
-  [/삼각근S/gi, '삼각근'],
-  [/대퇴사두S/gi, '대퇴사두'],
-  [/승모근S/gi, '승모근'],
-  [/광배근S/gi, '광배근'],
-  [/코어S/gi, '코어'],
-  [/가슴S/gi, '가슴'],
-  [/카프S/gi, '카프'],
+  const name = ex.name || '';
+  const nameEn = ex.name_en || '';
+  const bodyPart = (ex.bodyPart || '').trim();
+  const target = ex.target || '';
 
-  // Additional common terms
-  [/CROSS/gi, '크로스'],
-  [/UP/gi, '업'],
-  [/DOWN/gi, '다운'],
-  [/PULL/gi, '풀'],
-  [/CHIN/gi, '친'],
-  [/GRIP/gi, '그립'],
-  [/BAR/gi, '바'],
-  [/BALL/gi, '볼'],
-  [/SUPPORT/gi, '서포트'],
-  [/HIGH/gi, '하이'],
-  [/LOW/gi, '로우'],
-  [/FLOOR/gi, '플로어'],
-  [/DEPTH/gi, '뎁스'],
-  [/JUMP/gi, '점프'],
-  [/DROP/gi, '드롭'],
-  [/CLAP/gi, '클랩'],
-  [/CLOCK/gi, '클락'],
-  [/ARCHER/gi, '아처'],
-  [/ISOMETRIC/gi, '아이소메트릭'],
-  [/SQUEEZE/gi, '스퀴즈'],
-  [/WIPERS/gi, '와이퍼'],
-  [/PLYO/gi, '플라이오'],
-  [/GUILLOTINE/gi, '기요틴'],
-  [/PREACHER/gi, '프리처'],
-  [/SNATCH/gi, '스내치'],
-  [/HAMMER/gi, '해머'],
-  [/ALTERNATE/gi, '얼터네이트'],
-  [/TWIST/gi, '트위스트'],
-  [/FRONT/gi, '프론트'],
-  [/SIDE/gi, '사이드'],
-  [/LATERAL/gi, '레터럴'],
-  [/BACK/gi, '백'],
-  [/FULL/gi, '풀'],
-  [/RANGE/gi, '레인지'],
-  [/MOTION/gi, '모션'],
-  [/STERNUM/gi, '스터넘'],
-  [/GIRONDA/gi, '지론다'],
-  [/CLEAN/gi, '클린'],
-  [/JERK/gi, '저크'],
-  [/SWING/gi, '스윙'],
-  [/BURPEE/gi, '버피'],
-  [/PLANK/gi, '플랭크'],
-  [/CRUNCH/gi, '크런치'],
-  [/LEG/gi, '레그'],
-  [/KICK/gi, '킥'],
-  [/WRIST/gi, '리스트'],
-  [/STRETCHING/gi, '스트레칭'],
-  [/UPPER/gi, '상부'], // context dependent, but usually upper chest etc.
-  [/LOWER/gi, '하부']
-];
+  if (bodyPart === '가슴') {
+    if (name.includes('인클라인') || nameEn.toLowerCase().includes('incline') || target.includes('상부')) {
+      subTarget_ko = '상부';
+      subTarget_en = 'Upper';
+    } else if (name.includes('디클라인') || nameEn.toLowerCase().includes('decline') || target.includes('하부') || name.includes('딥스') || nameEn.toLowerCase().includes('dip')) {
+      subTarget_ko = '하부';
+      subTarget_en = 'Lower';
+    } else {
+      subTarget_ko = '중부';
+      subTarget_en = 'Mid';
+    }
+  } else if (bodyPart === '등') {
+    if (name.includes('슈러그') || nameEn.toLowerCase().includes('shrug') || target.includes('승모근')) {
+      subTarget_ko = '승모근';
+      subTarget_en = 'Traps';
+    } else if (name.includes('익스텐션') || nameEn.toLowerCase().includes('extension') || name.includes('기립근') || nameEn.toLowerCase().includes('erector') || name.includes('굿모닝') || nameEn.toLowerCase().includes('good morning')) {
+      subTarget_ko = '하부/기립근';
+      subTarget_en = 'Erector Spinae';
+    } else if (name.includes('로우') || nameEn.toLowerCase().includes('row') || name.includes('풀오버') || nameEn.toLowerCase().includes('pullover') || name.includes('T바') || nameEn.toLowerCase().includes('t-bar')) {
+      subTarget_ko = '두께';
+      subTarget_en = 'Thickness';
+    } else if (name.includes('풀다운') || nameEn.toLowerCase().includes('pulldown') || name.includes('풀업') || nameEn.toLowerCase().includes('pull up') || name.includes('친업') || nameEn.toLowerCase().includes('chin up') || name.includes('렛풀') || nameEn.toLowerCase().includes('lat pull')) {
+      subTarget_ko = '넓이';
+      subTarget_en = 'Width';
+    } else if (name.includes('데드리프트') || nameEn.toLowerCase().includes('deadlift')) {
+      subTarget_ko = '두께';
+      subTarget_en = 'Thickness';
+    } else {
+      subTarget_ko = '두께';
+      subTarget_en = 'Thickness';
+    }
+  } else if (bodyPart === '어깨') {
+    if (name.includes('프론트') || nameEn.toLowerCase().includes('front') || name.includes('밀리터리') || nameEn.toLowerCase().includes('military') || name.includes('오버헤드') || nameEn.toLowerCase().includes('overhead') || name.includes('아놀드') || nameEn.toLowerCase().includes('arnold') || (name.includes('프레스') && !name.includes('비하인드'))) {
+      subTarget_ko = '전면';
+      subTarget_en = 'Front';
+    } else if (name.includes('리어') || nameEn.toLowerCase().includes('rear') || name.includes('후면') || nameEn.toLowerCase().includes('reverse fly') || name.includes('페이스풀') || nameEn.toLowerCase().includes('face pull')) {
+      subTarget_ko = '후면';
+      subTarget_en = 'Rear';
+    } else {
+      subTarget_ko = '측면';
+      subTarget_en = 'Side';
+    }
+  } else if (bodyPart === '하체') {
+    if (name.includes('카프') || nameEn.toLowerCase().includes('calf')) {
+      subTarget_ko = '종아리';
+      subTarget_en = 'Calves';
+    } else if (name.includes('컬') || nameEn.toLowerCase().includes('curl') || name.includes('데드리프트') || nameEn.toLowerCase().includes('deadlift') || name.includes('힙') || nameEn.toLowerCase().includes('hip') || name.includes('둔근') || nameEn.toLowerCase().includes('glute') || name.includes('햄스트링') || nameEn.toLowerCase().includes('hamstring') || name.includes('브리지') || nameEn.toLowerCase().includes('bridge') || name.includes('어브덕션') || nameEn.toLowerCase().includes('abduction') || name.includes('어덕션') || nameEn.toLowerCase().includes('adduction')) {
+      subTarget_ko = '햄스트링/둔근';
+      subTarget_en = 'Hamstrings/Glutes';
+    } else {
+      subTarget_ko = '대퇴사두근';
+      subTarget_en = 'Quads';
+    }
+  } else if (bodyPart === '팔') {
+    if (name.includes('삼두') || nameEn.toLowerCase().includes('tricep') || name.includes('푸시다운') || nameEn.toLowerCase().includes('pushdown') || name.includes('킥백') || nameEn.toLowerCase().includes('kickback') || (name.includes('익스텐션') && !name.includes('컬')) || name.includes('딥스') || nameEn.toLowerCase().includes('dip') || name.includes('클로즈 그립 벤치')) {
+      subTarget_ko = '삼두근';
+      subTarget_en = 'Triceps';
+    } else if (name.includes('리스트') || nameEn.toLowerCase().includes('wrist') || name.includes('전완') || nameEn.toLowerCase().includes('forearm')) {
+      subTarget_ko = '전완근';
+      subTarget_en = 'Forearms';
+    } else {
+      subTarget_ko = '이두근';
+      subTarget_en = 'Biceps';
+    }
+  } else if (bodyPart === '코어' || bodyPart === '허리/코어') {
+    if (name.includes('트위스트') || nameEn.toLowerCase().includes('twist') || name.includes('사이드') || nameEn.toLowerCase().includes('side') || name.includes('복사근') || nameEn.toLowerCase().includes('oblique') || name.includes('회전') || nameEn.toLowerCase().includes('rotation') || name.includes('힐터치') || nameEn.toLowerCase().includes('heel touch')) {
+      subTarget_ko = '복사근/회전';
+      subTarget_en = 'Obliques';
+    } else {
+      subTarget_ko = '복직근';
+      subTarget_en = 'Rectus Abdominis';
+    }
+  } else {
+    subTarget_ko = '기타';
+    subTarget_en = 'Other';
+  }
 
-exercises.forEach(ex => {
-  let name = ex.name;
-  replacements.forEach(([regex, replacement]) => {
-    name = name.replace(regex, replacement);
-  });
-  
-  // Clean up extra spaces
-  name = name.replace(/\s+/g, ' ').trim();
-  
-  ex.name = name;
+  return {
+    ...ex,
+    subTarget_ko,
+    subTarget_en
+  };
 });
 
-fs.writeFileSync(filePath, JSON.stringify(exercises, null, 2), 'utf8');
-console.log('Successfully updated exercise names with improved rules.');
+fs.writeFileSync(exercisesPath, JSON.stringify(updatedExercises, null, 2));
+console.log(`Updated ${updatedExercises.length} exercises.`);

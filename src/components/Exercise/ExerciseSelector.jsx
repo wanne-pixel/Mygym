@@ -2,17 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import EXERCISE_DATASET from '../../data/exercises.json';
 import { BODY_PARTS, EQUIPMENT_MAP } from '../../constants/exerciseConstants';
-import { getExerciseGif } from '../../utils/exerciseUtils';
+import { getExerciseGif, BODY_PART_I18N } from '../../utils/exerciseUtils';
 import { useWindowSize } from '../../hooks/useWindowSize';
-
-const BODY_PART_I18N = {
-    '가슴': 'bodyParts.chest',
-    '등': 'bodyParts.back',
-    '어깨': 'bodyParts.shoulder',
-    '하체': 'bodyParts.lower',
-    '팔': 'bodyParts.arms',
-    '허리/코어': 'bodyParts.core',
-};
 
 const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cover", onClick }) => {
     const gifUrl = getExerciseGif(nameEn, exerciseId);
@@ -39,7 +30,10 @@ const GifRenderer = ({ nameEn, exerciseId, className = "w-full h-full object-cov
 };
 
 const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+
+    const getExerciseName = (ex) => i18n.language === 'en' && ex?.name_en ? ex.name_en : ex?.name;
+    const getEquipmentLabel = (eq) => t(`equipment.${eq}`, { defaultValue: eq });
     const { isMobile } = useWindowSize();
     const [searchTerm, setSearchTerm] = useState('');
     const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '', isDirectInput: false });
@@ -114,7 +108,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
         if (searchTerm.trim()) {
             list = list.filter(ex => {
                 const searchLower = searchTerm.toLowerCase();
-                const nameEn = ex.nameEn?.toLowerCase() || '';
+                const nameEn = ex.name_en?.toLowerCase() || '';
                 const nameKo = ex.name.toLowerCase();
                 return nameEn.includes(searchLower) || nameKo.includes(searchLower);
             });
@@ -143,13 +137,13 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                             {selection.equipment && (
                                 <>
                                     <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                                    <span className="text-slate-300">{EQUIPMENT_MAP[selection.equipment] || selection.equipment}</span>
+                                    <span className="text-slate-300">{getEquipmentLabel(selection.equipment)}</span>
                                 </>
                             )}
                             {selection.exercise && (
                                 <>
                                     <svg className="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                                    <span className="text-white uppercase">{selection.exercise.name}</span>
+                                    <span className="text-white uppercase">{getExerciseName(selection.exercise)}</span>
                                 </>
                             )}
                         </div>
@@ -161,12 +155,12 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
             {!selection.part && (
                 <div className="animate-fade-in">
                     <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block px-1">{t('exercise.selectPart')}</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-3 gap-4 w-full">
                         {BODY_PARTS.map(p => (
                             <button
                                 key={p.key}
                                 onClick={() => handlePartClick(p.key)}
-                                className={`rounded-2xl font-black text-sm tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50 ${isMobile ? 'py-4' : 'py-3'}`}
+                                className={`rounded-2xl font-black text-sm tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50 px-6 py-4 w-full`}
                             >
                                 {getPartLabel(p.key).toUpperCase()}
                             </button>
@@ -186,7 +180,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                 onClick={() => handleEquipmentClick(eq)}
                                 className={`rounded-2xl font-black text-sm tracking-tighter transition-all duration-300 bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50 ${isMobile ? 'py-4' : 'py-3'}`}
                             >
-                                {(EQUIPMENT_MAP[eq] || eq).toUpperCase()}
+                                {getEquipmentLabel(eq).toUpperCase()}
                             </button>
                         ))}
                     </div>
@@ -226,8 +220,8 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                             />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className={`text-sm font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{ex.name}</p>
-                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{EQUIPMENT_MAP[ex.equipment] || ex.equipment}</span>
+                                            <p className={`text-sm font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{getExerciseName(ex)}</p>
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{getEquipmentLabel(ex.equipment)}</span>
                                         </div>
                                         <div className="shrink-0 flex items-center gap-1.5">
                                             <button

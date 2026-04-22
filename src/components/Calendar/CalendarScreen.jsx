@@ -10,7 +10,6 @@ import DayDetailView from './DayDetailView';
 
 const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => {
     const { t } = useTranslation();
-    if (!isOpen) return null;
 
     const [profile, setProfile] = useState({
         age: userData?.age || '',
@@ -22,22 +21,66 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
         body_fat_percentage: userData?.body_fat_percentage || '',
         bmr: userData?.bmr || '',
         visceral_fat_level: userData?.visceral_fat_level || '',
-        goal: userData?.goal || 'strength',
+        goals: userData?.goals || (userData?.goal ? [userData.goal] : ['strength']),
         weekly_frequency: userData?.weekly_frequency || 3
     });
 
     const [isSaving, setIsSaving] = useState(false);
 
+    useEffect(() => {
+        if (isOpen && userData) {
+            setProfile({
+                age: userData.age || '',
+                height: userData.height || '',
+                weight: userData.weight || '',
+                gender: userData.gender || '',
+                skeletal_muscle_mass: userData.skeletal_muscle_mass || '',
+                body_fat_mass: userData.body_fat_mass || '',
+                body_fat_percentage: userData.body_fat_percentage || '',
+                bmr: userData.bmr || '',
+                visceral_fat_level: userData.visceral_fat_level || '',
+                goals: userData.goals || (userData.goal ? [userData.goal] : ['strength']),
+                weekly_frequency: userData.weekly_frequency || 3
+            });
+        }
+    }, [isOpen, userData]);
+
+    if (!isOpen) return null;
+
+    const toggleGoal = (value) => {
+        setProfile(prev => {
+            const isSelected = prev.goals.includes(value);
+            if (isSelected) {
+                return { ...prev, goals: prev.goals.filter(g => g !== value) };
+            }
+            if (prev.goals.length >= 2) {
+                // 이미 2개면 가장 먼저 선택한 걸 버리고 새 거 추가 (또는 그냥 무시할 수도 있지만 토글이 더 자연스러움)
+                // 여기서는 2개 제한 안내가 있으니 추가를 막는 방식으로 구현
+                return prev;
+            }
+            return { ...prev, goals: [...prev.goals, value] };
+        });
+    };
+
     const handleSave = async () => {
+        if (profile.goals.length === 0) {
+            alert(t('onboarding.goal.maxSelect'));
+            return;
+        }
+
         setIsSaving(true);
         try {
             const { data: session } = await supabase.auth.getSession();
             if (!session.session) throw new Error(t('common.loginRequired'));
             const userId = session.session.user.id;
 
+            // 하위 호환성을 위해 첫 번째 목표를 goal 필드에도 저장
+            const primaryGoal = profile.goals[0];
+
             await supabase.auth.updateUser({
                 data: {
-                    goal: profile.goal,
+                    goal: primaryGoal,
+                    goals: profile.goals,
                     age: profile.age,
                     gender: profile.gender,
                     height: profile.height,
@@ -46,7 +89,8 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
             });
 
             const updatePayload = {
-                goal: profile.goal,
+                goal: primaryGoal,
+                goals: profile.goals,
                 weekly_frequency: parseInt(profile.weekly_frequency) || 3,
                 height: profile.height ? parseInt(profile.height) : null,
                 weight: profile.weight ? parseFloat(profile.weight) : null,
@@ -76,6 +120,13 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
         }
     };
 
+    const goalOptions = [
+        { key: 'strength', label: t('onboarding.goal.strength') },
+        { key: 'hypertrophy', label: t('onboarding.goal.hypertrophy') },
+        { key: 'weight_loss', label: t('onboarding.goal.weightLoss') },
+        { key: 'maintenance', label: t('onboarding.goal.maintenance') }
+    ];
+
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={onClose}></div>
@@ -88,20 +139,32 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                 </div>
 
                 <div className="space-y-6">
-                    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                        <div className="col-span-1">
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.goal')}</label>
-                            <select
-                                value={profile.goal}
-                                onChange={e => setProfile({...profile, goal: e.target.value})}
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold"
-                            >
-                                <option value="strength">{t('calendar.goals.strength')}</option>
-                                <option value="hypertrophy">{t('calendar.goals.hypertrophy')}</option>
-                                <option value="weight_loss">{t('calendar.goals.weightLoss')}</option>
-                                <option value="maintenance">{t('calendar.goals.maintenance')}</option>
-                            </select>
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-end">
+                            <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.goal')}</label>
+                            <span className="text-[9px] font-bold text-slate-600 uppercase">{t('onboarding.goal.maxSelect')}</span>
                         </div>
+                        <div className="flex flex-wrap gap-2">
+                            {goalOptions.map(opt => {
+                                const isSelected = profile.goals.includes(opt.key);
+                                return (
+                                    <button
+                                        key={opt.key}
+                                        onClick={() => toggleGoal(opt.key)}
+                                        className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all border-2 ${
+                                            isSelected 
+                                                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20' 
+                                                : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
                         <div className="col-span-1">
                             <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.weeklyFrequency')}</label>
                             <input
@@ -129,7 +192,7 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                             <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.height')}</label>
                             <input type="number" value={profile.height} onChange={e => setProfile({...profile, height: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder={t('calendar.profileFields.heightUnit')} />
                         </div>
-                        <div>
+                        <div className="col-span-1">
                             <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.weight')}</label>
                             <input type="number" value={profile.weight} onChange={e => setProfile({...profile, weight: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder={t('calendar.profileFields.weightUnit')} />
                         </div>
@@ -218,7 +281,7 @@ const CalendarScreen = () => {
     };
 
     return (
-        <div className={`${isMobile ? 'p-4' : 'p-8 max-w-5xl mx-auto'} flex flex-col bg-slate-950 min-h-screen pb-24`}>
+        <div className={`${isMobile ? 'p-4' : 'p-8 max-w-6xl mx-auto'} flex flex-col bg-slate-950 min-h-screen pb-24`}>
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">{t('calendar.appName')}</h2>
                 <div className="flex items-center gap-2">

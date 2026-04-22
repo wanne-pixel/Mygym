@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../api/supabase';
 import { PART_MAP } from '../../constants/exerciseConstants';
+import { getLocalizedNameByKo, BODY_PART_I18N } from '../../utils/exerciseUtils';
 
 const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [logs, setLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -61,8 +62,8 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                                 <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
-                                        <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase text-white mb-1 inline-block">{PART_MAP[log.part] || log.part}</span>
-                                        <h3 className={`font-black italic text-white uppercase tracking-tighter ${isMobile ? 'text-lg' : 'text-xl'}`}>{log.exercise}</h3>
+                                        <span className="bg-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase text-white mb-1 inline-block">{t(BODY_PART_I18N[log.part] || log.part, { defaultValue: log.part })}</span>
+                                        <h3 className={`font-black italic text-white uppercase tracking-tighter ${isMobile ? 'text-lg' : 'text-xl'}`}>{getLocalizedNameByKo(log.exercise, i18n.language)}</h3>
                                     </div>
                                     <button onClick={() => handleDelete(log.id)} className="p-2 bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white rounded-lg transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                 </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../api/supabase';
 import { STORAGE_KEYS } from '../../constants/exerciseConstants';
 import EXERCISE_DATASET from '../../data/exercises.json';
@@ -13,21 +14,13 @@ const callAiCoachFunction = async (payload) => {
     // 1. 현재 세션 강제 확인
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    console.log('[FRONTEND] Session found:', session ? 'YES' : 'NO')
-    console.log('[FRONTEND] Session error:', sessionError)
-
     if (sessionError || !session) {
-        console.error('[FRONTEND] Session validation failed:', sessionError);
         throw new Error('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
     }
 
     const token = session.access_token;
-    console.log('[FRONTEND] Token extracted:', token ? 'YES' : 'NO')
-    console.log('[FRONTEND] Token length:', token?.length)
-    console.log('[FRONTEND] Token prefix:', token?.substring(0, 20))
 
     // 2. invoke 호출 시 headers에 토큰 명시적으로 포함
-    console.log('[FRONTEND] Calling supabase.functions.invoke...')
     const { data, error } = await supabase.functions.invoke('ai-coach', {
         body: payload,
         headers: {
@@ -35,24 +28,14 @@ const callAiCoachFunction = async (payload) => {
         }
     });
 
-    console.log('[FRONTEND] Invoke completed')
-    console.log('[FRONTEND] Data:', data)
-    console.log('[FRONTEND] Error:', error)
-
-    if (error) {
-        console.error('[FRONTEND] Edge Function Invoke Error:', error);
-        throw error;
-    }
-
-    if (data?.error) {
-        console.error('[FRONTEND] Edge Function Business Error:', data.error);
-        throw new Error(data.error);
-    }
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
 
     return data.content;
 };
 
 export const useAiCoach = () => {
+    const { t, i18n } = useTranslation();
     const [profile, setProfile] = useState(null);
     const [recentStats, setRecentStats] = useState({ totalWorkouts: 0, mostFrequentPart: null });
     const [personalRecords, setPersonalRecords] = useState({});
@@ -103,18 +86,34 @@ export const useAiCoach = () => {
     };
 
     const generateGreeting = (profile, stats) => {
-        if (!profile) return "안녕하세요! 😊\n\nMyGym AI 코치입니다. 프로필을 설정하시면 더 개인화된 코칭을 받으실 수 있어요. 오늘은 어떤 운동을 하실까요?";
+        if (!profile) return t('aiCoach.greeting.noProfile');
         const { experience_level, goal, weekly_frequency, limitations } = profile;
         const { totalWorkouts } = stats;
-        let text = "안녕하세요! 😊\n\n";
-        if (experience_level === 'beginner') text += "웨이트트레이닝이 처음이시군요! 걱정 마세요, 제가 차근차근 알려드릴게요. ";
-        else if (experience_level === 'intermediate') text += "꾸준히 운동하고 계시는 걸 알고 있어요. 한 단계 더 성장할 준비가 되셨네요! ";
-        else text += "탄탄한 운동 경력을 가지고 계시네요. 더 강해질 준비 되셨죠? ";
-        const goalText = { strength: '강력한 근력', hypertrophy: '멋진 근육', weight_loss: '건강한 체중 감량', maintenance: '현재 컨디션 유지' };
-        text += `${goalText[goal] || '목표 달성'}을 위해 주 ${weekly_frequency}회 함께해요!\n\n`;
-        if (limitations?.length > 0) text += `${limitations.join(', ')} 부위를 고려해서 안전한 운동으로 구성할게요.\n\n`;
-        if (totalWorkouts > 0) text += `이번 주 ${totalWorkouts}회 운동하셨네요! 오늘은 어떤 부위를 하실까요?`;
-        else text += "오늘부터 시작해볼까요? 아래 버튼으로 루틴 추천을 받아보세요!";
+        let text = t('aiCoach.greeting.welcome');
+        
+        if (experience_level === 'beginner') text += t('aiCoach.greeting.beginner');
+        else if (experience_level === 'intermediate') text += t('aiCoach.greeting.intermediate');
+        else if (experience_level === 'advanced') text += t('aiCoach.greeting.advanced');
+        
+        const goalText = { 
+            strength: t('onboarding.goal.strength'), 
+            hypertrophy: t('onboarding.goal.hypertrophy'), 
+            weight_loss: t('onboarding.goal.weightLoss'), 
+            maintenance: t('onboarding.goal.maintenance') 
+        };
+        
+        text += (goalText[goal] || t('onboarding.goal.maintenance')) + t('aiCoach.greeting.weeklyFrequency', { count: weekly_frequency });
+        
+        if (limitations?.length > 0) {
+            const parts = limitations.map(l => t(`onboarding.limitations.${l}`, { defaultValue: l })).join(', ');
+            text += t('aiCoach.greeting.limitations', { parts });
+        }
+        
+        if (totalWorkouts > 0) {
+            text += t('aiCoach.greeting.stats', { count: totalWorkouts });
+        } else {
+            text += t('aiCoach.greeting.start');
+        }
         return text;
     };
 
@@ -159,36 +158,37 @@ export const useAiCoach = () => {
     const callOpenAI = async (userPrompt, currentHistory) => {
         setIsTyping(true);
         const recordsText = Object.keys(personalRecords).length > 0
-            ? Object.entries(personalRecords).map(([name, r]) => `- ${name}: ${r.kg}kg × ${r.reps}회`).join('\n')
-            : '없음 (초보자)';
+            ? Object.entries(personalRecords).map(([name, r]) => `- ${name}: ${r.kg}kg × ${r.reps}${t('dayDetail.repsUnit')}`).join('\n')
+            : t('aiCoach.prompt.none') + ` (${t('aiCoach.prompt.beginnerLevel')})`;
 
-        const goalLabels = { strength: '근력 증가', hypertrophy: '근육 성장', weight_loss: '체중 감량', maintenance: '현상 유지' };
+        const goalLabels = { 
+            strength: t('onboarding.goal.strength'), 
+            hypertrophy: t('onboarding.goal.hypertrophy'), 
+            weight_loss: t('onboarding.goal.weightLoss'), 
+            maintenance: t('onboarding.goal.maintenance') 
+        };
         const goalsDisplay = Array.isArray(profile?.goals) && profile.goals.length > 0
             ? profile.goals.map(g => goalLabels[g] || g).join(', ')
-            : goalLabels[profile?.goal] || profile?.goal || '없음';
+            : goalLabels[profile?.goal] || profile?.goal || t('aiCoach.prompt.none');
 
-        const systemMessage = `당신은 MyGym의 전문 퍼스널 트레이너 AI 코치입니다.
+        const systemMessage = `${t('aiCoach.prompt.systemRole')}
 
-사용자 프로필:
-- 목표: ${goalsDisplay}
-- 경험: ${profile?.experience_level || '없음'}
-- 주당 횟수: ${profile?.weekly_frequency || 0}회
-- 1회 운동 가능 시간: ${profile?.available_time || '미설정'}
-- 기구: ${profile?.equipment_access || '없음'}
-- 제한사항: ${profile?.limitations?.join(', ') || '없음'}
+${t('aiCoach.prompt.userProfile')}
+- ${t('aiCoach.prompt.goal')}: ${goalsDisplay}
+- ${t('aiCoach.prompt.experience')}: ${profile?.experience_level || t('aiCoach.prompt.none')}
+- ${t('aiCoach.prompt.frequency')}: ${profile?.weekly_frequency || 0}${t('onboarding.frequency.unit')}
+- ${t('aiCoach.prompt.time')}: ${profile?.available_time || t('aiCoach.prompt.none')}
+- ${t('aiCoach.prompt.equipment')}: ${profile?.equipment_access || t('aiCoach.prompt.none')}
+- ${t('aiCoach.prompt.limitations')}: ${profile?.limitations?.map(l => t(`onboarding.limitations.${l}`, { defaultValue: l })).join(', ') || t('aiCoach.prompt.none')}
 
-최근 7일 운동 기록:
-- 운동 횟수: ${recentStats?.totalWorkouts || 0}회
-- 가장 많이 한 부위: ${recentStats?.mostFrequentPart || '없음'}
+${t('aiCoach.prompt.recentStats')}
+- ${t('aiCoach.prompt.workoutCount')}: ${recentStats?.totalWorkouts || 0}${t('onboarding.frequency.unit')}
+- ${t('aiCoach.prompt.frequentPart')}: ${recentStats?.mostFrequentPart || t('aiCoach.prompt.none')}
 
-운동별 최고 기록:
+${t('aiCoach.prompt.personalRecords')}
 ${recordsText}
 
-[응답 규칙 - 매우 중요]
-1. 반드시 어떠한 인사말이나 마크다운 (\`\`\`json) 기호 없이, 순수한 JSON 객체 형식으로만 응답하십시오.
-2. 사용자의 현재 상태를 분석한 짧은 코멘트(plain text)를 JSON 외부에 포함하지 말고, JSON 내부의 특정 필드에 넣거나 오직 JSON만 반환하십시오.
-3. 운동 루틴은 반드시 'routine' 배열 필드에 담아야 합니다. 각 운동은 name, part, sets(kg, reps 포함), description 필드를 가져야 합니다.
-4. 한국어로 응답하십시오.
+${t('aiCoach.prompt.rules')}
 
 응답 JSON 구조 예시:
 {
@@ -207,6 +207,7 @@ ${recordsText}
             const aiText = await callAiCoachFunction({
                 type: 'chat',
                 systemMessage,
+                lang: i18n.language,
                 chatHistory: currentHistory.slice(-6).map(m => ({
                     role: m.type === 'ai' ? 'assistant' : 'user',
                     content: m.text,
@@ -233,8 +234,8 @@ ${recordsText}
     const callRecommendation = async (mode, hardModeType = null, hardModeLabel = null) => {
         setIsTyping(true);
         const displayText = mode === 'hard'
-            ? `🔥 하드모드 루틴 추천 (${hardModeLabel || hardModeType?.replace(/_/g, ' ')})`
-            : '🎯 오늘의 루틴 추천';
+            ? `${t('aiCoach.promptHardMode')} (${hardModeLabel || hardModeType?.replace(/_/g, ' ')})`
+            : t('aiCoach.promptRecommend');
         const userMsg = { id: Date.now(), type: 'user', text: displayText };
         setMessages(prev => [...prev, userMsg]);
         try {
@@ -271,6 +272,7 @@ ${recordsText}
 
             const aiText = await callAiCoachFunction({
                 type: 'recommendation',
+                lang: i18n.language,
                 exercises: EXERCISE_DATASET,
                 profile,
                 mode,
@@ -287,7 +289,7 @@ ${recordsText}
     };
 
     const handleManualReset = () => {
-        if (!confirm('채팅 기록을 모두 삭제하고 새로 시작할까요?')) return;
+        if (!confirm(t('aiCoach.resetConfirm'))) return;
         const greetingText = generateGreeting(profile, recentStats);
         const initialMessage = { id: Date.now(), type: 'ai', text: greetingText };
         setMessages([initialMessage]);

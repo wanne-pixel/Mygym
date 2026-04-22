@@ -10,6 +10,8 @@ import {
   PieChart, Pie, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { supabase } from '../../api/supabase';
+import EXERCISE_DATASET from '../../data/exercises.json';
+import { getLocalizedNameByKo } from '../../utils/exerciseUtils';
 
 const MUSCLE_KEY_MAP = {
   '전체': 'all',
@@ -34,130 +36,6 @@ const MUSCLE_COLORS = {
   '코어': '#06b6d4',
 };
 
-// 운동명 → 서브카테고리 매핑
-const SUB_CATEGORY_MAP = {
-  // 가슴 - 상부
-  '바벨 인클라인 벤치 프레스': '상부', '스미스 인클라인 벤치 프레스': '상부',
-  '덤벨 인클라인 벤치 프레스': '상부', '덤벨 인클라인 플라이': '상부',
-  '케이블 인클라인 플라이': '상부', '레버 인클라인 가슴 프레스': '상부',
-  '인클라인 푸시 업': '상부',
-  // 가슴 - 중부
-  '바벨 벤치 프레스': '중부', '스미스 벤치 프레스': '중부',
-  '덤벨 벤치 프레스': '중부', '덤벨 플라이': '중부', '덤벨 풀오버': '중부',
-  '케이블 크로스오버': '중부', '케이블 미들 플라이': '중부',
-  '케이블 스탠딩 플라이': '중부', '케이블 시티드 가슴 프레스': '중부',
-  '레버 가슴 프레스': '중부', '레버 시티드 플라이': '중부', '푸시 업': '중부',
-  // 가슴 - 하부
-  '디클라인 푸시 업': '하부', '어시스트 딥스': '하부', '가슴 딥스': '하부',
-  // 등 - 넓이
-  '케이블 풀다운 / 랫풀다운': '넓이', '언더핸드 풀다운': '넓이',
-  '패러럴 그립 랫 풀다운': '넓이', '케이블 원암 풀다운': '넓이',
-  '레버 프론트 풀다운': '넓이', '풀업': '넓이', '친업': '넓이',
-  '뉴트럴 그립 풀업': '넓이', '와이드 그립 풀업': '넓이',
-  '스캐풀라 풀업': '넓이', '어시스트 풀업': '넓이',
-  // 등 - 두께
-  '바벨 벤트오버 로우': '두께', '바벨 펜들레이 로우': '두께',
-  '바벨 리버스 그립 벤트오버 로우': '두께', '스미스 벤트오버 로우': '두께',
-  '덤벨 벤트오버 로우': '두께', '덤벨 원암 벤트오버 로우': '두께',
-  '덤벨 인클라인 로우': '두께', '케이블 시티드 로우': '두께',
-  '케이블 시티드 와이드 그립 로우': '두께', '케이블 V바 하이 로우': '두께',
-  '케이블 원암 로우': '두께', '레버 하이 로우': '두께',
-  '레버 시티드 로우': '두께', '레버 T바 로우': '두께',
-  '인버티드 로우': '두께', '서스펜디드 로우': '두께',
-  // 등 - 승모근
-  '바벨 슈러그': '승모근', '덤벨 슈러그': '승모근',
-  // 등 - 기타
-  '케이블 스트레이트 암 풀다운': '기타', '하이퍼익스텐션': '기타',
-  // 어깨 - 전면
-  '바벨 시티드 오버헤드 프레스': '전면', '바벨 프론트 레이즈': '전면',
-  '스미스 시티드 숄더 프레스': '전면', '스미스 숄더 프레스': '전면',
-  '덤벨 아놀드 프레스': '전면', '덤벨 시티드 숄더 프레스': '전면',
-  '덤벨 스탠딩 오버헤드 프레스': '전면', '덤벨 프론트 레이즈': '전면',
-  '케이블 숄더 프레스': '전면', '레버 숄더 프레스': '전면',
-  // 어깨 - 측면
-  '덤벨 레터럴 레이즈': '측면', '덤벨 원암 레터럴 레이즈': '측면',
-  '케이블 레터럴 레이즈': '측면', '케이블 원암 레터럴 레이즈': '측면',
-  '레버 레터럴 레이즈': '측면', '바벨 업라이트 로우': '측면',
-  '스미스 업라이트 로우': '측면',
-  // 어깨 - 후면
-  '덤벨 리버스 플라이': '후면', '덤벨 리어 레터럴 레이즈': '후면',
-  '케이블 외회전': '후면', '케이블 리어 델트 로우': '후면',
-  '레버 시티드 리버스 플라이': '후면',
-  // 하체 - 대퇴사두근
-  '바벨 스쿼트': '대퇴사두근', '바벨 하이바 스쿼트': '대퇴사두근',
-  '바벨 로우바 스쿼트': '대퇴사두근', '바벨 프론트 스쿼트': '대퇴사두근',
-  '스미스 스쿼트': '대퇴사두근', '스미스 핵 스쿼트': '대퇴사두근',
-  '덤벨 스쿼트': '대퇴사두근', '덤벨 고블릿 스쿼트': '대퇴사두근',
-  '레그 프레스': '대퇴사두근', '레그 익스텐션': '대퇴사두근',
-  '45도 레그 프레스': '대퇴사두근', '핵 스쿼트': '대퇴사두근',
-  '바벨 런지': '대퇴사두근', '바벨 리버스 런지': '대퇴사두근',
-  '바벨 스텝업': '대퇴사두근', '스미스 불가리안/스플릿 스쿼트': '대퇴사두근',
-  '덤벨 런지': '대퇴사두근', '덤벨 리버스 런지': '대퇴사두근',
-  '덤벨 스텝업': '대퇴사두근', '포워드 런지': '대퇴사두근',
-  '스플릿 스쿼트': '대퇴사두근', '워킹 런지': '대퇴사두근',
-  '점프 스쿼트': '대퇴사두근',
-  // 하체 - 햄스트링/둔근
-  '바벨 데드리프트': '햄스트링/둔근', '바벨 루마니안 데드리프트': '햄스트링/둔근',
-  '바벨 스모 데드리프트': '햄스트링/둔근', '바벨 랙풀': '햄스트링/둔근',
-  '스미스 데드리프트': '햄스트링/둔근', '덤벨 데드리프트': '햄스트링/둔근',
-  '덤벨 루마니안 데드리프트': '햄스트링/둔근',
-  '덤벨 싱글 레그 데드리프트': '햄스트링/둔근',
-  '트랩바 데드리프트': '햄스트링/둔근', '라이잉 레그 컬': '햄스트링/둔근',
-  '시티드 레그 컬': '햄스트링/둔근', '바벨 글루트 브리지': '햄스트링/둔근',
-  '글루트 브리지 (벤치)': '햄스트링/둔근', '케이블 힙 익스텐션': '햄스트링/둔근',
-  '케이블 풀 스루': '햄스트링/둔근', '힙 어브덕션': '햄스트링/둔근',
-  '힙 어덕션': '햄스트링/둔근', '케이블 힙 어덕션': '햄스트링/둔근',
-  // 하체 - 종아리
-  '바벨 스탠딩 카프 레이즈': '종아리', '바벨 시티드 카프 레이즈': '종아리',
-  '덤벨 시티드 카프 레이즈': '종아리', '덤벨 스탠딩 카프 레이즈': '종아리',
-  '시티드 카프 레이즈': '종아리', '스탠딩 카프 레이즈': '종아리',
-  '레그프레스 카프 레이즈': '종아리', '맨몸 스탠딩 카프 레이즈': '종아리',
-  '파머스 워크': '종아리',
-  // 팔 - 이두근
-  '바벨 컬': '이두근', '바벨 프리처 컬': '이두근', '바벨 리버스 컬': '이두근',
-  'EZ바 컬': '이두근', 'EZ바 리버스 컬': '이두근', 'EZ바 프리처 컬': '이두근',
-  '덤벨 이두 컬': '이두근', '덤벨 얼터네이트 컬': '이두근',
-  '덤벨 해머 컬': '이두근', '덤벨 인클라인 컬': '이두근',
-  '덤벨 컨센트레이션 컬': '이두근', '덤벨 프리처 컬': '이두근',
-  '덤벨 조트만 컬': '이두근', '케이블 컬': '이두근',
-  '케이블 원암 컬': '이두근', '케이블 해머 컬': '이두근',
-  '케이블 프리처 컬': '이두근', '케이블 리버스 컬': '이두근',
-  '머신 바이셉 컬': '이두근', '머신 프리처 컬': '이두근',
-  // 팔 - 삼두근
-  '바벨 클로즈 그립 벤치 프레스': '삼두근',
-  '바벨 라이잉 트라이셉스 익스텐션': '삼두근', '바벨 스컬 크러셔': '삼두근',
-  '바벨 시티드 오버헤드 트라이셉스 익스텐션': '삼두근',
-  'EZ바 시티드 트라이셉스 익스텐션': '삼두근',
-  '스미스 클로즈 그립 벤치 프레스': '삼두근',
-  '덤벨 라이잉 트라이셉스 익스텐션': '삼두근',
-  '덤벨 원암 트라이셉스 익스텐션': '삼두근',
-  '덤벨 시티드 트라이셉스 익스텐션': '삼두근', '덤벨 킥백': '삼두근',
-  '케이블 푸시다운': '삼두근', '케이블 로프 푸시다운': '삼두근',
-  '케이블 V바 트라이셉스 푸시다운': '삼두근',
-  '케이블 오버헤드 트라이셉스 익스텐션': '삼두근',
-  '케이블 원암 트라이셉스 푸시다운': '삼두근',
-  '머신 트라이셉스 익스텐션': '삼두근', '시티드 딥 머신': '삼두근',
-  '삼두 딥스': '삼두근', '벤치 딥스': '삼두근',
-  '클로즈 그립 푸시업': '삼두근', '다이아몬드 푸시업': '삼두근',
-  // 팔 - 전완근
-  '바벨 리스트 컬': '전완근', '바벨 리버스 리스트 컬': '전완근',
-  // 코어 - 복직근
-  '크런치': '복직근', '리버스 크런치': '복직근', '싯업': '복직근',
-  '잭나이프 싯업': '복직근', '행잉 레그 레이즈': '복직근',
-  '라이잉 레그 레이즈': '복직근', '데드 버그': '복직근',
-  '에어 바이크/바이시클 크런치': '복직근', '케이블 니링 크런치': '복직근',
-  '케이블 스탠딩 크런치': '복직근', '중량 크런치': '복직근',
-  '중량 행잉 레그 레이즈': '복직근', '어시스트 행잉 니 레이즈': '복직근',
-  '어시스트 싯업': '복직근', '플랭크 변형': '복직근', '중량 플랭크': '복직근',
-  // 코어 - 복사근/회전
-  '크로스 바디 크런치': '복사근/회전', '러시안 트위스트': '복사근/회전',
-  '사이드 플랭크': '복사근/회전', '행잉 오블리크 니 레이즈': '복사근/회전',
-  '힐 터치': '복사근/회전', '케이블 트위스트': '복사근/회전',
-  '케이블 사이드 벤드': '복사근/회전', '덤벨 사이드 벤드': '복사근/회전',
-  '중량 러시안 트위스트': '복사근/회전', '바벨 롤아웃': '복사근/회전',
-  '랜드마인 180': '복사근/회전',
-};
-
 const SUB_CAT_COLORS = {
   '상부': '#60a5fa', '중부': '#3b82f6', '하부': '#2563eb',
   '넓이': '#a78bfa', '두께': '#7c3aed', '승모근': '#6d28d9',
@@ -166,9 +44,28 @@ const SUB_CAT_COLORS = {
   '이두근': '#34d399', '삼두근': '#10b981', '전완근': '#059669',
   '복직근': '#22d3ee', '복사근/회전': '#06b6d4',
   '기타': '#94a3b8',
+  '광배근': '#a78bfa', '척추기립근': '#94a3b8',
+  // 영어 대응
+  'Upper': '#60a5fa', 'Mid': '#3b82f6', 'Lower': '#2563eb',
+  'Width': '#a78bfa', 'Thickness': '#7c3aed', 'Traps': '#6d28d9',
+  'Front': '#f472b6', 'Side': '#ec4899', 'Rear': '#db2777',
+  'Quads': '#fb923c', 'Hamstrings/Glutes': '#f59e0b', 'Calves': '#ea580c',
+  'Biceps': '#34d399', 'Triceps': '#10b981', 'Forearms': '#059669',
+  'Rectus Abdominis': '#22d3ee', 'Obliques': '#06b6d4',
+  'Lats': '#a78bfa', 'Erector Spinae': '#94a3b8'
 };
 
 // ─── 헬퍼 함수 ───────────────────────────────────────────────────────────────
+
+const getSubCategory = (exerciseName, lang) => {
+  const ex = EXERCISE_DATASET.find(e => 
+    e.name === exerciseName || 
+    e.name_en === exerciseName ||
+    e.name?.replace(/\s/g, '') === exerciseName?.replace(/\s/g, '')
+  );
+  if (!ex) return lang === 'en' ? 'Other' : '기타';
+  return lang === 'en' ? (ex.subTarget_en || 'Other') : (ex.subTarget_ko || '기타');
+};
 
 const calc1RM = (weight, reps) => {
   if (!weight || !reps || reps <= 0) return 0;
@@ -194,8 +91,6 @@ const normalizePart = (part) => {
   return '기타';
 };
 
-const getSubCategory = (name) => SUB_CATEGORY_MAP[name] || '기타';
-
 const calcLogVolume = (setsData) => {
   let sds = setsData;
   if (typeof sds === 'string') { try { sds = JSON.parse(sds); } catch { return 0; } }
@@ -210,7 +105,7 @@ const calcLogVolume = (setsData) => {
 // ─── PRCard ───────────────────────────────────────────────────────────────────
 
 const PRCard = ({ pr }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const days = daysSince(pr.date);
   const isNew = days <= 7;
   const isRecent = days <= 30;
@@ -227,7 +122,7 @@ const PRCard = ({ pr }) => {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-white font-black text-sm truncate">{pr.exercise}</span>
+          <span className="text-white font-black text-sm truncate">{getLocalizedNameByKo(pr.exercise, i18n.language)}</span>
           {isNew && (
             <span className="text-[9px] font-black text-blue-400 bg-blue-400/15 px-2 py-0.5 rounded-full uppercase tracking-widest flex-shrink-0">{t('common.new')}</span>
           )}
@@ -303,15 +198,16 @@ const VolumeDistributionSection = ({ logs }) => {
     const total = Object.values(volMap).reduce((s, v) => s + v, 0);
     if (total === 0) return [];
     return MUSCLE_TABS
-      .filter(t => t !== '전체' && volMap[t] > 0)
+      .filter(tab => tab !== '전체' && volMap[tab] > 0)
       .map(tab => ({
         name: tab,
+        label: t(`bodyParts.${MUSCLE_KEY_MAP[tab] || tab}`, { defaultValue: tab }),
         value: Math.round(volMap[tab]),
         percentage: Math.round((volMap[tab] / total) * 100),
         fill: MUSCLE_COLORS[tab] || '#94a3b8',
       }))
       .sort((a, b) => b.value - a.value);
-  }, [logs]);
+  }, [logs, t]);
 
   if (!data.length) return null;
 
@@ -333,7 +229,7 @@ const VolumeDistributionSection = ({ logs }) => {
               outerRadius={100}
               paddingAngle={2}
               dataKey="value"
-              label={({ name, percentage }) => `${name} ${percentage}%`}
+              label={({ label, percentage }) => `${label} ${percentage}%`}
               labelLine={true}
             />
             <Tooltip
@@ -346,7 +242,7 @@ const VolumeDistributionSection = ({ logs }) => {
             />
           </PieChart>
         </ResponsiveContainer>
-        <DonutLegend items={data} colorMap={MUSCLE_COLORS} />
+        <DonutLegend items={data.map(d => ({ ...d, name: d.label }))} colorMap={MUSCLE_COLORS} />
       </div>
       <p className="text-slate-600 text-[11px] mt-3 text-center font-bold">
         {t('analysis.totalRecords')}{logs.length}{t('analysis.recordsSuffix')}
@@ -358,7 +254,7 @@ const VolumeDistributionSection = ({ logs }) => {
 // ─── 서브카테고리 분석 + AI 인사이트 ─────────────────────────────────────────
 
 const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [aiError, setAiError] = useState(null);
@@ -374,7 +270,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
     const cntMap = {};
 
     filtered.forEach(log => {
-      const sub = getSubCategory(log.exercise);
+      const sub = getSubCategory(log.exercise, i18n.language);
       const vol = calcLogVolume(log.sets_data);
       volMap[sub] = (volMap[sub] || 0) + vol;
       cntMap[sub] = (cntMap[sub] || 0) + 1;
@@ -386,13 +282,14 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
     return Object.entries(volMap)
       .map(([cat, vol]) => ({
         name: cat,
+        label: t(`subCategories.${cat}`, { defaultValue: cat }),
         value: Math.round(vol),
         count: cntMap[cat],
         percentage: Math.round((vol / total) * 100),
         fill: SUB_CAT_COLORS[cat] || '#94a3b8',
       }))
       .sort((a, b) => b.percentage - a.percentage);
-  }, [muscleGroup, logs]);
+  }, [muscleGroup, logs, t, i18n.language]);
 
   const runAnalysis = async () => {
     if (!subCategoryData.length || !token) return;
@@ -402,6 +299,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
       const { data, error } = await supabase.functions.invoke('ai-coach', {
         body: {
           type: 'muscle_analysis',
+          lang: i18n.language,
           muscle_group: muscleGroup,
           breakdown: subCategoryData.map(d => ({
             category: d.name,
@@ -445,7 +343,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
               outerRadius={100}
               paddingAngle={2}
               dataKey="value"
-              label={({ name, percentage }) => `${name} ${percentage}%`}
+              label={({ label, percentage }) => `${label} ${percentage}%`}
               labelLine={true}
             />
             <Tooltip
@@ -458,7 +356,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
             />
           </PieChart>
         </ResponsiveContainer>
-        <DonutLegend items={subCategoryData} colorMap={SUB_CAT_COLORS} />
+        <DonutLegend items={subCategoryData.map(d => ({ ...d, name: d.label }))} colorMap={SUB_CAT_COLORS} />
       </div>
 
       {/* AI 분석 */}
@@ -520,7 +418,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
 // ─── 메인 컴포넌트 ────────────────────────────────────────────────────────────
 
 const AnalysisScreen = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -582,7 +480,9 @@ const AnalysisScreen = () => {
         muscleStats[muscle].volume += calcLogVolume(log.sets_data);
       });
 
-      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      const dayNames = i18n.language === 'en'
+        ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        : ['일', '월', '화', '수', '목', '금', '토'];
       const dayStats = {};
       recentLogs.forEach(log => {
         const dayName = dayNames[new Date(log.created_at).getDay()];
@@ -594,6 +494,7 @@ const AnalysisScreen = () => {
       const { data, error } = await supabase.functions.invoke('ai-coach', {
         body: {
           type: 'training_analysis',
+          lang: i18n.language,
           total_workouts: recentLogs.length,
           muscle_stats: muscleStats,
           day_stats: dayStats,
@@ -665,7 +566,7 @@ const AnalysisScreen = () => {
 
   // ── 렌더 ─────────────────────────────────────────────────────────────────
   return (
-    <div className="p-4 md:p-8 bg-slate-950 min-h-screen pb-24">
+    <div className="p-4 md:p-8 w-full max-w-6xl mx-auto bg-slate-950 min-h-screen pb-24">
       {/* 헤더 */}
       <div className="flex items-center gap-3 mb-6">
         <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">{t('analysis.title')}</h2>
@@ -715,7 +616,8 @@ const AnalysisScreen = () => {
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
             {visibleTabs.map(tab => {
               const count = tab === '전체' ? prList.length : (muscleGroupCounts[tab] || 0);
-              const tabLabel = t(`bodyParts.${MUSCLE_KEY_MAP[tab] || tab}`, { defaultValue: tab });
+              const tabKey = MUSCLE_KEY_MAP[tab] || tab;
+              const tabLabel = tab === '전체' ? t('bodyParts.all') : t(`bodyParts.${tabKey}`, { defaultValue: tab });
               const isActive = selectedMuscleGroup === tab;
               return (
                 <button

@@ -72,7 +72,7 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
                         >
                             {d && (() => {
                                 const parts = info ? [...new Set(info.logs.map(l => l.part))] : [];
-                                const moreLabel = i18n.language === 'ko' ? '외' : '+';
+                                const moreLabel = t('common.more');
                                 const partsLabel = parts.length === 1
                                     ? translatePart(parts[0])
                                     : parts.length === 2

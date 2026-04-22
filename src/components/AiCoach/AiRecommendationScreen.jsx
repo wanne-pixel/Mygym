@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Target, Flame, Dumbbell, TrendingUp, Plus, Check } from 'lucide-react';
 import ChatMessage from '../ChatMessage';
 import { useAiCoach } from './useAiCoach';
+import { getLocalizedNameByKo } from '../../utils/exerciseUtils';
 
 const AiRecommendationScreen = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const HARD_MODE_OPTIONS = [
         { label: t('aiCoach.hardModes.lowWeightHighRep'), value: 'low_weight_high_reps', description: t('aiCoach.hardModes.lowWeightHighRepDesc') },
@@ -41,8 +42,9 @@ const AiRecommendationScreen = () => {
         if (addedExercises.has(key)) return;
         addExerciseToRoutine(exercise, isHard);
         setAddedExercises(prev => new Set(prev).add(key));
-        showToast(`${exercise.name}${t('aiCoach.addedToRoutine')}`);
-    }, [addedExercises, addExerciseToRoutine, showToast]);
+        const localizedName = getLocalizedNameByKo(exercise.name, i18n.language);
+        showToast(`${localizedName}${t('aiCoach.addedToRoutine')}`);
+    }, [addedExercises, addExerciseToRoutine, showToast, i18n.language, t]);
 
     const parseResponseJSON = (content) => {
         try {
@@ -87,10 +89,15 @@ const AiRecommendationScreen = () => {
         setInputText('');
     };
 
+    const handleResetWithInput = () => {
+        handleManualReset();
+        setInputText('');
+    };
+
     const addedCount = addedExercises.size;
 
     return (
-        <div className="flex flex-col h-screen bg-slate-950 max-w-2xl mx-auto border-x border-white/5 pb-20 relative">
+        <div className="flex flex-col h-screen bg-slate-950 w-full max-w-6xl mx-auto border-x border-white/5 pb-20 relative">
             {/* 토스트 */}
             {toast && (
                 <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg animate-slide-up">
@@ -107,7 +114,7 @@ const AiRecommendationScreen = () => {
                     </span>
                 )}
                 <button
-                    onClick={handleManualReset}
+                    onClick={handleResetWithInput}
                     className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300 ml-1"
                 >
                     {t('aiCoach.reset')}
@@ -156,12 +163,13 @@ const AiRecommendationScreen = () => {
                                                 const isAdded = addedExercises.has(exercise.name);
                                                 const isRecommendation = parsed.type === 'recommendations';
                                                 const hasRecord = exercise.best_record && exercise.best_record !== t('aiCoach.noRecord');
+                                                const localizedName = getLocalizedNameByKo(exercise.name, i18n.language);
 
                                                 return (
                                                     <div key={exIdx} className={`bg-slate-800/40 rounded-xl p-3 border transition-colors ${isAdded ? 'border-green-500/40' : 'border-white/5 hover:border-blue-500/30'}`}>
                                                         {/* 운동명 + 부위|기록 + 버튼 */}
                                                         <div className="flex items-center justify-between gap-2 mb-1.5">
-                                                            <h4 className="text-sm font-black text-white italic uppercase truncate">{exercise.name}</h4>
+                                                            <h4 className="text-sm font-black text-white italic uppercase truncate">{localizedName}</h4>
                                                             <div className="flex items-center gap-2 flex-shrink-0">
                                                                 <div className="flex items-center gap-1.5">
                                                                     <span className="text-[10px] text-blue-500 font-bold uppercase">{exercise.part}</span>
@@ -193,7 +201,7 @@ const AiRecommendationScreen = () => {
                                                             <div className="flex gap-2 mb-1.5">
                                                                 {exercise.sets.map((set, sIdx) => (
                                                                     <div key={sIdx} className="bg-slate-900/60 px-2 py-1 rounded text-[10px] text-slate-300 font-medium border border-white/5">
-                                                                        {set.kg ? `${set.kg}kg × ` : ''}{set.reps}회
+                                                                        {set.kg ? `${set.kg}kg × ` : ''}{set.reps}{t('dayDetail.repsUnit')}
                                                                     </div>
                                                                 ))}
                                                             </div>
@@ -235,7 +243,7 @@ const AiRecommendationScreen = () => {
             <div className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent space-y-4">
                 <div className="space-y-3">
                     <div className="flex gap-3">
-                        <button onClick={() => sendRecommendationRequest('balanced')} className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-600/20"><Target size={16} /> {t('aiCoach.recommendToday')}</button>
+                        <button onClick={() => sendRecommendationRequest()} className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-600/20"><Target size={16} /> {t('aiCoach.recommendToday')}</button>
                         <button onClick={() => setShowHardModeOptions(!showHardModeOptions)} className="flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/20"><Flame size={16} /> {t('aiCoach.hardMode')}</button>
                     </div>
                     {showHardModeOptions && (
