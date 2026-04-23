@@ -84,7 +84,7 @@
       "strength": "근력 증가",
       "strengthDesc": "더 무거운 무게를 들고 싶어요",
       "hypertrophy": "근육 성장",
-      "hypertrophyDesc": "멋진 몸을 만들고 싶어요",
+      "hypertryphyDesc": "멋진 몸을 만들고 싶어요",
       "weightLoss": "체중 감량",
       "weightLossDesc": "지방을 태우고 싶어요",
       "maintenance": "현상 유지",
@@ -147,21 +147,20 @@
     "yearSuffix": "년",
     "monthSuffix": "월",
     "profileFields": {
+      "nickname": "닉네임",
       "goal": "운동 목표",
+      "experienceLevel": "운동 숙련도",
       "weeklyFrequency": "주간 운동 횟수",
+      "availableTime": "1회 가용 시간",
+      "equipmentAccess": "운동 환경",
+      "limitations": "부상 및 제한사항",
       "age": "나이",
       "ageSuffix": "세",
       "gender": "성별",
       "height": "키 (cm)",
       "heightUnit": "cm",
       "weight": "몸무게 (kg)",
-      "weightUnit": "kg",
-      "inbody": "인바디 정보",
-      "skeletalMuscle": "골격근량 (kg)",
-      "bodyFat": "체지방량 (kg)",
-      "bodyFatPercent": "체지방률 (%)",
-      "bmr": "기초대사량 (kcal)",
-      "visceralFat": "내장지방레벨"
+      "weightUnit": "kg"
     },
     "goals": {
       "strength": "근력 증가",
@@ -327,7 +326,7 @@
     "reset": "초기화",
     "resetConfirm": "채팅 기록을 모두 삭제하고 새로 시작할까요?",
     "promptRecommend": "🎯 오늘의 루틴 추천",
-    "promptHardMode": "🔥 하드모드 루틴 추천",
+    "promptHardMode": "🔥 하드모드",
     "analyzing": "코치가 데이터를 분석 중...",
     "guideTitle": "📊 코치 가이드",
     "routineTitle": "맞춤 운동 루틴",
@@ -340,14 +339,15 @@
     "hardModeNotReady": "데이터가 2주 이상 쌓여야 정확한 하드모드 추천이 가능합니다.",
     "inputPlaceholder": "코치에게 질문하기...",
     "profileLoading": "프로필 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.",
+    "fetchError": "데이터를 불러오는 데 실패했습니다.",
     "hardModes": {
       "lowWeightHighRep": "저중량 고반복",
       "lowWeightHighRepDesc": "근지구력 향상, 근육 펌핑",
       "highWeightLowRep": "고중량 저반복",
       "highWeightLowRepDesc": "근력 증가, 파워 향상",
-      "progressiveOverload": "점진적 과부하",
+      "progressiveOverload": "피라미드 세트",
       "progressiveOverloadDesc": "지속적인 중량 증가",
-      "dropSet": "드롭 세트",
+      "dropSet": "드롭세트",
       "dropSetDesc": "중량 감소하며 한계까지"
     },
     "greeting": {
@@ -376,7 +376,7 @@
       "frequentPart": "가장 많이 한 부위",
       "none": "없음",
       "beginnerLevel": "초보자",
-      "rules": "[응답 규칙 - 매우 중요]\n1. 반드시 어떠한 인사말이나 마크다운 (```json) 기호 없이, 순수한 JSON 객체 형식으로만 응답하십시오.\n2. 사용자의 현재 상태를 분석한 짧은 코멘트(plain text)를 JSON 외부에 포함하지 말고, JSON 내부의 특정 필드에 넣거나 오직 JSON만 반환하십시오.\n3. 운동 루틴은 반드시 'routine' 배열 필드에 담아야 합니다. 각 운동은 name, part, sets(kg, reps 포함), description 필드를 가져야 합니다.\n4. 요청된 언어로 응답하십시오."
+      "rules": "[응답 규칙]\n1. 자연스러운 대화체로 답변하세요. JSON 형식으로 응답하지 마세요.\n2. 친근하고 전문적인 트레이너 말투를 유지하세요.\n3. 운동 조언은 구체적이고 실용적으로 제공하세요.\n4. 한국어로 응답하세요."
     }
   }
 }

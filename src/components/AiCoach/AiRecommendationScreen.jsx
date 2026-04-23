@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Flame, Dumbbell, TrendingUp, Plus, Check } from 'lucide-react';
+import { Target, Flame, Dumbbell, TrendingUp, Plus, Check, Loader2, AlertCircle } from 'lucide-react';
 import ChatMessage from '../ChatMessage';
 import { useAiCoach } from './useAiCoach';
 import { getLocalizedNameByKo } from '../../utils/exerciseUtils';
@@ -8,79 +8,93 @@ import { getLocalizedNameByKo } from '../../utils/exerciseUtils';
 const AiRecommendationScreen = () => {
     const { t, i18n } = useTranslation();
 
-    const HARD_MODE_OPTIONS = [
-        { label: t('aiCoach.hardModes.lowWeightHighRep'), value: 'low_weight_high_reps', description: t('aiCoach.hardModes.lowWeightHighRepDesc') },
-        { label: t('aiCoach.hardModes.highWeightLowRep'), value: 'high_weight_low_reps', description: t('aiCoach.hardModes.highWeightLowRepDesc') },
-        { label: t('aiCoach.hardModes.progressiveOverload'), value: 'progressive_overload', description: t('aiCoach.hardModes.progressiveOverloadDesc') },
-        { label: t('aiCoach.hardModes.dropSet'), value: 'drop_sets', description: t('aiCoach.hardModes.dropSetDesc') },
-    ];
+    const HARD_MODE_OPTIONS = useMemo(() => [
+        { label: t('aiCoach.hardModes.lowWeightHighRep'), value: 'hard_mode_low_weight', description: t('aiCoach.hardModes.lowWeightHighRepDesc') },
+        { label: t('aiCoach.hardModes.highWeightLowRep'), value: 'hard_mode_high_weight', description: t('aiCoach.hardModes.highWeightLowRepDesc') },
+        { label: t('aiCoach.hardModes.progressiveOverload'), value: 'hard_mode_progressive', description: t('aiCoach.hardModes.progressiveOverloadDesc') },
+        { label: t('aiCoach.hardModes.dropSet'), value: 'hard_mode_drop_set', description: t('aiCoach.hardModes.dropSetDesc') },
+    ], [t]);
 
     const {
         profile,
-        recentStats,
         messages,
         isTyping,
         handleSendMessage,
         handleManualReset,
-        addExerciseToRoutine,
+        insertRoutineToDb,
         callRecommendation,
     } = useAiCoach();
 
     const [inputText, setInputText] = useState('');
     const [showHardModeOptions, setShowHardModeOptions] = useState(false);
-    const [currentRecommendationMode, setCurrentRecommendationMode] = useState('balanced');
     const [addedExercises, setAddedExercises] = useState(new Set());
+    const [isInserting, setIsInserting] = useState(null); 
     const [toast, setToast] = useState(null);
+    const [error, setError] = useState(null);
 
     const showToast = useCallback((message) => {
         setToast(message);
-        setTimeout(() => setToast(null), 2000);
+        setTimeout(() => setToast(null), 2500);
     }, []);
 
-    const handleAddExercise = useCallback((exercise, isHard) => {
-        const key = exercise.name;
+    const handleAddRoutine = async (routine, index, msgId) => {
+        const key = `${msgId}_${routine.exercise}_${index}`;
         if (addedExercises.has(key)) return;
-        addExerciseToRoutine(exercise, isHard);
-        setAddedExercises(prev => new Set(prev).add(key));
-        const localizedName = getLocalizedNameByKo(exercise.name, i18n.language);
-        showToast(`${localizedName}${t('aiCoach.addedToRoutine')}`);
-    }, [addedExercises, addExerciseToRoutine, showToast, i18n.language, t]);
+
+        setIsInserting(key);
+        try {
+            await insertRoutineToDb(routine);
+            setAddedExercises(prev => new Set(prev).add(key));
+            const localizedName = getLocalizedNameByKo(routine.exercise, i18n.language);
+            showToast(`${localizedName} ${t('aiCoach.addedToRoutine')}`);
+        } catch (err) {
+            alert(t('workout.saveFailed') + err.message);
+        } finally {
+            setIsInserting(null);
+        }
+    };
 
     const parseResponseJSON = (content) => {
+        if (typeof content !== 'string') return null;
         try {
             const jsonMatch = content.match(/\{[\s\S]*\}/);
             if (!jsonMatch) return null;
             const data = JSON.parse(jsonMatch[0]);
-            if (Array.isArray(data.recommendations)) return {
-                type: 'recommendations',
-                items: data.recommendations,
-                intro: data.intro || null,
-                tip: data.tip || null,
-            };
-            if (Array.isArray(data.routine)) return { type: 'routine', items: data.routine };
-            if (Array.isArray(data.exercises)) return { type: 'routine', items: data.exercises };
+            
+            if (Array.isArray(data.routines)) {
+                return {
+                    type: 'routines',
+                    items: data.routines,
+                    reason: data.recommendationReason || null
+                };
+            }
+            if (Array.isArray(data.routine)) return { type: 'routines', items: data.routine };
             return null;
         } catch (e) {
-            console.error('Failed to parse JSON from AI response', e);
             return null;
         }
     };
 
     const sendRecommendationRequest = async () => {
         if (!profile) { alert(t('aiCoach.profileLoading')); return; }
-        setCurrentRecommendationMode('balanced');
-        await callRecommendation('balanced');
+        setError(null);
+        setShowHardModeOptions(false);
+        try {
+            await callRecommendation('balanced');
+        } catch (err) {
+            setError(t('aiCoach.fetchError'));
+        }
     };
 
     const sendHardModeRequest = async (hardModeType) => {
-        if (!profile || !recentStats) {
-            alert(t('aiCoach.profileLoading'));
-            return;
-        }
-        const option = HARD_MODE_OPTIONS.find(o => o.value === hardModeType);
-        setCurrentRecommendationMode('hard');
+        if (!profile) { alert(t('aiCoach.profileLoading')); return; }
+        setError(null);
         setShowHardModeOptions(false);
-        await callRecommendation('hard', hardModeType, option?.label);
+        try {
+            await callRecommendation('hard', hardModeType);
+        } catch (err) {
+            setError(t('aiCoach.fetchError'));
+        }
     };
 
     const onSendMessage = () => {
@@ -92,177 +106,161 @@ const AiRecommendationScreen = () => {
     const handleResetWithInput = () => {
         handleManualReset();
         setInputText('');
+        setError(null);
     };
 
     const addedCount = addedExercises.size;
 
     return (
-        <div className="flex flex-col h-screen bg-slate-950 w-full max-w-6xl mx-auto border-x border-white/5 pb-20 relative">
-            {/* 토스트 */}
+        <div className="flex flex-col h-screen bg-slate-950 w-full max-w-6xl mx-auto border-x border-white/5 pb-20 relative overflow-hidden">
             {toast && (
-                <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg animate-slide-up">
-                    ✓ {toast}
+                <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[150] bg-blue-600 text-white text-xs font-black px-6 py-3 rounded-full shadow-2xl shadow-blue-600/40 animate-slide-up flex items-center gap-2 border border-white/10">
+                    <Check size={16} /> {toast}
                 </div>
             )}
 
             <div className="p-4 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                 <h2 className="text-sm font-black text-white italic uppercase tracking-tighter">{t('aiCoach.title')}</h2>
                 {addedCount > 0 && (
-                    <span className="bg-green-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
-                        {addedCount}{t('aiCoach.selectedCount')}
+                    <span className="bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
+                        {addedCount} {t('aiCoach.selectedCount')}
                     </span>
                 )}
-                <button
-                    onClick={handleResetWithInput}
-                    className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300 ml-1"
-                >
+                <button onClick={handleResetWithInput} className="text-[9px] font-bold text-slate-500 uppercase hover:text-slate-300 ml-auto">
                     {t('aiCoach.reset')}
                 </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-32">
                 {messages.map((msg) => {
-                    if (msg.type === 'user') {
-                        return <ChatMessage key={msg.id} msg={msg} />;
-                    }
+                    if (msg.type === 'user') return <ChatMessage key={msg.id} msg={msg} />;
 
+                    // AI 메시지 렌더링
                     const parsed = parseResponseJSON(msg.text);
-                    const plainText = msg.text.replace(/\{[\s\S]*\}/, '').replace(/```json/gi, '').replace(/```/gi, '').trim();
+                    const isRecommendation = msg.msgType === 'recommendation' && parsed;
+                    const isMsgHardMode = typeof msg.text === 'string' && msg.text.toLowerCase().includes('hard_mode');
 
                     return (
                         <div key={msg.id} className="flex items-start gap-3 mb-4 animate-slide-up">
                             <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg shadow-blue-900/20">AI</div>
-                            <div className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 space-y-4 max-w-[85%] shadow-xl overflow-hidden">
-
-                                {plainText && (
-                                    <div className="bg-blue-600/10 border-l-4 border-blue-500 pl-3 py-2 rounded-r">
-                                        <p className="text-[10px] text-blue-400 font-black mb-1 uppercase tracking-widest flex items-center gap-1.5"><TrendingUp size={12} /> {t('aiCoach.guideTitle')}</p>
-                                        <p className="text-sm text-slate-200 leading-relaxed font-medium whitespace-pre-line">{plainText}</p>
+                            <div className="flex-1 space-y-4 max-w-[85%]">
+                                
+                                {/* 1. 일반 텍스트 렌더링 (추천이 아니거나 파싱 실패 시 fallback) */}
+                                {!isRecommendation && (
+                                    <div className="bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 shadow-xl">
+                                        <p className="text-sm text-slate-200 leading-relaxed font-medium whitespace-pre-line">
+                                            {/* JSON이 포함된 텍스트일 경우 텍스트 부분만 추출, 아니면 전체 출력 */}
+                                            {typeof msg.text === 'string' ? msg.text.replace(/\{[\s\S]*\}/, '').trim() : msg.text}
+                                        </p>
                                     </div>
                                 )}
 
-                                {parsed && parsed.items.length > 0 && (
-                                    <div className="bg-purple-600/10 border border-purple-500/30 rounded-2xl p-4 space-y-4">
-                                        {/* 앞 멘트 */}
-                                        {parsed.intro && (
-                                            <p className="text-sm text-slate-200 leading-relaxed font-medium">{parsed.intro}</p>
+                                {/* 2. 루틴 카드 렌더링 (추천 타입이고 파싱 성공 시) */}
+                                {isRecommendation && (
+                                    <div className={`border rounded-3xl p-5 space-y-5 shadow-2xl backdrop-blur-sm ${isMsgHardMode ? 'bg-rose-950/20 border-rose-500/30' : 'bg-slate-900 border-white/10'}`}>
+                                        {parsed.reason && (
+                                            <div className="flex items-start gap-2.5 bg-white/5 p-3.5 rounded-2xl border border-white/5">
+                                                <TrendingUp size={16} className={isMsgHardMode ? 'text-rose-400' : 'text-blue-400'} />
+                                                <p className="text-xs text-slate-300 leading-relaxed font-bold italic">{parsed.reason}</p>
+                                            </div>
                                         )}
 
-                                        {/* 헤더 */}
-                                        <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                                            <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1.5 uppercase tracking-widest">
-                                                <Dumbbell size={14} className="text-blue-500" /> {t('aiCoach.routineTitle')}
-                                            </p>
-                                            <span className="text-[10px] text-blue-500 font-black italic">{parsed.items.length} EXERCISES</span>
-                                        </div>
-
-                                        {/* 운동 카드 */}
-                                        <div className="space-y-2">
-                                            {parsed.items.map((exercise, exIdx) => {
-                                                const isAdded = addedExercises.has(exercise.name);
-                                                const isRecommendation = parsed.type === 'recommendations';
-                                                const hasRecord = exercise.best_record && exercise.best_record !== t('aiCoach.noRecord');
-                                                const localizedName = getLocalizedNameByKo(exercise.name, i18n.language);
+                                        <div className="space-y-3">
+                                            {parsed.items.map((routine, idx) => {
+                                                const key = `${msg.id}_${routine.exercise}_${idx}`;
+                                                const isAdded = addedExercises.has(key);
+                                                const loading = isInserting === key;
+                                                const localizedName = getLocalizedNameByKo(routine.exercise, i18n.language);
 
                                                 return (
-                                                    <div key={exIdx} className={`bg-slate-800/40 rounded-xl p-3 border transition-colors ${isAdded ? 'border-green-500/40' : 'border-white/5 hover:border-blue-500/30'}`}>
-                                                        {/* 운동명 + 부위|기록 + 버튼 */}
-                                                        <div className="flex items-center justify-between gap-2 mb-1.5">
-                                                            <h4 className="text-sm font-black text-white italic uppercase truncate">{localizedName}</h4>
-                                                            <div className="flex items-center gap-2 flex-shrink-0">
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <span className="text-[10px] text-blue-500 font-bold uppercase">{exercise.part}</span>
-                                                                    {isRecommendation && (
-                                                                        <>
-                                                                            <span className="text-slate-600 text-[10px]">|</span>
-                                                                            <span className={`text-[10px] font-black ${hasRecord ? 'text-yellow-400' : 'text-slate-600'}`}>
-                                                                                {exercise.best_record || t('aiCoach.noRecord')}
-                                                                            </span>
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                                <button
-                                                                    onClick={() => handleAddExercise(exercise, currentRecommendationMode === 'hard')}
-                                                                    disabled={isAdded}
-                                                                    className={`p-1.5 rounded-lg text-white transition-all active:scale-90 flex-shrink-0 ${
-                                                                        isAdded
-                                                                            ? 'bg-green-600 cursor-default'
-                                                                            : 'bg-blue-600 hover:bg-blue-500'
-                                                                    }`}
-                                                                >
-                                                                    {isAdded ? <Check size={14} /> : <Plus size={14} />}
-                                                                </button>
+                                                    <div key={idx} className={`rounded-2xl p-4 border transition-all ${isAdded ? 'bg-blue-600/10 border-blue-500/50 animate-success-pulse' : 'bg-slate-800/50 border-white/5'}`}>
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <div>
+                                                                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md mb-1.5 inline-block ${isMsgHardMode ? 'bg-rose-500/20 text-rose-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                                                    {routine.part}
+                                                                </span>
+                                                                <h4 className="text-sm font-black text-white italic uppercase">{localizedName}</h4>
                                                             </div>
+                                                            <button
+                                                                onClick={() => handleAddRoutine(routine, idx, msg.id)}
+                                                                disabled={isAdded || loading}
+                                                                className={`p-2.5 rounded-xl transition-all active:scale-90 ${isAdded ? 'bg-blue-600 text-white cursor-default' : isMsgHardMode ? 'bg-rose-600 hover:bg-rose-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+                                                            >
+                                                                {loading ? <Loader2 size={16} className="animate-spin" /> : isAdded ? <Check size={16} /> : <Plus size={16} />}
+                                                            </button>
                                                         </div>
 
-                                                        {/* routine 타입: sets 표시 */}
-                                                        {!isRecommendation && exercise.sets?.length > 0 && (
-                                                            <div className="flex gap-2 mb-1.5">
-                                                                {exercise.sets.map((set, sIdx) => (
-                                                                    <div key={sIdx} className="bg-slate-900/60 px-2 py-1 rounded text-[10px] text-slate-300 font-medium border border-white/5">
-                                                                        {set.kg ? `${set.kg}kg × ` : ''}{set.reps}{t('dayDetail.repsUnit')}
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
-
-                                                        {(exercise.description || exercise.advice) && (
-                                                            <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2 italic">
-                                                                "{exercise.advice || exercise.description}"
-                                                            </p>
-                                                        )}
+                                                        <div className="overflow-hidden rounded-xl border border-white/5 bg-slate-950/30">
+                                                            <table className="w-full text-left border-collapse">
+                                                                <thead>
+                                                                    <tr className="bg-white/5">
+                                                                        <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5">Set</th>
+                                                                        <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5">Weight</th>
+                                                                        <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 text-right">Reps</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {routine.sets_data?.map((set, sIdx) => (
+                                                                        <tr key={sIdx} className="border-b border-white/5 last:border-0">
+                                                                            <td className="px-3 py-2 text-[10px] font-bold text-slate-400">#{sIdx + 1}</td>
+                                                                            <td className="px-3 py-2 text-[11px] font-black text-white">
+                                                                                {set.kg}kg
+                                                                                {set.isDropSet && <span className="ml-1.5 text-[8px] text-rose-400 font-black animate-pulse">DROP</span>}
+                                                                            </td>
+                                                                            <td className="px-3 py-2 text-[11px] font-black text-white text-right">{set.reps}회</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 );
                                             })}
                                         </div>
-
-                                        <p className="text-[9px] text-slate-500 text-center font-bold animate-pulse uppercase tracking-widest">
-                                            {t('aiCoach.addHint')}
-                                        </p>
-
-                                        {/* 뒤 멘트 */}
-                                        {parsed.tip && (
-                                            <p className="text-sm text-slate-200 leading-relaxed font-medium">💪 {parsed.tip}</p>
-                                        )}
+                                        <p className="text-[9px] text-slate-500 text-center font-bold animate-pulse uppercase tracking-widest">{t('aiCoach.addHint')}</p>
                                     </div>
-                                )}
-
-                                {!plainText && !parsed && (
-                                    <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-medium">
-                                        {msg.text}
-                                    </p>
                                 )}
                             </div>
                         </div>
                     );
                 })}
-                {isTyping && <div className="text-slate-500 italic text-xs animate-pulse ml-2">{t('aiCoach.analyzing')}</div>}
+                {isTyping && (
+                    <div className="flex items-center gap-2 text-blue-400 italic text-xs animate-pulse ml-2">
+                        <Loader2 size={14} className="animate-spin" />
+                        {t('aiCoach.analyzing')}
+                    </div>
+                )}
+                {error && (
+                    <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl text-red-400 text-xs font-bold mx-2">
+                        <AlertCircle size={16} />
+                        {error}
+                    </div>
+                )}
             </div>
 
             <div className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent space-y-4">
                 <div className="space-y-3">
                     <div className="flex gap-3">
-                        <button onClick={() => sendRecommendationRequest()} className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-600/20"><Target size={16} /> {t('aiCoach.recommendToday')}</button>
-                        <button onClick={() => setShowHardModeOptions(!showHardModeOptions)} className="flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/20"><Flame size={16} /> {t('aiCoach.hardMode')}</button>
+                        <button onClick={sendRecommendationRequest} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-600/20 border border-white/10"><Target size={18} /> {t('aiCoach.recommendToday')}</button>
+                        <button onClick={() => setShowHardModeOptions(!showHardModeOptions)} className="flex-1 py-4 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black italic text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/20 border border-white/10"><Flame size={18} /> {t('aiCoach.hardMode')}</button>
                     </div>
                     {showHardModeOptions && (
-                        <div className="bg-slate-900/80 border border-rose-500/30 rounded-2xl p-3 space-y-3 animate-slide-up shadow-2xl backdrop-blur-md">
-                            <p className="text-[10px] text-slate-500 font-bold text-center">{t('aiCoach.hardModeNotReady')}</p>
-                            <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-slate-900 border border-rose-500/30 rounded-3xl p-4 space-y-3 animate-slide-up shadow-2xl backdrop-blur-xl">
+                            <div className="grid grid-cols-2 gap-2.5">
                                 {HARD_MODE_OPTIONS.map(({ label, value, description }) => (
-                                    <button key={value} onClick={() => sendHardModeRequest(value)} className="bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 rounded-xl py-3 px-4 text-left active:scale-95 transition-all">
-                                        <p className="text-xs font-black text-white">{label}</p>
-                                        <p className="text-[10px] text-rose-300/70 mt-0.5">{description}</p>
+                                    <button key={value} onClick={() => sendHardModeRequest(value)} className="bg-rose-600/5 hover:bg-rose-600/15 border border-rose-500/10 hover:border-rose-500/30 rounded-2xl py-4 px-4 text-left active:scale-95 transition-all group">
+                                        <p className="text-xs font-black text-white group-hover:text-rose-400 transition-colors">{label}</p>
+                                        <p className="text-[9px] text-slate-500 mt-1 font-medium leading-tight">{description}</p>
                                     </button>
                                 ))}
                             </div>
                         </div>
                     )}
                 </div>
-                <div className="relative">
-                    <input type="text" value={inputText} onChange={e => setInputText(e.target.value)} onKeyDown={e => e.key === 'Enter' && onSendMessage()} placeholder={t('aiCoach.inputPlaceholder')} className="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                    <button onClick={onSendMessage} className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 text-white rounded-xl font-bold active:scale-90 transition-transform">↑</button>
+                <div className="relative group">
+                    <input type="text" value={inputText} onChange={e => setInputText(e.target.value)} onKeyDown={e => e.key === 'Enter' && onSendMessage()} placeholder={t('aiCoach.inputPlaceholder')} className="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all focus:bg-slate-800" />
+                    <button onClick={onSendMessage} className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold active:scale-90 transition-all shadow-lg">↑</button>
                 </div>
             </div>
         </div>

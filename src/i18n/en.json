@@ -148,21 +148,20 @@
     "yearSuffix": "",
     "monthSuffix": "",
     "profileFields": {
-      "goal": "Fitness Goal",
+      "nickname": "Nickname",
+      "goal": "Workout Goal",
+      "experienceLevel": "Experience Level",
       "weeklyFrequency": "Weekly Frequency",
+      "availableTime": "Time per Session",
+      "equipmentAccess": "Environment",
+      "limitations": "Injuries & Limitations",
       "age": "Age",
-      "ageSuffix": "yrs",
+      "ageSuffix": "",
       "gender": "Gender",
       "height": "Height (cm)",
       "heightUnit": "cm",
       "weight": "Weight (kg)",
-      "weightUnit": "kg",
-      "inbody": "Body Composition",
-      "skeletalMuscle": "Skeletal Muscle (kg)",
-      "bodyFat": "Body Fat (kg)",
-      "bodyFatPercent": "Body Fat (%)",
-      "bmr": "BMR (kcal)",
-      "visceralFat": "Visceral Fat Level"
+      "weightUnit": "kg"
     },
     "goals": {
       "strength": "Build Strength",
@@ -328,7 +327,7 @@
     "reset": "Reset",
     "resetConfirm": "Clear chat history and start over?",
     "promptRecommend": "🎯 Recommend Today's Routine",
-    "promptHardMode": "🔥 Recommend Hard Mode Routine",
+    "promptHardMode": "🔥 Hard Mode",
     "analyzing": "Coach is analyzing data...",
     "guideTitle": "📊 Coach Guide",
     "routineTitle": "Custom Routine",
@@ -341,15 +340,16 @@
     "hardModeNotReady": "At least 2 weeks of data is needed for accurate Hard Mode recommendations.",
     "inputPlaceholder": "Ask your coach...",
     "profileLoading": "Loading profile. Please try again in a moment.",
+    "fetchError": "Failed to fetch data.",
     "hardModes": {
-      "lowWeightHighRep": "High-Rep / Light Weight",
-      "lowWeightHighRepDesc": "Muscular endurance & pump",
-      "highWeightLowRep": "Low-Rep / Heavy Weight",
-      "highWeightLowRepDesc": "Strength & power gains",
-      "progressiveOverload": "Progressive Overload",
-      "progressiveOverloadDesc": "Steadily increase weight over time",
+      "lowWeightHighRep": "Low-Weight High-Rep",
+      "lowWeightHighRepDesc": "Endurance & pump",
+      "highWeightLowRep": "High-Weight Low-Rep",
+      "highWeightLowRepDesc": "Strength & power",
+      "progressiveOverload": "Pyramid Set",
+      "progressiveOverloadDesc": "Steadily increase weight",
       "dropSet": "Drop Sets",
-      "dropSetDesc": "Reduce weight and push to failure"
+      "dropSetDesc": "Reduce weight to failure"
     },
     "greeting": {
       "noProfile": "Hello! 😊\n\nI'm MyGym AI Coach. If you set up your profile, I can provide more personalized coaching. What's your workout plan for today?",
@@ -377,7 +377,7 @@
       "frequentPart": "Most Frequent Part",
       "none": "None",
       "beginnerLevel": "Beginner",
-      "rules": "[Response Rules - VERY IMPORTANT]\n1. Respond ONLY in pure JSON format, without any greetings or markdown (```json) symbols.\n2. Do NOT include any plain text analysis outside the JSON; put it in specific fields within the JSON or return only JSON.\n3. The workout routine must be in a 'routine' array field. Each exercise should have name, part, sets (including kg, reps), and description fields.\n4. Respond in the requested language."
+      "rules": "[Response Rules]\n1. Respond in natural conversational language. Do NOT respond in JSON format.\n2. Maintain a friendly and professional trainer tone.\n3. Provide specific and practical fitness advice.\n4. Respond in English."
     }
   }
 }

@@ -12,17 +12,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
     const { t } = useTranslation();
 
     const [profile, setProfile] = useState({
-        age: userData?.age || '',
-        height: userData?.height || '',
-        weight: userData?.weight || '',
-        gender: userData?.gender || '',
-        skeletal_muscle_mass: userData?.skeletal_muscle_mass || '',
-        body_fat_mass: userData?.body_fat_mass || '',
-        body_fat_percentage: userData?.body_fat_percentage || '',
-        bmr: userData?.bmr || '',
-        visceral_fat_level: userData?.visceral_fat_level || '',
+        nickname: userData?.nickname || userData?.full_name || '',
         goals: userData?.goals || (userData?.goal ? [userData.goal] : ['strength']),
-        weekly_frequency: userData?.weekly_frequency || 3
+        weekly_frequency: userData?.weekly_frequency || 3,
+        experience_level: userData?.experience_level || 'beginner',
+        available_time: userData?.available_time || '30분~1시간',
+        limitations: userData?.limitations || []
     });
 
     const [isSaving, setIsSaving] = useState(false);
@@ -30,17 +25,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
     useEffect(() => {
         if (isOpen && userData) {
             setProfile({
-                age: userData.age || '',
-                height: userData.height || '',
-                weight: userData.weight || '',
-                gender: userData.gender || '',
-                skeletal_muscle_mass: userData.skeletal_muscle_mass || '',
-                body_fat_mass: userData.body_fat_mass || '',
-                body_fat_percentage: userData.body_fat_percentage || '',
-                bmr: userData.bmr || '',
-                visceral_fat_level: userData.visceral_fat_level || '',
+                nickname: userData.nickname || userData.full_name || '',
                 goals: userData.goals || (userData.goal ? [userData.goal] : ['strength']),
-                weekly_frequency: userData.weekly_frequency || 3
+                weekly_frequency: userData.weekly_frequency || 3,
+                experience_level: userData.experience_level || 'beginner',
+                available_time: userData.available_time || '30분~1시간',
+                limitations: userData.limitations || []
             });
         }
     }, [isOpen, userData]);
@@ -53,13 +43,18 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
             if (isSelected) {
                 return { ...prev, goals: prev.goals.filter(g => g !== value) };
             }
-            if (prev.goals.length >= 2) {
-                // 이미 2개면 가장 먼저 선택한 걸 버리고 새 거 추가 (또는 그냥 무시할 수도 있지만 토글이 더 자연스러움)
-                // 여기서는 2개 제한 안내가 있으니 추가를 막는 방식으로 구현
-                return prev;
-            }
+            if (prev.goals.length >= 2) return prev;
             return { ...prev, goals: [...prev.goals, value] };
         });
+    };
+
+    const toggleLimitation = (limit) => {
+        setProfile(prev => ({
+            ...prev,
+            limitations: prev.limitations.includes(limit)
+                ? prev.limitations.filter(l => l !== limit)
+                : [...prev.limitations, limit]
+        }));
     };
 
     const handleSave = async () => {
@@ -74,17 +69,14 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
             if (!session.session) throw new Error(t('common.loginRequired'));
             const userId = session.session.user.id;
 
-            // 하위 호환성을 위해 첫 번째 목표를 goal 필드에도 저장
             const primaryGoal = profile.goals[0];
 
+            // Auth Metadata 업데이트 (닉네임 포함)
             await supabase.auth.updateUser({
                 data: {
+                    nickname: profile.nickname,
                     goal: primaryGoal,
                     goals: profile.goals,
-                    age: profile.age,
-                    gender: profile.gender,
-                    height: profile.height,
-                    weight: profile.weight
                 }
             });
 
@@ -92,13 +84,9 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                 goal: primaryGoal,
                 goals: profile.goals,
                 weekly_frequency: parseInt(profile.weekly_frequency) || 3,
-                height: profile.height ? parseInt(profile.height) : null,
-                weight: profile.weight ? parseFloat(profile.weight) : null,
-                age: profile.age ? parseInt(profile.age) : null,
-                gender: profile.gender || null,
-                experience_level: userData?.experience_level || 'beginner',
-                equipment_access: userData?.equipment_access || 'full_gym',
-                limitations: userData?.limitations || []
+                experience_level: profile.experience_level,
+                available_time: profile.available_time,
+                limitations: profile.limitations
             };
 
             const { error: profileError } = await supabase
@@ -127,31 +115,64 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
         { key: 'maintenance', label: t('onboarding.goal.maintenance') }
     ];
 
+    const levelOptions = [
+        { key: 'beginner', label: t('onboarding.level.beginner') },
+        { key: 'intermediate', label: t('onboarding.level.intermediate') },
+        { key: 'advanced', label: t('onboarding.level.advanced') }
+    ];
+
+    const timeOptions = [
+        { key: '30분 이하', label: t('onboarding.availableTime.under30') },
+        { key: '30분~1시간', label: t('onboarding.availableTime.30to60') },
+        { key: '1시간~1.5시간', label: t('onboarding.availableTime.60to90') },
+        { key: '1.5시간 이상', label: t('onboarding.availableTime.over90') }
+    ];
+
+    const limitOptions = [
+        { key: 'knee', label: t('onboarding.limitations.knee') },
+        { key: 'back', label: t('onboarding.limitations.lowerBack') },
+        { key: 'shoulder', label: t('onboarding.limitations.shoulder') },
+        { key: 'wrist', label: t('onboarding.limitations.wrist') }
+    ];
+
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-4">
             <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={onClose}></div>
-            <div className="relative bg-slate-900 border border-white/10 w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="relative bg-slate-900 border-t sm:border border-white/10 w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar animate-slide-up sm:animate-fade-in">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-2xl font-black text-white italic text-shadow">{t('calendar.editProfile')}</h3>
-                    <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+                    <h3 className="text-xl sm:text-2xl font-black text-white italic text-shadow">{t('calendar.editProfile')}</h3>
+                    <button onClick={onClose} className="p-2 -mr-2 text-slate-500 hover:text-white transition-colors">
                         <X size={24} />
                     </button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-5 sm:space-y-6">
+                    {/* 닉네임 */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.nickname')}</label>
+                        <input
+                            type="text"
+                            value={profile.nickname}
+                            onChange={e => setProfile({...profile, nickname: e.target.value})}
+                            className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold transition-all"
+                            placeholder={t('calendar.profileFields.nickname')}
+                        />
+                    </div>
+
+                    {/* 운동 목표 */}
                     <div className="space-y-3">
                         <div className="flex justify-between items-end">
                             <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.goal')}</label>
                             <span className="text-[9px] font-bold text-slate-600 uppercase">{t('onboarding.goal.maxSelect')}</span>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-2 gap-2">
                             {goalOptions.map(opt => {
                                 const isSelected = profile.goals.includes(opt.key);
                                 return (
                                     <button
                                         key={opt.key}
                                         onClick={() => toggleGoal(opt.key)}
-                                        className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all border-2 ${
+                                        className={`px-3 py-3 rounded-2xl text-xs font-black transition-all border-2 ${
                                             isSelected 
                                                 ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20' 
                                                 : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
@@ -164,69 +185,83 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                         </div>
                     </div>
 
-                    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                        <div className="col-span-1">
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.weeklyFrequency')}</label>
-                            <input
-                                type="number"
-                                min="1"
-                                max="7"
-                                value={profile.weekly_frequency}
-                                onChange={e => setProfile({...profile, weekly_frequency: e.target.value})}
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.age')}</label>
-                            <input type="number" value={profile.age} onChange={e => setProfile({...profile, age: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder={t('calendar.profileFields.ageSuffix')} />
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.gender')}</label>
-                            <select value={profile.gender} onChange={e => setProfile({...profile, gender: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold">
-                                <option value="">{t('common.select')}</option>
-                                <option value="male">{t('common.male')}</option>
-                                <option value="female">{t('common.female')}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.height')}</label>
-                            <input type="number" value={profile.height} onChange={e => setProfile({...profile, height: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder={t('calendar.profileFields.heightUnit')} />
-                        </div>
-                        <div className="col-span-1">
-                            <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.weight')}</label>
-                            <input type="number" value={profile.weight} onChange={e => setProfile({...profile, weight: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" placeholder={t('calendar.profileFields.weightUnit')} />
+                    {/* 운동 숙련도 */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.experienceLevel')}</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {levelOptions.map(opt => (
+                                <button
+                                    key={opt.key}
+                                    onClick={() => setProfile({...profile, experience_level: opt.key})}
+                                    className={`py-3 rounded-2xl text-[10px] font-black transition-all border-2 ${
+                                        profile.experience_level === opt.key
+                                            ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20'
+                                            : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
+                                    }`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-800">
-                        <label className="text-[10px] font-black text-blue-400 uppercase block mb-4 tracking-widest italic">{t('calendar.profileFields.inbody')}</label>
-                        <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.skeletalMuscle')}</label>
-                                <input type="number" value={profile.skeletal_muscle_mass} onChange={e => setProfile({...profile, skeletal_muscle_mass: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* 주간 횟수 */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.weeklyFrequency')}</label>
+                            <div className="relative">
+                                <select
+                                    value={profile.weekly_frequency}
+                                    onChange={e => setProfile({...profile, weekly_frequency: e.target.value})}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold appearance-none cursor-pointer"
+                                >
+                                    {[2,3,4,5,6,7].map(n => <option key={n} value={n}>{n}{t('onboarding.frequency.unit')}</option>)}
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
                             </div>
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.bodyFat')}</label>
-                                <input type="number" value={profile.body_fat_mass} onChange={e => setProfile({...profile, body_fat_mass: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.bodyFatPercent')}</label>
-                                <input type="number" value={profile.body_fat_percentage} onChange={e => setProfile({...profile, body_fat_percentage: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.bmr')}</label>
-                                <input type="number" value={profile.bmr} onChange={e => setProfile({...profile, bmr: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
-                            </div>
-                            <div className="col-span-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase block mb-1 tracking-widest">{t('calendar.profileFields.visceralFat')}</label>
-                                <input type="number" value={profile.visceral_fat_level} onChange={e => setProfile({...profile, visceral_fat_level: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold" />
+                        </div>
+                        {/* 가용 시간 */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.availableTime')}</label>
+                            <div className="relative">
+                                <select
+                                    value={profile.available_time}
+                                    onChange={e => setProfile({...profile, available_time: e.target.value})}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold appearance-none cursor-pointer"
+                                >
+                                    {timeOptions.map(opt => <option key={opt.key} value={opt.key}>{opt.label}</option>)}
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="pt-6 flex gap-3">
-                        <button onClick={onClose} className={`flex-1 bg-slate-800 text-white font-black rounded-xl transition-all hover:bg-slate-700 italic uppercase tracking-widest ${isMobile ? 'py-4 text-sm' : 'py-3 text-xs'}`}>{t('common.cancel')}</button>
-                        <button onClick={handleSave} disabled={isSaving} className={`flex-1 bg-blue-600 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:bg-blue-500 disabled:opacity-50 italic uppercase tracking-widest ${isMobile ? 'py-4 text-sm' : 'py-3 text-xs'}`}>{isSaving ? t('common.saving') : t('common.save')}</button>
+                    {/* 부상/제한사항 */}
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.limitations')}</label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {limitOptions.map(opt => {
+                                const isSelected = profile.limitations.includes(opt.key);
+                                return (
+                                    <button
+                                        key={opt.key}
+                                        onClick={() => toggleLimitation(opt.key)}
+                                        className={`px-3 py-3 rounded-2xl text-[10px] font-black transition-all border-2 ${
+                                            isSelected 
+                                                ? 'bg-rose-600 border-rose-500 text-white shadow-lg shadow-rose-600/20' 
+                                                : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="pt-4 flex gap-3">
+                        <button onClick={onClose} className="flex-1 bg-slate-800 text-white font-black py-4 rounded-2xl transition-all hover:bg-slate-700 italic uppercase tracking-widest text-sm">{t('common.cancel')}</button>
+                        <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-blue-600 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-blue-600/20 hover:bg-blue-500 disabled:opacity-50 italic uppercase tracking-widest text-sm">{isSaving ? t('common.saving') : t('common.save')}</button>
                     </div>
                 </div>
             </div>

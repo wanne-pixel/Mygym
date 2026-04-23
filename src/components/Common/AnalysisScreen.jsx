@@ -109,6 +109,8 @@ const PRCard = ({ pr }) => {
   const days = daysSince(pr.date);
   const isNew = days <= 7;
   const isRecent = days <= 30;
+  const subTarget = getSubCategory(pr.exercise, i18n.language);
+
   return (
     <div className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
       isNew ? 'bg-blue-500/10 border-blue-500/30'
@@ -121,8 +123,9 @@ const PRCard = ({ pr }) => {
         <Trophy size={18} className={isNew ? 'text-blue-400' : isRecent ? 'text-yellow-400' : 'text-slate-500'} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-white font-black text-sm truncate">{getLocalizedNameByKo(pr.exercise, i18n.language)}</span>
+          <span className="text-[11px] text-slate-500 font-medium shrink-0">({subTarget})</span>
           {isNew && (
             <span className="text-[9px] font-black text-blue-400 bg-blue-400/15 px-2 py-0.5 rounded-full uppercase tracking-widest flex-shrink-0">{t('common.new')}</span>
           )}

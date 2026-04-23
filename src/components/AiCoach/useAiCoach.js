@@ -8,30 +8,31 @@ const MAX_CHAT_HISTORY = 100;
 const SESSION_CHAT_KEY = 'mygym_session_chat';
 
 const callAiCoachFunction = async (payload) => {
-    console.log('[FRONTEND] Starting AI Coach request')
-    console.log('[FRONTEND] Payload type:', payload?.type)
+    console.log('[AI COACH REQUEST]', payload);
 
-    // 1. 현재 세션 강제 확인
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-        throw new Error('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
-    }
-
-    const token = session.access_token;
-
-    // 2. invoke 호출 시 headers에 토큰 명시적으로 포함
-    const { data, error } = await supabase.functions.invoke('ai-coach', {
-        body: payload,
-        headers: {
-            Authorization: `Bearer ${token}`
+    try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session) {
+            throw new Error('로그인 세션이 만료되었습니다.');
         }
-    });
 
-    if (error) throw error;
-    if (data?.error) throw new Error(data.error);
+        const token = session.access_token;
+        const { data, error } = await supabase.functions.invoke('ai-coach', {
+            body: payload,
+            headers: { Authorization: `Bearer ${token}` }
+        });
 
-    return data.content;
+        if (error) {
+            console.error('[AI COACH API ERROR]', error);
+            throw error;
+        }
+
+        console.log('[AI COACH RESPONSE]', data);
+        return data; // { reply, msgType } 반환
+    } catch (err) {
+        console.error('[AI COACH CALL FAILED]', err);
+        throw err;
+    }
 };
 
 export const useAiCoach = () => {
@@ -62,9 +63,9 @@ export const useAiCoach = () => {
                 .from('workout_logs')
                 .select('exercise, sets_data')
                 .eq('user_id', userId);
-            
+
             if (!logs || logs.length === 0) return {};
-            
+
             const records = {};
             logs.forEach(log => {
                 const exerciseName = log.exercise;
@@ -87,28 +88,29 @@ export const useAiCoach = () => {
 
     const generateGreeting = (profile, stats) => {
         if (!profile) return t('aiCoach.greeting.noProfile');
-        const { experience_level, goal, weekly_frequency, limitations } = profile;
+        const { experience_level, goals, weekly_frequency, limitations } = profile;
         const { totalWorkouts } = stats;
         let text = t('aiCoach.greeting.welcome');
-        
+
         if (experience_level === 'beginner') text += t('aiCoach.greeting.beginner');
         else if (experience_level === 'intermediate') text += t('aiCoach.greeting.intermediate');
         else if (experience_level === 'advanced') text += t('aiCoach.greeting.advanced');
-        
-        const goalText = { 
+
+        const goalLabels = { 
             strength: t('onboarding.goal.strength'), 
             hypertrophy: t('onboarding.goal.hypertrophy'), 
             weight_loss: t('onboarding.goal.weightLoss'), 
             maintenance: t('onboarding.goal.maintenance') 
         };
-        
-        text += (goalText[goal] || t('onboarding.goal.maintenance')) + t('aiCoach.greeting.weeklyFrequency', { count: weekly_frequency });
-        
+
+        const mainGoal = Array.isArray(goals) && goals.length > 0 ? goals[0] : (profile.goal || 'maintenance');
+        text += (goalLabels[mainGoal] || goalLabels.maintenance) + t('aiCoach.greeting.weeklyFrequency', { count: weekly_frequency });
+
         if (limitations?.length > 0) {
             const parts = limitations.map(l => t(`onboarding.limitations.${l}`, { defaultValue: l })).join(', ');
             text += t('aiCoach.greeting.limitations', { parts });
         }
-        
+
         if (totalWorkouts > 0) {
             text += t('aiCoach.greeting.stats', { count: totalWorkouts });
         } else {
@@ -135,13 +137,13 @@ export const useAiCoach = () => {
                 const { data: logs } = await supabase.from('workout_logs').select('*').eq('user_id', userId).gte('created_at', sevenDaysAgo.toISOString());
                 const stats = { totalWorkouts: new Set(logs?.map(l => l.created_at.split('T')[0])).size || 0, mostFrequentPart: getMostFrequent(logs?.map(l => l.part)) };
                 setRecentStats(stats);
-                
+
                 const records = await fetchExercisePersonalRecords(userId);
                 setPersonalRecords(records);
 
                 if (shouldReset || messages.length === 0) {
                     const greetingText = generateGreeting(profileData, stats);
-                    const initialMessage = { id: Date.now(), type: 'ai', text: greetingText };
+                    const initialMessage = { id: Date.now(), type: 'ai', msgType: 'chat', text: greetingText };
                     setMessages([initialMessage]);
                     sessionStorage.setItem('aiCoachLastReset', now.toString());
                 }
@@ -155,56 +157,89 @@ export const useAiCoach = () => {
         sessionStorage.setItem(SESSION_CHAT_KEY, JSON.stringify(trimmed));
     }, [messages]);
 
+    const fetchRecentWorkouts = async (userId) => {
+        const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+        try {
+            const { data: logs } = await supabase
+                .from('workout_logs')
+                .select('part, exercise, sets_data, created_at')
+                .eq('user_id', userId)
+                .gte('created_at', fiveDaysAgo)
+                .order('created_at', { ascending: false });
+
+            if (!logs || logs.length === 0) return [];
+
+            const grouped = {};
+            logs.forEach(log => {
+                const date = log.created_at.split('T')[0];
+                if (!grouped[date]) grouped[date] = { date, parts: [], exercises: [] };
+
+                if (log.part && !grouped[date].parts.includes(log.part)) {
+                    grouped[date].parts.push(log.part);
+                }
+
+                let sets = [];
+                try {
+                    sets = typeof log.sets_data === 'string'
+                        ? JSON.parse(log.sets_data)
+                        : (Array.isArray(log.sets_data) ? log.sets_data : []);
+                } catch {}
+
+                const bestSet = sets.reduce((best, s) => {
+                    const kg = parseFloat(s?.kg) || 0;
+                    return kg > (parseFloat(best?.kg) || 0) ? s : best;
+                }, sets[0] || null);
+
+                if (log.exercise) {
+                    grouped[date].exercises.push({
+                        part: log.part,
+                        exercise: log.exercise,
+                        bestKg: bestSet ? parseFloat(bestSet.kg) || 0 : 0,
+                        bestReps: bestSet ? parseInt(bestSet.reps) || 0 : 0,
+                        totalSets: sets.length,
+                    });
+                }
+            });
+            return Object.values(grouped);
+        } catch (error) {
+            console.error('[RECENT] 최근 운동 기록 조회 실패:', error);
+            return [];
+        }
+    };
+
     const callOpenAI = async (userPrompt, currentHistory) => {
         setIsTyping(true);
-        const recordsText = Object.keys(personalRecords).length > 0
-            ? Object.entries(personalRecords).map(([name, r]) => `- ${name}: ${r.kg}kg × ${r.reps}${t('dayDetail.repsUnit')}`).join('\n')
-            : t('aiCoach.prompt.none') + ` (${t('aiCoach.prompt.beginnerLevel')})`;
 
-        const goalLabels = { 
-            strength: t('onboarding.goal.strength'), 
-            hypertrophy: t('onboarding.goal.hypertrophy'), 
-            weight_loss: t('onboarding.goal.weightLoss'), 
-            maintenance: t('onboarding.goal.maintenance') 
-        };
-        const goalsDisplay = Array.isArray(profile?.goals) && profile.goals.length > 0
-            ? profile.goals.map(g => goalLabels[g] || g).join(', ')
-            : goalLabels[profile?.goal] || profile?.goal || t('aiCoach.prompt.none');
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            let recentWorkouts = [];
+            if (session) {
+                recentWorkouts = await fetchRecentWorkouts(session.user.id);
+            }
 
-        const systemMessage = `${t('aiCoach.prompt.systemRole')}
+            const goalLabels = { 
+                strength: t('onboarding.goal.strength'), 
+                hypertrophy: t('onboarding.goal.hypertrophy'), 
+                weight_loss: t('onboarding.goal.weightLoss'), 
+                maintenance: t('onboarding.goal.maintenance') 
+            };
+            const goalsDisplay = Array.isArray(profile?.goals) && profile.goals.length > 0
+                ? profile.goals.map(g => goalLabels[g] || g).join(', ')
+                : goalLabels[profile?.goal] || profile?.goal || t('aiCoach.prompt.none');
+
+            const systemMessage = `${t('aiCoach.prompt.systemRole')}
 
 ${t('aiCoach.prompt.userProfile')}
 - ${t('aiCoach.prompt.goal')}: ${goalsDisplay}
 - ${t('aiCoach.prompt.experience')}: ${profile?.experience_level || t('aiCoach.prompt.none')}
 - ${t('aiCoach.prompt.frequency')}: ${profile?.weekly_frequency || 0}${t('onboarding.frequency.unit')}
 - ${t('aiCoach.prompt.time')}: ${profile?.available_time || t('aiCoach.prompt.none')}
-- ${t('aiCoach.prompt.equipment')}: ${profile?.equipment_access || t('aiCoach.prompt.none')}
 - ${t('aiCoach.prompt.limitations')}: ${profile?.limitations?.map(l => t(`onboarding.limitations.${l}`, { defaultValue: l })).join(', ') || t('aiCoach.prompt.none')}
 
-${t('aiCoach.prompt.recentStats')}
-- ${t('aiCoach.prompt.workoutCount')}: ${recentStats?.totalWorkouts || 0}${t('onboarding.frequency.unit')}
-- ${t('aiCoach.prompt.frequentPart')}: ${recentStats?.mostFrequentPart || t('aiCoach.prompt.none')}
-
-${t('aiCoach.prompt.personalRecords')}
-${recordsText}
-
 ${t('aiCoach.prompt.rules')}
+`;
 
-응답 JSON 구조 예시:
-{
-  "analysis": "사용자의 현재 상태 분석 및 오늘 운동의 방향성",
-  "routine": [
-    {
-      "name": "벤치프레스",
-      "part": "가슴",
-      "sets": [{ "kg": 40, "reps": 10 }, { "kg": 40, "reps": 10 }],
-      "description": "가슴 중앙부를 타겟팅하며 바를 천천히 내리세요."
-    }
-  ]
-}`;
-
-        try {
-            const aiText = await callAiCoachFunction({
+            const response = await callAiCoachFunction({
                 type: 'chat',
                 systemMessage,
                 lang: i18n.language,
@@ -213,11 +248,18 @@ ${t('aiCoach.prompt.rules')}
                     content: m.text,
                 })),
                 userPrompt,
+                recentWorkouts,
             });
-            setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', text: aiText }]);
+
+            setMessages(prev => [...prev, { 
+                id: Date.now() + 1, 
+                type: 'ai', 
+                msgType: response.msgType || 'chat',
+                text: response.reply 
+            }]);
         } catch (e) {
             console.error(e);
-            alert('AI 코치와 연결이 원활하지 않습니다.');
+            setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', msgType: 'chat', text: t('aiCoach.fetchError') }]);
         } finally {
             setIsTyping(false);
         }
@@ -231,87 +273,125 @@ ${t('aiCoach.prompt.rules')}
         await callOpenAI(aiPrompt, updatedHistory);
     };
 
-    const callRecommendation = async (mode, hardModeType = null, hardModeLabel = null) => {
+    const callRecommendation = async (mode, selectedMode = 'today_routine') => {
         setIsTyping(true);
+
+        let displayModeName = selectedMode;
+        if (mode === 'hard') {
+            const hardModeKeys = {
+                'hard_mode_low_weight': 'aiCoach.hardModes.lowWeightHighRep',
+                'hard_mode_high_weight': 'aiCoach.hardModes.highWeightLowRep',
+                'hard_mode_progressive': 'aiCoach.hardModes.progressiveOverload',
+                'hard_mode_drop_set': 'aiCoach.hardModes.dropSet'
+            };
+            displayModeName = t(hardModeKeys[selectedMode] || selectedMode);
+        }
+
         const displayText = mode === 'hard'
-            ? `${t('aiCoach.promptHardMode')} (${hardModeLabel || hardModeType?.replace(/_/g, ' ')})`
+            ? `🔥 ${t('aiCoach.hardMode')} (${displayModeName})`
             : t('aiCoach.promptRecommend');
+
         const userMsg = { id: Date.now(), type: 'user', text: displayText };
         setMessages(prev => [...prev, userMsg]);
-        try {
-            // 최근 7일 운동 기록 조회 (날짜별 부위 + 운동명)
-            let recentWorkouts = [];
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-                const { data: logs } = await supabase
-                    .from('workout_logs')
-                    .select('exercise, part, created_at')
-                    .eq('user_id', session.user.id)
-                    .gte('created_at', sevenDaysAgo)
-                    .order('created_at', { ascending: false });
 
-                if (logs?.length) {
-                    // 날짜별로 그룹화
-                    const byDate = {};
-                    logs.forEach(log => {
-                        const date = log.created_at.split('T')[0];
-                        if (!byDate[date]) byDate[date] = { parts: new Set(), exercises: [] };
-                        if (log.part) byDate[date].parts.add(log.part);
-                        if (log.exercise) byDate[date].exercises.push(log.exercise);
-                    });
-                    recentWorkouts = Object.entries(byDate)
-                        .sort(([a], [b]) => b.localeCompare(a))
-                        .map(([date, { parts, exercises }]) => ({
-                            date,
-                            parts: [...parts],
-                            exercises: [...new Set(exercises)],
-                        }));
-                }
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            let recentWorkouts = [];
+            if (session) {
+                recentWorkouts = await fetchRecentWorkouts(session.user.id);
             }
 
-            const aiText = await callAiCoachFunction({
+            const response = await callAiCoachFunction({
                 type: 'recommendation',
                 lang: i18n.language,
                 exercises: EXERCISE_DATASET,
-                profile,
-                mode,
-                hardModeType,
+                userProfile: {
+                    level: profile?.experience_level || 'beginner',
+                    frequency: profile?.weekly_frequency || 3,
+                    availableTime: profile?.available_time || '30분~1시간',
+                    goals: Array.isArray(profile?.goals) && profile.goals.length > 0
+                        ? profile.goals
+                        : (profile?.goal ? [profile.goal] : ['maintenance']),
+                    limitations: profile?.limitations || [],
+                },
                 recentWorkouts,
+                selectedMode: mode === 'hard' ? selectedMode : 'today_routine',
             });
-            setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', text: aiText }]);
+
+            // callAiCoachFunction은 supabase.functions.invoke의 data만 반환하므로
+            // response = { reply, content, parsedData } 구조
+            console.log("=== RECOMMENDATION RESPONSE ===");
+            console.log("Full response:", response);
+            console.log("response.reply:", response?.reply);
+            console.log("response.content:", response?.content);
+            console.log("response.parsedData:", response?.parsedData);
+
+            const reply = response?.reply ?? response?.content ?? null;
+            console.log("Extracted reply:", reply);
+
+            if (!reply) {
+                console.error("No reply extracted from response");
+                throw new Error("AI 응답에서 텍스트를 추출할 수 없습니다.");
+            }
+
+            setMessages(prev => [...prev, {
+                id: Date.now() + 1,
+                type: 'ai',
+                msgType: response?.msgType || 'recommendation',
+                text: reply
+            }]);
         } catch (e) {
-            console.error('[callRecommendation]', e);
-            alert('AI 코치와 연결이 원활하지 않습니다.');
+            console.error('[callRecommendation ERROR]', e);
+            setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', msgType: 'chat', text: t('aiCoach.fetchError') }]);
         } finally {
             setIsTyping(false);
+        }
+    };
+
+    const insertRoutineToDb = async (routine) => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) throw new Error(t('common.loginRequired'));
+
+            const { error } = await supabase
+                .from('workout_logs')
+                .insert({
+                    user_id: session.user.id,
+                    part: routine.part,
+                    exercise: routine.exercise,
+                    type: routine.type || 'strength',
+                    sets_count: routine.sets_count,
+                    sets_data: routine.sets_data,
+                    is_completed: false
+                });
+
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.error('[DB Insert Error]', error);
+            throw error;
         }
     };
 
     const handleManualReset = () => {
         if (!confirm(t('aiCoach.resetConfirm'))) return;
         const greetingText = generateGreeting(profile, recentStats);
-        const initialMessage = { id: Date.now(), type: 'ai', text: greetingText };
+        const initialMessage = { id: Date.now(), type: 'ai', msgType: 'chat', text: greetingText };
         setMessages([initialMessage]);
         sessionStorage.setItem('aiCoachLastReset', Date.now().toString());
     };
 
-    const addExerciseToRoutine = (exercise, isHardMode = false) => {
-        const today = new Date().toISOString().split('T')[0];
-        const storageKey = `mygym_routine_${today}`;
-        let fullExercise = exercise.exercise_id
-            ? EXERCISE_DATASET?.find(e => e.id === exercise.exercise_id)
-            : EXERCISE_DATASET?.find(e => e.name === exercise.name);
-        
-        const cleanedSets = isHardMode 
-            ? exercise.sets?.map(set => ({ kg: set.kg, reps: set.reps, isDropSet: set.isDropSet || false, dropKgs: set.dropKgs || ['', '', ''] }))
-            : exercise.sets?.map(set => ({ kg: '', reps: '', isDropSet: set.isDropSet || false, dropKgs: ['', '', ''] })) || Array(3).fill({ kg: '', reps: '', isDropSet: false, dropKgs: ['', '', ''] });
-
-        const exerciseToAdd = { ...exercise, sets: cleanedSets, id: fullExercise?.id || `temp_${Date.now()}`, image: fullExercise?.gif_url || '', completed: false };
-        const existingRoutine = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        if (existingRoutine.find(e => e.name === exercise.name)) return;
-        localStorage.setItem(storageKey, JSON.stringify([...existingRoutine, exerciseToAdd]));
+    return { 
+        profile, 
+        recentStats, 
+        messages, 
+        setMessages, 
+        isTyping, 
+        handleSendMessage, 
+        handleManualReset, 
+        insertRoutineToDb, 
+        callOpenAI, 
+        callRecommendation 
     };
-
-    return { profile, recentStats, messages, setMessages, isTyping, handleSendMessage, handleManualReset, addExerciseToRoutine, callOpenAI, callRecommendation };
 };
+
