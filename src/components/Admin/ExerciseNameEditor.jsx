@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState, useMemo } from 'react';
 import EXERCISE_DATASET from '../../data/exercises.json';
 
@@ -63,9 +64,9 @@ export default function ExerciseNameEditor() {
         // 특수 케이스: 영문 포함 항목을 찾아서 input에 포커스하기 어려우니, 검색창에 패턴 힌트 제공
         const abnormal = exercises.filter(ex => /[A-Z]/.test(ex.name));
         if (abnormal.length === 0) {
-            alert('대문자 영문이 포함된 항목이 없습니다.');
+            toast('대문자 영문이 포함된 항목이 없습니다.');
         } else {
-            alert(`대문자 영문 포함 항목: ${abnormal.length}개\n\n예: ${abnormal.slice(0, 5).map(e => e.name).join(', ')}...\n\n검색창에 영문을 입력하면 필터링됩니다.`);
+            toast(`대문자 영문 포함 항목: ${abnormal.length}개\n\n예: ${abnormal.slice(0, 5).map(e => e.name).join(', ')}...\n\n검색창에 영문을 입력하면 필터링됩니다.`);
         }
     };
 

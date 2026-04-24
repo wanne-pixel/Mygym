@@ -59,7 +59,7 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
 
     const handleSave = async () => {
         if (profile.goals.length === 0) {
-            alert(t('onboarding.goal.maxSelect'));
+            toast.error(t('onboarding.goal.maxSelect'));
             return;
         }
 
@@ -97,12 +97,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
             if (profileError) throw profileError;
 
             localStorage.setItem(STORAGE_KEYS.USER_BODY_INFO, JSON.stringify(profile));
-            alert(t('calendar.profileSaved'));
+            toast.success(t('calendar.profileSaved'));
             onUpdate();
             onClose();
         } catch (error) {
             console.error('Update Error:', error);
-            alert(t('calendar.saveFailed') + (error.message || ''));
+            toast.error(t('calendar.saveFailed') + (error.message || ''));
         } finally {
             setIsSaving(false);
         }

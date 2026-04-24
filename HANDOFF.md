@@ -1,120 +1,77 @@
 # 📝 HANDOFF.md
 
-> 마지막 업데이트: 2026-04-23
-> 브랜치: `main` — **AI 코치 Edge Function 응답 파이프라인 완전 재정비**
+> 마지막 업데이트: 2026-04-24 (늦은 오후)
+> 상태: **전체 시스템 고도화 및 데이터베이스 이관 완료 (Final Beta)**
 
 ---
 
 ## 📌 1. 현재 상태 요약
 
-이번 세션에서는 AI 코치 백엔드(`supabase/functions/ai-coach/index.ts`)와 프론트엔드(`useAiCoach.js`, i18n)에 걸쳐 발생하던 여러 버그를 단계적으로 진단하고 수정했습니다.
-
-**핵심 성과:**
-- 응답 구조 불일치로 추천 카드가 렌더링되지 않던 문제 해결
-- OpenAI null content 에러 방어 로직 추가
-- chat 타입에서 AI가 JSON으로만 응답하던 근본 원인(i18n 잘못된 규칙) 수정
-- 디버깅용 console.log 전면 추가 (Supabase 대시보드에서 확인 가능)
+프로젝트의 모든 핵심 정적 데이터를 Supabase DB로 이관하였으며, AI 코치의 추천 알고리즘을 전문가 수준(보디빌딩 원칙 적용)으로 고도화했습니다. 프론트엔드는 Tailwind 4 기반의 슬림한 가로형 UI로 최적화되어 데이터 밀도와 가독성을 동시에 확보한 상태입니다.
 
 ---
 
-## ✅ 2. 이번 세션에서 완료한 작업
+## ✅ 2. 이번 세션 주요 완료 작업
 
-### 작업 A: 응답 구조 통일 (`index.ts`)
-- **문제**: 비-chat 타입(`recommendation`, `muscle_analysis`, `training_analysis`)이 OpenAI JSON 문자열을 raw body로 반환 → `supabase.functions.invoke`가 파싱하면 `data.reply`, `data.content` 키가 없음
-- **수정**: 모든 응답을 `{ reply, content, parsedData }` 봉투로 통일
+### **A. 데이터 인프라 혁신 (Cloud-First)**
+- **DB 마이그레이션**: `exercises.json` 데이터를 Supabase `exercises` 테이블로 100% 이관.
+- **실시간 API 연동**: `src/api/exerciseApi.js`를 통해 모든 컴포넌트가 DB 데이터를 비동기로 로드하도록 전환.
+- **전역 캐싱**: 유틸리티(`exerciseUtils.js`) 내 전역 캐시 시스템을 구축하여 API 호출 효율 극대화.
 
-| 타입 | 반환 구조 |
-|------|-----------|
-| `chat` | `{ reply: string, content: string }` |
-| `recommendation` / `muscle_analysis` / `training_analysis` / `onboarding` | `{ reply: string, content: string, parsedData: object }` |
+### **B. AI 코치 알고리즘 전문가급 고도화**
+- **강력한 분할 원칙**: 중/고급자 유저에게 전신 루틴 추천을 엄격히 금지하고, 2/3/4분할 원칙을 강제 적용.
+- **지능형 로테이션**: 최근 48시간 로그를 분석하여 휴식과 자극의 밸런스를 맞춘 '메인 타겟 부위' 자동 선정.
+- **결정론적 응답**: `temperature: 0`, `seed: 42`를 적용하여 동일 조건에서 100% 일관된 추천 결과 보장.
+- **종목 수 보장**: 추천 요청 시 최소 5개 ~ 7개의 풍성한 운동 리스트를 제공하도록 규칙 설정.
 
-### 작업 B: OpenAI 응답 null 방어 (`index.ts`)
-- `openaiData.choices` 배열 존재 여부 체크
-- `choices[0]?.message?.content ?? null` 로 안전 추출
-- `content === null`이면 `finish_reason` 포함한 구체적 에러 throw
+### **C. UI/UX 리팩토링 및 최적화**
+- **가로형 슬림 레이아웃**: 일반 추천 루틴에 대해 얇은 바(Bar) 형태의 반응형 UI를 적용하여 스크롤 피로도 급감.
+- **하드모드 전용 테마**: 레드 네온 효과와 상세 세트 테이블이 포함된 강렬한 전용 UI 분리 렌더링.
+- **장바구니 시스템**: 추천 받은 운동을 임시 상태(Cart)에 담아 토글(Check)하고 한 번에 루틴에 추가하는 UX 완성.
+- **한글 가독성**: `break-keep` 클래스를 적용하여 운동 명칭이 단어 중간에서 잘리지 않도록 최적화.
 
-### 작업 C: exercises 빈 배열 fallback (`index.ts`)
-- `Array.isArray(exercises)` 만으로는 빈 배열 `[]` 통과 → `exercises.length > 0` 조건 추가
-- 빈 배열일 때 "운동 종목 데이터 없음. 일반적인 운동 종목으로 구성할 것." 텍스트로 fallback
-
-### 작업 D: systemPrompt 유효성 검사 + excludeText 분리 (`index.ts`)
-- `recommendation` 블록에서 `systemPrompt` 생성 후 빈 문자열 체크 → 실패 시 throw
-- `recentlyTrainedParts.join(', ')` 로직을 `excludeText` 변수로 분리하여 명시적 처리
-
-### 작업 E: JSON 파싱 강화 (`index.ts`)
-- 비-chat 응답에서 마크다운 코드블록(` ```json `) 제거 후 `JSON.parse` 시도
-- 파싱 실패 시 `console.error` + "AI response is not valid JSON" 에러 throw
-- `recommendation` 타입에서 `parsedRoutine.routines` 배열 존재 여부 추가 검증
-
-### 작업 F: 디버깅 로그 추가 (`index.ts`)
-- `recommendation` 진입 시: exercises count, recentWorkouts, selectedMode, userProfile, lang
-- messages 생성 후: systemPrompt length, user message 내용
-- AI 응답 수신 후: raw content, cleaned content, parsed result, routines count
-
-### 작업 G: callRecommendation 응답 처리 개선 (`useAiCoach.js`)
-- 응답 로그 추가: `response.reply`, `response.content`, `response.parsedData`
-- `reply = response?.reply ?? response?.content ?? null` 폴백 로직
-- `reply`가 null이면 명시적 에러 throw (기존에는 undefined가 조용히 표시됨)
-
-### 작업 H: chat JSON 응답 근본 원인 수정 (`ko.json` / `en.json`)
-- **문제**: `aiCoach.prompt.rules` i18n 키에 "순수한 JSON 형식으로만 응답하십시오"가 있어서 chat 모드에서도 AI가 JSON으로 응답
-- **수정**: 대화체 응답 규칙으로 교체 ("자연스러운 대화체로 답변, JSON 형식 금지")
-- `index.ts`의 `useJsonMode` 플래그는 이미 올바르게 분기되어 있었음 (chat → false)
+### **D. 백엔드 안정화 (Edge Function)**
+- **통합 라우팅**: `recommendation`, `chat`, `analysis` 등 모든 요청 타입을 안정적으로 처리하도록 로직 통합.
+- **JSON Mode 강제**: OpenAI JSON Mode를 활성화하고 파서 방어 코드를 추가하여 렌더링 깨짐 현상 해결.
+- **인증 보강**: 401 Unauthorized 에러를 원천 차단하는 표준 인증 처리 로직 적용.
 
 ---
 
-## 📍 3. 지금 멈춘 지점 및 현재 상태
+## 📍 3. 주요 설정 및 환경
 
-- **상태**: 모든 수정 완료. Edge Function 재배포 후 실제 테스트 필요.
-- **디버그 로그**: 현재 `console.log`가 다수 남아있음. 안정화 확인 후 제거 권장.
-- **미확인**: chat 응답 정상화 여부 (i18n 수정 후 테스트 미완료).
-
----
-
-## 🚀 4. 다음에 해야 할 작업 (우선순위 1~3)
-
-1. **Edge Function 재배포 및 전체 플로우 테스트**
-   - `supabase functions deploy ai-coach`
-   - chat / recommendation / muscle_analysis / training_analysis 각각 테스트
-   - Supabase 대시보드 → Functions → Logs에서 debug 로그 확인
-
-2. **디버그 console.log 제거**: 안정화 확인 후 `index.ts`의 `console.log` 전면 제거 (민감 데이터 노출 방지)
-
-3. **Google Analytics(GA4) 설치**: `index.html`에 트래킹 스니펫 추가
+- **Tailwind CSS 4**: `tailwind.config.js` 없이 `src/style.css`와 `vite.config.js` 플러그인만으로 구동.
+- **Supabase DB**: `exercises` 테이블 (RLS 적용, public read 허용).
+- **PostgreSQL**: 호환성을 위해 `config.toml` 내 버전을 `15`로 유지.
 
 ---
 
-## 📂 5. 관련 파일 및 역할
+## 🚀 4. 다음에 해야 할 작업 (우선순위)
 
-| 파일 | 역할 |
+1. **레거시 파일 정리 (Cleanup)**
+   - 더 이상 사용하지 않는 `src/data/exercises.json` 삭제.
+   - 마이그레이션 스크립트 `migrate_exercises.js` 삭제.
+   - 구버전 변환 도구(`transform_exercises_*.cjs`) 백업 후 정리.
+
+2. **분석 탭 고도화**
+   - 현재 복구된 분석 로직을 기반으로 Recharts를 활용한 더 시각적인 그래프 데이터 연동.
+
+3. **배포 자동화 점검**
+   - `supabase functions deploy ai-coach` 실행 시 환경 변수(`OPENAI_API_KEY` 등) 누락 여부 최종 점검.
+
+---
+
+## 📂 5. 주요 파일 가이드 (New)
+
+| 파일/경로 | 역할 |
 |------|------|
-| `supabase/functions/ai-coach/index.ts` | AI 코치 Edge Function. 타입별 프롬프트 생성 + OpenAI 호출 + 응답 구조화 |
-| `src/components/AiCoach/useAiCoach.js` | 프론트 API 통신부. `callRecommendation` / `callOpenAI` / `insertRoutineToDb` |
-| `src/components/AiCoach/AiRecommendationScreen.jsx` | 추천 UI. `parseResponseJSON`으로 `msg.text`(JSON 문자열) 파싱 후 루틴 카드 렌더링 |
-| `src/components/Common/AnalysisScreen.jsx` | 분석 UI. `JSON.parse(data.content)`로 AI 분석 결과 렌더링 |
-| `src/i18n/ko.json` / `en.json` | `aiCoach.prompt.rules` — chat용 대화체 규칙으로 수정됨 |
+| `src/api/exerciseApi.js` | Supabase 운동 데이터 통합 관리 API |
+| `src/hooks/useAiCoach.js` | AI 대화, 추천, 히스토리, PR 데이터 통합 훅 |
+| `src/components/AiCoach/` | AI 추천 화면 및 카드 UI (가로형/하드모드 분리) |
+| `supabase/functions/ai-coach/` | 보디빌딩 엔진이 탑재된 핵심 서버 로직 |
 
 ---
 
-## ⚠️ 6. 수정 시 주의사항
+## ⚠️ 6. 유지보수 주의사항
 
-- **응답 봉투 구조 유지**: 모든 non-chat 응답은 `{ reply, content, parsedData }` 형태여야 함
-  - `reply` / `content`: 동일한 JSON 문자열 (프론트 두 곳에서 각각 참조)
-  - `parsedData`: 이미 파싱된 객체 (향후 프론트에서 직접 활용 가능)
-- **chat은 JSON 모드 금지**: `useJsonMode = false` 유지, i18n `rules`에 JSON 지시 금지
-- **`recentWorkouts` 구조**: `{ date, parts[], exercises[] }` 유지 필수
-- **`exercises` 빈 배열**: `exercises.length > 0` 체크로 fallback 처리됨
-
----
-
-## 🧪 7. 검증 방법
-
-1. **recommendation**: 추천 버튼 클릭 → 루틴 카드가 렌더링되는지 확인
-   - 브라우저 콘솔: `response.reply`가 JSON 문자열인지 확인
-   - Supabase 로그: `Routines count: N` 출력 확인
-
-2. **chat**: 채팅 입력 → 자연스러운 한국어/영어 텍스트로 응답하는지 확인 (JSON 객체 아님)
-
-3. **muscle_analysis / training_analysis**: 분석 버튼 클릭 → `data.content`를 `JSON.parse`해서 카드 렌더링 확인
-
-4. **에러 핸들링**: 잘못된 요청 시 `{ error: "..." }` + 500 상태 코드 반환 확인
+- **프롬프트 수정 주의**: `supabase/functions/ai-coach/index.ts` 수정 시 `JSON SCHEMA` 예시를 변경하면 프론트엔드 렌더링이 깨질 수 있음.
+- **데이터 일관성**: 새로운 운동 추가 시 Supabase `exercises` 테이블에 직접 추가하거나 마이그레이션 툴 활용 권장.

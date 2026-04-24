@@ -1,10 +1,29 @@
 @import "tailwindcss";
 
+@theme {
+  @keyframes success-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); border-color: var(--color-green-500); }
+    100% { transform: scale(1); }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scale-up {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  --animate-success-pulse: success-pulse 0.4s ease-out;
+  --animate-slide-up: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-scale-up: scale-up 0.3s ease-out forwards;
+}
+
 html {
     font-size: 17px;
 }
 
-/* 기본 컨테이너 */
 .app-container {
     width: 100%;
     margin: 0 auto;
@@ -14,102 +33,33 @@ html {
     padding: 12px;
 }
 
-/* 태블릿 (768px ~ 1023px) */
 @media (min-width: 768px) {
-    html {
-        font-size: 18px;
-    }
-
-    .main-content {
-        padding: 20px;
-    }
+    html { font-size: 18px; }
+    .main-content { padding: 20px; }
 }
 
-/* PC (1024px 이상) */
 @media (min-width: 1024px) {
-    html {
-        font-size: 18px;
-    }
-
-    .app-container {
-        max-width: 1400px;
-    }
-
-    .main-content {
-        padding: 32px;
-    }
+    html { font-size: 18px; }
+    .app-container { max-width: 1400px; }
+    .main-content { padding: 32px; }
 }
 
-/* 대형 화면 (1440px 이상) */
 @media (min-width: 1440px) {
-    .app-container {
-        max-width: 1600px;
-    }
+    .app-container { max-width: 1600px; }
 }
 
-@keyframes success-pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); border-color: rgb(34 197 94); }
-    100% { transform: scale(1); }
-}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-.animate-success-pulse {
-    animation: success-pulse 0.4s ease-out;
-}
-
-@keyframes slide-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-slide-up {
-    animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-@keyframes scale-up {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.animate-scale-up {
-    animation: scale-up 0.3s ease-out forwards;
-}
-
-/* 모바일: 하단 네비 공간 확보 */
 @media (max-width: 1023px) {
-    .main-content {
-        padding-bottom: 80px;
-    }
+    .main-content { padding-bottom: 80px; }
 }
 
-/* 모바일 터치 영역 최소 크기 */
 @media (max-width: 767px) {
-    button {
-        min-height: 44px;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    select {
-        min-height: 44px;
-    }
+    button { min-height: 44px; }
+    input[type="text"], input[type="number"], select { min-height: 44px; }
 }
 
-/* PC 운동 카드 호버 효과 */
 @media (min-width: 1024px) {
     .exercise-card:hover {
         transform: translateY(-2px);

@@ -78,7 +78,7 @@ const Onboarding = ({ onComplete }) => {
             onComplete();
         } catch (error) {
             console.error('[Onboarding] 에러:', error);
-            alert(`${t('onboarding.setupFailed')}: ${error.message}\n${t('onboarding.goHome')}`);
+            toast.error(`${t('onboarding.setupFailed')}: ${error.message}\n${t('onboarding.goHome')}`);
             onComplete();
         }
     };

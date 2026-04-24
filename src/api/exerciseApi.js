@@ -1,31 +1,55 @@
-const API_KEY = import.meta.env.VITE_RAPIDAPI_KEY;
-const API_HOST = 'exercisedb.p.rapidapi.com';
-const BASE_URL = `https://${API_HOST}`;
+import { supabase } from './supabase';
 
 /**
- * Fetch exercises by body part from ExerciseDB API
- * @param {string} bodyPart - The body part to fetch exercises for (e.g., 'back', 'chest', 'cardio')
- * @returns {Promise<Array>} - Array of exercise objects
+ * Supabase DB에서 전체 운동 목록을 가져옵니다.
+ */
+export const fetchAllExercises = async () => {
+    try {
+        const { data, error } = await supabase
+            .from('exercises')
+            .select('*')
+            .order('name', { ascending: true });
+
+        if (error) throw error;
+
+        // DB의 스네이크 케이스 컬럼명을 앱에서 사용하는 카멜 케이스로 매핑 (하위 호환성 유지)
+        return data.map(ex => ({
+            ...ex,
+            bodyPart: ex.body_part,
+            subTarget_ko: ex.sub_target_ko,
+            subTarget_en: ex.sub_target_en,
+            secondaryMuscles: ex.secondary_muscles,
+            instructions: ex.instructions
+        }));
+    } catch (error) {
+        console.error('[fetchAllExercises] 에러:', error);
+        throw error;
+    }
+};
+
+/**
+ * 특정 부위의 운동 목록을 가져옵니다.
  */
 export const fetchExercisesByBodyPart = async (bodyPart) => {
-  const url = `${BASE_URL}/exercises/bodyPart/${bodyPart}`;
-  const options = {
-    method: 'GET',
-    headers: {
-      'x-rapidapi-key': API_KEY,
-      'x-rapidapi-host': API_HOST
-    }
-  };
+    try {
+        const { data, error } = await supabase
+            .from('exercises')
+            .select('*')
+            .eq('body_part', bodyPart)
+            .order('name', { ascending: true });
 
-  try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
+        if (error) throw error;
+
+        return data.map(ex => ({
+            ...ex,
+            bodyPart: ex.body_part,
+            subTarget_ko: ex.sub_target_ko,
+            subTarget_en: ex.sub_target_en,
+            secondaryMuscles: ex.secondary_muscles,
+            instructions: ex.instructions
+        }));
+    } catch (error) {
+        console.error(`[fetchExercisesByBodyPart] ${bodyPart} 에러:`, error);
+        throw error;
     }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Failed to fetch exercises:', error);
-    throw error;
-  }
 };

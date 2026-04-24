@@ -98,7 +98,7 @@ const LoginScreen = ({ session, isChecking, onStart }) => {
         setErrorMsg('');
         const { error } = await supabase.auth.resend({ type: 'signup', email: otpEmail });
         if (error) setErrorMsg(t('auth.otp.resendFailed'));
-        else alert(t('auth.otp.resendSuccess'));
+        else toast.success(t('auth.otp.resendSuccess'));
     };
 
     // ── 로그인 화면 ────────────────────────────────────────────

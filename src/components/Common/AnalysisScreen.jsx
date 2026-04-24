@@ -10,7 +10,7 @@ import {
   PieChart, Pie, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { supabase } from '../../api/supabase';
-import EXERCISE_DATASET from '../../data/exercises.json';
+import { fetchAllExercises } from '../../api/exerciseApi'; // DB 연동 API 추가
 import { getLocalizedNameByKo } from '../../utils/exerciseUtils';
 
 const MUSCLE_KEY_MAP = {
@@ -57,8 +57,9 @@ const SUB_CAT_COLORS = {
 
 // ─── 헬퍼 함수 ───────────────────────────────────────────────────────────────
 
-const getSubCategory = (exerciseName, lang) => {
-  const ex = EXERCISE_DATASET.find(e => 
+// EXERCISE_DATASET을 인자로 받도록 수정
+const getSubCategory = (exerciseName, lang, dataset = []) => {
+  const ex = dataset.find(e => 
     e.name === exerciseName || 
     e.name_en === exerciseName ||
     e.name?.replace(/\s/g, '') === exerciseName?.replace(/\s/g, '')
@@ -104,12 +105,12 @@ const calcLogVolume = (setsData) => {
 
 // ─── PRCard ───────────────────────────────────────────────────────────────────
 
-const PRCard = ({ pr }) => {
+const PRCard = ({ pr, dataset }) => {
   const { t, i18n } = useTranslation();
   const days = daysSince(pr.date);
   const isNew = days <= 7;
   const isRecent = days <= 30;
-  const subTarget = getSubCategory(pr.exercise, i18n.language);
+  const subTarget = getSubCategory(pr.exercise, i18n.language, dataset);
 
   return (
     <div className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
@@ -256,7 +257,7 @@ const VolumeDistributionSection = ({ logs }) => {
 
 // ─── 서브카테고리 분석 + AI 인사이트 ─────────────────────────────────────────
 
-const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
+const MuscleDetailAnalysis = ({ muscleGroup, logs, token, dataset }) => {
   const { t, i18n } = useTranslation();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
@@ -273,7 +274,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
     const cntMap = {};
 
     filtered.forEach(log => {
-      const sub = getSubCategory(log.exercise, i18n.language);
+      const sub = getSubCategory(log.exercise, i18n.language, dataset);
       const vol = calcLogVolume(log.sets_data);
       volMap[sub] = (volMap[sub] || 0) + vol;
       cntMap[sub] = (cntMap[sub] || 0) + 1;
@@ -292,7 +293,7 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token }) => {
         fill: SUB_CAT_COLORS[cat] || '#94a3b8',
       }))
       .sort((a, b) => b.percentage - a.percentage);
-  }, [muscleGroup, logs, t, i18n.language]);
+  }, [muscleGroup, logs, t, i18n.language, dataset]);
 
   const runAnalysis = async () => {
     if (!subCategoryData.length || !token) return;
@@ -431,6 +432,9 @@ const AnalysisScreen = () => {
   const [showAllPRs, setShowAllPRs] = useState(false);
   const [aiTrainingAnalysis, setAiTrainingAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  // DB에서 불러온 운동 데이터 상태
+  const [exerciseDataset, setExerciseDataset] = useState([]);
 
 
   useEffect(() => {
@@ -446,14 +450,19 @@ const AnalysisScreen = () => {
         const { data: { session } } = await supabase.auth.getSession();
         setToken(session?.access_token || null);
 
-        const { data, error: dbError } = await supabase
-          .from('workout_logs')
-          .select('id, exercise, part, sets_data, created_at')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: true });
+        // 운동 로그와 운동 데이터셋을 동시에 병렬로 로드
+        const [logsRes, datasetRes] = await Promise.all([
+          supabase
+            .from('workout_logs')
+            .select('id, exercise, part, sets_data, created_at')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true }),
+          fetchAllExercises() // DB에서 전체 운동 목록 가져오기
+        ]);
 
-        if (dbError) throw dbError;
-        setLogs(data || []);
+        if (logsRes.error) throw logsRes.error;
+        setLogs(logsRes.data || []);
+        setExerciseDataset(datasetRes || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -760,7 +769,7 @@ const AnalysisScreen = () => {
                   <>
                     <div className="space-y-2.5">
                       {(showAllPRs ? filteredPRs : filteredPRs.slice(0, 5)).map(pr => (
-                        <PRCard key={pr.exercise} pr={pr} />
+                        <PRCard key={pr.exercise} pr={pr} dataset={exerciseDataset} />
                       ))}
                     </div>
                     {filteredPRs.length > 5 && (
@@ -787,6 +796,7 @@ const AnalysisScreen = () => {
                 muscleGroup={selectedMuscleGroup}
                 logs={logs}
                 token={token}
+                dataset={exerciseDataset}
               />
             </>
           )}

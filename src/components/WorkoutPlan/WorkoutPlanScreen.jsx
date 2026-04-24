@@ -143,7 +143,7 @@ const WorkoutPlanScreen = () => {
                 })
                 .filter(item => item.sets.length > 0);
 
-            if (logsToSave.length === 0) { alert(t('workout.noValidSets')); return; }
+            if (logsToSave.length === 0) { toast.error(t('workout.noValidSets')); return; }
 
             const savedAt = new Date(`${targetDate}T12:00:00`).toISOString();
             const payload = logsToSave.map(item => ({
@@ -159,11 +159,11 @@ const WorkoutPlanScreen = () => {
 
             localStorage.removeItem(storageKey);
             setPlanList([]);
-            alert(t('workout.saveSuccess'));
+            toast.success(t('workout.saveSuccess'));
             setSearchParams({ tab: '달력' });
         } catch (e) {
             console.error('[save workout] error:', e);
-            alert(t('workout.saveFailed') + (e?.message || JSON.stringify(e)));
+            toast.error(t('workout.saveFailed') + (e?.message || JSON.stringify(e)));
         } finally {
             setIsSaving(false);
         }
