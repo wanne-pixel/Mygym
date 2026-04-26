@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../api/supabase';
@@ -8,6 +8,7 @@ import CalendarScreen from '../Calendar/CalendarScreen';
 import WorkoutPlanScreen from '../WorkoutPlan/WorkoutPlanScreen';
 import AIRecommendationScreen from '../AiCoach/AiRecommendationScreen';
 import AnalysisScreen from '../Common/AnalysisScreen';
+import FeedbackModal from '../Common/FeedbackModal';
 
 // 언어 전환 컴포넌트 (레이아웃에 종속적이므로 함께 이동)
 const LangSwitcher = () => {
@@ -32,6 +33,7 @@ const MainLayout = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || '달력';
     const handleTabChange = (tab) => setSearchParams({ tab });
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
     return (
         <div className="relative min-h-screen bg-slate-950">
@@ -71,6 +73,21 @@ const MainLayout = () => {
 
             {/* 모바일: 하단 탭바 */}
             <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+
+            {/* 플로팅 건의/문의 버튼 */}
+            <button
+                onClick={() => setIsFeedbackOpen(true)}
+                className="fixed bottom-24 lg:bottom-8 right-4 z-50 flex items-center gap-2 px-4 py-3 bg-slate-800/90 backdrop-blur-sm border border-white/10 text-slate-300 hover:text-white hover:border-white/20 hover:bg-slate-700/90 rounded-2xl text-xs font-bold shadow-lg transition-all active:scale-95 break-keep"
+                title={t('feedback.floatingButton')}
+            >
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+                <span className="hidden sm:inline">{t('feedback.floatingButton')}</span>
+            </button>
+
+            {/* 건의/문의 모달 */}
+            <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
         </div>
     );
 };

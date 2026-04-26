@@ -320,6 +320,22 @@
     "aiFailed": "AI 분석에 실패했습니다. 다시 시도해주세요."
   },
 
+  "feedback": {
+    "title": "건의하기 / 문의하기",
+    "typeLabel": "유형 선택",
+    "typeSuggestion": "건의",
+    "typeInquiry": "문의",
+    "titleLabel": "제목",
+    "titlePlaceholder": "제목을 입력해주세요",
+    "contentLabel": "내용",
+    "contentPlaceholder": "내용을 자유롭게 입력해주세요",
+    "submit": "전송하기",
+    "success": "소중한 의견이 전달되었습니다. 감사합니다!",
+    "error": "전송에 실패했습니다. 다시 시도해주세요.",
+    "errorRequired": "제목과 내용을 모두 입력해주세요.",
+    "floatingButton": "건의/문의"
+  },
+
   "aiCoach": {
     "title": "AI PT COACH",
     "selectedCount": "개 선택됨",

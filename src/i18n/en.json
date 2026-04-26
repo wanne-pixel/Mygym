@@ -321,6 +321,22 @@
     "aiFailed": "AI analysis failed. Please try again."
   },
 
+  "feedback": {
+    "title": "Feedback / Inquiry",
+    "typeLabel": "Type",
+    "typeSuggestion": "Suggestion",
+    "typeInquiry": "Inquiry",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Enter a title",
+    "contentLabel": "Message",
+    "contentPlaceholder": "Write your message here",
+    "submit": "Send",
+    "success": "Your feedback has been sent. Thank you!",
+    "error": "Failed to send. Please try again.",
+    "errorRequired": "Please fill in both the title and message.",
+    "floatingButton": "Feedback"
+  },
+
   "aiCoach": {
     "title": "AI PT COACH",
     "selectedCount": " selected",
