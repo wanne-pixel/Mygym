@@ -321,6 +321,13 @@
     "aiFailed": "AI analysis failed. Please try again."
   },
 
+  "privacy": {
+    "linkText": "Privacy Policy",
+    "signupNoticePrefix": "By signing up, you agree to our ",
+    "signupNoticeSuffix": ".",
+    "footerLink": "개인정보처리방침 / Privacy Policy"
+  },
+
   "beta": {
     "title": "🎉 Welcome to MyGym Beta!",
     "notices": [

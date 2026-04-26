@@ -93,6 +93,18 @@ const MainLayout = () => {
 
             {/* 베타 공지 모달 */}
             <BetaNoticeModal isOpen={isBetaModalOpen} onClose={() => setIsBetaModalOpen(false)} />
+
+            {/* 개인정보처리방침 푸터 링크 */}
+            <div className="fixed bottom-[84px] lg:bottom-3 left-0 right-0 lg:ml-56 flex justify-center z-40 pointer-events-none">
+                <a
+                    href="https://shell-locust-532.notion.site/MyGym-2ea3913a10d080a69587f5da233e965f"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pointer-events-auto text-xs text-slate-700 hover:text-slate-400 underline underline-offset-2 break-keep transition-colors px-2 py-1"
+                >
+                    {t('privacy.footerLink')}
+                </a>
+            </div>
         </div>
     );
 };

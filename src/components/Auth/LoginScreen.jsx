@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../api/supabase';
 
+const PRIVACY_URL = 'https://shell-locust-532.notion.site/MyGym-2ea3913a10d080a69587f5da233e965f';
+
 const MIN_PASSWORD_LENGTH = 8;
 
 const LoginScreen = ({ session, isChecking, onStart }) => {
@@ -225,6 +227,18 @@ const LoginScreen = ({ session, isChecking, onStart }) => {
                         >
                             {isLoading ? t('common.processing') : t('auth.sendVerificationEmail')}
                         </button>
+                        <p className="text-center text-xs text-slate-600 break-keep leading-relaxed pt-1">
+                            {t('privacy.signupNoticePrefix')}
+                            <a
+                                href={PRIVACY_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-slate-500 underline underline-offset-2 hover:text-slate-300 transition-colors"
+                            >
+                                {t('privacy.linkText')}
+                            </a>
+                            {t('privacy.signupNoticeSuffix')}
+                        </p>
                     </div>
                 </div>
             ) : (
