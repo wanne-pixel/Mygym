@@ -34,8 +34,17 @@ export default function FeedbackModal({ isOpen, onClose }) {
 
     setIsSubmitting(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error(t('common.loginRequired'));
+        return;
+      }
+
       const { error } = await supabase.functions.invoke('send-feedback', {
         body: { type, title: title.trim(), content: content.trim() },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
       if (error) throw error;
       toast.success(t('feedback.success'));
