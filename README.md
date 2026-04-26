@@ -18,7 +18,6 @@ src/
 │   ├── WorkoutPlan/  # 루틴 구성 및 세트 설정 화면
 │   └── Common/       # GIF 모달, 버튼 등 공통 UI 요소
 ├── constants/        # 운동 부위, 기구 매핑 등 전역 상수
-├── data/             # 운동 데이터셋 (exercises.json)
 └── utils/            # GIF 매칭 등 공용 헬퍼 함수
 ```
 

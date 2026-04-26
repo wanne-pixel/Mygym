@@ -1,17 +1,31 @@
 import { toast } from 'sonner';
-import React, { useState, useMemo } from 'react';
-import EXERCISE_DATASET from '../../data/exercises.json';
+import React, { useState, useMemo, useEffect } from 'react';
+import { fetchAllExercises } from '../../api/exerciseApi';
 
 const DELETE_KEYWORD = '삭제';
 
-const chestExercises = EXERCISE_DATASET.filter(ex => ex.bodyPart === '가슴');
-
 export default function ExerciseNameEditor() {
-    const [exercises, setExercises] = useState(() =>
-        chestExercises.map(ex => ({ ...ex, modifiedName: ex.name }))
-    );
+    const [exercises, setExercises] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [filterMode, setFilterMode] = useState('all'); // all | modified | deleted
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const data = await fetchAllExercises();
+                // 초기 로드 시 가슴 운동만 필터링하거나 전체를 보여줄 수 있음. 
+                // 기존 로직이 가슴 운동 중심이었으므로 호환성을 위해 유지
+                const chestOnly = data.filter(ex => ex.bodyPart === '가슴');
+                setExercises(chestOnly.map(ex => ({ ...ex, modifiedName: ex.name })));
+            } catch (error) {
+                toast.error('운동 데이터를 불러오는데 실패했습니다.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadData();
+    }, []);
 
     const stats = useMemo(() => {
         const modified = exercises.filter(
