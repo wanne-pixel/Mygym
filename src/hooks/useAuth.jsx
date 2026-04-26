@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { supabase } from '../api/supabase';
+import { clearBetaModalFlag } from '../components/Common/BetaNoticeModal';
 
 export const isOnboardingComplete = (p) =>
     !!(p?.experience_level && ((Array.isArray(p?.goals) && p.goals.length > 0) || !!p?.goal));
@@ -70,6 +71,7 @@ export const useAuth = () => {
             if (!s) {
                 setProfile(null);
                 setIsInitializing(false);
+                clearBetaModalFlag();
                 navigate('/', { replace: true });
             }
         });

@@ -9,6 +9,7 @@ import WorkoutPlanScreen from '../WorkoutPlan/WorkoutPlanScreen';
 import AIRecommendationScreen from '../AiCoach/AiRecommendationScreen';
 import AnalysisScreen from '../Common/AnalysisScreen';
 import FeedbackModal from '../Common/FeedbackModal';
+import BetaNoticeModal, { shouldShowBetaModal } from '../Common/BetaNoticeModal';
 
 // 언어 전환 컴포넌트 (레이아웃에 종속적이므로 함께 이동)
 const LangSwitcher = () => {
@@ -34,6 +35,7 @@ const MainLayout = () => {
     const activeTab = searchParams.get('tab') || '달력';
     const handleTabChange = (tab) => setSearchParams({ tab });
     const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+    const [isBetaModalOpen, setIsBetaModalOpen] = useState(shouldShowBetaModal);
 
     return (
         <div className="relative min-h-screen bg-slate-950">
@@ -88,6 +90,9 @@ const MainLayout = () => {
 
             {/* 건의/문의 모달 */}
             <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
+
+            {/* 베타 공지 모달 */}
+            <BetaNoticeModal isOpen={isBetaModalOpen} onClose={() => setIsBetaModalOpen(false)} />
         </div>
     );
 };

@@ -321,6 +321,18 @@
     "aiFailed": "AI analysis failed. Please try again."
   },
 
+  "beta": {
+    "title": "🎉 Welcome to MyGym Beta!",
+    "notices": [
+      "MyGym is currently in beta.",
+      "More exercise types will be added in future updates.",
+      "AI features are continuously improving — the more workout data you log, the better your experience."
+    ],
+    "highlightTitle": "💬 Your voice shapes MyGym!",
+    "highlightContent": "Your feedback is the most valuable resource during the beta period.\nAnything goes — bugs, feature requests, questions, or suggestions.\nPlease use the Feedback button at the bottom right! 🙏",
+    "confirm": "Got it"
+  },
+
   "feedback": {
     "title": "Feedback / Inquiry",
     "typeLabel": "Type",
