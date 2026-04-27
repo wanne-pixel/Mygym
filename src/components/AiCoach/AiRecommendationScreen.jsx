@@ -87,15 +87,51 @@ const AiRecommendationScreen = () => {
     };
 
     const sendRecommendationRequest = async () => {
-        if (!profile) { sonnerToast.error(t('aiCoach.profileLoading')); return; }
-        setError(null); setShowHardModeOptions(false);
-        try { await callRecommendation('balanced'); } catch (err) { setError(t('aiCoach.fetchError')); }
+        console.log('--- [추천 버튼 클릭됨 시작!] ---');
+        console.log('현재 프로필 상태:', profile);
+        
+        if (!profile) { 
+            console.warn('프로필 데이터가 없어 요청을 중단합니다.');
+            sonnerToast.error(t('aiCoach.profileLoading')); 
+            return; 
+        }
+
+        setError(null); 
+        setShowHardModeOptions(false);
+        try { 
+            console.log('callRecommendation(balanced) 호출 시도...');
+            await callRecommendation('balanced'); 
+            console.log('callRecommendation(balanced) 호출 성공');
+        } catch (err) { 
+            console.error('[sendRecommendationRequest Error]:', err);
+            setError(t('aiCoach.fetchError')); 
+        } finally {
+            console.log('--- [추천 요청 프로세스 종료] ---');
+        }
     };
 
     const sendHardModeRequest = async (hardModeType) => {
-        if (!profile) { sonnerToast.error(t('aiCoach.profileLoading')); return; }
-        setError(null); setShowHardModeOptions(false);
-        try { await callRecommendation('hard', hardModeType); } catch (err) { setError(t('aiCoach.fetchError')); }
+        console.log(`--- [하드모드 버튼 클릭됨: ${hardModeType}] ---`);
+        console.log('현재 프로필 상태:', profile);
+
+        if (!profile) { 
+            console.warn('프로필 데이터가 없어 하드모드 요청을 중단합니다.');
+            sonnerToast.error(t('aiCoach.profileLoading')); 
+            return; 
+        }
+
+        setError(null); 
+        setShowHardModeOptions(false);
+        try { 
+            console.log(`callRecommendation(hard, ${hardModeType}) 호출 시도...`);
+            await callRecommendation('hard', hardModeType); 
+            console.log(`callRecommendation(hard, ${hardModeType}) 호출 성공`);
+        } catch (err) { 
+            console.error('[sendHardModeRequest Error]:', err);
+            setError(t('aiCoach.fetchError')); 
+        } finally {
+            console.log('--- [하드모드 요청 프로세스 종료] ---');
+        }
     };
 
     const onSendMessage = () => {

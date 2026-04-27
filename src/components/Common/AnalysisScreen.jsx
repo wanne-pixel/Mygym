@@ -315,10 +315,19 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token, dataset }) => {
         },
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (error) throw error;
-      const parsed = JSON.parse(data.content);
+
+      if (error) {
+          console.error('[Muscle Analysis Function Error]:', error);
+          throw error;
+      }
+      
+      const content = data?.content || data?.reply;
+      if (!content) throw new Error('No analysis content received');
+
+      const parsed = typeof content === 'string' ? JSON.parse(content) : content;
       setAiAnalysis(parsed.analysis || parsed);
     } catch (err) {
+      console.error('[Muscle Analysis Exception]:', err);
       setAiError(t('analysis.aiFailed'));
     } finally {
       setIsAnalyzing(false);
