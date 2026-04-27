@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { User, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase } from '../../api/supabase';
 import { STORAGE_KEYS } from '../../constants/exerciseConstants';
 import { useWindowSize } from '../../hooks/useWindowSize';
@@ -58,6 +59,11 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
     };
 
     const handleSave = async () => {
+        if (!profile.nickname?.trim()) {
+            toast.error(t('calendar.profileFields.nickname') + ' ' + t('common.required'));
+            return;
+        }
+
         if (profile.goals.length === 0) {
             toast.error(t('onboarding.goal.maxSelect'));
             return;
@@ -65,21 +71,23 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
 
         setIsSaving(true);
         try {
-            const { data: session } = await supabase.auth.getSession();
-            if (!session.session) throw new Error(t('common.loginRequired'));
-            const userId = session.session.user.id;
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData.session) throw new Error(t('common.loginRequired'));
+            const userId = sessionData.session.user.id;
 
             const primaryGoal = profile.goals[0];
 
-            // Auth Metadata 업데이트 (닉네임 포함)
-            await supabase.auth.updateUser({
+            // 1. Auth Metadata 업데이트 (닉네임 및 기본 정보)
+            const { error: authError } = await supabase.auth.updateUser({
                 data: {
                     nickname: profile.nickname,
                     goal: primaryGoal,
                     goals: profile.goals,
                 }
             });
+            if (authError) throw authError;
 
+            // 2. user_profiles 테이블 업데이트
             const updatePayload = {
                 goal: primaryGoal,
                 goals: profile.goals,
@@ -96,13 +104,15 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
 
             if (profileError) throw profileError;
 
+            // 3. 로컬 저장소 및 UI 상태 동기화
             localStorage.setItem(STORAGE_KEYS.USER_BODY_INFO, JSON.stringify(profile));
             toast.success(t('calendar.profileSaved'));
-            onUpdate();
-            onClose();
+            
+            await onUpdate(); // 최신 데이터 다시 불러오기
+            onClose(); // 모달 닫기
         } catch (error) {
-            console.error('Update Error:', error);
-            toast.error(t('calendar.saveFailed') + (error.message || ''));
+            console.error('[Profile Update Error]:', error);
+            toast.error(t('calendar.saveFailed') + (error.message ? `: ${error.message}` : ''));
         } finally {
             setIsSaving(false);
         }
