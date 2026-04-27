@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner'; // sonner 추가
 import './i18n/i18n';
 
@@ -16,6 +16,16 @@ import { useAuth, isOnboardingComplete } from './hooks/useAuth';
 
 const AppContent = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (typeof window.gtag !== 'function') return;
+        window.gtag('event', 'page_view', {
+            page_path: location.pathname + location.search,
+            send_to: 'G-9WVC2JRCWT',
+        });
+    }, [location]);
+
     const {
         session,
         profile,
