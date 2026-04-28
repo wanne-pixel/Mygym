@@ -47,8 +47,24 @@ export const useAiCoach = () => {
 
     const fetchRecentWorkouts = async (userId) => {
         const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
-        const { data: logs } = await supabase.from('workout_logs').select('*').eq('user_id', userId).gte('created_at', fiveDaysAgo).order('created_at', { ascending: false });
-        return logs || [];
+        const { data: logs } = await supabase
+            .from('workout_logs')
+            .select('id, user_id, exercise, sets_data, created_at')
+            .eq('user_id', userId)
+            .gte('created_at', fiveDaysAgo)
+            .order('created_at', { ascending: false });
+
+        if (!logs || logs.length === 0) return [];
+
+        // workout_logs에는 body_part가 없으므로 exercises 테이블에서 조회해 보강
+        const uniqueNames = [...new Set(logs.map(l => l.exercise))];
+        const { data: exerciseInfo } = await supabase
+            .from('exercises')
+            .select('name, body_part')
+            .in('name', uniqueNames);
+
+        const bodyPartMap = Object.fromEntries((exerciseInfo || []).map(ex => [ex.name, ex.body_part]));
+        return logs.map(log => ({ ...log, exercise_body_part: bodyPartMap[log.exercise] || null }));
     };
 
     useEffect(() => {
@@ -66,7 +82,6 @@ export const useAiCoach = () => {
                     supabase.from('workout_logs').select('exercise, sets_data').eq('user_id', userId)
                 ]);
                 
-                // 엔진 호환성을 위해 snake_case를 camelCase로 변환한 객체 생성
                 const mappedProfile = profileRes.data ? {
                     ...profileRes.data,
                     experienceLevel: profileRes.data.experience_level,
@@ -76,7 +91,6 @@ export const useAiCoach = () => {
                 
                 setProfile(mappedProfile);
                 
-                // PR 매핑 로직
                 const records = {};
                 (prs.data || []).forEach(log => {
                     const exerciseName = log.exercise;
@@ -104,6 +118,50 @@ export const useAiCoach = () => {
         sessionStorage.setItem(SESSION_CHAT_KEY, JSON.stringify(messages.slice(-20)));
     }, [messages]);
 
+    const processAiResponse = (response, isHard = false, selectedMode = 'today_routine') => {
+        const rawText = response?.reply || response?.content || "";
+        let parsedData = null;
+        let displayType = 'chat';
+
+        try {
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const tempObj = JSON.parse(jsonMatch[0]);
+                
+                const targetData = tempObj['운동추천'] || tempObj['recommendation'] || tempObj['routines'] || tempObj;
+
+                if (targetData) {
+                    parsedData = {
+                        reason: targetData['추천사유'] || targetData['recommendationReason'] || targetData['reason'] || targetData['설명'] || "",
+                        routines: (targetData['운동종목'] || targetData['운동목록'] || targetData['routines'] || targetData['items'] || targetData['exercises'] || []).map(item => ({
+                            part: item['부위'] || item['part'] || (Array.isArray(targetData['부위']) ? targetData['부위'][0] : targetData['부위']) || "",
+                            exercise: item['운동명'] || item['종목명'] || item['이름'] || item['exercise'] || "",
+                            sub_target_focus: item['세부타겟'] || item['세부부위'] || item['sub_target_focus'] || "",
+                            sets_data: item['세트정보'] || item['세트'] || item['sets_data'] || []
+                        }))
+                    };
+                    
+                    if (parsedData.routines.length > 0 && parsedData.routines[0].exercise !== "") {
+                        displayType = 'recommendation';
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('[useAiCoach] JSON 파싱 및 매핑 실패:', e);
+        }
+
+        setMessages(prev => [...prev, {
+            id: Date.now() + Math.random(),
+            type: 'ai',
+            msgType: displayType,
+            isHardMode: isHard,
+            selectedMode: selectedMode,
+            text: rawText,
+            parsedData: parsedData,
+            engineConfig: response.engineConfig
+        }]);
+    };
+
     const handleSendMessage = async (displayText) => {
         if (!displayText.trim() || isTyping) return;
         setMessages(prev => [...prev, { id: Date.now(), type: 'user', text: displayText }]);
@@ -111,7 +169,6 @@ export const useAiCoach = () => {
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) throw new Error('No session');
-            
             const recentLogs = await fetchRecentWorkouts(session.user.id);
 
             const response = await callAiCoachFunction({
@@ -127,16 +184,7 @@ export const useAiCoach = () => {
                 userPrompt: displayText,
             });
 
-            if (response?.reply || response?.content) {
-                setMessages(prev => [...prev, { 
-                    id: Date.now() + Math.random(), 
-                    type: 'ai', 
-                    msgType: response.parsedData ? 'recommendation' : 'chat',
-                    text: response.reply || response.content 
-                }]);
-            } else {
-                throw new Error('Invalid AI response structure');
-            }
+            processAiResponse(response);
         } catch (e) {
             console.error('[handleSendMessage Error]:', e);
             toast.error(t('aiCoach.fetchError'));
@@ -147,19 +195,12 @@ export const useAiCoach = () => {
     };
 
     const callRecommendation = async (mode, selectedMode = 'today_routine') => {
-        console.log(`[useAiCoach] 추천 요청 시작. 모드: ${mode}, 상세모드: ${selectedMode}`);
         setIsTyping(true);
         const isHard = mode === 'hard';
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                console.error('[useAiCoach] 세션이 없습니다.');
-                throw new Error('Session not found');
-            }
-            
-            console.log('[useAiCoach] 최근 운동 기록 조회 중...');
+            if (!session) throw new Error('Session not found');
             const recentLogs = await fetchRecentWorkouts(session.user.id);
-            console.log(`[useAiCoach] 조회된 로그 수: ${recentLogs.length}`);
 
             const response = await callAiCoachFunction({
                 type: 'recommendation',
@@ -170,35 +211,13 @@ export const useAiCoach = () => {
                 selectedMode: isHard ? selectedMode : 'today_routine',
             });
 
-            const replyText = response?.reply || response?.content;
-            if (replyText) {
-                console.log('[useAiCoach] 추천 메시지 추가 중...');
-                setMessages(prev => [...prev, {
-                    id: Date.now() + Math.random(),
-                    type: 'ai',
-                    msgType: 'recommendation',
-                    isHardMode: isHard,
-                    text: replyText,
-                    engineConfig: response.engineConfig
-                }]);
-            } else {
-                console.error('[useAiCoach] 응답 텍스트가 없습니다:', response);
-                throw new Error('Invalid AI recommendation response');
-            }
+            processAiResponse(response, isHard, isHard ? selectedMode : 'today_routine');
         } catch (e) {
             console.error('[callRecommendation Error]:', e);
             toast.error(t('aiCoach.fetchError'));
-            setMessages(prev => [...prev, { 
-                id: Date.now() + Math.random(), 
-                type: 'ai', 
-                msgType: 'chat', 
-                text: t('aiCoach.fetchError') 
-            }]);
-            // 에러를 상위로 다시 던지지 않고 내부에서 처리 (UI 무반응 방지)
-            // 하지만 caller가 await로 기다리고 있으므로 여기서 끝남
+            setMessages(prev => [...prev, { id: Date.now() + Math.random(), type: 'ai', msgType: 'chat', text: t('aiCoach.fetchError') }]);
         } finally { 
             setIsTyping(false); 
-            console.log('[useAiCoach] 추천 요청 프로세스 종료 (finally)');
         }
     };
 

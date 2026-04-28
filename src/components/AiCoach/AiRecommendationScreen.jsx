@@ -19,7 +19,7 @@ const AiRecommendationScreen = () => {
     ], [t]);
 
     const {
-        profile, exerciseDataset, personalRecords, messages, isTyping,
+        profile, exerciseDataset, personalRecords, messages, setMessages, isTyping,
         handleSendMessage, handleManualReset, callRecommendation,
     } = useAiCoach();
 
@@ -57,21 +57,42 @@ const AiRecommendationScreen = () => {
         }
     };
 
-    const parseResponseJSON = (content) => {
-        if (typeof content !== 'string') return null;
-        try {
-            // 방어 로직: 마크다운 코드 블록 제거 및 순수 JSON 추출
-            const jsonStr = content.replace(/```json|```/g, '').trim();
-            const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) return null;
-            
-            const data = JSON.parse(jsonMatch[0]);
-            if (Array.isArray(data.routines)) return { type: 'routines', items: data.routines, reason: data.recommendationReason || null };
-            return null;
-        } catch (e) { 
-            console.error('[Parser Error]', e);
-            return null; 
+    const handleBatchAdd = (routines, msgId, selectedMode = 'today_routine') => {
+        if (!routines || routines.length === 0) return;
+
+        const selectedRoutines = routines.filter((r, idx) =>
+            addedExercises.has(`${msgId}_${r.exercise}_${idx}`)
+        );
+
+        if (selectedRoutines.length === 0) {
+            sonnerToast.error(t('aiCoach.selectAtLeastOne', { defaultValue: '운동을 1개 이상 선택해주세요' }));
+            return;
         }
+
+        const today = new Date().toISOString().split('T')[0];
+        const storageKey = `mygym_routine_${today}`;
+        const currentPlan = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const total = selectedRoutines.length;
+
+        const newItems = selectedRoutines.map((r, idx) => {
+            const normalizedName = r.exercise?.trim().toLowerCase() ?? '';
+            const exInfo = exerciseDataset.find(e =>
+                e.name?.trim().toLowerCase() === normalizedName ||
+                e.name_en?.trim().toLowerCase() === normalizedName
+            );
+            const isLastThree = idx >= total - 3;
+            return {
+                id: exInfo?.id ?? (Date.now() + Math.random() + idx),
+                name: r.exercise,
+                body_part: r.part,
+                completed: false,
+                sets: buildSetsForMode(selectedMode, r.exercise, isLastThree)
+            };
+        });
+
+        localStorage.setItem(storageKey, JSON.stringify([...currentPlan, ...newItems]));
+        sonnerToast.success(t('aiCoach.batchAddSuccess'));
+        navigate('/app?tab=루틴구성');
     };
 
     const goToWorkoutPlan = () => {
@@ -87,51 +108,30 @@ const AiRecommendationScreen = () => {
     };
 
     const sendRecommendationRequest = async () => {
-        console.log('--- [추천 버튼 클릭됨 시작!] ---');
-        console.log('현재 프로필 상태:', profile);
-        
-        if (!profile) { 
-            console.warn('프로필 데이터가 없어 요청을 중단합니다.');
-            sonnerToast.error(t('aiCoach.profileLoading')); 
-            return; 
-        }
-
-        setError(null); 
-        setShowHardModeOptions(false);
-        try { 
-            console.log('callRecommendation(balanced) 호출 시도...');
-            await callRecommendation('balanced'); 
-            console.log('callRecommendation(balanced) 호출 성공');
-        } catch (err) { 
-            console.error('[sendRecommendationRequest Error]:', err);
-            setError(t('aiCoach.fetchError')); 
-        } finally {
-            console.log('--- [추천 요청 프로세스 종료] ---');
-        }
+        if (!profile) { sonnerToast.error(t('aiCoach.profileLoading')); return; }
+        setError(null); setShowHardModeOptions(false);
+        const userMsg = i18n.language === 'en' ? "Recommend today's routine" : "오늘의 루틴 추천해줘";
+        setMessages(prev => [...prev, { id: Date.now(), type: 'user', text: userMsg }]);
+        try { await callRecommendation('balanced'); } catch (err) { setError(t('aiCoach.fetchError')); }
     };
 
     const sendHardModeRequest = async (hardModeType) => {
-        console.log(`--- [하드모드 버튼 클릭됨: ${hardModeType}] ---`);
-        console.log('현재 프로필 상태:', profile);
-
-        if (!profile) { 
-            console.warn('프로필 데이터가 없어 하드모드 요청을 중단합니다.');
-            sonnerToast.error(t('aiCoach.profileLoading')); 
-            return; 
-        }
-
-        setError(null); 
-        setShowHardModeOptions(false);
-        try { 
-            console.log(`callRecommendation(hard, ${hardModeType}) 호출 시도...`);
-            await callRecommendation('hard', hardModeType); 
-            console.log(`callRecommendation(hard, ${hardModeType}) 호출 성공`);
-        } catch (err) { 
-            console.error('[sendHardModeRequest Error]:', err);
-            setError(t('aiCoach.fetchError')); 
-        } finally {
-            console.log('--- [하드모드 요청 프로세스 종료] ---');
-        }
+        if (!profile) { sonnerToast.error(t('aiCoach.profileLoading')); return; }
+        setError(null); setShowHardModeOptions(false);
+        const hardMsgMap = i18n.language === 'en' ? {
+            hard_mode_low_weight:  "Recommend hard mode (Low Weight High Reps)",
+            hard_mode_high_weight: "Recommend hard mode (High Weight Low Reps)",
+            hard_mode_progressive: "Recommend hard mode (Pyramid Set)",
+            hard_mode_drop_set:    "Recommend hard mode (Drop Set)",
+        } : {
+            hard_mode_low_weight:  "하드모드(저중량 고반복) 추천해줘",
+            hard_mode_high_weight: "하드모드(고중량 저반복) 추천해줘",
+            hard_mode_progressive: "하드모드(피라미드 세트) 추천해줘",
+            hard_mode_drop_set:    "하드모드(드롭세트) 추천해줘",
+        };
+        const userMsg = hardMsgMap[hardModeType] || (i18n.language === 'en' ? "Recommend hard mode" : "하드모드 추천해줘");
+        setMessages(prev => [...prev, { id: Date.now(), type: 'user', text: userMsg }]);
+        try { await callRecommendation('hard', hardModeType); } catch (err) { setError(t('aiCoach.fetchError')); }
     };
 
     const onSendMessage = () => {
@@ -150,6 +150,33 @@ const AiRecommendationScreen = () => {
         if (personalRecords[exerciseName]) return personalRecords[exerciseName];
         const foundKey = Object.keys(personalRecords).find(k => k.trim().toLowerCase() === normalizedInput);
         return foundKey ? personalRecords[foundKey] : null;
+    };
+
+    const buildSetsForMode = (selectedMode, exerciseName, isLastThree = false) => {
+        const pr = getPRForExercise(exerciseName);
+        const prKg = pr?.kg || 0;
+        const kg = (ratio) => prKg > 0 ? Math.round(prKg * ratio) : 0;
+
+        switch (selectedMode) {
+            case 'hard_mode_low_weight':
+                return [0.30, 0.40, 0.55, 0.70].map((r, i) => ({
+                    kg: kg(r), reps: [20, 20, 15, 15][i], isDropSet: false, dropKgs: ['', '', '']
+                }));
+            case 'hard_mode_high_weight':
+                return [0.80, 0.90, 1.00, 1.20].map((r, i) => ({
+                    kg: kg(r), reps: [10, 10, 8, 6][i], isDropSet: false, dropKgs: ['', '', '']
+                }));
+            case 'hard_mode_progressive':
+                return [0.60, 0.70, 0.85, 1.00, 0.85, 0.70].map((r, i) => ({
+                    kg: kg(r), reps: [15, 13, 10, 10, 13, 15][i], isDropSet: false, dropKgs: ['', '', '']
+                }));
+            case 'hard_mode_drop_set':
+                return Array.from({ length: 4 }, () => ({
+                    kg: 0, reps: 0, isDropSet: isLastThree, dropKgs: ['', '', '']
+                }));
+            default:
+                return [{ kg: 0, reps: 0, isDropSet: false, dropKgs: ['', '', ''] }];
+        }
     };
 
     return (
@@ -177,33 +204,33 @@ const AiRecommendationScreen = () => {
                 {messages.map((msg) => {
                     if (msg.type === 'user') return <ChatMessage key={msg.id} msg={msg} />;
 
-                    const parsed = parseResponseJSON(msg.text);
-                    const isRecommendation = (msg.msgType === 'recommendation' || parsed) && parsed;
+                    const routineData = msg.parsedData;
+                    const isRecommendation = msg.msgType === 'recommendation' && routineData;
                     const isHard = !!msg.isHardMode;
 
                     return (
                         <div key={msg.id} className="flex items-start gap-3 mb-4 animate-slide-up">
                             <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg shadow-blue-900/20">AI</div>
                             <div className="flex-1 space-y-4 max-w-[95%]">
-                                {!isRecommendation && (
-                                    <div className="bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 shadow-xl">
-                                        <p className="text-sm text-slate-200 leading-relaxed font-medium whitespace-pre-line">
-                                            {typeof msg.text === 'string' ? msg.text.replace(/\{[\s\S]*\}/, '').trim() : msg.text}
-                                        </p>
-                                    </div>
-                                )}
+                                
+                                <div className="bg-slate-900/80 border border-white/5 rounded-2xl rounded-tl-none p-4 shadow-xl">
+                                    <p className="text-sm text-slate-200 leading-relaxed font-medium whitespace-pre-line">
+                                        {isRecommendation 
+                                            ? (routineData.reason || t('aiCoach.recommendationReason', { defaultValue: '오늘의 추천 루틴입니다.' })) 
+                                            : (() => {
+                                                const cleanedText = typeof msg.text === 'string' ? msg.text.replace(/\{[\s\S]*\}/, '').trim() : msg.text;
+                                                if (cleanedText) return cleanedText;
+                                                if (msg.parsedData) return t('aiCoach.analysisComplete', { defaultValue: '추천 루틴 분석이 완료되었습니다. 아래 카드를 확인해 주세요.' });
+                                                return msg.text;
+                                              })()
+                                        }
+                                    </p>
+                                </div>
 
                                 {isRecommendation && (
                                     <div className={`border rounded-3xl p-5 space-y-5 shadow-2xl backdrop-blur-sm ${isHard ? 'bg-rose-950/20 border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.15)]' : 'bg-slate-900 border-white/10'}`}>
-                                        {parsed.reason && (
-                                            <div className="flex items-start gap-2.5 bg-white/5 p-3.5 rounded-2xl border border-white/5">
-                                                <TrendingUp size={16} className={isHard ? 'text-rose-400' : 'text-blue-400'} />
-                                                <p className="text-xs text-slate-300 leading-relaxed font-bold italic">{parsed.reason}</p>
-                                            </div>
-                                        )}
-
                                         <div className="space-y-3">
-                                            {parsed.items.map((routine, idx) => {
+                                            {routineData.routines.map((routine, idx) => {
                                                 const key = `${msg.id}_${routine.exercise}_${idx}`;
                                                 const isAdded = addedExercises.has(key);
                                                 const localizedName = getLocalizedNameByKo(routine.exercise, i18n.language);
@@ -214,12 +241,21 @@ const AiRecommendationScreen = () => {
                                                 return (
                                                     <div key={idx} className={`rounded-xl border transition-all overflow-hidden ${isAdded ? 'bg-blue-600/10 border-blue-500/50' : isHard ? 'bg-rose-900/30 border-rose-500/40' : 'bg-slate-800/40 border-white/5'}`}>
                                                         <div className="flex items-start sm:items-center gap-3 px-3 sm:px-4 py-3">
-                                                            <span className={`text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-md shrink-0 ${isHard ? 'bg-rose-500/20 text-rose-400' : 'bg-blue-500/20 text-blue-400'}`}>
-                                                                {routine.part}
-                                                            </span>
-                                                            <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                                                                <h4 className="text-sm font-black text-white italic uppercase break-keep leading-tight">{localizedName}</h4>
-                                                                {subTarget && <span className="text-[10px] text-slate-500 font-bold whitespace-nowrap">{subTarget}</span>}
+                                                            <div className="flex-1 min-w-0 grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 sm:flex sm:flex-row sm:items-center sm:gap-3">
+                                                                <div className="flex flex-col items-start gap-0.5 sm:contents">
+                                                                    <span className={`text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-md shrink-0 ${isHard ? 'bg-rose-500/20 text-rose-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                                                        {routine.part}
+                                                                    </span>
+                                                                    {(routine.equipment || exInfo?.equipment) && (
+                                                                        <span className="text-[10px] text-slate-400 font-bold whitespace-nowrap">
+                                                                            {routine.equipment || exInfo?.equipment}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex flex-col gap-0.5 sm:contents">
+                                                                    <h4 className="text-sm font-black text-white italic uppercase break-keep leading-tight">{localizedName}</h4>
+                                                                    {subTarget && <span className="text-[10px] text-slate-500 font-bold whitespace-nowrap">{subTarget}</span>}
+                                                                </div>
                                                             </div>
                                                             <div className="flex items-center gap-3 shrink-0 ml-auto sm:ml-0">
                                                                 <div className="flex flex-col items-end gap-0.5 min-w-[80px]">
@@ -230,27 +266,11 @@ const AiRecommendationScreen = () => {
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        {isHard && routine.sets_data && (
-                                                            <div className="px-3 pb-3">
-                                                                <div className="bg-slate-950/60 rounded-lg border border-rose-500/20 overflow-hidden shadow-inner">
-                                                                    <div className="grid grid-cols-3 bg-rose-500/5 px-3 py-1.5 text-[8px] font-black text-rose-400/60 uppercase tracking-widest border-b border-rose-500/10">
-                                                                        <span>Set</span><span className="text-center italic">Intensity</span><span className="text-right">Reps</span>
-                                                                    </div>
-                                                                    <div className="divide-y divide-rose-500/5">
-                                                                        {routine.sets_data.map((set, sIdx) => (
-                                                                            <div key={sIdx} className="grid grid-cols-3 px-3 py-2 items-center italic">
-                                                                                <span className="text-[10px] font-black text-slate-600">#{sIdx + 1}</span><div className="text-center flex flex-col items-center"><span className="text-xs font-black text-white">{set.kg}kg</span>{set.isDropSet && <span className="text-[7px] text-rose-500 font-black animate-pulse mt-0.5">DROP</span>}</div><span className="text-right text-sm font-black text-rose-500">{set.reps}회</span>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        )}
                                                     </div>
                                                 );
                                             })}
                                         </div>
-                                        <button onClick={goToWorkoutPlan} className={`w-full py-4 mt-2 bg-gradient-to-r text-white rounded-2xl font-black italic text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xl border border-white/10 ${isHard ? 'from-rose-600 to-orange-600 shadow-rose-900/40' : 'from-blue-600 to-indigo-600 shadow-blue-900/40'}`}>
+                                        <button onClick={() => handleBatchAdd(routineData.routines, msg.id, msg.selectedMode)} className={`w-full py-4 mt-2 bg-gradient-to-r text-white rounded-2xl font-black italic text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xl border border-white/10 ${isHard ? 'from-rose-600 to-orange-600 shadow-rose-900/40' : 'from-blue-600 to-indigo-600 shadow-blue-900/40'}`}>
                                             <PlayCircle size={20} />{t('aiCoach.startTodayWorkout', { defaultValue: '오늘 운동 시작하기' })}
                                         </button>
                                     </div>

@@ -269,7 +269,10 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token, dataset }) => {
   }, [muscleGroup]);
 
   const subCategoryData = useMemo(() => {
-    const filtered = logs.filter(log => normalizePart(log.part) === muscleGroup);
+    const filtered = logs.filter(log => {
+      const exInfo = dataset.find(e => e.name?.trim().toLowerCase() === log.exercise?.trim().toLowerCase());
+      return normalizePart(exInfo?.bodyPart || exInfo?.body_part || log.part) === muscleGroup;
+    });
     const volMap = {};
     const cntMap = {};
 
@@ -334,7 +337,11 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token, dataset }) => {
     }
   };
 
-  if (!subCategoryData.length) return null;
+  if (!subCategoryData.length) return (
+    <p className="text-center py-8 text-slate-500 text-sm font-bold">
+      {i18n.language === 'en' ? 'No workout records for this muscle group.' : '해당 부위의 운동 기록이 없습니다.'}
+    </p>
+  );
 
   return (
     <section>
@@ -374,15 +381,31 @@ const MuscleDetailAnalysis = ({ muscleGroup, logs, token, dataset }) => {
 
       {/* AI 분석 */}
       <div className="mt-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Brain size={16} className="text-purple-400" />
+          <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('analysis.aiInsights')}</h3>
+          {!aiAnalysis && (
+            <button
+              onClick={runAnalysis}
+              disabled={isAnalyzing || !token}
+              className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black text-white disabled:opacity-40 transition-all active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}
+            >
+              {isAnalyzing ? (
+                <><Loader2 size={13} className="animate-spin" />{t('common.processing')}</>
+              ) : (
+                <><Sparkles size={13} />{t('analysis.aiAnalysisRequest')}</>
+              )}
+            </button>
+          )}
+        </div>
+
         {!aiAnalysis && !isAnalyzing && (
-          <button
-            onClick={runAnalysis}
-            disabled={!token}
-            className="w-full flex items-center justify-center gap-2 py-4 bg-purple-600/15 border border-purple-500/30 text-purple-400 text-xs font-black rounded-2xl hover:bg-purple-600/25 transition-all active:scale-95 disabled:opacity-40"
-          >
-            <Brain size={15} />
-            {t('analysis.aiAnalysisRequest')}
-          </button>
+          <div className="flex flex-col items-center justify-center py-12 gap-3 text-center bg-slate-900 border border-slate-800 rounded-2xl">
+            <Brain size={36} className="text-slate-700" />
+            <p className="text-white font-black text-sm">{t('analysis.aiPrompt')}</p>
+            <p className="text-slate-500 text-xs font-bold">{t('analysis.aiPromptDesc')}</p>
+          </div>
         )}
 
         {isAnalyzing && (
@@ -451,6 +474,16 @@ const AnalysisScreen = () => {
   }, [selectedMuscleGroup]);
 
   useEffect(() => {
+    if (!aiTrainingAnalysis) return;
+    setAiTrainingAnalysis(prev => ({
+      ...prev,
+      intensity: computedAnalysisStats.intensityVal,
+      balance: computedAnalysisStats.balanceVal,
+      consistency: computedAnalysisStats.consistencyVal,
+    }));
+  }, [selectedMuscleGroup]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     const init = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -485,32 +518,7 @@ const AnalysisScreen = () => {
   const requestAIAnalysis = async () => {
     setIsAnalyzing(true);
     try {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      const recentLogs = logs.filter(log =>
-        new Date(log.created_at) >= thirtyDaysAgo
-      );
-
-      const muscleStats = {};
-      recentLogs.forEach(log => {
-        const muscle = normalizePart(log.part);
-        if (muscle === '기타') return;
-        if (!muscleStats[muscle]) muscleStats[muscle] = { count: 0, volume: 0 };
-        muscleStats[muscle].count += 1;
-        muscleStats[muscle].volume += calcLogVolume(log.sets_data);
-      });
-
-      const dayNames = i18n.language === 'en'
-        ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-        : ['일', '월', '화', '수', '목', '금', '토'];
-      const dayStats = {};
-      recentLogs.forEach(log => {
-        const dayName = dayNames[new Date(log.created_at).getDay()];
-        dayStats[dayName] = (dayStats[dayName] || 0) + 1;
-      });
-
-      const weeklyFrequency = Math.round(recentLogs.length / 4.3);
+      const { recentLogs, muscleStats, dayStats, weeklyFrequency, intensityVal, balanceVal, consistencyVal } = computedAnalysisStats;
 
       const { data, error } = await supabase.functions.invoke('ai-coach', {
         body: {
@@ -526,8 +534,14 @@ const AnalysisScreen = () => {
       });
 
       if (error) throw error;
-      const parsed = JSON.parse(data.content);
-      setAiTrainingAnalysis(parsed);
+      let parsed = {};
+      try { parsed = JSON.parse(data.content); } catch { /* parse 실패 시 빈 객체로 처리 */ }
+      setAiTrainingAnalysis({
+        ...parsed,
+        intensity: intensityVal,
+        balance: balanceVal,
+        consistency: consistencyVal,
+      });
     } catch (err) {
       console.error('AI 분석 실패:', err);
     } finally {
@@ -584,6 +598,71 @@ const AnalysisScreen = () => {
     else if (sortBy === 'name') list = [...list].sort((a, b) => a.exercise.localeCompare(b.exercise, 'ko'));
     return list;
   }, [prList, selectedMuscleGroup, sortBy]);
+
+  const computedAnalysisStats = useMemo(() => {
+    const noData = i18n.language === 'en' ? 'No records' : '기록 없음';
+    const periodDays = 30;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    let recentLogs = logs.filter(log => new Date(log.created_at) >= thirtyDaysAgo);
+
+    // 특정 부위 필터 적용: exercises 테이블 body_part 기반
+    if (selectedMuscleGroup !== '전체') {
+      recentLogs = recentLogs.filter(log => {
+        const exInfo = exerciseDataset.find(e =>
+          e.name?.trim().toLowerCase() === log.exercise?.trim().toLowerCase()
+        );
+        return normalizePart(exInfo?.bodyPart || exInfo?.body_part || log.part) === selectedMuscleGroup;
+      });
+    }
+
+    // 훈련 강도: sets_data kg × reps 볼륨 합산
+    const totalVolume = recentLogs.reduce((sum, log) => sum + calcLogVolume(log.sets_data), 0);
+    const intensityVal = totalVolume > 0
+      ? (i18n.language === 'en' ? `Total ${totalVolume.toLocaleString()} kg` : `총 ${totalVolume.toLocaleString()}kg`)
+      : noData;
+
+    // 부위 균형: exercises 테이블 body_part 기준 비율
+    const muscleStats = {};
+    recentLogs.forEach(log => {
+      const exInfo = exerciseDataset.find(e =>
+        e.name?.trim().toLowerCase() === log.exercise?.trim().toLowerCase()
+      );
+      const muscle = normalizePart(exInfo?.bodyPart || exInfo?.body_part || log.part);
+      if (muscle === '기타') return;
+      if (!muscleStats[muscle]) muscleStats[muscle] = { count: 0, volume: 0 };
+      muscleStats[muscle].count += 1;
+      muscleStats[muscle].volume += calcLogVolume(log.sets_data);
+    });
+    const partEntries = Object.entries(muscleStats).sort((a, b) => b[1].volume - a[1].volume);
+    const balanceVal = partEntries.length > 0
+      ? partEntries.map(([p, s]) => `${p} ${Math.round((s.volume / totalVolume) * 100)}%`).join(', ')
+      : noData;
+
+    // 일관성: 최근 30일 중 운동한 날 수 비율
+    const uniqueDays = new Set(recentLogs.map(l => l.created_at.split('T')[0])).size;
+    const consistencyVal = recentLogs.length > 0
+      ? (i18n.language === 'en'
+          ? `${uniqueDays}/${periodDays} days (${Math.round((uniqueDays / periodDays) * 100)}%)`
+          : `${periodDays}일 중 ${uniqueDays}일 (${Math.round((uniqueDays / periodDays) * 100)}%)`)
+      : noData;
+
+    const dayNames = i18n.language === 'en'
+      ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      : ['일', '월', '화', '수', '목', '금', '토'];
+    const dayStats = {};
+    recentLogs.forEach(log => {
+      const dayName = dayNames[new Date(log.created_at).getDay()];
+      dayStats[dayName] = (dayStats[dayName] || 0) + 1;
+    });
+
+    return {
+      recentLogs, muscleStats, dayStats,
+      weeklyFrequency: Math.round(recentLogs.length / 4.3),
+      intensityVal, balanceVal, consistencyVal,
+    };
+  }, [selectedMuscleGroup, logs, exerciseDataset, i18n.language]);
 
   // ── 렌더 ─────────────────────────────────────────────────────────────────
   return (

@@ -279,7 +279,7 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
     );
 };
 
-const CalendarScreen = () => {
+const CalendarScreen = ({ onSelectedDateChange }) => {
     const { t, i18n } = useTranslation();
     const { isMobile } = useWindowSize();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -289,6 +289,10 @@ const CalendarScreen = () => {
     const [showProfileEdit, setShowProfileEdit] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(null);
+
+    useEffect(() => {
+        onSelectedDateChange?.(selectedDate);
+    }, [selectedDate]);
 
     const fetchLogs = async () => {
         setIsLoading(true);

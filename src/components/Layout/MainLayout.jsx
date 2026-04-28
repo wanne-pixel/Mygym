@@ -36,6 +36,7 @@ const MainLayout = () => {
     const handleTabChange = (tab) => setSearchParams({ tab });
     const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
     const [isBetaModalOpen, setIsBetaModalOpen] = useState(shouldShowBetaModal);
+    const [isCalendarDetail, setIsCalendarDetail] = useState(false);
 
     return (
         <div className="relative min-h-screen bg-slate-950">
@@ -67,7 +68,7 @@ const MainLayout = () => {
 
             {/* 메인 콘텐츠 영역 */}
             <main className="lg:ml-56">
-                {activeTab === '달력' && <CalendarScreen />}
+                {activeTab === '달력' && <CalendarScreen onSelectedDateChange={(date) => setIsCalendarDetail(!!date)} />}
                 {activeTab === '루틴구성' && <WorkoutPlanScreen />}
                 {activeTab === 'AI코치' && <AIRecommendationScreen />}
                 {activeTab === 'analysis' && <AnalysisScreen />}
@@ -76,7 +77,8 @@ const MainLayout = () => {
             {/* 모바일: 하단 탭바 */}
             <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 
-            {/* 플로팅 건의/문의 버튼 */}
+            {/* 플로팅 건의/문의 버튼 - 달력 탭에서만 표시 */}
+            {activeTab === '달력' && !isCalendarDetail && (
             <button
                 onClick={() => setIsFeedbackOpen(true)}
                 className="fixed bottom-24 lg:bottom-8 right-4 z-50 flex items-center gap-2 px-4 py-3 bg-slate-800/90 backdrop-blur-sm border border-white/10 text-slate-300 hover:text-white hover:border-white/20 hover:bg-slate-700/90 rounded-2xl text-xs font-bold shadow-lg transition-all active:scale-95 break-keep"
@@ -87,6 +89,7 @@ const MainLayout = () => {
                 </svg>
                 <span className="hidden sm:inline">{t('feedback.floatingButton')}</span>
             </button>
+            )}
 
             {/* 건의/문의 모달 */}
             <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
@@ -94,7 +97,8 @@ const MainLayout = () => {
             {/* 베타 공지 모달 */}
             <BetaNoticeModal isOpen={isBetaModalOpen} onClose={() => setIsBetaModalOpen(false)} />
 
-            {/* 개인정보처리방침 푸터 링크 */}
+            {/* 개인정보처리방침 푸터 링크 - 달력 탭에서만 표시 */}
+            {activeTab === '달력' && !isCalendarDetail && (
             <div className="fixed bottom-[84px] lg:bottom-3 left-0 right-0 lg:ml-56 flex justify-center z-40 pointer-events-none">
                 <a
                     href="https://shell-locust-532.notion.site/MyGym-2ea3913a10d080a69587f5da233e965f"
@@ -105,6 +109,7 @@ const MainLayout = () => {
                     {t('privacy.footerLink')}
                 </a>
             </div>
+            )}
         </div>
     );
 };
