@@ -46,25 +46,47 @@ export const useAiCoach = () => {
     const [isTyping, setIsTyping] = useState(false);
 
     const fetchRecentWorkouts = async (userId) => {
-        const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
         const { data: logs } = await supabase
             .from('workout_logs')
             .select('id, user_id, exercise, sets_data, created_at')
             .eq('user_id', userId)
-            .gte('created_at', fiveDaysAgo)
+            .gte('created_at', thirtyDaysAgo)
             .order('created_at', { ascending: false });
 
-        if (!logs || logs.length === 0) return [];
+        if (!logs || logs.length === 0) return {
+            recentWorkouts: [],
+            workoutFrequency: { totalDays: 30, workedOutDays: 0 },
+            bodyPartVolume: {},
+        };
 
-        // workout_logs에는 body_part가 없으므로 exercises 테이블에서 조회해 보강
-        const uniqueNames = [...new Set(logs.map(l => l.exercise))];
-        const { data: exerciseInfo } = await supabase
-            .from('exercises')
-            .select('name, body_part')
-            .in('name', uniqueNames);
+        // 1. recentWorkouts: 최근 10회 + exerciseDataset으로 body_part 보강 (별도 쿼리 없음)
+        const top10 = logs.slice(0, 10);
+        const bodyPartMap = Object.fromEntries(
+            exerciseDataset.map(ex => [ex.name, ex.body_part || ex.bodyPart])
+        );
+        const recentWorkouts = top10.map(log => ({
+            ...log,
+            exercise_body_part: bodyPartMap[log.exercise] || null
+        }));
 
-        const bodyPartMap = Object.fromEntries((exerciseInfo || []).map(ex => [ex.name, ex.body_part]));
-        return logs.map(log => ({ ...log, exercise_body_part: bodyPartMap[log.exercise] || null }));
+        // 2. workoutFrequency: 30일 중 운동한 날 수
+        const workedOutDays = new Set(logs.map(l => l.created_at.split('T')[0])).size;
+        const workoutFrequency = { totalDays: 30, workedOutDays };
+
+        // 3. bodyPartVolume: top10 기준 부위별 볼륨(kg × reps) 합산
+        const bodyPartVolume = {};
+        top10.forEach(log => {
+            const bp = bodyPartMap[log.exercise];
+            if (!bp) return;
+            const sets = typeof log.sets_data === 'string'
+                ? JSON.parse(log.sets_data)
+                : (log.sets_data || []);
+            const vol = sets.reduce((acc, s) => acc + (parseFloat(s.kg) || 0) * (parseInt(s.reps) || 0), 0);
+            bodyPartVolume[bp] = (bodyPartVolume[bp] || 0) + vol;
+        });
+
+        return { recentWorkouts, workoutFrequency, bodyPartVolume };
     };
 
     useEffect(() => {
@@ -137,7 +159,8 @@ export const useAiCoach = () => {
                             part: item['부위'] || item['part'] || (Array.isArray(targetData['부위']) ? targetData['부위'][0] : targetData['부위']) || "",
                             exercise: item['운동명'] || item['종목명'] || item['이름'] || item['exercise'] || "",
                             sub_target_focus: item['세부타겟'] || item['세부부위'] || item['sub_target_focus'] || "",
-                            sets_data: item['세트정보'] || item['세트'] || item['sets_data'] || []
+                            sets_data: item['세트정보'] || item['세트'] || item['sets_data'] || [],
+                            reason: item['reason'] || item['이유'] || ""
                         }))
                     };
                     
@@ -169,13 +192,20 @@ export const useAiCoach = () => {
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) throw new Error('No session');
-            const recentLogs = await fetchRecentWorkouts(session.user.id);
+            const { recentWorkouts, workoutFrequency, bodyPartVolume } = await fetchRecentWorkouts(session.user.id);
+            const doneNames = new Set(Object.keys(personalRecords));
+            const neverDoneExercises = exerciseDataset
+                .filter(ex => !doneNames.has(ex.name))
+                .map(ex => ({ name: ex.name, body_part: ex.body_part || ex.bodyPart }));
 
             const response = await callAiCoachFunction({
                 type: 'chat',
                 lang: i18n.language,
                 userProfile: profile,
-                recentWorkouts: recentLogs,
+                recentWorkouts,
+                workoutFrequency,
+                bodyPartVolume,
+                neverDoneExercises,
                 exercises: exerciseDataset,
                 chatHistory: messages.slice(-MAX_CHAT_HISTORY).map(m => ({
                     role: m.type === 'ai' ? 'assistant' : 'user',
@@ -200,14 +230,21 @@ export const useAiCoach = () => {
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) throw new Error('Session not found');
-            const recentLogs = await fetchRecentWorkouts(session.user.id);
+            const { recentWorkouts, workoutFrequency, bodyPartVolume } = await fetchRecentWorkouts(session.user.id);
+            const doneNames = new Set(Object.keys(personalRecords));
+            const neverDoneExercises = exerciseDataset
+                .filter(ex => !doneNames.has(ex.name))
+                .map(ex => ({ name: ex.name, body_part: ex.body_part || ex.bodyPart }));
 
             const response = await callAiCoachFunction({
                 type: 'recommendation',
                 lang: i18n.language,
                 exercises: exerciseDataset,
                 userProfile: profile,
-                recentWorkouts: recentLogs,
+                recentWorkouts,
+                workoutFrequency,
+                bodyPartVolume,
+                neverDoneExercises,
                 selectedMode: isHard ? selectedMode : 'today_routine',
             });
 

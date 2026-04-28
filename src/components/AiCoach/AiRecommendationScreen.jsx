@@ -255,6 +255,7 @@ const AiRecommendationScreen = () => {
                                                                 <div className="flex flex-col gap-0.5 sm:contents">
                                                                     <h4 className="text-sm font-black text-white italic uppercase break-keep leading-tight">{localizedName}</h4>
                                                                     {subTarget && <span className="text-[10px] text-slate-500 font-bold whitespace-nowrap">{subTarget}</span>}
+                                                                    {routine.reason && <span className={`text-[10px] font-medium italic ${isHard ? 'text-rose-400/70' : 'text-blue-400/70'}`}>{routine.reason}</span>}
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-3 shrink-0 ml-auto sm:ml-0">

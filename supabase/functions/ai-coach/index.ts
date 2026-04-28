@@ -98,7 +98,10 @@ serve(async (req) => {
     const body = await req.json();
     const {
       type, lang = 'ko', recentWorkouts = [], userProfile = {},
-      exercises = [], userPrompt = '', selectedMode = 'today_routine'
+      exercises = [], userPrompt = '', selectedMode = 'today_routine',
+      workoutFrequency = { totalDays: 30, workedOutDays: 0 },
+      bodyPartVolume = {},
+      neverDoneExercises = [],
     } = body;
 
     // 규칙 기반 엔진 실행
@@ -195,6 +198,34 @@ Training data (last ${period_days} days):
       ? recentPartsList.join(', ')
       : (isEn ? 'no recent workout history' : '최근 운동 기록 없음');
 
+    // 신규 컨텍스트 데이터 문자열 변환
+    const frequencyComment = (() => {
+      const d = (workoutFrequency as any).workedOutDays ?? 0;
+      if (isEn) {
+        if (d <= 3) return `Only ${d} workout days in the last 30 days (low activity — let's get back on track)`;
+        if (d >= 7) return `${d} workout days in the last 30 days (great consistency!)`;
+        return `${d} workout days in the last 30 days`;
+      } else {
+        if (d <= 3) return `최근 30일 중 ${d}일 (최근 운동이 뜸했어요)`;
+        if (d >= 7) return `최근 30일 중 ${d}일 (꾸준히 잘 하고 있어요)`;
+        return `최근 30일 중 ${d}일`;
+      }
+    })();
+
+    const volumeContext = Object.entries(bodyPartVolume as Record<string, number>)
+      .sort(([, a], [, b]) => b - a)
+      .map(([part, vol]) => `${part}: ${Math.round(vol)}kg·회`)
+      .join(', ') || (isEn ? 'No volume data' : '볼륨 데이터 없음');
+
+    const neverDoneContext = (neverDoneExercises as any[])
+      .slice(0, 20)
+      .map((ex: any) => `${ex.name}(${ex.body_part})`)
+      .join(', ') || (isEn ? 'None' : '없음');
+
+    const recentExerciseNames = [...new Set(
+      (recentWorkouts as any[]).slice(0, 10).map((w: any) => w.exercise).filter(Boolean)
+    )].join(', ') || (isEn ? 'No recent records' : '최근 운동 기록 없음');
+
     // 하드모드 selectedMode별 서론 톤 지시문
     const getModeReplyInstruction = (mode: string): string => {
       if (isEn) {
@@ -225,12 +256,13 @@ Training data (last ${period_days} days):
 
     {
       "운동추천": {
-        "추천사유": "[USER CONTEXT FOR REPLY]의 실제 데이터(최근 운동 부위·목표·숙련도)를 언급하며 오늘 루틴 추천 이유를 다음 지시에 따라 작성 → ${modeReplyInstruction} 인사말·격려 표현 없이 데이터 기반으로만.",
+        "추천사유": "[USER CONTEXT FOR REPLY]의 실제 데이터(최근 운동 부위·목표·숙련도·운동 빈도)를 언급하며 오늘 루틴 추천 이유를 다음 지시에 따라 작성 → ${modeReplyInstruction} 인사말·격려 표현 없이 데이터 기반으로만. 반드시 운동 빈도(${frequencyComment})를 자연스럽게 문장 안에 녹여 언급할 것.",
         "운동목록": [
           {
             "부위": "제공된 DB의 부위명과 일치",
             "운동명": "제공된 DB의 운동명과 일치",
             "세부타겟": "타겟 근육 (예: 대흉근)",
+            "reason": "이 운동을 선택한 근거를 친근한 트레이너 구어체로 한 줄(15자 이내) 작성. 아래 우선순위로 판단: 1순위) neverDoneExercises에 포함된 운동이면 → '처음 해보는 운동으로 새로운 자극이에요' 2순위) bodyPartVolume에서 해당 부위 볼륨이 가장 낮으면 → '최근 [부위] 볼륨이 부족해요' 3순위) recentWorkouts 최근 10회에 없는 운동이면 → '이번 주 한 번도 안 했어요'",
             "세트정보": [
               {"set": 1, "reps": 12, "weight": 0},
               {"set": 2, "reps": 12, "weight": 0}
@@ -245,13 +277,18 @@ Training data (last ${period_days} days):
     - Goal: ${profileGoal}
     - Available Time: ${profileTime}
     - Split Preference: ${profileSplit}
+    - Workout Frequency: ${frequencyComment}
     - Recently Trained Parts (last 10 logs): ${recentPartsText}
+    - Recent Exercises (last 10 workouts): ${recentExerciseNames}
+    - Body Part Volume (kg×reps, last 10 workouts): ${volumeContext}
+    - Never Done Exercises (sample): ${neverDoneContext}
     - Today's Target Parts: ${targets.join(', ')}
 
     [STRICT RULES: DO NOT HALLUCINATE]
     1. 반드시 아래 [AVAILABLE EXERCISE DATABASE]에 있는 운동만 선택해라.
     2. '부위'와 '운동명'은 제공된 DB와 글자 하나 틀리지 않고 100% 일치해야 한다.
     3. DB에 없는 운동을 지어내는 것은 엄격히 금지된다.
+    4. reason 필드는 반드시 모든 운동목록 항목에 포함해야 한다.
 
     [AVAILABLE EXERCISE DATABASE]
     ${availableExercises || "해당 부위의 운동 데이터가 없습니다."}
@@ -263,12 +300,62 @@ Training data (last ${period_days} days):
     ${selectedMode === 'hard_mode_drop_set' ? '- DROP SET RULE: 운동목록의 마지막 3개 운동은 반드시 equipment가 "덤벨"인 덤벨 운동으로 선택해라. 이 규칙은 절대적으로 지켜야 한다.' : ''}
     `;
 
-    let systemPrompt = `You are a professional bodybuilding head coach. ${langInstruction}\n${systemGuideline}`;
     let isJsonOutput = true;
+    let systemPrompt: string;
 
     if (type === "chat") {
       isJsonOutput = false;
-      systemPrompt += "\n단순 대화 시에는 친절하게 대화하되, 루틴 추천 요청이 들어오면 반드시 위의 [STRICT RESPONSE SCHEMA]를 따라라.";
+      const allExercisesDb = exercises
+        .map((ex: any) => `- ${ex.name} (부위: ${ex.body_part || ex.bodyPart})`)
+        .join('\n');
+
+      systemPrompt = `You are a professional fitness coach. ${langInstruction}
+
+[CORE INSTRUCTION - 최우선 규칙]
+사용자의 메시지를 반드시 최우선으로 따른다.
+특정 부위, 운동 종류, 개수가 언급되면 반드시 그것을 기준으로 응답한다.
+userProfile과 recentWorkouts는 참고용이며, 사용자 요청을 절대 override하지 마라.
+
+[RESPONSE FORMAT RULES]
+- 운동 추천/루틴 구성 요청 (예: "하체운동 추천", "등 운동 5가지" 등): 반드시 아래 JSON 형식으로만 응답한다. JSON 외 텍스트는 금지.
+- 단순 질문 (운동 방법, 영양, 자세 교정 등): 텍스트로만 응답한다. JSON 없이.
+
+[JSON SCHEMA - 운동 추천 시 반드시 사용]
+{
+  "운동추천": {
+    "추천사유": "운동 빈도(${frequencyComment})를 자연스럽게 언급하며 요청 기반으로 추천 이유를 1~2문장으로 작성. 친근한 트레이너 구어체.",
+    "운동목록": [
+      {
+        "부위": "아래 DB의 부위명과 일치",
+        "운동명": "아래 DB의 운동명과 일치",
+        "세부타겟": "타겟 근육 (예: 대흉근)",
+        "reason": "이 운동을 선택한 구체적 근거를 친근한 구어체로 두 줄 이내 작성. 아래 데이터를 분석해 근거로 활용할 것: 1) neverDoneExercises에 있으면 '한 번도 안 해본 운동이에요 → 새로운 자극' 2) bodyPartVolume에서 해당 부위 세부 근육 볼륨 불균형이 있으면 구체적으로 언급 (예: '대퇴사두근 볼륨이 햄스트링보다 많아요 → 균형 보완') 3) recentWorkouts 최근 10회에 없는 운동이면 '최근에 한 번도 안 한 운동이에요' 언급",
+        "세트정보": [{"set": 1, "reps": 12, "weight": 0}, {"set": 2, "reps": 12, "weight": 0}]
+      }
+    ]
+  }
+}
+
+[STRICT RULES]
+1. 운동명은 반드시 아래 [AVAILABLE EXERCISE DATABASE]에서만 선택한다.
+2. DB에 없는 운동을 만들어내는 것은 금지된다.
+3. 부위와 운동명은 DB와 정확히 일치해야 한다.
+4. reason 필드는 반드시 모든 운동목록 항목에 포함해야 한다.
+
+[USER CONTEXT - 참고용]
+- Level: ${profileLevel}
+- Goal: ${profileGoal}
+- Available Time: ${profileTime}
+- Workout Frequency: ${frequencyComment}
+- Recent Exercises (last 10 workouts): ${recentExerciseNames}
+- Body Part Volume (kg×reps, last 10 workouts): ${volumeContext}
+- Never Done Exercises (sample): ${neverDoneContext}
+
+[AVAILABLE EXERCISE DATABASE]
+${allExercisesDb || "운동 데이터가 없습니다."}
+`;
+    } else {
+      systemPrompt = `You are a professional bodybuilding head coach. ${langInstruction}\n${systemGuideline}`;
     }
 
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
