@@ -72,13 +72,12 @@ const MonthlyCalendar = ({ workoutGroups, currentViewDate, onMonthChange, onDayC
                         >
                             {d && (() => {
                                 const parts = info ? [...new Set(info.logs.map(l => l.part))] : [];
-                                const moreLabel = t('common.more');
                                 const partsLabel = parts.length === 1
                                     ? translatePart(parts[0])
                                     : parts.length === 2
                                         ? `${translatePart(parts[0])}·${translatePart(parts[1])}`
                                         : parts.length >= 3
-                                            ? `${translatePart(parts[0])} ${moreLabel} ${parts.length - 1}`
+                                            ? t('calendar.moreParts', { part: translatePart(parts[0]), count: parts.length - 1, defaultValue: `${translatePart(parts[0])} 외 ${parts.length - 1}` })
                                             : '';
                                 return (
                                     <>

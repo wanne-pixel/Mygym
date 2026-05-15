@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(pwdx 66)",
+      "Bash(kill 90452)",
+      "Bash(kill -9 90452)",
+      "Bash(pkill -f \"vite\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npm install *)",
+      "Bash(npx supabase *)",
+      "Bash(firebase deploy *)",
+      "Bash(git commit *)",
+      "Bash(node *)",
+      "Bash(wrangler pages *)",
+      "Bash(npx wrangler *)",
+      "Bash(python3 -m json.tool)",
+      "Bash(python3 *)",
+      "Bash(xargs ls *)",
+      "Bash(git rm *)",
+      "Bash(grep -E \"\\\\.\\(json|js\\)$\")",
+      "Bash(xargs cat *)",
+      "Bash(awk '{print $1}' RS= 'OFS= *)",
+      "Bash(git -C /home/user/mygym status)",
+      "Bash(git -C /home/user/mygym diff --stat)",
+      "Bash(git *)"
+    ]
+  }
+}

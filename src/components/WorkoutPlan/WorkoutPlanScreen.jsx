@@ -8,6 +8,7 @@ import ExerciseSelector from '../Exercise/ExerciseSelector';
 import { GifModal, GifRenderer } from '../Common/GifUI';
 import { getLocalizedNameByKo, getExerciseGif, BODY_PART_I18N } from '../../utils/exerciseUtils';
 import { useWindowSize } from '../../hooks/useWindowSize';
+import { toast } from 'sonner';
 
 const WorkoutPlanScreen = () => {
     const { t, i18n } = useTranslation();
@@ -125,25 +126,41 @@ const WorkoutPlanScreen = () => {
     };
 
     const handleSaveWorkout = async () => {
-        if (!window.confirm(t('workout.saveConfirm'))) return;
-        setIsSaving(true);
+        console.log('[handleSaveWorkout] Started. planList:', planList);
+        
+        // window.confirm이 브라우저에서 차단될 가능성을 고려하여 일단 주석 처리하거나 로그 추가
+        // if (!window.confirm(t('workout.saveConfirm'))) return;
+
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error(t('common.loginRequired'));
+            const { data: { session } } = await supabase.auth.getSession();
+            const user = session?.user;
+            console.log('[handleSaveWorkout] User session:', user?.id);
+
+            if (!user) {
+                toast.error(t('common.loginRequired'));
+                return;
+            }
 
             const logsToSave = planList
                 .map(item => {
                     const cardio = isCardio(item);
                     const filteredSets = (item.sets || []).filter(s => {
-                        if (cardio) return s.level !== '' || s.minutes !== '';
-                        if (s.isDropSet) return s.dropKgs?.some(k => k !== '') || s.reps !== '';
-                        return s.kg !== '' || s.reps !== '';
+                        if (cardio) return String(s.level) !== '' || String(s.minutes) !== '';
+                        if (s.isDropSet) return s.dropKgs?.some(k => String(k) !== '') || String(s.reps) !== '';
+                        return String(s.kg) !== '' || String(s.reps) !== '';
                     });
                     return { ...item, sets: filteredSets };
                 })
                 .filter(item => item.sets.length > 0);
 
-            if (logsToSave.length === 0) { toast.error(t('workout.noValidSets')); return; }
+            console.log('[handleSaveWorkout] Valid logs to save:', logsToSave);
+
+            if (logsToSave.length === 0) { 
+                toast.error(t('workout.noValidSets')); 
+                return; 
+            }
+
+            setIsSaving(true);
 
             const savedAt = new Date(`${targetDate}T12:00:00`).toISOString();
             const payload = logsToSave.map(item => ({
@@ -155,17 +172,27 @@ const WorkoutPlanScreen = () => {
                 created_at: savedAt,
             }));
 
+            console.log('[handleSaveWorkout] Final payload for Supabase:', payload);
+
             await saveWorkoutLogs(payload);
 
+            console.log('[handleSaveWorkout] Save successful!');
             localStorage.removeItem(storageKey);
             setPlanList([]);
             toast.success(t('workout.saveSuccess'));
-            setSearchParams({ tab: '달력' });
+            
+            // 약간의 지연 후 이동 (토스트 확인용)
+            setTimeout(() => {
+                setSearchParams({ tab: '달력' });
+            }, 500);
+
         } catch (e) {
-            console.error('[save workout] error:', e);
-            toast.error(t('workout.saveFailed') + (e?.message || JSON.stringify(e)));
+            console.error('[handleSaveWorkout] Error during save:', e);
+            const errMsg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e));
+            toast.error(t('workout.saveFailed') + errMsg);
         } finally {
             setIsSaving(false);
+            console.log('[handleSaveWorkout] Finished.');
         }
     };
 
@@ -191,55 +218,60 @@ const WorkoutPlanScreen = () => {
                         selection={selection}
                         setSelection={setSelection}
                     />
-                    {selection.exercise && <button onClick={handleAddToList} className="w-full mt-6 py-4 bg-indigo-600 text-white font-black rounded-xl italic active:scale-95 transition-all">{t('workout.addToList')}</button>}
+                    {selection.exercise && <button onClick={handleAddToList} className="w-full mt-6 py-4 bg-indigo-600 text-white font-black rounded-xl italic active:scale-95 transition-all shadow-lg shadow-indigo-600/20">{t('workout.addToList')}</button>}
                 </div>
-                <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 min-h-[400px]">
+                <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 min-h-[400px] flex flex-col">
                     <h3 className="text-xl font-bold text-white mb-6">{t('workout.todayList')}{planList.length})</h3>
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex-1">
                         {planList.map((item, exIdx) => {
                             const cardio = isCardio(item);
                             const sets = item.sets || [];
                             const pr = personalRecords[item.name || item.exercise];
                             return (
-                                <div key={item.id} className={`p-4 border rounded-2xl space-y-3 transition-all ${item.completed ? 'bg-slate-800/30 border-green-500/30 opacity-70' : 'bg-slate-800/60 border-slate-700'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-900">
+                                <div key={item.id} className={`p-4 border rounded-2xl space-y-4 transition-all ${item.completed ? 'bg-slate-800/30 border-green-500/30 opacity-70' : 'bg-slate-800/60 border-slate-700'}`}>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-white/5">
                                             <GifRenderer exerciseId={item.id} onClick={() => openPreview(item.id, item.name)} />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-bold text-indigo-400 uppercase">{t(BODY_PART_I18N[item.body_part] || item.body_part, { defaultValue: item.body_part })}</p>
-                                            <h4 className={`font-bold text-white uppercase truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{getLocalizedNameByKo(item.name || item.exercise, i18n.language)}</h4>
+                                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{t(BODY_PART_I18N[item.body_part] || item.body_part, { defaultValue: item.body_part })}</p>
+                                            <h4 className={`font-black text-white uppercase break-words leading-tight ${isMobile ? 'text-base' : 'text-sm'}`}>{getLocalizedNameByKo(item.name || item.exercise, i18n.language)}</h4>
                                             {pr && (
-                                                <p className="text-xs text-green-400 font-bold mt-0.5">
-                                                    {t('workout.bestRecord')}{pr.kg}kg × {pr.reps}{t('workout.repsUnit')}
+                                                <p className="text-[10px] text-green-400 font-bold mt-1 flex items-center gap-1">
+                                                    <span className="opacity-70">🏆 {t('workout.bestRecord')}</span>
+                                                    <span>{pr.kg}kg × {pr.reps}{t('workout.repsUnit')}</span>
                                                 </p>
                                             )}
                                         </div>
-                                        <button
-                                            onClick={() => toggleCompleted(exIdx)}
-                                            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border transition-all active:scale-95 shrink-0 ${item.completed ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-transparent text-blue-400 border-blue-500'}`}
-                                        >
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
-                                            {item.completed ? t('workout.done') : t('workout.complete')}
-                                        </button>
-                                        <button onClick={() => setPlanList(prev => prev.filter(p => p.id !== item.id))} className="p-2 text-slate-500 hover:text-white shrink-0 transition-colors">×</button>
+                                        <div className="flex flex-col items-end gap-2 shrink-0">
+                                            <button onClick={() => setPlanList(prev => prev.filter(p => p.id !== item.id))} className="p-1 text-slate-500 hover:text-white transition-colors">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                            </button>
+                                            <button
+                                                onClick={() => toggleCompleted(exIdx)}
+                                                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-black border transition-all active:scale-95 ${item.completed ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-transparent text-blue-400 border-blue-500'}`}
+                                            >
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
+                                                {item.completed ? t('workout.done') : t('workout.complete')}
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-2 pl-1">
+                                    <div className="space-y-3 pt-2 border-t border-white/5">
                                         {sets.length === 0 ? (
-                                            <button onClick={() => addSet(exIdx)} className="w-full py-2 text-xs text-indigo-400 border border-dashed border-indigo-800/60 rounded-xl hover:border-indigo-600 transition-all">
+                                            <button onClick={() => addSet(exIdx)} className="w-full py-3 text-xs font-bold text-indigo-400 border border-dashed border-indigo-800/60 rounded-xl hover:border-indigo-600 transition-all bg-indigo-500/5">
                                                 + {t('workout.addSet')}
                                             </button>
                                         ) : sets.map((set, setIdx) => {
                                             const isLast = setIdx === sets.length - 1;
                                             return (
-                                                <div key={setIdx} style={{display:'grid', gridTemplateColumns:'16px 1fr 56px 40px 28px', gap:'6px', alignItems:'center'}}>
-                                                    <span className="text-gray-500 text-xs text-center">{setIdx + 1}</span>
+                                                <div key={setIdx} className="grid grid-cols-[20px_1fr_1fr_auto_32px] gap-2 items-center">
+                                                    <span className="text-[10px] font-black text-slate-600 italic">{setIdx + 1}</span>
 
                                                     {cardio ? (
                                                         <div className="relative">
-                                                            <input type="number" inputMode="decimal" value={set.level} onChange={e => updateSet(exIdx, setIdx, 'level', e.target.value)} className={`${inputCls} pr-6`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">{t('workout.levelPrefix')}</span>
+                                                            <input type="number" inputMode="decimal" value={set.level} onChange={e => updateSet(exIdx, setIdx, 'level', e.target.value)} className={`${inputCls} pr-8`} placeholder="0" />
+                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none uppercase">{t('workout.levelPrefix')}</span>
                                                         </div>
                                                     ) : set.isDropSet ? (
                                                         <div className="grid grid-cols-3 gap-1">
@@ -249,39 +281,39 @@ const WorkoutPlanScreen = () => {
                                                         </div>
                                                     ) : (
                                                         <div className="relative">
-                                                            <input type="number" inputMode="decimal" value={set.kg} onChange={e => updateSet(exIdx, setIdx, 'kg', e.target.value)} className={`${inputCls} pr-6`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">kg</span>
+                                                            <input type="number" inputMode="decimal" value={set.kg} onChange={e => updateSet(exIdx, setIdx, 'kg', e.target.value)} className={`${inputCls} pr-7`} placeholder="0" />
+                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none lowercase">kg</span>
                                                         </div>
                                                     )}
 
                                                     {cardio ? (
                                                         <div className="relative">
-                                                            <input type="number" inputMode="numeric" value={set.minutes} onChange={e => updateSet(exIdx, setIdx, 'minutes', e.target.value)} className={`${inputCls} pr-5`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">{t('workout.minuteUnit')}</span>
+                                                            <input type="number" inputMode="numeric" value={set.minutes} onChange={e => updateSet(exIdx, setIdx, 'minutes', e.target.value)} className={`${inputCls} pr-6`} placeholder="0" />
+                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none lowercase">{t('workout.minuteUnit')}</span>
                                                         </div>
                                                     ) : (
                                                         <div className="relative">
-                                                            <input type="number" inputMode="numeric" value={set.reps} onChange={e => updateSet(exIdx, setIdx, 'reps', e.target.value)} className={`${inputCls} pr-7`} placeholder="0" />
-                                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">{t('workout.repsUnit')}</span>
+                                                            <input type="number" inputMode="numeric" value={set.reps} onChange={e => updateSet(exIdx, setIdx, 'reps', e.target.value)} className={`${inputCls} pr-6`} placeholder="0" />
+                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none lowercase">{t('workout.repsUnit')}</span>
                                                         </div>
                                                     )}
 
-                                                    {cardio ? (
-                                                        <div />
-                                                    ) : (
-                                                        <label className="flex items-center gap-0.5 justify-center cursor-pointer">
-                                                            <input type="checkbox" checked={!!set.isDropSet} onChange={() => toggleDropSet(exIdx, setIdx)} className="w-3 h-3 accent-red-500" />
-                                                            <span className="text-xs text-gray-400">{t('workout.drop')}</span>
+                                                    {!cardio && (
+                                                        <label className="flex flex-col items-center gap-0.5 cursor-pointer px-1">
+                                                            <input type="checkbox" checked={!!set.isDropSet} onChange={() => toggleDropSet(exIdx, setIdx)} className="w-3.5 h-3.5 rounded border-white/10 bg-white/5 checked:bg-red-500 accent-red-500 transition-all" />
+                                                            <span className="text-[8px] font-black text-slate-500 uppercase">{t('workout.drop')}</span>
                                                         </label>
                                                     )}
 
-                                                    {isLast ? (
-                                                        <button onClick={() => addSet(exIdx)} className="w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-500 active:scale-90 text-white flex items-center justify-center text-base leading-none transition-all">+</button>
-                                                    ) : (
-                                                        <button onClick={() => removeSet(exIdx, setIdx)} className="w-7 h-7 rounded-full flex items-center justify-center text-gray-500 hover:text-red-400 transition-colors">
-                                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                        </button>
-                                                    )}
+                                                    <div className="flex justify-end">
+                                                        {isLast ? (
+                                                            <button onClick={() => addSet(exIdx)} className="w-8 h-8 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-90 text-white flex items-center justify-center text-lg font-black transition-all shadow-lg shadow-blue-600/20">+</button>
+                                                        ) : (
+                                                            <button onClick={() => removeSet(exIdx, setIdx)} className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition-all">
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             );
                                         })}
@@ -291,24 +323,31 @@ const WorkoutPlanScreen = () => {
                         })}
                     </div>
                     {planList.length > 0 && (
-                        <button
-                            onClick={handleSaveWorkout}
-                            disabled={isSaving}
-                            className={`w-full mt-4 py-4 rounded-xl font-bold text-base transition-all active:scale-[0.98] flex items-center justify-center gap-2
-                                ${isSaving ? 'bg-blue-600 opacity-70 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20'}`}
-                        >
-                            {isSaving ? (
-                                <span>{t('common.saving')}</span>
-                            ) : (
-                                <>
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
-                                    {t('workout.saveWorkout')}
-                                </>
-                            )}
-                        </button>
+                        <div className="mt-8 space-y-4">
+                            <button
+                                onClick={handleSaveWorkout}
+                                disabled={isSaving}
+                                className={`w-full py-5 rounded-2xl font-black text-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 shadow-2xl
+                                    ${isSaving ? 'bg-blue-600 opacity-70 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30'}`}
+                            >
+                                {isSaving ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <span>{t('common.saving')}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
+                                        <span className="italic uppercase tracking-tight">{t('workout.saveWorkout')}</span>
+                                    </>
+                                )}
+                            </button>
+                            <p className="text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('workout.saveHint', { defaultValue: 'ALL PROGRESS WILL BE SAVED TO YOUR CALENDAR' })}</p>
+                        </div>
                     )}
                 </div>
             </div>
+            <div className="h-24 lg:hidden" /> {/* Additional spacing for mobile nav */}
             <GifModal isOpen={modalState.isOpen} onClose={() => setModalState({ ...modalState, isOpen: false })} gifUrl={modalState.gifUrl} exerciseName={modalState.name} />
         </div>
     );

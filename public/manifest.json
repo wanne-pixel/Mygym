@@ -1,0 +1,17 @@
+{
+  "name": "MyGym | AI Fitness Coach",
+  "short_name": "MyGym",
+  "description": "AI-powered personalized workout logging and coaching service.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3B82F6",
+  "icons": [
+    {
+      "src": "/mygym_app_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

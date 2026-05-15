@@ -21,6 +21,10 @@
     "loginRequired": "Login required."
   },
 
+  "calendar": {
+    "moreParts": "{{part}} and {{count}} more"
+  },
+
   "auth": {
     "email": "Email",
     "password": "Password",
@@ -170,7 +174,13 @@
       "maintenance": "Stay Fit"
     },
     "profileSaved": "Profile updated successfully.",
-    "saveFailed": "Save failed: "
+    "saveFailed": "Save failed: ",
+    "workoutHistory": "WORKOUT HISTORY",
+    "newSession": "NEW SESSION",
+    "addWorkout": "Add Workout",
+    "recordsFound": "{{count}} Records Found",
+    "noRecords": "No Records",
+    "noRecordsDesc": "No workout data found for this date."
   },
 
   "dayDetail": {

@@ -97,3 +97,15 @@ const AppContent = () => {
 const App = () => (<BrowserRouter><AppContent /></BrowserRouter>);
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);
+
+// Service Worker 등록
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('SW registered: ', registration);
+        }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+        });
+    });
+}
+

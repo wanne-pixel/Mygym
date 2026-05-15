@@ -259,7 +259,7 @@ export const useAiCoach = () => {
     };
 
     const handleManualReset = () => {
-        if (!confirm(t('aiCoach.resetConfirm'))) return;
+        if (!window.confirm(t('aiCoach.resetConfirm'))) return;
         setMessages([{ id: Date.now(), type: 'ai', msgType: 'chat', text: t('aiCoach.greeting.welcome') }]);
     };
 

@@ -17,10 +17,13 @@
   - send-feedback Supabase Edge Function 구현 및 배포 (Resend 이메일 + feedback DB 저장 + Authorization 헤더 RLS 처리)
   - 로그인 시 베타 공지 모달(BetaNoticeModal) 구현 (sessionStorage 기반 1회 표시)
   - 개인정보처리방침 Notion 페이지 작성 및 회원가입 화면 + 앱 하단 푸터 링크 연결
-- [x] 분석 탭 1차 구현: 부위별/서브카테고리 볼륨 도넛 차트 (Recharts PieChart), PR 카드 시스템
+- [x] 분석 탭 고도화 완료: Recharts(부위별 볼륨, 활동 빈도) 시각화 및 PR 카드 시스템 구축
+- [x] PWA 최적화 완료: 프리미엄 아이콘 생성, manifest.json 설정, Service Worker 등록 (A2HS 지원)
 - [x] DB 스키마 확장: sub_category, equipment, goals (JSONB), available_time 컬럼
 - [x] useAiCoach 훅 리팩토링: selectedMode, lang 파라미터 연동
 - [x] 디자인 시스템: break-keep, success-pulse 등 한글 가독성 및 시각 피드백 최적화
+- [x] 달력 상세 보기(DayDetailView) 프리미엄 UI 개편 및 운동 추가 경로 연동
+- [x] 운동 기록 저장 로직 안정화: toast 누락 수정, 세션 처리 개선 및 UI 짤림(Truncation) 해결
 - [x] dist 빌드 산출물 git 추적 제거 (.gitignore 처리)
 
 ---
@@ -50,16 +53,13 @@
 
 ## 🔜 차기 작업 우선순위 (Next Steps)
 
-1. **[인프라] Edge Function 프로덕션 보안 검증**
-   - OPENAI_API_KEY 환경 변수 최종 검증
+3. **[사업화] Google Analytics 상세 이벤트 트래킹**
+   - 단순 페이지 뷰 외에 '운동 저장', 'AI 추천 클릭' 등 핵심 액션 이벤트 로깅
+
+4. **[인프라] Edge Function 프로덕션 보안 검증**
    - RLS 정책 실제 동작 여부 전수 테스트 (workout_logs, user_profiles, feedback)
 
-2. **[사업화] Google Analytics 연동**
-   - 사용자 행동 분석을 위한 GA4 트래킹 코드 삽입
-
-3. **[개발] PWA 최적화**
-   - 오프라인 모드 기초 데이터 접근성 (Service Worker 점검)
-   - 홈 화면 추가(A2HS) 유도 UI 및 매니페스트 설정 확인
+5. **[사업화] 랜딩 페이지 제작** *(베타 유저 확보용)*
 
 4. **[사업화] 랜딩 페이지 제작** *(베타 유저 확보 후)*
 

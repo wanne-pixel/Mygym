@@ -222,7 +222,7 @@ const ExerciseSelector = ({ selection, setSelection, onExerciseSelect }) => {
                                             <GifRenderer exerciseId={ex.id} dataset={exerciseDataset} onClick={(e) => handlePreviewOpen(e, ex)} />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className={`text-sm font-black italic uppercase truncate ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{getExerciseName(ex)}</p>
+                                            <p className={`text-sm font-black italic uppercase break-words ${selection.exercise?.id === ex.id ? 'text-blue-400' : 'text-white'}`}>{getExerciseName(ex)}</p>
                                             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{getEquipmentLabel(ex.equipment)}</span>
                                         </div>
                                         <div className="shrink-0 flex items-center gap-1.5">
