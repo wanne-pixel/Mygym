@@ -41,9 +41,11 @@ const AiRecommendationScreen = () => {
             setAddedExercises(prev => { const next = new Set(prev); next.delete(key); return next; });
             setCart(prev => { const next = { ...prev }; delete next[key]; return next; });
         } else {
+            const exInfo = exerciseDataset.find(e => e.name === routine.exercise || e.name_en === routine.exercise);
             const newItem = {
                 id: Date.now() + Math.random(),
                 name: routine.exercise,
+                equipment: routine.equipment || exInfo?.equipment,
                 body_part: routine.part,
                 completed: false,
                 sets: (routine.sets_data || []).map(s => ({
@@ -84,6 +86,7 @@ const AiRecommendationScreen = () => {
             return {
                 id: exInfo?.id ?? (Date.now() + Math.random() + idx),
                 name: r.exercise,
+                equipment: r.equipment || exInfo?.equipment,
                 body_part: r.part,
                 completed: false,
                 sets: buildSetsForMode(selectedMode, r.exercise, isLastThree)
@@ -144,8 +147,13 @@ const AiRecommendationScreen = () => {
         handleManualReset(); setInputText(''); setError(null); setAddedExercises(new Set()); setCart({});
     };
 
-    const getPRForExercise = (exerciseName) => {
+    const getPRForExercise = (exerciseName, equipment) => {
         if (!exerciseName || !personalRecords) return null;
+        if (equipment) {
+            const withEquip = `${exerciseName} (${equipment})`.trim().toLowerCase();
+            const foundKey = Object.keys(personalRecords).find(k => k.trim().toLowerCase() === withEquip);
+            if (foundKey) return personalRecords[foundKey];
+        }
         const normalizedInput = exerciseName.trim().toLowerCase();
         if (personalRecords[exerciseName]) return personalRecords[exerciseName];
         const foundKey = Object.keys(personalRecords).find(k => k.trim().toLowerCase() === normalizedInput);
@@ -153,7 +161,9 @@ const AiRecommendationScreen = () => {
     };
 
     const buildSetsForMode = (selectedMode, exerciseName, isLastThree = false) => {
-        const pr = getPRForExercise(exerciseName);
+        const exInfo = exerciseDataset.find(e => e.name === exerciseName || e.name_en === exerciseName);
+        const equipment = exInfo?.equipment;
+        const pr = getPRForExercise(exerciseName, equipment);
         const prKg = pr?.kg || 0;
         const kg = (ratio) => prKg > 0 ? Math.round(prKg * ratio) : 0;
 
@@ -234,8 +244,8 @@ const AiRecommendationScreen = () => {
                                                 const key = `${msg.id}_${routine.exercise}_${idx}`;
                                                 const isAdded = addedExercises.has(key);
                                                 const localizedName = getLocalizedNameByKo(routine.exercise, i18n.language);
-                                                const pr = getPRForExercise(routine.exercise);
                                                 const exInfo = exerciseDataset.find(e => e.name === routine.exercise || e.name_en === routine.exercise);
+                                                const pr = getPRForExercise(routine.exercise, routine.equipment || exInfo?.equipment);
                                                 const subTarget = routine.sub_target_focus || (i18n.language === 'en' ? exInfo?.subTarget_en : exInfo?.subTarget_ko);
 
                                                 return (
