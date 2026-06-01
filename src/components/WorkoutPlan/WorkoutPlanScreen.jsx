@@ -226,8 +226,26 @@ const WorkoutPlanScreen = () => {
                         {planList.map((item, exIdx) => {
                             const cardio = isCardio(item);
                             const sets = item.sets || [];
-                            const exerciseKey = item.equipment ? `${item.name} (${item.equipment})` : (item.name || item.exercise);
-                            const pr = personalRecords[exerciseKey] || personalRecords[item.name] || personalRecords[item.exercise];
+                            const getPR = (name, equipment, exercise) => {
+                                if (!personalRecords) return null;
+                                const keys = Object.keys(personalRecords);
+                                const normalize = (s) => (s || '').replace(/\s/g, '').toLowerCase();
+                                if (equipment) {
+                                    const withEquip = normalize(`${name}(${equipment})`);
+                                    const found = keys.find(k => normalize(k) === withEquip);
+                                    if (found) return personalRecords[found];
+                                }
+                                const normName = normalize(name);
+                                const foundName = keys.find(k => normalize(k) === normName);
+                                if (foundName) return personalRecords[foundName];
+                                if (exercise) {
+                                    const normEx = normalize(exercise);
+                                    const foundEx = keys.find(k => normalize(k) === normEx);
+                                    if (foundEx) return personalRecords[foundEx];
+                                }
+                                return null;
+                            };
+                            const pr = getPR(item.name, item.equipment, item.exercise);
                             return (
                                 <div key={item.id} className={`p-4 border rounded-2xl space-y-4 transition-all ${item.completed ? 'bg-slate-800/30 border-green-500/30 opacity-70' : 'bg-slate-800/60 border-slate-700'}`}>
                                     <div className="flex items-start gap-3">
