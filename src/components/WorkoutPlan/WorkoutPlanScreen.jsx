@@ -227,7 +227,7 @@ const WorkoutPlanScreen = () => {
                             const cardio = isCardio(item);
                             const sets = item.sets || [];
                             const exerciseKey = item.equipment ? `${item.name} (${item.equipment})` : (item.name || item.exercise);
-                            const pr = personalRecords[exerciseKey];
+                            const pr = personalRecords[exerciseKey] || personalRecords[item.name] || personalRecords[item.exercise];
                             return (
                                 <div key={item.id} className={`p-4 border rounded-2xl space-y-4 transition-all ${item.completed ? 'bg-slate-800/30 border-green-500/30 opacity-70' : 'bg-slate-800/60 border-slate-700'}`}>
                                     <div className="flex items-start gap-3">
