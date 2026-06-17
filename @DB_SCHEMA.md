@@ -32,6 +32,13 @@
   - `goals`: 다중 목표 (JSONB, 최대 2개 선택 가능)
   - `available_time`: 1회 운동 가능 시간 (TEXT)
   - `split_preference`: 분할 선호도 (Full Body, 2-Split, 3-Split 등)
+  - `active_program`: 활성화된 운동 프로그램 정보 (JSONB, default NULL)
+  - `active_diet_plan`: 활성화된 식단 계획 정보 (JSONB, default NULL)
+  - `gender`: 성별 (TEXT, default NULL)
+  - `age`: 나이 (INTEGER, default NULL)
+  - `height`: 키 (NUMERIC, default NULL)
+  - `weight`: 몸무게 (NUMERIC, default NULL)
+  - `activity_level`: 활동량 (TEXT, default NULL)
 
 ## 🌐 AI Coach 통신 규약 (Edge Function: `ai-coach`)
 - **Request Payload**:

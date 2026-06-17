@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 const STORAGE_KEY = 'betaModalShown';
 
 export const clearBetaModalFlag = () => sessionStorage.removeItem(STORAGE_KEY);
-export const shouldShowBetaModal = () => !sessionStorage.getItem(STORAGE_KEY);
+export const shouldShowBetaModal = () => false;
 
 export default function BetaNoticeModal({ isOpen, onClose }) {
   const { t } = useTranslation();

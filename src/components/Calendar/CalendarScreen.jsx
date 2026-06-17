@@ -18,7 +18,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
         weekly_frequency: userData?.weekly_frequency || 3,
         experience_level: userData?.experience_level || 'beginner',
         available_time: userData?.available_time || '30분~1시간',
-        limitations: userData?.limitations || []
+        limitations: userData?.limitations || [],
+        gender: userData?.gender || 'male',
+        age: userData?.age || '',
+        height: userData?.height || '',
+        weight: userData?.weight || '',
+        activity_level: userData?.activity_level || 'sedentary'
     });
 
     const [isSaving, setIsSaving] = useState(false);
@@ -31,7 +36,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                 weekly_frequency: userData.weekly_frequency || 3,
                 experience_level: userData.experience_level || 'beginner',
                 available_time: userData.available_time || '30분~1시간',
-                limitations: userData.limitations || []
+                limitations: userData.limitations || [],
+                gender: userData.gender || 'male',
+                age: userData.age || '',
+                height: userData.height || '',
+                weight: userData.weight || '',
+                activity_level: userData.activity_level || 'sedentary'
             });
         }
     }, [isOpen, userData]);
@@ -94,7 +104,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                 weekly_frequency: parseInt(profile.weekly_frequency) || 3,
                 experience_level: profile.experience_level,
                 available_time: profile.available_time,
-                limitations: profile.limitations
+                limitations: profile.limitations,
+                gender: profile.gender,
+                age: profile.age ? parseInt(profile.age) : null,
+                height: profile.height ? parseFloat(profile.height) : null,
+                weight: profile.weight ? parseFloat(profile.weight) : null,
+                activity_level: profile.activity_level
             };
 
             const { error: profileError } = await supabase
@@ -106,6 +121,7 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
 
             // 3. 로컬 저장소 및 UI 상태 동기화
             localStorage.setItem(STORAGE_KEYS.USER_BODY_INFO, JSON.stringify(profile));
+            localStorage.setItem('USER_BODY_INFO', JSON.stringify(profile));
             toast.success(t('calendar.profileSaved'));
             
             await onUpdate(); // 최신 데이터 다시 불러오기
@@ -212,6 +228,84 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                                     {opt.label}
                                 </button>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* 성별 */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.gender')}</label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {['male', 'female'].map(g => (
+                                <button
+                                    key={g}
+                                    type="button"
+                                    onClick={() => setProfile({...profile, gender: g})}
+                                    className={`py-3 rounded-2xl text-[10px] font-black transition-all border-2 ${
+                                        profile.gender === g
+                                            ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20'
+                                            : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
+                                    }`}
+                                >
+                                    {t(`common.${g}`)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* 신체 정보 */}
+                    <div className="grid grid-cols-3 gap-2">
+                        {/* 나이 */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.age')}</label>
+                            <input
+                                type="number"
+                                value={profile.age || ''}
+                                onChange={e => setProfile({...profile, age: e.target.value})}
+                                className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold transition-all"
+                                placeholder={t('calendar.profileFields.age')}
+                            />
+                        </div>
+                        {/* 키 */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.height')}</label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={profile.height || ''}
+                                onChange={e => setProfile({...profile, height: e.target.value})}
+                                className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold transition-all"
+                                placeholder="cm"
+                            />
+                        </div>
+                        {/* 몸무게 */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.weight')}</label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={profile.weight || ''}
+                                onChange={e => setProfile({...profile, weight: e.target.value})}
+                                className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold transition-all"
+                                placeholder="kg"
+                            />
+                        </div>
+                    </div>
+
+                    {/* 활동량 */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.activityLevel')}</label>
+                        <div className="relative">
+                            <select
+                                value={profile.activity_level || 'sedentary'}
+                                onChange={e => setProfile({...profile, activity_level: e.target.value})}
+                                className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold appearance-none cursor-pointer"
+                            >
+                                <option value="sedentary">{t('calendar.profileFields.activityLevels.sedentary')}</option>
+                                <option value="light">{t('calendar.profileFields.activityLevels.light')}</option>
+                                <option value="moderate">{t('calendar.profileFields.activityLevels.moderate')}</option>
+                                <option value="heavy">{t('calendar.profileFields.activityLevels.heavy')}</option>
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
                         </div>
                     </div>
 
@@ -368,7 +462,7 @@ const CalendarScreen = ({ onSelectedDateChange }) => {
                 <DayDetailView
                     date={selectedDate}
                     onBack={() => setSelectedDate(null)}
-                    onGoToRoutine={() => setSearchParams({ tab: '루틴구성', date: selectedDate })}
+                    onGoToRoutine={() => setSearchParams({ tab: '운동', date: selectedDate })}
                     isMobile={isMobile}
                 />
             ) : (

@@ -80,7 +80,7 @@ const AppContent = () => {
                             <DayDetailView
                                 date={new URLSearchParams(window.location.search).get('date')}
                                 onBack={() => navigate(-1)}
-                                onGoToRoutine={() => navigate('/app?tab=루틴구성')}
+                                onGoToRoutine={() => navigate('/app?tab=운동')}
                             />
                         ) : <Navigate to="/" replace />
                     }
