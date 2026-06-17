@@ -5,7 +5,7 @@ import { supabase } from '../../api/supabase';
 import { saveWorkoutLogs } from '../../api/workoutApi';
 import ExerciseSelector from '../Exercise/ExerciseSelector';
 import { GifModal, GifRenderer } from '../Common/GifUI';
-import { getLocalizedNameByKo, getExerciseGif, BODY_PART_I18N } from '../../utils/exerciseUtils';
+import { getLocalizedNameByKo, getExerciseGif, BODY_PART_I18N, getExerciseUniqueKey } from '../../utils/exerciseUtils';
 import { useWindowSize } from '../../hooks/useWindowSize';
 import { toast } from 'sonner';
 
@@ -391,7 +391,7 @@ const WorkoutPlanScreen = () => {
                 
                 return {
                     user_id: user.id,
-                    exercise: item.equipment ? `${item.name} (${item.equipment})` : (item.name || item.exercise),
+                    exercise: getExerciseUniqueKey(item),
                     part: item.body_part,
                     type: item.body_part === '유산소' || item.body_part === 'cardio' ? 'cardio' : 'strength',
                     sets_data: setsData,
@@ -456,8 +456,21 @@ const WorkoutPlanScreen = () => {
 
     const getPR = (name, equipment, exercise) => {
         if (!personalRecords) return null;
+
+        // 1. Try matching with the new unique key format directly
+        const uniqueKey = getExerciseUniqueKey({ name, equipment, exercise });
+        if (personalRecords[uniqueKey]) {
+            return personalRecords[uniqueKey];
+        }
+
+        // 2. Fallback to normalized check for backwards compatibility
         const keys = Object.keys(personalRecords);
         const normalize = (s) => (s || '').replace(/\s/g, '').toLowerCase();
+        
+        const normUniqueKey = normalize(uniqueKey);
+        const foundUnique = keys.find(k => normalize(k) === normUniqueKey);
+        if (foundUnique) return personalRecords[foundUnique];
+
         if (equipment) {
             const withEquip = normalize(`${name}(${equipment})`);
             const found = keys.find(k => normalize(k) === withEquip);

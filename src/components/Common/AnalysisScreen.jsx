@@ -53,7 +53,15 @@ const AnalysisScreen = () => {
     }, []);
 
     const exerciseToPart = useMemo(() => {
-        return Object.fromEntries(exerciseDataset.map(ex => [ex.name, ex.body_part || ex.bodyPart]));
+        const mapping = {};
+        exerciseDataset.forEach(ex => {
+            const part = ex.body_part || ex.bodyPart;
+            mapping[ex.name] = part;
+            if (ex.equipment) {
+                mapping[`${ex.name} (${ex.equipment})`] = part;
+            }
+        });
+        return mapping;
     }, [exerciseDataset]);
 
     const stats = useMemo(() => {

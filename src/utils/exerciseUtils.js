@@ -19,6 +19,19 @@ let _cachedDataset = [];
 export const setGlobalExerciseCache = (data) => { _cachedDataset = data; };
 export const getGlobalExerciseCache = () => _cachedDataset;
 
+/**
+ * 운동 고유 키 생성: "운동명 (장비)" 또는 "운동명"
+ * 동일한 운동명이 다른 장비(덤벨, 바벨 등)에 존재할 때 데이터 중복을 방지합니다.
+ * workout_logs 저장, PR 조회, 이전 기록 조회 등 모든 곳에서 이 함수를 사용해야 합니다.
+ * @param {Object} item - { name, exercise, equipment } 형태의 운동 데이터
+ * @returns {string} "운동명 (장비)" 또는 "운동명"
+ */
+export const getExerciseUniqueKey = (item) => {
+    const name = item?.name || item?.exercise || '';
+    const equipment = item?.equipment || '';
+    return equipment ? `${name} (${equipment})` : name;
+};
+
 export const getLocalizedName = (ex, lang) => {
     if (!ex) return '';
     return lang === 'en' && ex.name_en ? ex.name_en : ex.name;
@@ -71,13 +84,13 @@ export const getExerciseGif = (nameOrId, exerciseId, dataset = _cachedDataset) =
 
     if (exerciseId) {
         const ex = dataset.find(e => e.id === exerciseId);
-        if (ex) return `/${ex.gif_url}`;
+        if (ex && ex.gif_url && ex.gif_url.trim() !== '') return `/${ex.gif_url}`;
     }
 
     if (nameOrId) {
         const lower = nameOrId.toLowerCase();
         const ex = dataset.find(e => e.name_en?.toLowerCase() === lower || e.name.toLowerCase() === lower);
-        if (ex) return `/${ex.gif_url}`;
+        if (ex && ex.gif_url && ex.gif_url.trim() !== '') return `/${ex.gif_url}`;
     }
 
     return null;
