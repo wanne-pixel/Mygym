@@ -23,6 +23,7 @@
     "url": "https://github.com/wanne-pixel/Mygym/issues"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.103.0",
     "@tailwindcss/vite": "^4.2.4",
     "i18next": "^26.0.6",

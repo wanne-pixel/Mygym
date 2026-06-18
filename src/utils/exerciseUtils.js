@@ -10,8 +10,7 @@ export const BODY_PART_I18N = {
     '어깨': 'bodyParts.shoulder',
     '하체': 'bodyParts.lower',
     '팔': 'bodyParts.arms',
-    '허리/코어': 'bodyParts.core',
-    '유산소': 'workout.cardio',
+    '유산소': 'bodyParts.cardio',
 };
 
 // 전역 캐시 변수 (앱 시작 시 한 번 저장됨)

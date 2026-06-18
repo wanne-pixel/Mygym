@@ -1,6 +1,49 @@
 @import "tailwindcss";
 
 @theme {
+  /* =========================================
+     Theme 2: Premium High-End (Gold & Dark)
+     ========================================= */
+  /* Accent Colors (Remapped from Blue & Indigo to Gold) */
+  --color-blue-50: #fbf9f1;
+  --color-blue-100: #f5f0db;
+  --color-blue-200: #eadcb4;
+  --color-blue-300: #dfc384;
+  --color-blue-400: #d6ac5c;
+  --color-blue-500: #ce943b;
+  --color-blue-600: #b57630;
+  --color-blue-700: #965a29;
+  --color-blue-800: #7c4927;
+  --color-blue-900: #653d23;
+  --color-blue-950: #3a2012;
+
+  --color-indigo-50: #fbf9f1;
+  --color-indigo-100: #f5f0db;
+  --color-indigo-200: #eadcb4;
+  --color-indigo-300: #dfc384;
+  --color-indigo-400: #d6ac5c;
+  --color-indigo-500: #ce943b;
+  --color-indigo-600: #b57630;
+  --color-indigo-700: #965a29;
+  --color-indigo-800: #7c4927;
+  --color-indigo-900: #653d23;
+  --color-indigo-950: #3a2012;
+
+  /* Background Colors (Remapped Slate to Premium Charcoal) */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-slate-50: #f6f6f7;
+  --color-slate-100: #e8e9ea;
+  --color-slate-200: #d1d2d6;
+  --color-slate-300: #afb2b8;
+  --color-slate-400: #888c95;
+  --color-slate-500: #686d76;
+  --color-slate-600: #52565e;
+  --color-slate-700: #44474e;
+  --color-slate-800: #222428;
+  --color-slate-900: #17181b;
+  --color-slate-950: #0d0e10;
+
   @keyframes success-pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.02); border-color: var(--color-green-500); }

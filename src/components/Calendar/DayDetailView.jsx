@@ -193,30 +193,56 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                                         </div>
                                     </div>
 
-                                    {sets.length > 0 && (
-                                        <div className="grid grid-cols-2 gap-2 mt-4">
-                                            <div className="bg-white/5 rounded-2xl p-3 flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                                                    <Activity size={14} className="text-blue-400" />
+                                    {sets.length > 0 && (() => {
+                                        const isCardio = log.part === '유산소' || log.part === 'cardio' || log.part === 'Cardio';
+                                        const isHiking = isCardio && (log.exercise?.includes('등산') || log.exercise?.toLowerCase()?.includes('hiking'));
+                                        
+                                        const totalDuration = sets.reduce((sum, s) => sum + (parseInt(s.reps) || 0), 0);
+                                        const totalDistance = isHiking 
+                                            ? [...new Set(sets.map(s => s.kg).filter(Boolean))].join(', ')
+                                            : sets.reduce((sum, s) => sum + (parseFloat(s.kg) || 0), 0);
+
+                                        return (
+                                            <div className="grid grid-cols-2 gap-2 mt-4">
+                                                <div className="bg-white/5 rounded-2xl p-3 flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                                                        <Activity size={14} className="text-blue-400" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter leading-none mb-1">
+                                                            {isCardio ? t('workout.totalDuration', { defaultValue: 'Total Time' }) : 'Sets'}
+                                                        </p>
+                                                        <p className="text-sm font-black text-white italic">
+                                                            {isCardio ? `${totalDuration} MIN` : `${sets.length} SETS`}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter leading-none mb-1">Sets</p>
-                                                    <p className="text-sm font-black text-white italic">{sets.length} SETS</p>
+                                                <div className="bg-white/5 rounded-2xl p-3 flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                                                        {isCardio && isHiking ? (
+                                                            <Activity size={14} className="text-emerald-400" />
+                                                        ) : (
+                                                            <Dumbbell size={14} className="text-emerald-400" />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter leading-none mb-1">
+                                                            {isCardio 
+                                                                ? (isHiking ? t('workout.mountainName', { defaultValue: 'Mountain' }) : t('workout.totalDistance', { defaultValue: 'Total Dist' }))
+                                                                : 'Max Vol'
+                                                            }
+                                                        </p>
+                                                        <p className="text-sm font-black text-white italic truncate" title={isCardio && isHiking ? totalDistance : undefined}>
+                                                            {isCardio 
+                                                                ? (isHiking ? (totalDistance || '-') : `${typeof totalDistance === 'number' ? totalDistance.toFixed(2).replace(/\.00$/, '') : totalDistance} KM`)
+                                                                : `${Math.max(...sets.map(s => parseFloat(s.kg) || 0))} KG`
+                                                            }
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="bg-white/5 rounded-2xl p-3 flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                                                    <Dumbbell size={14} className="text-emerald-400" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter leading-none mb-1">Max Vol</p>
-                                                    <p className="text-sm font-black text-white italic">
-                                                        {Math.max(...sets.map(s => parseFloat(s.kg) || 0))} KG
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                        );
+                                    })()}
                                     
                                     {/* Subtle background icon */}
                                     <div className="absolute -bottom-2 -right-2 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">

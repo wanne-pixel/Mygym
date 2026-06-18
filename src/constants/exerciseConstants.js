@@ -4,7 +4,7 @@ export const BODY_PARTS = [
     { key: '어깨', label: '어깨' },
     { key: '하체', label: '하체' },
     { key: '팔', label: '팔' },
-    { key: '허리/코어', label: '허리/코어' }
+    { key: '유산소', label: '유산소' }
 ];
 
 export const PART_MAP = {
@@ -13,7 +13,6 @@ export const PART_MAP = {
     '어깨': '어깨',
     '하체': '하체',
     '팔': '팔',
-    '허리/코어': '허리/코어',
     '유산소': '유산소',
     'back': '등',
     'cardio': '유산소',
@@ -21,7 +20,7 @@ export const PART_MAP = {
     'lower body': '하체',
     'shoulders': '어깨',
     'arms': '팔',
-    'waist': '허리/코어'
+    'waist': '유산소'
 };
 
 export const EQUIPMENT_MAP = {

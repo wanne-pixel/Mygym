@@ -171,8 +171,8 @@ const AnalysisScreen = () => {
 
     return (
         <div className="p-4 lg:p-8 space-y-8 animate-in fade-in duration-500 pb-24 lg:pb-8">
-            <h1 className="text-2xl font-black text-white italic tracking-tighter uppercase mb-6 flex items-center gap-2">
-                <BarChart3 className="text-blue-500" />
+            <h1 className="text-3xl font-black italic text-white uppercase underline decoration-blue-500 decoration-4 underline-offset-8 mb-8 flex items-center justify-center gap-3">
+                <BarChart3 className="text-blue-500 w-8 h-8" />
                 {t('analysis.title', { defaultValue: '분석' })}
             </h1>
 

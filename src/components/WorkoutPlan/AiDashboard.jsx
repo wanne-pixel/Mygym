@@ -1,0 +1,387 @@
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { supabase } from '../../api/supabase';
+import { saveWorkoutLogs } from '../../api/workoutApi';
+import { getLocalizedNameByKo, getExerciseUniqueKey, BODY_PART_I18N } from '../../utils/exerciseUtils';
+import { useWindowSize } from '../../hooks/useWindowSize';
+import { toast } from 'sonner';
+
+const inputCls = "w-full bg-white/5 border border-white/10 rounded-md px-1.5 py-1 text-xs sm:text-sm text-white focus:outline-none focus:border-blue-500 transition-colors";
+
+const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram }) => {
+    const { t, i18n } = useTranslation();
+    const { isMobile } = useWindowSize();
+    
+    const [isSaving, setIsSaving] = useState(false);
+    const [selectedTab, setSelectedTab] = useState(activeProgram.current_session_index || 0);
+
+    const initialSession = activeProgram.sessions[selectedTab];
+    const [activeWorkout, setActiveWorkout] = useState(initialSession ? JSON.parse(JSON.stringify(initialSession)) : null);
+
+    React.useEffect(() => {
+        if (activeProgram.sessions[selectedTab]) {
+            setActiveWorkout(JSON.parse(JSON.stringify(activeProgram.sessions[selectedTab])));
+        }
+    }, [selectedTab, activeProgram.sessions]);
+
+    const handleQuitProgram = async () => {
+        if (!window.confirm(t('program.quitConfirm', 'Are you sure you want to quit the current program?'))) return;
+
+        setIsSaving(true);
+        try {
+            const { error } = await supabase
+                .from('user_profiles')
+                .update({ active_program: null })
+                .eq('user_id', user.id);
+            if (error) throw error;
+            setActiveProgram(null);
+            toast.success(t('program.resetProgram', 'Program reset'));
+        } catch (err) {
+            console.error("Error quitting program:", err);
+            toast.error(err.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const getPR = (name, equipment, exercise) => {
+        if (!personalRecords) return null;
+
+        const uniqueKey = getExerciseUniqueKey({ name, equipment, exercise });
+        if (personalRecords[uniqueKey]) {
+            return personalRecords[uniqueKey];
+        }
+
+        const keys = Object.keys(personalRecords);
+        const normalize = (s) => (s || '').replace(/\s/g, '').toLowerCase();
+        
+        const normUniqueKey = normalize(uniqueKey);
+        const foundUnique = keys.find(k => normalize(k) === normUniqueKey);
+        if (foundUnique) return personalRecords[foundUnique];
+
+        if (equipment) {
+            const withEquip = normalize(`${name}(${equipment})`);
+            const found = keys.find(k => normalize(k) === withEquip);
+            if (found) return personalRecords[found];
+        }
+        const normName = normalize(name);
+        const foundName = keys.find(k => normalize(k) === normName);
+        if (foundName) return personalRecords[foundName];
+        if (exercise) {
+            const normEx = normalize(exercise);
+            const foundEx = keys.find(k => normalize(k) === normEx);
+            if (foundEx) return personalRecords[foundEx];
+        }
+        return null;
+    };
+
+    const updateSetActiveWorkout = (exIdx, setIdx, field, value) => {
+        setActiveWorkout(prev => {
+            const exercises = [...prev.exercises];
+            const ex = exercises[exIdx];
+            ex.sets = ex.sets.map((s, idx) => idx === setIdx ? { ...s, [field]: value } : s);
+            return { ...prev, exercises };
+        });
+    };
+
+    const addSetActiveWorkout = (exIdx) => {
+        setActiveWorkout(prev => {
+            const exercises = [...prev.exercises];
+            const ex = exercises[exIdx];
+            const lastSet = ex.sets[ex.sets.length - 1];
+            const newSet = {
+                kg: lastSet?.kg ?? '',
+                reps: lastSet?.reps ?? '',
+                completed: false
+            };
+            ex.sets = [...ex.sets, newSet];
+            return { ...prev, exercises };
+        });
+    };
+
+    const removeSetActiveWorkout = (exIdx, setIdx) => {
+        setActiveWorkout(prev => {
+            const exercises = [...prev.exercises];
+            const ex = exercises[exIdx];
+            ex.sets = ex.sets.filter((_, idx) => idx !== setIdx);
+            return { ...prev, exercises };
+        });
+    };
+
+    const handleSaveWorkoutSession = async () => {
+        if (!activeWorkout) return;
+
+        const logsToSave = activeWorkout.exercises.map(item => {
+            const completedSets = item.sets.filter(s => s.completed);
+            return { ...item, sets: completedSets };
+        }).filter(item => item.sets.length > 0);
+
+        if (logsToSave.length === 0) {
+            toast.error(t('workout.noValidSets', 'No completed sets to save'));
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const savedAt = new Date(`${todayStr}T12:00:00`).toISOString();
+            
+            const payload = logsToSave.map(item => {
+                const setsData = item.sets.map(s => ({
+                    kg: s.kg,
+                    reps: s.reps,
+                    isDropSet: false,
+                    dropKgs: ['', '', '']
+                }));
+                
+                return {
+                    user_id: user.id,
+                    exercise: getExerciseUniqueKey(item),
+                    part: item.body_part,
+                    type: item.body_part === '유산소' || item.body_part === 'cardio' ? 'cardio' : 'strength',
+                    sets_data: setsData,
+                    created_at: savedAt,
+                };
+            });
+
+            await saveWorkoutLogs(payload);
+
+            const updatedProgram = {
+                ...activeProgram,
+                current_session_index: selectedTab
+            };
+            
+            // Update the session data in the program so that completed sets remain checked
+            updatedProgram.sessions[selectedTab] = activeWorkout;
+
+            const { error: profileError } = await supabase
+                .from('user_profiles')
+                .update({ active_program: updatedProgram })
+                .eq('user_id', user.id);
+
+            if (profileError) throw profileError;
+
+            setActiveProgram(updatedProgram);
+            toast.success(t('workout.saveSuccess', 'Workout saved'));
+            
+            // Re-initialize to clear completed inputs if they want to do it again, or just stay
+            setActiveWorkout(JSON.parse(JSON.stringify(updatedProgram.sessions[selectedTab])));
+        } catch (err) {
+            console.error("Error saving workout session:", err);
+            toast.error(t('workout.saveFailed', 'Save failed: ') + err.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (!activeWorkout) {
+        return (
+            <div className={`${isMobile ? 'p-4' : 'p-8 max-w-4xl mx-auto'} bg-slate-950 min-h-screen pb-24 text-white text-center animate-fade-in flex flex-col items-center justify-center`}>
+                <p className="text-slate-400 mb-8">No active workout available.</p>
+                <button
+                    onClick={handleQuitProgram}
+                    className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl italic tracking-tight transition-all active:scale-[0.98] shadow-lg shadow-indigo-600/30 whitespace-nowrap"
+                >
+                    Start New Routine
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className={`${isMobile ? 'p-4' : 'p-8 max-w-4xl mx-auto'} bg-slate-950 min-h-screen pb-24 text-white animate-fade-in`}>
+            {/* Top Tabs for Day Selection */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+                {activeProgram.sessions.map((session, idx) => {
+                    const isCompleted = session.exercises.some(ex => ex.sets.some(s => s.completed));
+                    return (
+                        <button
+                            key={idx}
+                            onClick={() => setSelectedTab(idx)}
+                            className={`px-4 py-2.5 rounded-xl text-sm font-black italic whitespace-nowrap transition-all flex items-center gap-2 ${
+                                selectedTab === idx
+                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                                    : isCompleted
+                                        ? 'bg-green-900/30 border border-green-500/30 text-green-400'
+                                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                            }`}
+                        >
+                            {session.dayId || `Day ${idx + 1}`}
+                            {isCompleted && <span className="text-green-400">✅</span>}
+                        </button>
+                    );
+                })}
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-4 border-b border-slate-800">
+                <div>
+                    <h2 className="font-black italic uppercase flex flex-col gap-1">
+                        <span className="text-3xl text-indigo-400">
+                            {activeWorkout.dayId} ({activeWorkout.target.split(': ')[0] || ''})
+                        </span>
+                        <span className="text-xl text-slate-200">
+                            {activeWorkout.target.split(': ').slice(1).join(': ') || activeWorkout.target}
+                        </span>
+                    </h2>
+                    <p className="text-rose-450 font-bold text-xs uppercase tracking-wider mt-3 text-rose-400">
+                        {activeWorkout.exercises.length} Exercises Today
+                    </p>
+                </div>
+                
+                <div className="flex flex-col items-end gap-3 mt-4 md:mt-0">
+                    <button
+                        onClick={handleQuitProgram}
+                        disabled={isSaving}
+                        className="px-4 py-2 bg-rose-600/10 hover:bg-rose-600/25 border border-rose-500/30 hover:border-rose-500/50 text-rose-400 rounded-xl text-xs font-bold transition-all"
+                    >
+                        🔄 새로운 AI 루틴 생성
+                    </button>
+                    <span className="text-sm font-bold text-slate-500 italic">
+                        {new Date().getDate()}일({['일', '월', '화', '수', '목', '금', '토'][new Date().getDay()]})
+                    </span>
+                </div>
+            </div>
+
+            <div className="space-y-6">
+                {activeWorkout.exercises.map((item, exIdx) => {
+                    const pr = getPR(item.name, item.equipment, item.exercise);
+                    const isCardio = item.body_part === '유산소' || item.body_part === 'cardio' || item.body_part === 'Cardio';
+                    const isHiking = isCardio && (item.name?.includes('등산') || item.name_en?.toLowerCase()?.includes('hiking'));
+                    
+                    return (
+                        <div key={item.id || exIdx} className="bg-slate-900/50 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-800 space-y-4">
+                            <div className="flex items-start gap-4">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                                            {t(BODY_PART_I18N[item.body_part] || item.body_part, { defaultValue: item.body_part })}
+                                        </p>
+                                    </div>
+                                    <h4 className="font-black text-white uppercase text-base break-words leading-tight mt-0.5">
+                                        {getLocalizedNameByKo(item.name || item.exercise, i18n.language)}
+                                        {item.equipment && <span className="text-xs text-slate-500 font-normal ml-2">({item.equipment})</span>}
+                                    </h4>
+                                    {pr && (
+                                        <p className="text-[10px] text-green-400 font-bold mt-1 flex items-center gap-1">
+                                            <span className="opacity-70">🏆 {t('workout.bestRecord', 'Best Record')}</span>
+                                            <span>{pr.kg}kg × {pr.reps}{t('workout.repsUnit', 'reps')}</span>
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="space-y-3 pt-4 border-t border-slate-800">
+                                {item.sets.map((set, setIdx) => {
+                                    return (
+                                        <div
+                                            key={setIdx}
+                                            className={`grid grid-cols-[16px_1fr_1fr_auto] sm:grid-cols-[24px_1fr_1fr_auto] gap-2 sm:gap-3 items-center p-1.5 sm:p-2 rounded-xl transition-all ${
+                                                set.completed ? 'bg-green-500/10 border border-green-500/10' : 'bg-transparent'
+                                            }`}
+                                        >
+                                            <span className="text-xs font-black text-slate-600 italic">{setIdx + 1}</span>
+
+                                            {/* Weight / Distance / Mountain Name input */}
+                                            <div className="relative">
+                                                <input
+                                                    type={isHiking ? "text" : "number"}
+                                                    inputMode={isHiking ? "text" : "decimal"}
+                                                    step={isCardio && !isHiking ? "any" : undefined}
+                                                    value={set.kg || ''}
+                                                    onChange={e => updateSetActiveWorkout(exIdx, setIdx, 'kg', e.target.value)}
+                                                    className={`${inputCls} pr-7 sm:pr-8 text-xs sm:text-sm`}
+                                                    placeholder={isHiking ? t('workout.mountainName', { defaultValue: '산이름' }) : "0"}
+                                                />
+                                                {isCardio ? (
+                                                    !isHiking && <span className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 text-[9px] sm:text-[10px] font-bold text-slate-500 pointer-events-none lowercase">km</span>
+                                                ) : (
+                                                    <span className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 text-[9px] sm:text-[10px] font-bold text-slate-500 pointer-events-none lowercase">kg</span>
+                                                )}
+                                            </div>
+
+                                            {/* Reps / Time input */}
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    inputMode="numeric"
+                                                    value={set.reps || ''}
+                                                    onChange={e => updateSetActiveWorkout(exIdx, setIdx, 'reps', e.target.value)}
+                                                    className={`${inputCls} pr-7 sm:pr-8 text-xs sm:text-sm`}
+                                                    placeholder={item.targetReps || "0"}
+                                                />
+                                                <span className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 text-[9px] sm:text-[10px] font-bold text-slate-500 pointer-events-none lowercase">
+                                                    {isCardio ? '분' : t('workout.repsUnit', 'reps')}
+                                                </span>
+                                            </div>
+
+                                            {/* Actions / Tick */}
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => updateSetActiveWorkout(exIdx, setIdx, 'completed', !set.completed)}
+                                                    className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all ${
+                                                        set.completed
+                                                            ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/20'
+                                                            : 'bg-transparent border-slate-700 text-slate-500 hover:border-slate-500'
+                                                    }`}
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </button>
+                                                
+                                                {item.sets.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeSetActiveWorkout(exIdx, setIdx)}
+                                                        className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-red-400 transition-colors"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => addSetActiveWorkout(exIdx)}
+                                className="w-full py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all mt-2"
+                            >
+                                + {t('workout.addSet', 'Add Set')}
+                            </button>
+                        </div>
+                    );
+                })}
+            </div>
+
+            <div className="mt-8 space-y-4">
+                <button
+                    onClick={handleSaveWorkoutSession}
+                    disabled={isSaving}
+                    className={`w-full py-5 rounded-2xl font-black text-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 shadow-2xl
+                        ${isSaving ? 'bg-blue-600 opacity-70 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30'}`}
+                >
+                    {isSaving ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>{t('common.saving', 'Saving...')}</span>
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="italic uppercase tracking-tight">Finish Workout</span>
+                        </>
+                    )}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default AiDashboard;

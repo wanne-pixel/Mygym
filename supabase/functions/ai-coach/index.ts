@@ -94,7 +94,7 @@ serve(async (req) => {
       });
     }
 
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    const geminiKey = Deno.env.get("GEMINI_API_KEY") || Deno.env.get("OPENAI_API_KEY");
     const body = await req.json();
     const {
       type, lang = 'ko', recentWorkouts = [], userProfile = {},
@@ -131,18 +131,19 @@ ${langInstruction}
 ${muscle_group} training breakdown (total ${total_exercises} sessions):
 ${(breakdown as any[]).map((b: any) => `- ${b.category}: ${b.volume}kg (${b.percentage}%, ${b.count} sessions)`).join('\n')}`;
 
-      const mRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      const mRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: 'user', content: musclePrompt }],
-          temperature: 0.3,
-          response_format: { type: "json_object" },
+          contents: [{ role: 'user', parts: [{ text: musclePrompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            responseMimeType: "application/json",
+          },
         }),
       });
       const mData = await mRes.json();
-      const mContent = mData.choices?.[0]?.message?.content || "{}";
+      const mContent = mData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
       return new Response(
         JSON.stringify({ content: mContent, reply: mContent }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -166,18 +167,19 @@ Training data (last ${period_days} days):
 - Muscle volume stats: ${JSON.stringify(muscle_stats)}
 - Workout days: ${JSON.stringify(day_stats)}`;
 
-      const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      const aiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: 'user', content: analysisPrompt }],
-          temperature: 0.3,
-          response_format: { type: "json_object" },
+          contents: [{ role: 'user', parts: [{ text: analysisPrompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            responseMimeType: "application/json",
+          },
         }),
       });
       const aiData = await aiRes.json();
-      const content = aiData.choices?.[0]?.message?.content || "{}";
+      const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
       return new Response(
         JSON.stringify({ content, reply: content }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -358,23 +360,23 @@ ${allExercisesDb || "운동 데이터가 없습니다."}
       systemPrompt = `You are a professional bodybuilding head coach. ${langInstruction}\n${systemGuideline}`;
     }
 
-    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: 'system', content: systemPrompt }, 
-          { role: 'user', content: userPrompt || '오늘 운동 추천해줘.' }
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: [
+          { role: 'user', parts: [{ text: userPrompt || '오늘 운동 추천해줘.' }] }
         ],
-        temperature: 0.1, // 창의성을 억제하고 규칙 준수율을 높임
-        seed: 42,
-        response_format: isJsonOutput ? { type: "json_object" } : undefined,
+        generationConfig: {
+          temperature: 0.1,
+          responseMimeType: isJsonOutput ? "application/json" : "text/plain",
+        },
       }),
     });
 
-    const openaiData = await openaiRes.json();
-    const content = openaiData.choices?.[0]?.message?.content || "";
+    const geminiData = await geminiRes.json();
+    const content = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     return new Response(
       JSON.stringify({ 

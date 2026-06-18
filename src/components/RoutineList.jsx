@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getExerciseGif } from '../utils/exerciseUtils';
-import { GifModal, GifRenderer } from './Common/GifUI';
+
 
 const RoutineList = ({ data, onAddItem }) => {
     const { t } = useTranslation();
     const [addedItems, setAddedItems] = useState([]);
-    const [modalState, setModalState] = useState({ isOpen: false, gifUrl: '', name: '' });
+
 
     const handleItemClick = (item, itemIdx) => {
         if (addedItems.includes(itemIdx)) return;
@@ -24,14 +23,7 @@ const RoutineList = ({ data, onAddItem }) => {
         }
     };
 
-    const openPreview = (nameEn, name) => {
-        const url = getExerciseGif(nameEn);
-        if (url) {
-            setModalState({ isOpen: true, gifUrl: url, name: name });
-        } else {
-            setModalState({ isOpen: true, gifUrl: '', name: name });
-        }
-    };
+
 
     return (
         <div className="mt-4 space-y-2 bg-slate-900/50 p-3 rounded-2xl border border-white/5">
@@ -49,13 +41,6 @@ const RoutineList = ({ data, onAddItem }) => {
                 
                 return (
                     <div key={itemIdx} className="flex items-center gap-3 bg-slate-800/50 p-3 rounded-xl border border-white/5 group transition-all hover:border-indigo-500/30">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/5 bg-slate-900 shadow-inner">
-                            <GifRenderer 
-                                nameEn={item.name_en} 
-                                onClick={() => openPreview(item.name_en, item.name)} 
-                            />
-                        </div>
-                        
                         <div className="flex-1 min-w-0 flex justify-between items-center">
                             <div className="flex flex-col min-w-0 pr-2">
                                 <div className="flex items-center gap-2 mb-0.5">
@@ -90,12 +75,7 @@ const RoutineList = ({ data, onAddItem }) => {
                 );
             })}
 
-            <GifModal 
-                isOpen={modalState.isOpen} 
-                onClose={() => setModalState({ ...modalState, isOpen: false })} 
-                gifUrl={modalState.gifUrl} 
-                exerciseName={modalState.name} 
-            />
+
         </div>
     );
 };

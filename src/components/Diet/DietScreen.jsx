@@ -743,6 +743,10 @@ const DietScreen = () => {
 
     return (
         <div className="max-w-6xl mx-auto px-4 pt-6 pb-28">
+            <h1 className="text-3xl font-black italic text-white uppercase underline decoration-blue-500 decoration-4 underline-offset-8 mb-8 flex items-center justify-center gap-3">
+                <Apple className="text-blue-500 w-8 h-8" />
+                {t('nav.diet', { defaultValue: '식단' })}
+            </h1>
             
             {/* Header Date Selector */}
             <div className="flex items-center justify-between bg-slate-900/60 border border-white/5 backdrop-blur-md rounded-2xl p-4 mb-6">
