@@ -7,7 +7,7 @@ import { fetchAllExercises } from '../../api/exerciseApi';
 import { toast } from 'sonner';
 import { useWindowSize } from '../../hooks/useWindowSize';
 
-const AiWizard = ({ onSave }) => {
+const AiWizard = ({ onSave, personalRecords }) => {
     const { t, i18n } = useTranslation();
     const { isMobile } = useWindowSize();
     
@@ -44,7 +44,8 @@ const AiWizard = ({ onSave }) => {
 
             const result = await generateAiRoutine({
                 daysCount: 4,
-                availableExercises
+                availableExercises,
+                personalRecords
             });
             setPreviewRoutine(result);
         } catch (error) {

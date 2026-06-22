@@ -23,17 +23,55 @@ const WorkoutPlanScreen = () => {
             if (!logs || logs.length === 0) return {};
 
             const records = {};
+            // First pass: collect all weights per exercise
+            const exerciseWeights = {};
+
             logs.forEach(log => {
                 const exerciseName = log.exercise;
                 let sets = Array.isArray(log.sets_data) ? log.sets_data : JSON.parse(log.sets_data || '[]');
+                
+                if (!records[exerciseName]) {
+                    records[exerciseName] = { kg: 0, reps: 0, maxKgCount: 0, predictedStep: 5 };
+                    exerciseWeights[exerciseName] = new Set();
+                }
+
                 sets.forEach(set => {
                     const kg = parseFloat(set.kg) || 0;
                     const reps = parseInt(set.reps) || 0;
-                    if (!records[exerciseName] || kg > records[exerciseName].kg) {
-                        records[exerciseName] = { kg, reps };
+                    
+                    if (kg > 0) {
+                        exerciseWeights[exerciseName].add(kg);
+                    }
+
+                    if (kg > records[exerciseName].kg) {
+                        records[exerciseName].kg = kg;
+                        records[exerciseName].reps = reps;
+                        records[exerciseName].maxKgCount = 1;
+                    } else if (kg === records[exerciseName].kg && kg > 0) {
+                        records[exerciseName].maxKgCount += 1;
                     }
                 });
             });
+
+            // Second pass: Calculate predicted step based on minimum difference between unique weights
+            Object.keys(exerciseWeights).forEach(ex => {
+                const uniqueWeights = Array.from(exerciseWeights[ex]).sort((a, b) => a - b);
+                let minDiff = null;
+                for (let i = 1; i < uniqueWeights.length; i++) {
+                    const diff = uniqueWeights[i] - uniqueWeights[i - 1];
+                    if (diff >= 1 && (!minDiff || diff < minDiff)) {
+                        minDiff = diff;
+                    }
+                }
+                
+                if (minDiff) {
+                    records[ex].predictedStep = minDiff;
+                } else if (records[ex].kg > 0) {
+                    // Fallback to 10% if only one weight exists
+                    records[ex].predictedStep = Math.max(2.5, Math.round((records[ex].kg * 0.1) / 2.5) * 2.5);
+                }
+            });
+
             return records;
         } catch (e) {
             console.error('[PR] 조회 실패:', e);
@@ -116,7 +154,7 @@ const WorkoutPlanScreen = () => {
     }
 
     if (!activeProgram) {
-        return <AiWizard onSave={handleSaveProgram} />;
+        return <AiWizard onSave={handleSaveProgram} personalRecords={personalRecords} />;
     }
 
     if (activeProgram.type === 'weekly_ai') {

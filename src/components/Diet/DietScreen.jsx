@@ -21,6 +21,8 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '../../api/supabase';
 import { getRecommendedDietTargets } from '../../utils/dietRecommendation';
+import { fetchDietLogByDate, upsertDietLog, updateDietGoals } from '../../api/dietApi';
+import { FOOD_DATABASE, calculateMacros } from '../../utils/foodDatabase';
 
 // Helper to get date string in YYYY-MM-DD format
 const getLocalDateString = (date = new Date()) => {
@@ -59,7 +61,6 @@ const DietScreen = () => {
     });
 
     const [meals, setMeals] = useState([]);
-    const [water, setWater] = useState(0);
 
     // Modals visibility
     const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
@@ -70,6 +71,9 @@ const DietScreen = () => {
 
     // Custom Food Form State
     const [customFoodForm, setCustomFoodForm] = useState({
+        inputType: 'db', // 'db' or 'manual'
+        foodId: '',
+        weight: '',
         name: '',
         kcal: '',
         carbs: '',
@@ -154,7 +158,7 @@ const DietScreen = () => {
         return profile;
     };
 
-    // Load active_diet_plan from Supabase on mount
+    // Load active_diet_plan and diet_goals from Supabase on mount
     const loadActiveDietPlan = async () => {
         setIsLoadingProfile(true);
         try {
@@ -163,12 +167,18 @@ const DietScreen = () => {
                 setUserId(user.id);
                 const { data, error } = await supabase
                     .from('user_profiles')
-                    .select('active_diet_plan')
+                    .select('active_diet_plan, diet_goals')
                     .eq('user_id', user.id)
                     .maybeSingle();
                 if (error) throw error;
-                if (data && data.active_diet_plan) {
-                    setActiveDietPlan(data.active_diet_plan);
+                if (data) {
+                    if (data.active_diet_plan) setActiveDietPlan(data.active_diet_plan);
+                    else setActiveDietPlan(null);
+                    
+                    if (data.diet_goals) {
+                        setGoals(data.diet_goals);
+                        setGoalsForm(data.diet_goals);
+                    }
                 } else {
                     setActiveDietPlan(null);
                 }
@@ -259,28 +269,71 @@ const DietScreen = () => {
 
     // Load meals and water for the selected date
     useEffect(() => {
-        const savedData = localStorage.getItem(`mygym_diet_${selectedDate}`);
-        if (savedData) {
-            try {
-                const parsed = JSON.parse(savedData);
-                setMeals(parsed.meals || []);
-                setWater(parsed.water || 0);
-            } catch (e) {
-                setMeals([]);
-                setWater(0);
+        const loadDailyDiet = async () => {
+            if (!userId) {
+                // Fallback to local storage if not logged in yet
+                const savedData = localStorage.getItem(`mygym_diet_${selectedDate}`);
+                if (savedData) {
+                    try {
+                        const parsed = JSON.parse(savedData);
+                        setMeals(parsed.meals || []);
+                    } catch (e) {
+                        setMeals([]);
+                    }
+                } else {
+                    setMeals([]);
+                }
+                return;
             }
-        } else {
-            setMeals([]);
-            setWater(0);
-        }
-    }, [selectedDate]);
 
-    // Save meals and water to localStorage
-    const saveData = (updatedMeals, updatedWater) => {
+            try {
+                const log = await fetchDietLogByDate(userId, selectedDate);
+                if (log) {
+                    // Extract flat meals list from JSONB if stored that way, or just use it.
+                    // For now, assume meals are stored as an array or we parse it.
+                    // Wait, in migration we set meals as JSONB '{"breakfast": [], ...}'. 
+                    // Let's assume the API handles it as an array of all meals combined for the UI state.
+                    // To keep UI compatible, let's keep the meals array flat in state.
+                    let loadedMeals = log.meals;
+                    if (Array.isArray(loadedMeals)) {
+                        setMeals(loadedMeals);
+                    } else if (typeof loadedMeals === 'object') {
+                        // Flatten it
+                        const flat = [];
+                        Object.values(loadedMeals).forEach(arr => {
+                            if (Array.isArray(arr)) flat.push(...arr);
+                        });
+                        setMeals(flat);
+                    } else {
+                        setMeals([]);
+                    }
+                } else {
+                    setMeals([]);
+                }
+            } catch (err) {
+                console.error('Failed to load daily diet:', err);
+            }
+        };
+        loadDailyDiet();
+    }, [selectedDate, userId]);
+
+    // Save meals to Supabase
+    const saveData = async (updatedMeals) => {
+        // Still save to localStorage as backup/offline support
         localStorage.setItem(
             `mygym_diet_${selectedDate}`,
-            JSON.stringify({ meals: updatedMeals, water: updatedWater })
+            JSON.stringify({ meals: updatedMeals })
         );
+
+        if (userId) {
+            try {
+                // Group meals by category before saving to match DB schema if needed
+                // But saving as an array is also fine if JSONB.
+                await upsertDietLog(userId, selectedDate, updatedMeals, 0);
+            } catch (err) {
+                console.error('Failed to save diet log to DB:', err);
+            }
+        }
     };
 
     // --- Wizard Actions ---
@@ -418,7 +471,7 @@ const DietScreen = () => {
         
         const updatedMeals = [...meals, ...clonedMeals];
         setMeals(updatedMeals);
-        saveData(updatedMeals, water);
+        saveData(updatedMeals);
         
         const updatedHistory = {
             ...(activeDietPlan.history || {})
@@ -481,7 +534,7 @@ const DietScreen = () => {
         
         const updatedMeals = [...meals, ...clonedMeals];
         setMeals(updatedMeals);
-        saveData(updatedMeals, water);
+        saveData(updatedMeals);
         
         const updatedHistory = {
             ...(activeDietPlan.history || {}),
@@ -536,57 +589,26 @@ const DietScreen = () => {
         setSelectedDate(getLocalDateString(d));
     };
 
-    // Water Log handler (+250ml)
-    const handleAddWater = () => {
-        const newWater = water + 250;
-        setWater(newWater);
-        saveData(meals, newWater);
-        toast.success(`+250ml ${t('diet.water')}`);
-    };
-
-    // Water Log handler (-250ml)
-    const handleRemoveWater = () => {
-        if (water <= 0) return;
-        const newWater = Math.max(0, water - 250);
-        setWater(newWater);
-        saveData(meals, newWater);
-        toast.info(`-250ml ${t('diet.water')}`);
-    };
-
-    // Quick Log Presets list
+    // Quick Log Presets list (User's Weekly Diet Items + Basics)
     const presets = [
-        {
-            nameKey: 'diet.chickenBreast',
-            defaultName: '닭가슴살 100g',
-            kcal: 120,
-            carbs: 0,
-            protein: 23,
-            fat: 3
-        },
-        {
-            nameKey: 'diet.rice',
-            defaultName: '햇반 200g',
-            kcal: 300,
-            carbs: 65,
-            protein: 6,
-            fat: 1
-        },
-        {
-            nameKey: 'diet.proteinShake',
-            defaultName: '프로틴 쉐이크',
-            kcal: 150,
-            carbs: 3,
-            protein: 25,
-            fat: 2
-        },
-        {
-            nameKey: 'diet.sweetPotato',
-            defaultName: '고구마 150g',
-            kcal: 130,
-            carbs: 30,
-            protein: 2,
-            fat: 0
-        }
+        // 1일차
+        { nameKey: 'custom', defaultName: '닭가슴살 양배추 볶음 - 닭가슴살 250g, 양배추/양파, 스리라차, 현미밥 1개', kcal: 625, carbs: 75, protein: 63, fat: 4.5 },
+        { nameKey: 'custom', defaultName: '돼지 안심구이 - 돼지 안심 250g, 새송이버섯 1개, 방울토마토 한줌', kcal: 390, carbs: 8, protein: 54, fat: 12 },
+        // 2일차
+        { nameKey: 'custom', defaultName: '참치 양배추 덮밥 - 참치 1캔, 양배추/양파, 계란 2개, 현미밥 1개', kcal: 640, carbs: 76, protein: 43, fat: 16 },
+        { nameKey: 'custom', defaultName: '닭가슴살 샐러드 & 고구마 - 닭가슴살 250g, 생양배추, 찐 고구마 1~2개', kcal: 485, carbs: 50, protein: 60, fat: 3.5 },
+        // 3일차
+        { nameKey: 'custom', defaultName: '닭가슴살 마늘 볶음밥 - 닭가슴살 250g, 양파/마늘, 계란 2개, 현미밥 1개', kcal: 735, carbs: 80, protein: 75, fat: 14.5 },
+        { nameKey: 'custom', defaultName: '돼지 안심구이 - 돼지 안심 250g, 새송이버섯 1개', kcal: 370, carbs: 4, protein: 53, fat: 12 },
+        // 4일차
+        { nameKey: 'custom', defaultName: '참치 야채 오믈렛 - 참치 1캔, 채썬 양배추/양파, 계란 4개', kcal: 480, carbs: 12, protein: 49, fat: 25 },
+        { nameKey: 'custom', defaultName: '닭가슴살 & 고구마 - 닭가슴살 250g, 찐 고구마 1~2개, 방울토마토 한줌', kcal: 485, carbs: 49, protein: 60, fat: 3.5 },
+        // 5일차
+        { nameKey: 'custom', defaultName: '닭가슴살 양파 구이 - 닭가슴살 250g, 양파/마늘, 현미밥 1개', kcal: 625, carbs: 75, protein: 63, fat: 4.5 },
+        { nameKey: 'custom', defaultName: '참치 계란 양배추 볶음 - 참치 1캔, 계란 2개, 양배추', kcal: 340, carbs: 11, protein: 37, fat: 15 },
+        // 6일차
+        { nameKey: 'custom', defaultName: '계란 스크램블 볶음밥 - 계란 2개, 파기름, 현미밥 1개', kcal: 480, carbs: 67, protein: 18, fat: 15 },
+        { nameKey: 'custom', defaultName: '닭가슴살 토마토 스튜 - 닭가슴살 250g, 방울토마토, 마늘, 현미밥 1개', kcal: 620, carbs: 80, protein: 64, fat: 5 }
     ];
 
     // Log Preset Item
@@ -603,7 +625,7 @@ const DietScreen = () => {
         };
         const updatedMeals = [...meals, newMeal];
         setMeals(updatedMeals);
-        saveData(updatedMeals, water);
+        saveData(updatedMeals);
         toast.success(`${t(preset.nameKey)} -> ${t(`diet.${presetTargetCategory}`)}`);
     };
 
@@ -611,21 +633,30 @@ const DietScreen = () => {
     const handleDeleteMeal = (mealId) => {
         const updatedMeals = meals.filter(m => m.id !== mealId);
         setMeals(updatedMeals);
-        saveData(updatedMeals, water);
+        saveData(updatedMeals);
         toast.info(t('common.save') === '수정' ? '식단이 삭제되었습니다.' : 'Meal deleted.');
     };
 
-    // Custom Food Modal Submit handler
+    // Custom Food Submit handler
     const handleCustomFoodSubmit = (e) => {
         e.preventDefault();
-        if (!customFoodForm.name.trim()) {
-            toast.error(t('diet.foodName'));
+        
+        let finalName = customFoodForm.name.trim();
+        if (customFoodForm.inputType === 'db' && customFoodForm.foodId) {
+            const dbFood = FOOD_DATABASE.find(f => f.id === customFoodForm.foodId);
+            if (dbFood) {
+                finalName = `${dbFood.name} ${customFoodForm.weight}g`;
+            }
+        }
+
+        if (!finalName) {
+            toast.error(t('diet.foodName') || '음식 이름을 입력해주세요.');
             return;
         }
 
         const newMeal = {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-            name: customFoodForm.name.trim(),
+            name: finalName,
             kcal: Number(customFoodForm.kcal) || 0,
             carbs: Number(customFoodForm.carbs) || 0,
             protein: Number(customFoodForm.protein) || 0,
@@ -635,10 +666,13 @@ const DietScreen = () => {
 
         const updatedMeals = [...meals, newMeal];
         setMeals(updatedMeals);
-        saveData(updatedMeals, water);
+        saveData(updatedMeals);
         
         // Reset form & close modal
         setCustomFoodForm({
+            inputType: 'db',
+            foodId: '',
+            weight: '',
             name: '',
             kcal: '',
             carbs: '',
@@ -651,7 +685,7 @@ const DietScreen = () => {
     };
 
     // Goals Modal Submit handler
-    const handleGoalsSubmit = (e) => {
+    const handleGoalsSubmit = async (e) => {
         e.preventDefault();
         const updatedGoals = {
             kcal: Number(goalsForm.kcal) || 2000,
@@ -661,6 +695,15 @@ const DietScreen = () => {
         };
         setGoals(updatedGoals);
         localStorage.setItem('mygym_diet_goals', JSON.stringify(updatedGoals));
+        
+        if (userId) {
+            try {
+                await updateDietGoals(userId, updatedGoals);
+            } catch (err) {
+                console.error('Failed to update diet goals in DB:', err);
+            }
+        }
+        
         setIsGoalsModalOpen(false);
         toast.success(t('common.save') === '수정' ? '목표가 설정되었습니다.' : 'Goals updated successfully.');
     };
@@ -862,58 +905,7 @@ const DietScreen = () => {
                     </div>
                 </div>
 
-                {/* Water tracker section */}
-                <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 backdrop-blur-xl rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group">
-                    <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <h4 className="text-sm font-black text-white tracking-tight flex items-center gap-1.5">
-                                <Droplets className="w-4 h-4 text-blue-400 fill-blue-500" />
-                                {t('diet.water')}
-                            </h4>
-                            <p className="text-xs text-slate-500 mt-0.5">{t('diet.waterGoal')}</p>
-                        </div>
-                        <span className="text-xs font-semibold text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-500/10">
-                            {Math.round((water / 2000) * 100)}%
-                        </span>
-                    </div>
 
-                    <div className="flex items-center gap-6 my-2">
-                        {/* Interactive Cup */}
-                        <div 
-                            onClick={handleAddWater}
-                            className="relative w-20 h-24 bg-slate-950/80 border border-white/10 rounded-b-2xl rounded-t-sm overflow-hidden flex items-end justify-center shadow-inner group cursor-pointer hover:border-blue-500/30 transition-all active:scale-95"
-                            title="Tap to log +250ml"
-                        >
-                            <div 
-                                className="w-full bg-gradient-to-t from-blue-600 to-cyan-400 transition-all duration-500 ease-out relative"
-                                style={{ height: `${Math.min(100, (water / 2000) * 100)}%` }}
-                            >
-                                <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/30 animate-pulse" />
-                            </div>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
-                                <span className="text-lg font-black text-white drop-shadow-md">{water}</span>
-                                <span className="text-[9px] text-slate-400 font-bold uppercase drop-shadow-md">ml</span>
-                            </div>
-                        </div>
-
-                        {/* Adjust buttons */}
-                        <div className="flex-1 flex flex-col gap-2">
-                            <button
-                                onClick={handleAddWater}
-                                className="w-full py-2 bg-blue-600 hover:bg-blue-500 active:scale-98 text-white font-bold text-xs rounded-xl shadow-lg shadow-blue-500/20 transition-all"
-                            >
-                                +250ml
-                            </button>
-                            <button
-                                onClick={handleRemoveWater}
-                                disabled={water <= 0}
-                                className="w-full py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:pointer-events-none active:scale-98 text-slate-300 font-bold text-xs rounded-xl transition-all"
-                            >
-                                -250ml
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
             </div>
 
@@ -929,26 +921,29 @@ const DietScreen = () => {
                             <p className="text-xs text-slate-400 mt-0.5">{t('diet.planTab')}</p>
                         </div>
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setWizardPlanName('');
-                            setWizardPlanDays({
-                                Monday: { breakfast: [], lunch: [], dinner: [], snack: [] },
-                                Tuesday: { breakfast: [], lunch: [], dinner: [], snack: [] },
-                                Wednesday: { breakfast: [], lunch: [], dinner: [], snack: [] },
-                                Thursday: { breakfast: [], lunch: [], dinner: [], snack: [] },
-                                Friday: { breakfast: [], lunch: [], dinner: [], snack: [] },
-                                Saturday: { breakfast: [], lunch: [], dinner: [], snack: [] },
-                                Sunday: { breakfast: [], lunch: [], dinner: [], snack: [] }
-                            });
-                            setWizardSelectedDay('Monday');
-                            setIsCreatingPlan(true);
-                        }}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl shadow-lg transition-all whitespace-nowrap active:scale-95"
-                    >
-                        {t('diet.createPlan')}
-                    </button>
+                    <div className="flex items-center gap-2">
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setWizardPlanName('');
+                                setWizardPlanDays({
+                                    Monday: { breakfast: [], lunch: [], dinner: [], snack: [] },
+                                    Tuesday: { breakfast: [], lunch: [], dinner: [], snack: [] },
+                                    Wednesday: { breakfast: [], lunch: [], dinner: [], snack: [] },
+                                    Thursday: { breakfast: [], lunch: [], dinner: [], snack: [] },
+                                    Friday: { breakfast: [], lunch: [], dinner: [], snack: [] },
+                                    Saturday: { breakfast: [], lunch: [], dinner: [], snack: [] },
+                                    Sunday: { breakfast: [], lunch: [], dinner: [], snack: [] }
+                                });
+                                setWizardSelectedDay('Monday');
+                                setIsCreatingPlan(true);
+                            }}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl shadow-lg transition-all whitespace-nowrap active:scale-95"
+                        >
+                            {t('diet.createPlan')}
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -1041,8 +1036,8 @@ const DietScreen = () => {
                                                 items.map((item) => (
                                                     <div key={item.id} className="flex items-center justify-between p-2 bg-slate-900 border border-white/5 rounded-lg">
                                                         <div className="min-w-0 flex-1 pr-2">
-                                                            <p className="text-[10px] font-bold text-white truncate">
-                                                                {item.nameKey ? t(item.nameKey) : item.name}
+                                                            <p className="text-[10px] text-white">
+                                                                {renderFoodName(item.nameKey ? t(item.nameKey) : item.name)}
                                                             </p>
                                                             <p className="text-[8px] text-slate-500 mt-0.5">
                                                                 {item.kcal} kcal • C {item.carbs}g • P {item.protein}g • F {item.fat}g
@@ -1256,9 +1251,9 @@ const DietScreen = () => {
                                             className="w-full flex items-center justify-between p-3 bg-slate-950/40 hover:bg-slate-800/40 border border-white/5 hover:border-blue-500/20 rounded-xl text-left transition-all active:scale-98 group"
                                         >
                                             <div>
-                                                <p className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors">
-                                                    {t(p.nameKey)}
-                                                </p>
+                                                <div className="text-xs text-white group-hover:text-blue-400 transition-colors">
+                                                    {renderFoodName(p.nameKey && p.nameKey !== 'custom' ? t(p.nameKey) : p.defaultName)}
+                                                </div>
                                                 <p className="text-[10px] text-slate-500 font-medium mt-0.5">
                                                     C {p.carbs}g • P {p.protein}g • F {p.fat}g
                                                 </p>
@@ -1275,7 +1270,7 @@ const DietScreen = () => {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setCustomFoodForm(prev => ({ ...prev, category: presetTargetCategory }));
+                                        setCustomFoodForm(prev => ({ ...prev, category: presetTargetCategory, inputType: 'db', foodId: '', weight: '', name: '', kcal: '', carbs: '', protein: '', fat: '' }));
                                         setIsCustomModalOpen(true);
                                     }}
                                     className="mt-6 w-full flex items-center justify-center gap-1.5 py-2.5 bg-slate-800 hover:bg-slate-700 hover:text-white border border-white/10 hover:border-white/20 text-slate-300 font-bold text-xs rounded-xl transition-all"
@@ -1336,9 +1331,9 @@ const DietScreen = () => {
                                                         >
                                                             <div className="flex-1 min-w-0 pr-4">
                                                                 <div className="flex items-baseline gap-2">
-                                                                    <p className="text-xs font-bold text-white truncate max-w-[180px] sm:max-w-xs">
-                                                                        {displayName}
-                                                                    </p>
+                                                                    <div className="text-xs text-white">
+                                                                        {renderFoodName(displayName)}
+                                                                    </div>
                                                                     <span className="text-[10px] text-rose-400 font-black shrink-0">
                                                                         {item.kcal} kcal
                                                                     </span>
@@ -1389,21 +1384,82 @@ const DietScreen = () => {
                         </div>
 
                         <form onSubmit={handleCustomFoodSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
-                                    {t('diet.foodName')}
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    placeholder="e.g. 닭고기 볶음밥"
-                                    value={customFoodForm.name}
-                                    onChange={(e) => setCustomFoodForm({ ...customFoodForm, name: e.target.value })}
-                                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
-                                />
+                            {/* Input Type Selector */}
+                            <div className="flex items-center gap-2 mb-4 bg-slate-950 p-1 rounded-xl">
+                                <button
+                                    type="button"
+                                    onClick={() => setCustomFoodForm({ ...customFoodForm, inputType: 'db', foodId: '', weight: '', name: '', kcal: '', carbs: '', protein: '', fat: '' })}
+                                    className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${customFoodForm.inputType === 'db' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                                >
+                                    기본 식재료 선택
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setCustomFoodForm({ ...customFoodForm, inputType: 'manual', foodId: '', weight: '', name: '', kcal: '', carbs: '', protein: '', fat: '' })}
+                                    className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${customFoodForm.inputType === 'manual' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                                >
+                                    직접 수동 입력
+                                </button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            {customFoodForm.inputType === 'db' ? (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                                            식재료 선택
+                                        </label>
+                                        <select
+                                            required
+                                            value={customFoodForm.foodId}
+                                            onChange={(e) => {
+                                                const foodId = e.target.value;
+                                                const macros = calculateMacros(foodId, customFoodForm.weight);
+                                                setCustomFoodForm({ ...customFoodForm, foodId, ...macros });
+                                            }}
+                                            className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                                        >
+                                            <option value="" disabled>식재료를 선택하세요</option>
+                                            {FOOD_DATABASE.map(food => (
+                                                <option key={food.id} value={food.id}>{food.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                                            중량 (g)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            required
+                                            min="1"
+                                            placeholder="예: 150"
+                                            value={customFoodForm.weight}
+                                            onChange={(e) => {
+                                                const weight = e.target.value;
+                                                const macros = calculateMacros(customFoodForm.foodId, weight);
+                                                setCustomFoodForm({ ...customFoodForm, weight, ...macros });
+                                            }}
+                                            className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                                        {t('diet.foodName')}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="e.g. 닭고기 볶음밥"
+                                        value={customFoodForm.name}
+                                        onChange={(e) => setCustomFoodForm({ ...customFoodForm, name: e.target.value })}
+                                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4 mt-4">
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
                                         {t('diet.kcal')}
@@ -1412,9 +1468,10 @@ const DietScreen = () => {
                                         type="number"
                                         min="0"
                                         placeholder="0"
+                                        readOnly={customFoodForm.inputType === 'db'}
                                         value={customFoodForm.kcal}
                                         onChange={(e) => setCustomFoodForm({ ...customFoodForm, kcal: e.target.value })}
-                                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                                        className={`w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50 ${customFoodForm.inputType === 'db' ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     />
                                 </div>
                                 <div>
@@ -1443,9 +1500,10 @@ const DietScreen = () => {
                                         type="number"
                                         min="0"
                                         placeholder="0"
+                                        readOnly={customFoodForm.inputType === 'db'}
                                         value={customFoodForm.carbs}
                                         onChange={(e) => setCustomFoodForm({ ...customFoodForm, carbs: e.target.value })}
-                                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                                        className={`w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50 ${customFoodForm.inputType === 'db' ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     />
                                 </div>
                                 <div>
@@ -1456,9 +1514,10 @@ const DietScreen = () => {
                                         type="number"
                                         min="0"
                                         placeholder="0"
+                                        readOnly={customFoodForm.inputType === 'db'}
                                         value={customFoodForm.protein}
                                         onChange={(e) => setCustomFoodForm({ ...customFoodForm, protein: e.target.value })}
-                                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                                        className={`w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50 ${customFoodForm.inputType === 'db' ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     />
                                 </div>
                                 <div>
@@ -1469,9 +1528,10 @@ const DietScreen = () => {
                                         type="number"
                                         min="0"
                                         placeholder="0"
+                                        readOnly={customFoodForm.inputType === 'db'}
                                         value={customFoodForm.fat}
                                         onChange={(e) => setCustomFoodForm({ ...customFoodForm, fat: e.target.value })}
-                                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                                        className={`w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50 ${customFoodForm.inputType === 'db' ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     />
                                 </div>
                             </div>
@@ -1586,7 +1646,7 @@ const DietScreen = () => {
             {/* Modal: Wizard Add Food Entry */}
             {isWizardAddFoodOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-                    <div className="bg-slate-900 border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl relative animate-scale-up">
+                    <div className="bg-slate-900 border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl relative animate-scale-up max-h-[90vh] overflow-y-auto">
                         <button 
                             type="button"
                             onClick={() => setIsWizardAddFoodOpen(false)}
@@ -1607,25 +1667,36 @@ const DietScreen = () => {
                         {/* Presets List in Wizard */}
                         <div className="mb-6">
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                                {t('diet.presetTitle')}
+                                {t('diet.presetTitle')} (드롭다운 선택)
                             </label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {presets.map((p, idx) => (
-                                    <button
-                                        key={idx}
-                                        type="button"
-                                        onClick={() => addPresetToWizard(p)}
-                                        className="p-3 bg-slate-950/60 hover:bg-slate-800 border border-white/5 rounded-xl text-left transition-all active:scale-95 group"
-                                    >
-                                        <p className="text-[10px] font-bold text-white group-hover:text-blue-400 truncate">
-                                            {t(p.nameKey)}
-                                        </p>
-                                        <p className="text-[8px] text-slate-500 mt-1">
-                                            {p.kcal} kcal • C {p.carbs}g • P {p.protein}g • F {p.fat}g
-                                        </p>
-                                    </button>
-                                ))}
-                            </div>
+                            <select
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val !== "") {
+                                        const p = presets[parseInt(val, 10)];
+                                        setWizardCustomForm({
+                                            name: p.nameKey && p.nameKey !== 'custom' ? t(p.nameKey) : p.defaultName,
+                                            kcal: p.kcal.toString(),
+                                            carbs: p.carbs.toString(),
+                                            protein: p.protein.toString(),
+                                            fat: p.fat.toString()
+                                        });
+                                    }
+                                }}
+                                className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                                defaultValue=""
+                            >
+                                <option value="" disabled>-- 빠른등록 프리셋 선택 --</option>
+                                {presets.map((p, idx) => {
+                                    const rawName = p.nameKey && p.nameKey !== 'custom' ? t(p.nameKey) : p.defaultName;
+                                    const titleOnly = rawName.split(' - ')[0];
+                                    return (
+                                        <option key={idx} value={idx}>
+                                            {titleOnly} ({p.kcal} kcal)
+                                        </option>
+                                    );
+                                })}
+                            </select>
                         </div>
 
                         <div className="w-full h-px bg-white/5 my-4" />
@@ -1796,4 +1867,31 @@ const DietScreen = () => {
     );
 };
 
+// Helper to parse and render "FoodName - Ingredients"
+const renderFoodName = (rawName) => {
+    if (!rawName) return '';
+    const parts = rawName.split(' - ');
+    if (parts.length > 1) {
+        return (
+            <span className="inline-block">
+                <span className="font-bold">{parts[0]}</span>
+                <span className="text-[10px] text-slate-400 font-medium ml-1.5 break-all">
+                    {parts.slice(1).join(' - ')}
+                </span>
+            </span>
+        );
+    }
+    const oldParts = rawName.split(' (');
+    if (oldParts.length > 1 && rawName.endsWith(')')) {
+        return (
+            <span className="inline-block">
+                <span className="font-bold">{oldParts[0]}</span>
+                <span className="text-[10px] text-slate-400 font-medium ml-1.5 break-all">
+                    ({oldParts.slice(1).join(' (')}
+                </span>
+            </span>
+        );
+    }
+    return rawName;
+};
 export default DietScreen;

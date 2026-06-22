@@ -1,7 +1,9 @@
+import { getExerciseUniqueKey } from '../utils/exerciseUtils';
+
 /**
  * Gemini API를 사용한 루틴 생성 함수
  */
-export const generateAiRoutine = async ({ daysCount = 5, availableExercises = [] }) => {
+export const generateAiRoutine = async ({ daysCount = 4, availableExercises = [], personalRecords = {} }) => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -121,11 +123,14 @@ export const generateAiRoutine = async ({ daysCount = 5, availableExercises = []
 2. 운동 개수 및 세트 규칙:
    - 각 세션의 운동(\`exercises\`) 목록은 **반드시 6개**로 꽉 채워야 합니다.
    - 모든 운동은 본세트로 5세트(targetSets: 5)를 배정하십시오.
-3. 운동 목록 매칭 규칙:
+3. 운동 순서 및 배치 규칙 (매우 중요):
+   - 세션이 '타겟 부위 운동 4개 + 팔 운동 2개'로 구성된 경우(Case 1), 타겟 부위의 가장 무겁고 핵심적인 **메인 운동**(예: 바벨 프레스, 스쿼트 등)은 반드시 **3번째 또는 4번째** 순서에 배치하십시오.
+   - 세션이 '타겟 부위 운동 6개'로 구성된 경우(Case 2), 타겟 부위의 핵심 **메인 운동**은 반드시 **4번째 또는 5번째** 순서에 배치하십시오. (초반은 선피로/단관절 운동으로 구성)
+4. 운동 목록 매칭 규칙:
    - 아래 제공된 <AVAILABLE_EXERCISES> 목록 내에 존재하는 운동 중, 위의 루틴 목록의 운동 명칭 및 장비와 가장 잘 어울리는 실제 등록된 운동(이름과 장비)을 찾아 매핑하십시오.
    - 임의의 운동을 새로 만들거나 없는 아이디를 지어내면 절대 안 됩니다. 정확히 목록에 있는 id를 사용하십시오.
    - 루틴의 '바벨 스쿼트'가 목록에 없을 시, 목록에 존재하는 '스쿼트' (바벨 장비) 혹은 '스미스 머신 스쿼트' 등으로 가장 가깝게 대응하십시오.
-4. 출력은 반드시 JSON 객체 포맷이어야 합니다. 마크다운(\`\`\`json ...) 없이 순수 JSON 텍스트로만 반환하십시오.
+5. 출력은 반드시 JSON 객체 포맷이어야 합니다. 마크다운(\`\`\`json ...) 없이 순수 JSON 텍스트로만 반환하십시오.
 
 <AVAILABLE_EXERCISES>
 ${JSON.stringify(simplifiedExercises)}
@@ -196,15 +201,43 @@ ${JSON.stringify(simplifiedExercises)}
                 const targetSets = 5;
                 const repScheme = [15, 15, 13, 13, 10];
                 
+                const exerciseName = match.name || ex.name;
+                const equipment = match.equipment || ex.equipment || '';
+                const uniqueKey = getExerciseUniqueKey({ name: exerciseName, equipment });
+                const prRecord = personalRecords[uniqueKey];
+
+                const sets = Array.from({ length: targetSets }, (_, i) => ({ kg: '', reps: repScheme[i] || 10, completed: false }));
+
+                if (prRecord && prRecord.kg > 0) {
+                    const prKg = prRecord.kg;
+                    const maxCount = prRecord.maxKgCount || 1;
+                    const step = prRecord.predictedStep || 5;
+
+                    if (maxCount === 1) {
+                        sets[4].kg = prKg;
+                        for (let i = 3; i >= 0; i--) {
+                            let rec = sets[i + 1].kg - step;
+                            sets[i].kg = rec > 0 ? rec : '';
+                        }
+                    } else {
+                        sets[3].kg = prKg;
+                        sets[4].kg = prKg + step; // 점진적 과부하
+                        for (let i = 2; i >= 0; i--) {
+                            let rec = sets[i + 1].kg - step;
+                            sets[i].kg = rec > 0 ? rec : '';
+                        }
+                    }
+                }
+
                 return {
                     id: ex.id,
-                    name: match.name || ex.name,
+                    name: exerciseName,
                     name_en: match.name_en || ex.name_en,
                     body_part: match.body_part || match.bodyPart || ex.body_part || ex.bodyPart || '',
-                    equipment: match.equipment || ex.equipment || '',
+                    equipment: equipment,
                     targetSets: targetSets,
                     targetReps: 15,
-                    sets: Array.from({ length: targetSets }, (_, i) => ({ kg: '', reps: repScheme[i] || 10, completed: false }))
+                    sets: sets
                 };
             })
         }));
