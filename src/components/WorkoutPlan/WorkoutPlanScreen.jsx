@@ -10,8 +10,9 @@ const WorkoutPlanScreen = () => {
 
     const [user, setUser] = useState(null);
     const [activeProgram, setActiveProgram] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
     const [personalRecords, setPersonalRecords] = useState({});
+    const [workoutPreferences, setWorkoutPreferences] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchExercisePersonalRecords = async (userId) => {
         try {
@@ -39,16 +40,17 @@ const WorkoutPlanScreen = () => {
                     const kg = parseFloat(set.kg) || 0;
                     const reps = parseInt(set.reps) || 0;
                     
-                    if (kg > 0) {
+                    // Only count as PR if reps >= 10
+                    if (kg > 0 && reps >= 10) {
                         exerciseWeights[exerciseName].add(kg);
-                    }
 
-                    if (kg > records[exerciseName].kg) {
-                        records[exerciseName].kg = kg;
-                        records[exerciseName].reps = reps;
-                        records[exerciseName].maxKgCount = 1;
-                    } else if (kg === records[exerciseName].kg && kg > 0) {
-                        records[exerciseName].maxKgCount += 1;
+                        if (kg > records[exerciseName].kg) {
+                            records[exerciseName].kg = kg;
+                            records[exerciseName].reps = reps;
+                            records[exerciseName].maxKgCount = 1;
+                        } else if (kg === records[exerciseName].kg) {
+                            records[exerciseName].maxKgCount += 1;
+                        }
                     }
                 });
             });
@@ -91,11 +93,14 @@ const WorkoutPlanScreen = () => {
 
                 const { data: profile, error } = await supabase
                     .from('user_profiles')
-                    .select('active_program')
+                    .select('active_program, workout_preferences')
                     .eq('user_id', session.user.id)
                     .maybeSingle();
                 
                 if (error) throw error;
+                if (profile?.workout_preferences) {
+                    setWorkoutPreferences(profile.workout_preferences);
+                }
                 if (profile && profile.active_program) {
                     setActiveProgram(profile.active_program);
                 } else {
@@ -154,7 +159,7 @@ const WorkoutPlanScreen = () => {
     }
 
     if (!activeProgram) {
-        return <AiWizard onSave={handleSaveProgram} personalRecords={personalRecords} />;
+        return <AiWizard onSave={handleSaveProgram} personalRecords={personalRecords} workoutPreferences={workoutPreferences} user={user} />;
     }
 
     if (activeProgram.type === 'weekly_ai') {

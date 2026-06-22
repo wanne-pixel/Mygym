@@ -3,7 +3,7 @@ import { getExerciseUniqueKey } from '../utils/exerciseUtils';
 /**
  * Gemini API를 사용한 루틴 생성 함수
  */
-export const generateAiRoutine = async ({ daysCount = 4, availableExercises = [], personalRecords = {} }) => {
+export const generateAiRoutine = async ({ daysCount = 4, availableExercises = [], personalRecords = {}, workoutPreferences = null }) => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -23,10 +23,15 @@ export const generateAiRoutine = async ({ daysCount = 4, availableExercises = []
         equipment: ex.equipment
     }));
 
+    // Use workoutPreferences if provided, otherwise use defaults
+    const prefDays = workoutPreferences?.days_per_week || daysCount || 4;
+    const prefExercises = workoutPreferences?.exercises_per_session || 6;
+    const prefSets = workoutPreferences?.sets_per_exercise || 5;
+
     const prompt = `
 당신은 최고 수준의 퍼스널 트레이너이자 피트니스 프로그램 설계 AI입니다.
-사용자는 일주일에 총 4일(세션) 동안 운동을 수행하며, 하루에 정확히 6개의 종목을 소화해야 합니다.
-당신은 아래의 [제공된 루틴 A, B, C 템플릿]을 기준으로 4개 세션의 루틴을 설계해야 합니다.
+사용자는 일주일에 총 ${prefDays}일(세션) 동안 운동을 수행하며, 하루에 정확히 ${prefExercises}개의 종목을 소화해야 합니다.
+당신은 아래의 [제공된 루틴 A, B, C 템플릿]을 기준으로 ${prefDays}개 세션의 루틴을 설계해야 합니다.
 
 [사용자의 3가지 대표 루틴 템플릿]
 사용자가 직접 설계한 세 가지 루틴 정보입니다. 각 루틴은 4개의 세션(가슴+삼두, 등+이두, 하체, 어깨)으로 구성되어 있습니다.
@@ -63,8 +68,8 @@ export const generateAiRoutine = async ({ daysCount = 4, availableExercises = []
 - 가슴 (전체/아랫가슴 타깃) + 팔 (삼두):
   1. 머신 체스트 프레스머신 (웜업 3세트)
   2. 스미스머신 플랫 프레스
-  3. 스미스머신 디클라인 프레스
-  4. 머신 M디클라인 프레스
+  3. 머신 M디클라인 프레스
+  4. 덤벨 플랫 프레스
   5. 덤벨 오버헤드 익스텐션
   6. 케이블 푸시다운
 - 등 (두께 타깃) + 팔 (이두):
@@ -121,8 +126,8 @@ export const generateAiRoutine = async ({ daysCount = 4, availableExercises = []
    - AI가 위의 루틴 A, B, C 중 한 가지 테마를 분석하여 그 루틴의 4개 세션을 추출하십시오.
    - 각 세션의 \`dayId\`는 "Day 1, 2, 3, 4" 대신 반드시 **"가슴", "등", "하체", "어깨"** 중 하나로 출력하십시오.
 2. 운동 개수 및 세트 규칙:
-   - 각 세션의 운동(\`exercises\`) 목록은 **반드시 6개**로 꽉 채워야 합니다.
-   - 모든 운동은 본세트로 5세트(targetSets: 5)를 배정하십시오.
+   - 각 세션의 운동(\`exercises\`) 목록은 **반드시 ${prefExercises}개**로 꽉 채워야 합니다.
+   - 모든 운동은 본세트로 ${prefSets}세트(targetSets: ${prefSets})를 배정하십시오.
 3. 운동 순서 및 배치 규칙 (매우 중요):
    - 세션이 '타겟 부위 운동 4개 + 팔 운동 2개'로 구성된 경우(Case 1), 타겟 부위의 가장 무겁고 핵심적인 **메인 운동**(예: 바벨 프레스, 스쿼트 등)은 반드시 **3번째 또는 4번째** 순서에 배치하십시오.
    - 세션이 '타겟 부위 운동 6개'로 구성된 경우(Case 2), 타겟 부위의 핵심 **메인 운동**은 반드시 **4번째 또는 5번째** 순서에 배치하십시오. (초반은 선피로/단관절 운동으로 구성)
@@ -186,20 +191,35 @@ ${JSON.stringify(simplifiedExercises)}
 
         const data = await response.json();
         const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        const routineData = JSON.parse(responseText || "{}");
+        
+        if (!responseText) {
+            console.error('[Gemini] Empty response:', JSON.stringify(data));
+            throw new Error('AI가 응답을 생성하지 못했습니다. 잠시 후 다시 시도해주세요.');
+        }
+        
+        let routineData;
+        try {
+            routineData = JSON.parse(responseText);
+        } catch (parseErr) {
+            console.error('[Gemini] JSON parse error. Raw response:', responseText);
+            throw new Error('AI 응답을 파싱하는 데 실패했습니다. 다시 시도해주세요.');
+        }
         
         if (!routineData.sessions || !Array.isArray(routineData.sessions)) {
+            console.error('[Gemini] Unexpected structure:', routineData);
             throw new Error('AI 응답 포맷이 올바르지 않습니다.');
         }
 
         // 각 세션이 올바르게 지정된 일수만큼 나왔는지 확인하고 가공 (ID 부여 및 안전한 복사 등)
-        const formattedSessions = routineData.sessions.slice(0, daysCount).map((session, sIdx) => ({
+        const formattedSessions = routineData.sessions.slice(0, prefDays).map((session, sIdx) => ({
             dayId: session.dayId || `day${sIdx + 1}`,
             target: session.target || '부위 없음',
             exercises: (session.exercises || []).map(ex => {
                 const match = availableExercises.find(e => e.id === ex.id) || {};
-                const targetSets = 5;
-                const repScheme = [15, 15, 13, 13, 10];
+                const targetSets = prefSets;
+                // Build rep scheme based on sets count
+                const baseRepScheme = [15, 15, 13, 13, 10, 10, 8];
+                const repScheme = Array.from({ length: targetSets }, (_, i) => baseRepScheme[i] || 10);
                 
                 const exerciseName = match.name || ex.name;
                 const equipment = match.equipment || ex.equipment || '';
@@ -208,21 +228,23 @@ ${JSON.stringify(simplifiedExercises)}
 
                 const sets = Array.from({ length: targetSets }, (_, i) => ({ kg: '', reps: repScheme[i] || 10, completed: false }));
 
-                if (prRecord && prRecord.kg > 0) {
+                if (prRecord && prRecord.kg > 0 && targetSets >= 2) {
                     const prKg = prRecord.kg;
                     const maxCount = prRecord.maxKgCount || 1;
                     const step = prRecord.predictedStep || 5;
 
-                    if (maxCount === 1) {
-                        sets[4].kg = prKg;
-                        for (let i = 3; i >= 0; i--) {
+                    if (maxCount === 1 || targetSets < 3) {
+                        // PR at last set, build up from there
+                        sets[targetSets - 1].kg = prKg;
+                        for (let i = targetSets - 2; i >= 0; i--) {
                             let rec = sets[i + 1].kg - step;
                             sets[i].kg = rec > 0 ? rec : '';
                         }
                     } else {
-                        sets[3].kg = prKg;
-                        sets[4].kg = prKg + step; // 점진적 과부하
-                        for (let i = 2; i >= 0; i--) {
+                        // PR at second-to-last set, new PR target at last
+                        sets[targetSets - 2].kg = prKg;
+                        sets[targetSets - 1].kg = prKg + step;
+                        for (let i = targetSets - 3; i >= 0; i--) {
                             let rec = sets[i + 1].kg - step;
                             sets[i].kg = rec > 0 ? rec : '';
                         }

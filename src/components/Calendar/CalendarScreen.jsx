@@ -23,7 +23,11 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
         age: userData?.age || '',
         height: userData?.height || '',
         weight: userData?.weight || '',
-        activity_level: userData?.activity_level || 'sedentary'
+        activity_level: userData?.activity_level || 'sedentary',
+        // Workout style preferences
+        pref_days_per_week: userData?.workout_preferences?.days_per_week || 4,
+        pref_exercises_per_session: userData?.workout_preferences?.exercises_per_session || 6,
+        pref_sets_per_exercise: userData?.workout_preferences?.sets_per_exercise || 5,
     });
 
     const [isSaving, setIsSaving] = useState(false);
@@ -41,7 +45,10 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                 age: userData.age || '',
                 height: userData.height || '',
                 weight: userData.weight || '',
-                activity_level: userData.activity_level || 'sedentary'
+                activity_level: userData.activity_level || 'sedentary',
+                pref_days_per_week: userData.workout_preferences?.days_per_week || 4,
+                pref_exercises_per_session: userData.workout_preferences?.exercises_per_session || 6,
+                pref_sets_per_exercise: userData.workout_preferences?.sets_per_exercise || 5,
             });
         }
     }, [isOpen, userData]);
@@ -109,7 +116,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                 age: profile.age ? parseInt(profile.age) : null,
                 height: profile.height ? parseFloat(profile.height) : null,
                 weight: profile.weight ? parseFloat(profile.weight) : null,
-                activity_level: profile.activity_level
+                activity_level: profile.activity_level,
+                workout_preferences: {
+                    days_per_week: parseInt(profile.pref_days_per_week) || 4,
+                    exercises_per_session: parseInt(profile.pref_exercises_per_session) || 6,
+                    sets_per_exercise: parseInt(profile.pref_sets_per_exercise) || 5,
+                }
             };
 
             const { error: profileError } = await supabase
@@ -361,6 +373,44 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                                 );
                             })}
                         </div>
+                    </div>
+
+                    {/* 🏋️ 운동 스타일 설정 */}
+                    <div className="space-y-3 pt-2 border-t border-slate-800">
+                        <label className="text-[10px] font-black text-indigo-400 uppercase block tracking-widest">🏋️ 선호 운동 스타일</label>
+                        <div className="grid grid-cols-3 gap-3">
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">주당 운동일</label>
+                                <select
+                                    value={profile.pref_days_per_week}
+                                    onChange={e => setProfile({...profile, pref_days_per_week: e.target.value})}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 outline-none"
+                                >
+                                    {[3,4,5,6].map(n => <option key={n} value={n}>{n}일</option>)}
+                                </select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">운동 수</label>
+                                <select
+                                    value={profile.pref_exercises_per_session}
+                                    onChange={e => setProfile({...profile, pref_exercises_per_session: e.target.value})}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 outline-none"
+                                >
+                                    {[4,5,6,7,8].map(n => <option key={n} value={n}>{n}종목</option>)}
+                                </select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">세트 수</label>
+                                <select
+                                    value={profile.pref_sets_per_exercise}
+                                    onChange={e => setProfile({...profile, pref_sets_per_exercise: e.target.value})}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 outline-none"
+                                >
+                                    {[3,4,5,6].map(n => <option key={n} value={n}>{n}세트</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <p className="text-[10px] text-slate-500 italic">* AI 루틴 생성 시 이 설정이 자동으로 반영됩니다.</p>
                     </div>
 
                     <div className="pt-4 flex gap-3">

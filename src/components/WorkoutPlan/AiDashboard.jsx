@@ -5,6 +5,7 @@ import { saveWorkoutLogs } from '../../api/workoutApi';
 import { getLocalizedNameByKo, getExerciseUniqueKey, BODY_PART_I18N } from '../../utils/exerciseUtils';
 import { useWindowSize } from '../../hooks/useWindowSize';
 import { toast } from 'sonner';
+import ExerciseSearchModal from './ExerciseSearchModal';
 
 const inputCls = "w-full bg-white/5 border border-white/10 rounded-md px-1.5 py-1 text-xs sm:text-sm text-white focus:outline-none focus:border-blue-500 transition-colors";
 
@@ -13,7 +14,9 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
     const { isMobile } = useWindowSize();
     
     const [isSaving, setIsSaving] = useState(false);
+    const [isSessionSaved, setIsSessionSaved] = useState(false);
     const [selectedTab, setSelectedTab] = useState(activeProgram.current_session_index || 0);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     const initialSession = activeProgram.sessions[selectedTab];
     const [activeWorkout, setActiveWorkout] = useState(initialSession ? JSON.parse(JSON.stringify(initialSession)) : null);
@@ -22,6 +25,10 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
         if (activeProgram.sessions[selectedTab]) {
             setActiveWorkout(JSON.parse(JSON.stringify(activeProgram.sessions[selectedTab])));
         }
+        // Reset saved state when switching tabs
+        const session = activeProgram.sessions[selectedTab];
+        const alreadyCompleted = session?.isCompleted === true;
+        setIsSessionSaved(alreadyCompleted);
     }, [selectedTab, activeProgram.sessions]);
 
     const handleQuitProgram = async () => {
@@ -108,6 +115,72 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
         });
     };
 
+    const handleMoveExercise = (exIdx, direction) => {
+        if (direction === 'up' && exIdx === 0) return;
+        if (direction === 'down' && exIdx === activeWorkout.exercises.length - 1) return;
+
+        setActiveWorkout(prev => {
+            const exercises = [...prev.exercises];
+            const targetIdx = direction === 'up' ? exIdx - 1 : exIdx + 1;
+            [exercises[exIdx], exercises[targetIdx]] = [exercises[targetIdx], exercises[exIdx]];
+            return { ...prev, exercises };
+        });
+    };
+
+    const handleDeleteExercise = (exIdx) => {
+        if (!window.confirm(t('workout.deleteExerciseConfirm', '이 운동을 삭제하시겠습니까?'))) return;
+        setActiveWorkout(prev => ({
+            ...prev,
+            exercises: prev.exercises.filter((_, idx) => idx !== exIdx)
+        }));
+    };
+
+    const handleAddExercise = (ex) => {
+        const uniqueKey = getExerciseUniqueKey({ name: ex.name, equipment: ex.equipment });
+        const prRecord = personalRecords?.[uniqueKey];
+
+        const targetSets = 5;
+        const repScheme = [15, 15, 13, 13, 10];
+        const sets = Array.from({ length: targetSets }, (_, i) => ({ kg: '', reps: repScheme[i] || 10, completed: false }));
+
+        if (prRecord && prRecord.kg > 0) {
+            const prKg = prRecord.kg;
+            const maxCount = prRecord.maxKgCount || 1;
+            const step = prRecord.predictedStep || 5;
+
+            if (maxCount === 1) {
+                sets[4].kg = prKg;
+                for (let i = 3; i >= 0; i--) {
+                    let rec = sets[i + 1].kg - step;
+                    sets[i].kg = rec > 0 ? rec : '';
+                }
+            } else {
+                sets[3].kg = prKg;
+                sets[4].kg = prKg + step; 
+                for (let i = 2; i >= 0; i--) {
+                    let rec = sets[i + 1].kg - step;
+                    sets[i].kg = rec > 0 ? rec : '';
+                }
+            }
+        }
+
+        const newExercise = {
+            id: ex.id,
+            name: ex.name,
+            name_en: ex.name_en,
+            body_part: ex.body_part || '',
+            equipment: ex.equipment || '',
+            targetSets,
+            targetReps: 15,
+            sets
+        };
+
+        setActiveWorkout(prev => ({
+            ...prev,
+            exercises: [...prev.exercises, newExercise]
+        }));
+    };
+
     const handleSaveWorkoutSession = async () => {
         if (!activeWorkout) return;
 
@@ -152,7 +225,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             };
             
             // Update the session data in the program so that completed sets remain checked
-            updatedProgram.sessions[selectedTab] = activeWorkout;
+            updatedProgram.sessions[selectedTab] = { ...activeWorkout, isCompleted: true };
 
             const { error: profileError } = await supabase
                 .from('user_profiles')
@@ -162,10 +235,10 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             if (profileError) throw profileError;
 
             setActiveProgram(updatedProgram);
+            setIsSessionSaved(true);
             toast.success(t('workout.saveSuccess', 'Workout saved'));
             
-            // Re-initialize to clear completed inputs if they want to do it again, or just stay
-            setActiveWorkout(JSON.parse(JSON.stringify(updatedProgram.sessions[selectedTab])));
+            // Keep completed state; don't reset form
         } catch (err) {
             console.error("Error saving workout session:", err);
             toast.error(t('workout.saveFailed', 'Save failed: ') + err.message);
@@ -193,7 +266,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             {/* Top Tabs for Day Selection */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
                 {activeProgram.sessions.map((session, idx) => {
-                    const isCompleted = session.exercises.some(ex => ex.sets.some(s => s.completed));
+                    const isCompleted = session.isCompleted === true;
                     return (
                         <button
                             key={idx}
@@ -242,6 +315,35 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                 </div>
             </div>
 
+            {/* ✅ COMPLETED STATE — show instead of exercise list */}
+            {isSessionSaved && (
+                <div className="flex flex-col items-center justify-center py-20 gap-6 text-center">
+                    <div className="text-8xl animate-bounce">🏆</div>
+                    <div>
+                        <h3 className="text-2xl font-black text-green-400 uppercase italic mb-2">운동 완료!</h3>
+                        <p className="text-slate-400 font-bold">{activeWorkout.target} 운동이 저장되었습니다.</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                        <button
+                            onClick={() => setIsSessionSaved(false)}
+                            className="px-6 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-black rounded-2xl transition-all text-sm"
+                        >
+                            📋 운동 기록 다시 보기
+                        </button>
+                        <button
+                            onClick={handleQuitProgram}
+                            className="px-6 py-3 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 font-black rounded-2xl transition-all text-sm"
+                        >
+                            🔄 새로운 AI 루틴 생성
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Normal workout content — hidden when completed */}
+            {!isSessionSaved && (
+            <>
+
             <div className="space-y-6">
                 {activeWorkout.exercises.map((item, exIdx) => {
                     const pr = getPR(item.name, item.equipment, item.exercise);
@@ -267,6 +369,30 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                                             <span>{pr.kg}kg × {pr.reps}{t('workout.repsUnit', 'reps')}</span>
                                         </p>
                                     )}
+                                </div>
+                                <div className="flex flex-col gap-1 items-end">
+                                    <div className="flex bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                                        <button 
+                                            onClick={() => handleMoveExercise(exIdx, 'up')} 
+                                            disabled={exIdx === 0}
+                                            className="px-2 py-1.5 text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 transition-colors"
+                                        >
+                                            ▲
+                                        </button>
+                                        <button 
+                                            onClick={() => handleMoveExercise(exIdx, 'down')} 
+                                            disabled={exIdx === activeWorkout.exercises.length - 1}
+                                            className="px-2 py-1.5 text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 transition-colors border-l border-slate-700"
+                                        >
+                                            ▼
+                                        </button>
+                                    </div>
+                                    <button 
+                                        onClick={() => handleDeleteExercise(exIdx)}
+                                        className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors rounded-lg hover:bg-rose-400/10"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
                                 </div>
                             </div>
 
@@ -357,8 +483,17 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                     );
                 })}
             </div>
+            
+            <div className="mt-8">
+                <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="w-full py-4 border-2 border-dashed border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/10 text-slate-400 hover:text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
+                >
+                    <span className="text-xl">+</span> 새로운 운동 추가
+                </button>
+            </div>
 
-            <div className="mt-8 space-y-4">
+            <div className="mt-12 sticky bottom-4 z-20 pb-4">
                 <button
                     onClick={handleSaveWorkoutSession}
                     disabled={isSaving}
@@ -380,6 +515,14 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                     )}
                 </button>
             </div>
+
+            <ExerciseSearchModal 
+                isOpen={isAddModalOpen} 
+                onClose={() => setIsAddModalOpen(false)} 
+                onAdd={handleAddExercise} 
+            />
+            </>
+            )}
         </div>
     );
 };
