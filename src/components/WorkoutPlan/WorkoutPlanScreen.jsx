@@ -81,10 +81,11 @@ const WorkoutPlanScreen = () => {
         }
     };
 
-    const loadUserDataAndProgram = async () => {
+    const loadUserDataAndProgram = async (retries = 3) => {
         setIsLoading(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            if (sessionError) throw sessionError;
             if (session) {
                 setUser(session.user);
                 
@@ -107,11 +108,14 @@ const WorkoutPlanScreen = () => {
                     setActiveProgram(null);
                 }
             }
+            setIsLoading(false);
         } catch (err) {
             console.error("Error loading user profile & program:", err);
-            toast.error(t('common.serverDelay', 'Server delay'));
-        } finally {
-            setIsLoading(false);
+            if (retries > 0) {
+                setTimeout(() => loadUserDataAndProgram(retries - 1), 2000);
+            } else {
+                setIsLoading(false);
+            }
         }
     };
 

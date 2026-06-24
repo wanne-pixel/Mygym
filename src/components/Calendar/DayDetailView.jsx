@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../api/supabase';
+import { saveWorkoutLogs } from '../../api/workoutApi';
 import { 
     ChevronLeft, 
     Plus, 
@@ -9,16 +10,23 @@ import {
     Activity, 
     History,
     ChevronRight,
-    Clock,
     Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { getLocalizedNameByKo } from '../../utils/exerciseUtils';
+import { getLocalizedNameByKo, getExerciseUniqueKey } from '../../utils/exerciseUtils';
+import ExerciseSearchModal from '../WorkoutPlan/ExerciseSearchModal';
+
+const inputCls = "w-full bg-slate-950/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors";
 
 const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
     const { t, i18n } = useTranslation();
     const [logs, setLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    
+    // Add exercise state
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [draftExercise, setDraftExercise] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     const fetchLogs = async () => {
         setIsLoading(true);
@@ -78,6 +86,89 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
         }
     };
 
+    const handleSelectExercise = (ex) => {
+        setDraftExercise({
+            ...ex,
+            sets: [{ kg: '', reps: '' }]
+        });
+        setIsSearchOpen(false);
+    };
+
+    const updateDraftSet = (idx, field, value) => {
+        setDraftExercise(prev => {
+            const newSets = [...prev.sets];
+            newSets[idx] = { ...newSets[idx], [field]: value };
+            return { ...prev, sets: newSets };
+        });
+    };
+
+    const addDraftSet = () => {
+        setDraftExercise(prev => {
+            const lastSet = prev.sets[prev.sets.length - 1];
+            return {
+                ...prev,
+                sets: [...prev.sets, { kg: lastSet?.kg || '', reps: lastSet?.reps || '' }]
+            };
+        });
+    };
+
+    const removeDraftSet = (idx) => {
+        setDraftExercise(prev => ({
+            ...prev,
+            sets: prev.sets.filter((_, i) => i !== idx)
+        }));
+    };
+
+    const handleSaveDraft = async () => {
+        if (!draftExercise) return;
+        
+        const isCardio = draftExercise.body_part === '유산소' || draftExercise.body_part === 'cardio' || draftExercise.body_part === 'Cardio';
+        const isHiking = isCardio && (draftExercise.name?.includes('등산') || draftExercise.name_en?.toLowerCase()?.includes('hiking'));
+        
+        // Filter out empty sets
+        const validSets = draftExercise.sets.filter(s => {
+            if (isHiking) return s.kg && s.reps; // name and time
+            return (s.kg !== '' && s.reps !== '');
+        });
+
+        if (validSets.length === 0) {
+            toast.error(t('workout.noValidSets', '입력된 세트 정보가 없습니다.'));
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            const savedAt = new Date(`${date}T12:00:00`).toISOString();
+
+            const setsData = validSets.map(s => ({
+                kg: s.kg,
+                reps: s.reps,
+                isDropSet: false,
+                dropKgs: ['', '', '']
+            }));
+
+            const payload = {
+                user_id: user.id,
+                exercise: getExerciseUniqueKey({ name: draftExercise.name, equipment: draftExercise.equipment }),
+                part: draftExercise.body_part || '기타',
+                type: isCardio ? 'cardio' : 'strength',
+                sets_data: setsData,
+                created_at: savedAt,
+            };
+
+            await saveWorkoutLogs([payload]);
+            toast.success(t('workout.saveSuccess', '운동이 추가되었습니다.'));
+            setDraftExercise(null);
+            fetchLogs();
+        } catch (err) {
+            console.error("Error saving individual exercise:", err);
+            toast.error(t('workout.saveFailed', '저장에 실패했습니다.'));
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
@@ -109,7 +200,7 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 gap-4">
                 <button
-                    onClick={onGoToRoutine}
+                    onClick={() => setIsSearchOpen(true)}
                     className="group relative overflow-hidden bg-blue-600 hover:bg-blue-500 transition-all p-5 rounded-[2rem] shadow-xl shadow-blue-600/20 flex items-center justify-between"
                 >
                     <div className="relative z-10 flex items-center gap-4">
@@ -118,7 +209,7 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                         </div>
                         <div className="text-left">
                             <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-0.5 opacity-80 italic">
-                                {t('calendar.newSession', { defaultValue: 'NEW SESSION' })}
+                                ADD EXERCISE
                             </p>
                             <p className="text-xl font-black text-white italic tracking-tighter uppercase leading-none">
                                 {t('calendar.addWorkout', { defaultValue: '운동 추가하기' })}
@@ -131,6 +222,84 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                     </div>
                 </button>
             </div>
+
+            {/* Draft Exercise Inline Form */}
+            {draftExercise && (
+                <div className="bg-indigo-900/20 border border-indigo-500/30 rounded-3xl p-5 mb-2 animate-in fade-in zoom-in-95">
+                    <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-2 py-0.5 rounded-full">
+                                새 운동 기록
+                            </span>
+                            <h4 className="font-black text-white uppercase text-base mt-2">
+                                {getLocalizedNameByKo(draftExercise.name, i18n.language)}
+                                {draftExercise.equipment && <span className="text-xs font-normal text-slate-400 ml-2">({draftExercise.equipment})</span>}
+                            </h4>
+                        </div>
+                        <button onClick={() => setDraftExercise(null)} className="p-1 text-slate-400 hover:text-rose-400 transition-colors">
+                            ✕
+                        </button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {draftExercise.sets.map((set, idx) => {
+                            const isCardio = draftExercise.body_part === '유산소' || draftExercise.body_part === 'cardio' || draftExercise.body_part === 'Cardio';
+                            const isHiking = isCardio && (draftExercise.name?.includes('등산') || draftExercise.name_en?.toLowerCase()?.includes('hiking'));
+                            
+                            return (
+                                <div key={idx} className="flex gap-2 items-center">
+                                    <span className="text-xs font-black text-slate-500 w-4">{idx + 1}</span>
+                                    <div className="flex-1 relative">
+                                        <input
+                                            type={isHiking ? "text" : "number"}
+                                            value={set.kg}
+                                            onChange={e => updateDraftSet(idx, 'kg', e.target.value)}
+                                            className={inputCls}
+                                            placeholder={isHiking ? "산 이름" : (isCardio ? "거리" : "무게")}
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">
+                                            {isHiking ? "" : (isCardio ? "km" : "kg")}
+                                        </span>
+                                    </div>
+                                    <div className="flex-1 relative">
+                                        <input
+                                            type="number"
+                                            value={set.reps}
+                                            onChange={e => updateDraftSet(idx, 'reps', e.target.value)}
+                                            className={inputCls}
+                                            placeholder={isCardio ? "시간" : "횟수"}
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">
+                                            {isCardio ? "분" : "회"}
+                                        </span>
+                                    </div>
+                                    {draftExercise.sets.length > 1 && (
+                                        <button onClick={() => removeDraftSet(idx)} className="p-2 text-slate-500 hover:text-rose-400 transition-colors">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex gap-3 mt-5">
+                        <button 
+                            onClick={addDraftSet}
+                            className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold rounded-xl transition-colors"
+                        >
+                            + 세트 추가
+                        </button>
+                        <button 
+                            onClick={handleSaveDraft}
+                            disabled={isSaving}
+                            className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-black rounded-xl transition-colors shadow-lg shadow-indigo-600/20 disabled:opacity-50"
+                        >
+                            {isSaving ? '저장 중...' : '운동 저장'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Logs List */}
             <div className="space-y-4">
@@ -177,12 +346,6 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                                             </h5>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <div className="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-full border border-white/5">
-                                                <Clock size={10} className="text-slate-500" />
-                                                <span className="text-[9px] font-bold text-slate-400">
-                                                    {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
-                                            </div>
                                             <button 
                                                 onClick={(e) => handleDeleteLog(log.id, e)}
                                                 className="p-1.5 bg-slate-800/50 hover:bg-red-500/20 text-slate-500 hover:text-red-400 rounded-lg transition-colors"
@@ -257,6 +420,13 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
             
             {/* Bottom padding to avoid nav collision */}
             <div className="h-12" />
+
+            {/* Modal for selecting exercise */}
+            <ExerciseSearchModal 
+                isOpen={isSearchOpen}
+                onClose={() => setIsSearchOpen(false)}
+                onAdd={handleSelectExercise}
+            />
         </div>
     );
 };

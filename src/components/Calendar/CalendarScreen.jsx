@@ -15,19 +15,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
     const [profile, setProfile] = useState({
         nickname: userData?.nickname || userData?.full_name || '',
         goals: userData?.goals || (userData?.goal ? [userData.goal] : ['strength']),
-        weekly_frequency: userData?.weekly_frequency || 3,
         experience_level: userData?.experience_level || 'beginner',
-        available_time: userData?.available_time || '30분~1시간',
-        limitations: userData?.limitations || [],
         gender: userData?.gender || 'male',
         age: userData?.age || '',
         height: userData?.height || '',
         weight: userData?.weight || '',
         activity_level: userData?.activity_level || 'sedentary',
-        // Workout style preferences
-        pref_days_per_week: userData?.workout_preferences?.days_per_week || 4,
-        pref_exercises_per_session: userData?.workout_preferences?.exercises_per_session || 6,
-        pref_sets_per_exercise: userData?.workout_preferences?.sets_per_exercise || 5,
     });
 
     const [isSaving, setIsSaving] = useState(false);
@@ -37,18 +30,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
             setProfile({
                 nickname: userData.nickname || userData.full_name || '',
                 goals: userData.goals || (userData.goal ? [userData.goal] : ['strength']),
-                weekly_frequency: userData.weekly_frequency || 3,
                 experience_level: userData.experience_level || 'beginner',
-                available_time: userData.available_time || '30분~1시간',
-                limitations: userData.limitations || [],
                 gender: userData.gender || 'male',
                 age: userData.age || '',
                 height: userData.height || '',
                 weight: userData.weight || '',
                 activity_level: userData.activity_level || 'sedentary',
-                pref_days_per_week: userData.workout_preferences?.days_per_week || 4,
-                pref_exercises_per_session: userData.workout_preferences?.exercises_per_session || 6,
-                pref_sets_per_exercise: userData.workout_preferences?.sets_per_exercise || 5,
             });
         }
     }, [isOpen, userData]);
@@ -64,15 +51,6 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
             if (prev.goals.length >= 2) return prev;
             return { ...prev, goals: [...prev.goals, value] };
         });
-    };
-
-    const toggleLimitation = (limit) => {
-        setProfile(prev => ({
-            ...prev,
-            limitations: prev.limitations.includes(limit)
-                ? prev.limitations.filter(l => l !== limit)
-                : [...prev.limitations, limit]
-        }));
     };
 
     const handleSave = async () => {
@@ -108,20 +86,12 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
             const updatePayload = {
                 goal: primaryGoal,
                 goals: profile.goals,
-                weekly_frequency: parseInt(profile.weekly_frequency) || 3,
                 experience_level: profile.experience_level,
-                available_time: profile.available_time,
-                limitations: profile.limitations,
                 gender: profile.gender,
                 age: profile.age ? parseInt(profile.age) : null,
                 height: profile.height ? parseFloat(profile.height) : null,
                 weight: profile.weight ? parseFloat(profile.weight) : null,
                 activity_level: profile.activity_level,
-                workout_preferences: {
-                    days_per_week: parseInt(profile.pref_days_per_week) || 4,
-                    exercises_per_session: parseInt(profile.pref_exercises_per_session) || 6,
-                    sets_per_exercise: parseInt(profile.pref_sets_per_exercise) || 5,
-                }
             };
 
             const { error: profileError } = await supabase
@@ -157,20 +127,6 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
         { key: 'beginner', label: t('onboarding.level.beginner') },
         { key: 'intermediate', label: t('onboarding.level.intermediate') },
         { key: 'advanced', label: t('onboarding.level.advanced') }
-    ];
-
-    const timeOptions = [
-        { key: '30분 이하', label: t('onboarding.availableTime.under30') },
-        { key: '30분~1시간', label: t('onboarding.availableTime.30to60') },
-        { key: '1시간~1.5시간', label: t('onboarding.availableTime.60to90') },
-        { key: '1.5시간 이상', label: t('onboarding.availableTime.over90') }
-    ];
-
-    const limitOptions = [
-        { key: 'knee', label: t('onboarding.limitations.knee') },
-        { key: 'back', label: t('onboarding.limitations.lowerBack') },
-        { key: 'shoulder', label: t('onboarding.limitations.shoulder') },
-        { key: 'wrist', label: t('onboarding.limitations.wrist') }
     ];
 
     return (
@@ -319,98 +275,6 @@ const UserProfileModal = ({ isOpen, onClose, userData, onUpdate, isMobile }) => 
                             </select>
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        {/* 주간 횟수 */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.weeklyFrequency')}</label>
-                            <div className="relative">
-                                <select
-                                    value={profile.weekly_frequency}
-                                    onChange={e => setProfile({...profile, weekly_frequency: e.target.value})}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold appearance-none cursor-pointer"
-                                >
-                                    {[2,3,4,5,6,7].map(n => <option key={n} value={n}>{n}{t('onboarding.frequency.unit')}</option>)}
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
-                            </div>
-                        </div>
-                        {/* 가용 시간 */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.availableTime')}</label>
-                            <div className="relative">
-                                <select
-                                    value={profile.available_time}
-                                    onChange={e => setProfile({...profile, available_time: e.target.value})}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-white focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold appearance-none cursor-pointer"
-                                >
-                                    {timeOptions.map(opt => <option key={opt.key} value={opt.key}>{opt.label}</option>)}
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* 부상/제한사항 */}
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{t('calendar.profileFields.limitations')}</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {limitOptions.map(opt => {
-                                const isSelected = profile.limitations.includes(opt.key);
-                                return (
-                                    <button
-                                        key={opt.key}
-                                        onClick={() => toggleLimitation(opt.key)}
-                                        className={`px-3 py-3 rounded-2xl text-[10px] font-black transition-all border-2 ${
-                                            isSelected 
-                                                ? 'bg-rose-600 border-rose-500 text-white shadow-lg shadow-rose-600/20' 
-                                                : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
-                                        }`}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* 🏋️ 운동 스타일 설정 */}
-                    <div className="space-y-3 pt-2 border-t border-slate-800">
-                        <label className="text-[10px] font-black text-indigo-400 uppercase block tracking-widest">🏋️ 선호 운동 스타일</label>
-                        <div className="grid grid-cols-3 gap-3">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">주당 운동일</label>
-                                <select
-                                    value={profile.pref_days_per_week}
-                                    onChange={e => setProfile({...profile, pref_days_per_week: e.target.value})}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 outline-none"
-                                >
-                                    {[3,4,5,6].map(n => <option key={n} value={n}>{n}일</option>)}
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">운동 수</label>
-                                <select
-                                    value={profile.pref_exercises_per_session}
-                                    onChange={e => setProfile({...profile, pref_exercises_per_session: e.target.value})}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 outline-none"
-                                >
-                                    {[4,5,6,7,8].map(n => <option key={n} value={n}>{n}종목</option>)}
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">세트 수</label>
-                                <select
-                                    value={profile.pref_sets_per_exercise}
-                                    onChange={e => setProfile({...profile, pref_sets_per_exercise: e.target.value})}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 outline-none"
-                                >
-                                    {[3,4,5,6].map(n => <option key={n} value={n}>{n}세트</option>)}
-                                </select>
-                            </div>
-                        </div>
-                        <p className="text-[10px] text-slate-500 italic">* AI 루틴 생성 시 이 설정이 자동으로 반영됩니다.</p>
                     </div>
 
                     <div className="pt-4 flex gap-3">

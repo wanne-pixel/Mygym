@@ -27,3 +27,9 @@
   - `supabase.functions.invoke`를 이용한 Edge Function(`ai-coach`) 호출.
   - 응답 데이터는 마이그레이션 방어 코드가 포함된 `parseResponseJSON`을 통해 정제.
 - **State**: `useAiCoach` 훅을 통해 AI 대화 상태, PR 데이터, 프로필 정보를 통합 관리.
+
+## 🤖 AI 에이전트 작업 가이드 (Agent Rules)
+- **Code Generation & JSX Syntax**:
+  - React 컴포넌트(`.jsx`, `.js`)에서 템플릿 리터럴 생성 시 **절대 백틱(`\``)이나 달러 기호(`\$`)를 이스케이프(Escape) 처리하지 마세요.**
+  - `\`\${...}\`` 와 같이 작성하면 Vite 빌드 과정(esbuild)에서 구문 분석 오류(`ERROR: Syntax error "\`"`)가 발생합니다.
+  - 항상 표준 템플릿 리터럴 문법인 `` `${...}` `` 형태로 작성해야 합니다.
