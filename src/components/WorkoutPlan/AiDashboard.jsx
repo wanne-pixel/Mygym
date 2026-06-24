@@ -99,7 +99,9 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             const newSet = {
                 kg: lastSet?.kg ?? '',
                 reps: lastSet?.reps ?? '',
-                completed: false
+                completed: false,
+                isDropSet: lastSet?.isDropSet || false,
+                dropKgs: lastSet?.dropKgs ? [...lastSet.dropKgs] : ['', '', '']
             };
             ex.sets = [...ex.sets, newSet];
             return { ...prev, exercises };
@@ -201,10 +203,10 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             
             const payload = logsToSave.map(item => {
                 const setsData = item.sets.map(s => ({
-                    kg: s.kg,
+                    kg: s.isDropSet ? '' : s.kg,
                     reps: s.reps,
-                    isDropSet: false,
-                    dropKgs: ['', '', '']
+                    isDropSet: !!s.isDropSet,
+                    dropKgs: s.isDropSet ? (s.dropKgs || ['', '', '']) : ['', '', '']
                 }));
                 
                 return {
@@ -401,73 +403,113 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                                     return (
                                         <div
                                             key={setIdx}
-                                            className={`grid grid-cols-[16px_1fr_1fr_auto] sm:grid-cols-[24px_1fr_1fr_auto] gap-2 sm:gap-3 items-center p-1.5 sm:p-2 rounded-xl transition-all ${
+                                            className={`flex flex-col gap-1 p-1.5 sm:p-2 rounded-xl transition-all ${
                                                 set.completed ? 'bg-green-500/10 border border-green-500/10' : 'bg-transparent'
                                             }`}
                                         >
-                                            <span className="text-xs font-black text-slate-600 italic">{setIdx + 1}</span>
+                                            <div className="grid grid-cols-[16px_3fr_1fr_auto] sm:grid-cols-[24px_3fr_1fr_auto] gap-2 sm:gap-3 items-center">
+                                                <span className="text-xs font-black text-slate-600 italic">{setIdx + 1}</span>
 
-                                            {/* Weight / Distance / Mountain Name input */}
-                                            <div className="relative">
-                                                <input
-                                                    type={isHiking ? "text" : "number"}
-                                                    inputMode={isHiking ? "text" : "decimal"}
-                                                    step={isCardio && !isHiking ? "any" : undefined}
-                                                    value={set.kg || ''}
-                                                    onChange={e => updateSetActiveWorkout(exIdx, setIdx, 'kg', e.target.value)}
-                                                    className={`${inputCls} pr-7 sm:pr-8 text-xs sm:text-sm`}
-                                                    placeholder={isHiking ? t('workout.mountainName', { defaultValue: '산이름' }) : "0"}
-                                                />
-                                                {isCardio ? (
-                                                    !isHiking && <span className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 text-[9px] sm:text-[10px] font-bold text-slate-500 pointer-events-none lowercase">km</span>
-                                                ) : (
-                                                    <span className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 text-[9px] sm:text-[10px] font-bold text-slate-500 pointer-events-none lowercase">kg</span>
-                                                )}
-                                            </div>
+                                                {/* Weight / Distance / Mountain Name input */}
+                                                <div className="relative">
+                                                    {!set.isDropSet ? (
+                                                        <div className="relative">
+                                                            <input
+                                                                type={isHiking ? "text" : "number"}
+                                                                inputMode={isHiking ? "text" : "decimal"}
+                                                                step={isCardio && !isHiking ? "any" : undefined}
+                                                                value={set.kg || ''}
+                                                                onChange={e => updateSetActiveWorkout(exIdx, setIdx, 'kg', e.target.value)}
+                                                                className={`${inputCls} pr-7 sm:pr-8 text-xs sm:text-sm`}
+                                                                placeholder={isHiking ? t('workout.mountainName', { defaultValue: '산이름' }) : "0"}
+                                                            />
+                                                            {isCardio ? (
+                                                                !isHiking && <span className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none lowercase">km</span>
+                                                            ) : (
+                                                                <span className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none lowercase">kg</span>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex gap-1 relative">
+                                                            {[0, 1, 2].map(dropIdx => (
+                                                                <div key={dropIdx} className="relative flex-1">
+                                                                    <input
+                                                                        type="number"
+                                                                        value={set.dropKgs?.[dropIdx] || ''}
+                                                                        onChange={e => {
+                                                                            const newDropKgs = [...(set.dropKgs || ['', '', ''])];
+                                                                            newDropKgs[dropIdx] = e.target.value;
+                                                                            updateSetActiveWorkout(exIdx, setIdx, 'dropKgs', newDropKgs);
+                                                                        }}
+                                                                        className={`${inputCls} pl-1 pr-5 text-center text-xs sm:text-sm`}
+                                                                        placeholder=""
+                                                                    />
+                                                                    <span className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">
+                                                                        kg
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
 
-                                            {/* Reps / Time input */}
-                                            <div className="relative">
-                                                <input
-                                                    type="number"
-                                                    inputMode="numeric"
-                                                    value={set.reps || ''}
-                                                    onChange={e => updateSetActiveWorkout(exIdx, setIdx, 'reps', e.target.value)}
-                                                    className={`${inputCls} pr-7 sm:pr-8 text-xs sm:text-sm`}
-                                                    placeholder={item.targetReps || "0"}
-                                                />
-                                                <span className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 text-[9px] sm:text-[10px] font-bold text-slate-500 pointer-events-none lowercase">
-                                                    {isCardio ? '분' : t('workout.repsUnit', 'reps')}
-                                                </span>
-                                            </div>
+                                                {/* Reps / Time input */}
+                                                <div className="relative">
+                                                    <input
+                                                        type="number"
+                                                        inputMode="numeric"
+                                                        value={set.reps || ''}
+                                                        onChange={e => updateSetActiveWorkout(exIdx, setIdx, 'reps', e.target.value)}
+                                                        className={`${inputCls} pr-7 sm:pr-8 text-xs sm:text-sm`}
+                                                        placeholder={item.targetReps || "0"}
+                                                    />
+                                                    <span className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none lowercase">
+                                                        {isCardio ? '분' : t('workout.repsUnit', 'reps')}
+                                                    </span>
+                                                </div>
 
-                                            {/* Actions / Tick */}
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => updateSetActiveWorkout(exIdx, setIdx, 'completed', !set.completed)}
-                                                    className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all ${
-                                                        set.completed
-                                                            ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/20'
-                                                            : 'bg-transparent border-slate-700 text-slate-500 hover:border-slate-500'
-                                                    }`}
-                                                >
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                </button>
-                                                
-                                                {item.sets.length > 1 && (
+                                                {/* Actions / Tick */}
+                                                <div className="flex items-center gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => removeSetActiveWorkout(exIdx, setIdx)}
-                                                        className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-red-400 transition-colors"
+                                                        onClick={() => updateSetActiveWorkout(exIdx, setIdx, 'completed', !set.completed)}
+                                                        className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all ${
+                                                            set.completed
+                                                                ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/20'
+                                                                : 'bg-transparent border-slate-700 text-slate-500 hover:border-slate-500'
+                                                        }`}
                                                     >
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </button>
-                                                )}
+                                                    
+                                                    {item.sets.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeSetActiveWorkout(exIdx, setIdx)}
+                                                            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-red-400 transition-colors"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
+                                            {!isCardio && (
+                                                <div className="pl-6 sm:pl-8">
+                                                    <label className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-400 cursor-pointer w-max select-none">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={set.isDropSet || false}
+                                                            onChange={e => updateSetActiveWorkout(exIdx, setIdx, 'isDropSet', e.target.checked)}
+                                                            className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded border-slate-700 bg-slate-900/50 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900"
+                                                        />
+                                                        드롭세트
+                                                    </label>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}

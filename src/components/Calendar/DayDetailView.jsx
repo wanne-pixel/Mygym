@@ -89,7 +89,7 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
     const handleSelectExercise = (ex) => {
         setDraftExercise({
             ...ex,
-            sets: [{ kg: '', reps: '' }]
+            sets: [{ kg: '', reps: '', isDropSet: false, dropKgs: ['', '', ''] }]
         });
         setIsSearchOpen(false);
     };
@@ -107,7 +107,12 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
             const lastSet = prev.sets[prev.sets.length - 1];
             return {
                 ...prev,
-                sets: [...prev.sets, { kg: lastSet?.kg || '', reps: lastSet?.reps || '' }]
+                sets: [...prev.sets, { 
+                    kg: lastSet?.kg || '', 
+                    reps: lastSet?.reps || '',
+                    isDropSet: lastSet?.isDropSet || false,
+                    dropKgs: lastSet?.dropKgs ? [...lastSet.dropKgs] : ['', '', '']
+                }]
             };
         });
     };
@@ -128,6 +133,7 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
         // Filter out empty sets
         const validSets = draftExercise.sets.filter(s => {
             if (isHiking) return s.kg && s.reps; // name and time
+            if (s.isDropSet) return s.dropKgs && s.dropKgs.some(v => v !== '') && s.reps !== '';
             return (s.kg !== '' && s.reps !== '');
         });
 
@@ -142,10 +148,10 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
             const savedAt = new Date(`${date}T12:00:00`).toISOString();
 
             const setsData = validSets.map(s => ({
-                kg: s.kg,
+                kg: s.isDropSet ? '' : s.kg,
                 reps: s.reps,
-                isDropSet: false,
-                dropKgs: ['', '', '']
+                isDropSet: !!s.isDropSet,
+                dropKgs: s.isDropSet ? (s.dropKgs || ['', '', '']) : ['', '', '']
             }));
 
             const payload = {
@@ -247,36 +253,76 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                             const isHiking = isCardio && (draftExercise.name?.includes('등산') || draftExercise.name_en?.toLowerCase()?.includes('hiking'));
                             
                             return (
-                                <div key={idx} className="flex gap-2 items-center">
-                                    <span className="text-xs font-black text-slate-500 w-4">{idx + 1}</span>
-                                    <div className="flex-1 relative">
-                                        <input
-                                            type={isHiking ? "text" : "number"}
-                                            value={set.kg}
-                                            onChange={e => updateDraftSet(idx, 'kg', e.target.value)}
-                                            className={inputCls}
-                                            placeholder={isHiking ? "산 이름" : (isCardio ? "거리" : "무게")}
-                                        />
-                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">
-                                            {isHiking ? "" : (isCardio ? "km" : "kg")}
-                                        </span>
+                                <div key={idx} className="flex flex-col gap-1">
+                                    <div className="flex gap-2 items-center">
+                                        <span className="text-xs font-black text-slate-500 w-4">{idx + 1}</span>
+                                        <div className="flex-[3] relative">
+                                            {!set.isDropSet ? (
+                                                <div className="relative">
+                                                    <input
+                                                        type={isHiking ? "text" : "number"}
+                                                        value={set.kg || ''}
+                                                        onChange={e => updateDraftSet(idx, 'kg', e.target.value)}
+                                                        className={`${inputCls} pr-8 text-xs sm:text-sm`}
+                                                        placeholder={isHiking ? "산 이름" : (isCardio ? "거리" : "무게")}
+                                                    />
+                                                    <span className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">
+                                                        {isHiking ? "" : (isCardio ? "km" : "kg")}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-1 relative">
+                                                    {[0, 1, 2].map(dropIdx => (
+                                                        <div key={dropIdx} className="relative flex-1">
+                                                            <input
+                                                                type="number"
+                                                                value={set.dropKgs?.[dropIdx] || ''}
+                                                                onChange={e => {
+                                                                    const newDropKgs = [...(set.dropKgs || ['', '', ''])];
+                                                                    newDropKgs[dropIdx] = e.target.value;
+                                                                    updateDraftSet(idx, 'dropKgs', newDropKgs);
+                                                                }}
+                                                                className={`${inputCls} pl-1 pr-5 text-center text-xs sm:text-sm`}
+                                                                placeholder=""
+                                                            />
+                                                            <span className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">
+                                                                kg
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 relative">
+                                            <input
+                                                type="number"
+                                                value={set.reps}
+                                                onChange={e => updateDraftSet(idx, 'reps', e.target.value)}
+                                                className={`${inputCls} pr-7 text-xs sm:text-sm`}
+                                                placeholder={isCardio ? "시간" : ""}
+                                            />
+                                            <span className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">
+                                                {isCardio ? "분" : "회"}
+                                            </span>
+                                        </div>
+                                        {draftExercise.sets.length > 1 && (
+                                            <button onClick={() => removeDraftSet(idx)} className="p-2 text-slate-500 hover:text-rose-400 transition-colors">
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                     </div>
-                                    <div className="flex-1 relative">
-                                        <input
-                                            type="number"
-                                            value={set.reps}
-                                            onChange={e => updateDraftSet(idx, 'reps', e.target.value)}
-                                            className={inputCls}
-                                            placeholder={isCardio ? "시간" : "횟수"}
-                                        />
-                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">
-                                            {isCardio ? "분" : "회"}
-                                        </span>
-                                    </div>
-                                    {draftExercise.sets.length > 1 && (
-                                        <button onClick={() => removeDraftSet(idx)} className="p-2 text-slate-500 hover:text-rose-400 transition-colors">
-                                            <Trash2 size={16} />
-                                        </button>
+                                    {!isCardio && (
+                                        <div className="pl-6">
+                                            <label className="flex items-center gap-1.5 text-[10px] text-slate-400 cursor-pointer w-max select-none">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={set.isDropSet || false}
+                                                    onChange={e => updateDraftSet(idx, 'isDropSet', e.target.checked)}
+                                                    className="w-3 h-3 rounded border-slate-700 bg-slate-900/50 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900"
+                                                />
+                                                드롭세트
+                                            </label>
+                                        </div>
                                     )}
                                 </div>
                             );
