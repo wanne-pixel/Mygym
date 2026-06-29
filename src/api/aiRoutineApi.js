@@ -36,7 +36,12 @@ export const generateAiRoutine = async ({
     if (targetBodyPart === 'AI추천') {
         const order = ['가슴', '등', '하체', '어깨', '팔'];
         const unused = order.filter(part => !lastBodyParts.includes(part));
-        determinedBodyPart = unused.length > 0 ? unused[0] : order[0];
+        if (unused.length > 0) {
+            determinedBodyPart = unused[0];
+        } else {
+            const validTrainedParts = lastBodyParts.filter(part => order.includes(part));
+            determinedBodyPart = validTrainedParts.length > 0 ? validTrainedParts[validTrainedParts.length - 1] : order[0];
+        }
     }
 
     // 컨디션 설명

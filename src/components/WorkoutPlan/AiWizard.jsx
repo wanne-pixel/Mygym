@@ -56,11 +56,18 @@ const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLo
                     .order('created_at', { ascending: false });
                     
                 let hint = '가슴'; // 기본값
-                if (recentLogs) {
+                if (recentLogs && recentLogs.length > 0) {
                     const trainedParts = Array.from(new Set(recentLogs.map(log => log.part).filter(Boolean)));
                     const order = ['가슴', '등', '하체', '어깨', '팔'];
+                    
                     const unused = order.filter(part => !trainedParts.includes(part));
-                    hint = unused.length > 0 ? unused[0] : order[0];
+                    if (unused.length > 0) {
+                        hint = unused[0];
+                    } else {
+                        // 모든 부위를 다 했다면, 가장 오래 전에 한 부위를 추천 (trainedParts의 마지막 요소)
+                        const validTrainedParts = trainedParts.filter(part => order.includes(part));
+                        hint = validTrainedParts.length > 0 ? validTrainedParts[validTrainedParts.length - 1] : order[0];
+                    }
                 }
                 setRecommendedHint(`${hint} 차례`);
             } catch (e) {

@@ -22,14 +22,35 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
     const [activeWorkout, setActiveWorkout] = useState(initialSession ? JSON.parse(JSON.stringify(initialSession)) : null);
 
     React.useEffect(() => {
-        if (activeProgram.sessions[selectedTab]) {
-            setActiveWorkout(JSON.parse(JSON.stringify(activeProgram.sessions[selectedTab])));
-        }
-        // Reset saved state when switching tabs
         const session = activeProgram.sessions[selectedTab];
         const alreadyCompleted = session?.isCompleted === true;
         setIsSessionSaved(alreadyCompleted);
-    }, [selectedTab, activeProgram.sessions]);
+
+        const storageKey = `gym_active_workout_${user.id}_${selectedTab}`;
+        const savedWorkout = localStorage.getItem(storageKey);
+
+        if (savedWorkout && !alreadyCompleted) {
+            try {
+                const parsed = JSON.parse(savedWorkout);
+                setActiveWorkout(parsed);
+                return;
+            } catch (err) {
+                console.error("Failed to parse saved workout", err);
+            }
+        }
+
+        if (session) {
+            setActiveWorkout(JSON.parse(JSON.stringify(session)));
+        } else {
+            setActiveWorkout(null);
+        }
+    }, [selectedTab, activeProgram.sessions, user.id]);
+
+    React.useEffect(() => {
+        if (!activeWorkout || isSessionSaved) return;
+        const storageKey = `gym_active_workout_${user.id}_${selectedTab}`;
+        localStorage.setItem(storageKey, JSON.stringify(activeWorkout));
+    }, [activeWorkout, user.id, selectedTab, isSessionSaved]);
 
     const handleQuitProgram = async () => {
         if (!window.confirm(t('program.quitConfirm', 'Are you sure you want to quit the current program?'))) return;
@@ -41,6 +62,11 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                 .update({ active_program: null })
                 .eq('user_id', user.id);
             if (error) throw error;
+            
+            for (let i = 0; i < 7; i++) {
+                localStorage.removeItem(`gym_active_workout_${user.id}_${i}`);
+            }
+
             setActiveProgram(null);
             toast.success(t('program.resetProgram', 'Program reset'));
         } catch (err) {
@@ -235,6 +261,8 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                 .eq('user_id', user.id);
 
             if (profileError) throw profileError;
+
+            localStorage.removeItem(`gym_active_workout_${user.id}_${selectedTab}`);
 
             setActiveProgram(updatedProgram);
             setIsSessionSaved(true);
