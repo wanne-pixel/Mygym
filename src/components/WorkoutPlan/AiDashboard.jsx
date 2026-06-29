@@ -26,7 +26,8 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
         const alreadyCompleted = session?.isCompleted === true;
         setIsSessionSaved(alreadyCompleted);
 
-        const storageKey = `gym_active_workout_${user.id}_${selectedTab}`;
+        const programId = activeProgram?.start_date ? new Date(activeProgram.start_date).getTime() : 'legacy';
+        const storageKey = `gym_active_workout_${user.id}_${programId}_${selectedTab}`;
         const savedWorkout = localStorage.getItem(storageKey);
 
         if (savedWorkout && !alreadyCompleted) {
@@ -48,7 +49,8 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
 
     React.useEffect(() => {
         if (!activeWorkout || isSessionSaved) return;
-        const storageKey = `gym_active_workout_${user.id}_${selectedTab}`;
+        const programId = activeProgram?.start_date ? new Date(activeProgram.start_date).getTime() : 'legacy';
+        const storageKey = `gym_active_workout_${user.id}_${programId}_${selectedTab}`;
         localStorage.setItem(storageKey, JSON.stringify(activeWorkout));
     }, [activeWorkout, user.id, selectedTab, isSessionSaved]);
 
@@ -66,6 +68,12 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             for (let i = 0; i < 7; i++) {
                 localStorage.removeItem(`gym_active_workout_${user.id}_${i}`);
             }
+            // 프로그램 키 기반 localStorage도 정리
+            const programId = activeProgram?.start_date ? new Date(activeProgram.start_date).getTime() : 'legacy';
+            for (let i = 0; i < 7; i++) {
+                localStorage.removeItem(`gym_active_workout_${user.id}_${programId}_${i}`);
+            }
+            localStorage.removeItem('mygym_active_program');
 
             setActiveProgram(null);
             toast.success(t('program.resetProgram', 'Program reset'));
@@ -262,7 +270,11 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
 
             if (profileError) throw profileError;
 
+            // localStorage 동기화
+            const programId = activeProgram?.start_date ? new Date(activeProgram.start_date).getTime() : 'legacy';
+            localStorage.removeItem(`gym_active_workout_${user.id}_${programId}_${selectedTab}`);
             localStorage.removeItem(`gym_active_workout_${user.id}_${selectedTab}`);
+            localStorage.setItem('mygym_active_program', JSON.stringify(updatedProgram));
 
             setActiveProgram(updatedProgram);
             setIsSessionSaved(true);

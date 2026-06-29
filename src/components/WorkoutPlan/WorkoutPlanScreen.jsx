@@ -81,6 +81,8 @@ const WorkoutPlanScreen = () => {
         }
     };
 
+    const LOCAL_PROGRAM_KEY = 'mygym_active_program';
+
     const loadUserDataAndProgram = async (retries = 3) => {
         setIsLoading(true);
         try {
@@ -102,15 +104,52 @@ const WorkoutPlanScreen = () => {
                 if (profile?.workout_preferences) {
                     setWorkoutPreferences(profile.workout_preferences);
                 }
+
                 if (profile && profile.active_program) {
                     setActiveProgram(profile.active_program);
+                    localStorage.setItem(LOCAL_PROGRAM_KEY, JSON.stringify(profile.active_program));
                 } else {
-                    setActiveProgram(null);
+                    // DB에 없으면 localStorage 백업 확인
+                    const localBackup = localStorage.getItem(LOCAL_PROGRAM_KEY);
+                    if (localBackup) {
+                        try {
+                            const parsed = JSON.parse(localBackup);
+                            if (parsed && parsed.type) {
+                                setActiveProgram(parsed);
+                                // DB에 다시 동기화 시도
+                                supabase
+                                    .from('user_profiles')
+                                    .update({ active_program: parsed })
+                                    .eq('user_id', session.user.id)
+                                    .then(() => console.log('[Program] Synced localStorage backup to DB'));
+                            } else {
+                                setActiveProgram(null);
+                            }
+                        } catch (e) {
+                            setActiveProgram(null);
+                        }
+                    } else {
+                        setActiveProgram(null);
+                    }
                 }
             }
             setIsLoading(false);
         } catch (err) {
             console.error("Error loading user profile & program:", err);
+            // 네트워크 에러 시에도 localStorage에서 복원 시도
+            const localBackup = localStorage.getItem(LOCAL_PROGRAM_KEY);
+            if (localBackup) {
+                try {
+                    const parsed = JSON.parse(localBackup);
+                    if (parsed && parsed.type) {
+                        const { data: { session } } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }));
+                        if (session) setUser(session.user);
+                        setActiveProgram(parsed);
+                        setIsLoading(false);
+                        return;
+                    }
+                } catch (e) { /* ignore */ }
+            }
             if (retries > 0) {
                 setTimeout(() => loadUserDataAndProgram(retries - 1), 2000);
             } else {
@@ -124,17 +163,21 @@ const WorkoutPlanScreen = () => {
     }, []);
 
     const handleSaveProgram = async (newProgram) => {
+        // 즉시 localStorage에 저장 (탭 전환 대비)
+        localStorage.setItem(LOCAL_PROGRAM_KEY, JSON.stringify(newProgram));
+        setActiveProgram(newProgram);
+
         try {
             const { error } = await supabase
                 .from('user_profiles')
                 .update({ active_program: newProgram })
                 .eq('user_id', user.id);
             if (error) throw error;
-            setActiveProgram(newProgram);
             toast.success(t('workout.saveSuccess', 'Program saved!'));
         } catch (err) {
-            console.error("Error starting program:", err);
-            toast.error(t('workout.saveFailed', 'Failed to save program: ') + err.message);
+            console.error("Error saving program to DB:", err);
+            // DB 저장 실패해도 localStorage에는 이미 저장됨 → 루틴 유지
+            toast.error(t('workout.saveFailed', 'DB 저장 실패, 로컬에 임시 저장됨'));
         }
     };
 
@@ -147,6 +190,7 @@ const WorkoutPlanScreen = () => {
                 .eq('user_id', user.id);
             if (error) throw error;
             setActiveProgram(null);
+            localStorage.removeItem(LOCAL_PROGRAM_KEY);
         } catch (err) {
             console.error(err);
             toast.error(err.message);
