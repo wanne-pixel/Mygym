@@ -96,23 +96,25 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
         const keys = Object.keys(personalRecords);
         const normalize = (s) => (s || '').replace(/\s/g, '').toLowerCase();
         
+        // 정규화된 키로 정확 매칭 시도
         const normUniqueKey = normalize(uniqueKey);
         const foundUnique = keys.find(k => normalize(k) === normUniqueKey);
         if (foundUnique) return personalRecords[foundUnique];
 
+        // 장비 포함 키로 매칭 시도
         if (equipment) {
             const withEquip = normalize(`${name}(${equipment})`);
             const found = keys.find(k => normalize(k) === withEquip);
             if (found) return personalRecords[found];
         }
-        const normName = normalize(name);
-        const foundName = keys.find(k => normalize(k) === normName);
-        if (foundName) return personalRecords[foundName];
-        if (exercise) {
-            const normEx = normalize(exercise);
-            const foundEx = keys.find(k => normalize(k) === normEx);
-            if (foundEx) return personalRecords[foundEx];
+
+        // 장비 정보가 없는 운동만 이름으로 매칭 (기존 데이터 하위 호환)
+        if (!equipment) {
+            const normName = normalize(name);
+            const foundName = keys.find(k => normalize(k) === normName);
+            if (foundName) return personalRecords[foundName];
         }
+
         return null;
     };
 
