@@ -40,8 +40,8 @@ const WorkoutPlanScreen = () => {
                     const kg = parseFloat(set.kg) || 0;
                     const reps = parseInt(set.reps) || 0;
                     
-                    // Only count as PR if reps >= 10
-                    if (kg > 0 && reps >= 10) {
+                    // Only count as PR if reps >= 1
+                    if (kg > 0 && reps >= 1) {
                         exerciseWeights[exerciseName].add(kg);
 
                         if (kg > records[exerciseName].kg) {

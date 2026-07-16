@@ -108,12 +108,10 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             if (found) return personalRecords[found];
         }
 
-        // 장비 정보가 없는 운동만 이름으로 매칭 (기존 데이터 하위 호환)
-        if (!equipment) {
-            const normName = normalize(name);
-            const foundName = keys.find(k => normalize(k) === normName);
-            if (foundName) return personalRecords[foundName];
-        }
+        // 장비가 없는 옛날 기록(이름만 있는 기록)을 하위 호환용으로 매칭
+        const normName = normalize(name);
+        const foundName = keys.find(k => normalize(k) === normName);
+        if (foundName) return personalRecords[foundName];
 
         return null;
     };

@@ -6,7 +6,6 @@ import SideNav from '../SideNav';
 import BottomNav from '../BottomNav';
 import CalendarScreen from '../Calendar/CalendarScreen';
 import WorkoutPlanScreen from '../WorkoutPlan/WorkoutPlanScreen';
-import DietScreen from '../Diet/DietScreen';
 import AnalysisScreen from '../Common/AnalysisScreen';
 import FeedbackModal from '../Common/FeedbackModal';
 import BetaNoticeModal, { shouldShowBetaModal } from '../Common/BetaNoticeModal';
@@ -70,7 +69,6 @@ const MainLayout = () => {
             <main className="lg:ml-56">
                 {activeTab === '달력' && <CalendarScreen onSelectedDateChange={(date) => setIsCalendarDetail(!!date)} />}
                 {activeTab === '운동' && <WorkoutPlanScreen />}
-                {activeTab === '식단' && <DietScreen />}
                 {activeTab === 'analysis' && <AnalysisScreen />}
             </main>
 
