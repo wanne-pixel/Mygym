@@ -390,8 +390,15 @@ ${allExercisesDb || "운동 데이터가 없습니다."}
 
   } catch (error: any) {
     console.error('[Edge Function Error]:', error);
-    return new Response(JSON.stringify({ error: error.message }), { 
-      status: 500, 
+    return new Response(JSON.stringify({ 
+      error: true, 
+      message: error.message || 'AI 추천 중 오류가 발생했습니다.', 
+      fallback: {
+        reply: "현재 AI 코치 시스템이 일시적으로 혼잡합니다. 잠시 후 다시 시도해주세요.",
+        parsedData: { routines: [], recommendationReason: "에러 복구 모드" }
+      }
+    }), { 
+      status: 200, 
       headers: { ...corsHeaders, "Content-Type": "application/json" } 
     });
   }

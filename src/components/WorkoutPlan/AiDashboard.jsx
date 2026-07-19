@@ -6,6 +6,7 @@ import { getLocalizedNameByKo, getExerciseUniqueKey, BODY_PART_I18N } from '../.
 import { useWindowSize } from '../../hooks/useWindowSize';
 import { toast } from 'sonner';
 import ExerciseSearchModal from './ExerciseSearchModal';
+import { trackEvent } from '../../utils/analytics';
 
 const inputCls = "w-full bg-white/5 border border-white/10 rounded-md px-1.5 py-1 text-xs sm:text-sm text-white focus:outline-none focus:border-blue-500 transition-colors";
 
@@ -254,6 +255,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             });
 
             await saveWorkoutLogs(payload);
+            trackEvent('workout_saved', { type: 'session_complete', exerciseCount: logsToSave.length, userId: user?.id });
 
             const updatedProgram = {
                 ...activeProgram,

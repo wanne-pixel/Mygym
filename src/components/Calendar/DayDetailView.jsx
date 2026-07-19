@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner';
 import { getLocalizedNameByKo, getExerciseUniqueKey } from '../../utils/exerciseUtils';
 import ExerciseSearchModal from '../WorkoutPlan/ExerciseSearchModal';
+import { trackEvent } from '../../utils/analytics';
 
 const inputCls = "w-full bg-slate-950/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors";
 
@@ -164,6 +165,7 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
             };
 
             await saveWorkoutLogs([payload]);
+            trackEvent('workout_saved', { type: 'draft_save', userId: user?.id });
             toast.success(t('workout.saveSuccess', '운동이 추가되었습니다.'));
             setDraftExercise(null);
             fetchLogs();

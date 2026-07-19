@@ -5,13 +5,14 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { BarChart3, TrendingUp, Sparkles, BrainCircuit, Target, Check, RefreshCw } from 'lucide-react';
 import { fetchAllExercises } from '../../api/exerciseApi';
 import { toast } from 'sonner';
+import VolumeRadarChart from '../Analysis/VolumeRadarChart';
 
 const COLORS = [
     '#3B82F6', '#10B981', '#F59E0B', '#EF4444', 
     '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'
 ];
 
-const BODY_PARTS = ['전체', '가슴', '등', '어깨', '하체', '팔', '복부', '유산소'];
+const BODY_PARTS = ['전체', '가슴', '등', '어깨', '하체', '팔', '유산소'];
 
 const AnalysisScreen = () => {
     const { t } = useTranslation();
@@ -195,7 +196,7 @@ const AnalysisScreen = () => {
 
             {/* 도넛 차트 컨테이너 */}
             <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-6">
-                <div className="h-48 w-full mb-6">
+                <div className="h-64 w-full mb-6">
                     {stats.pieData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -205,6 +206,37 @@ const AnalysisScreen = () => {
                                     innerRadius={55} outerRadius={75}
                                     paddingAngle={2}
                                     dataKey="value" stroke="none"
+                                    labelLine={false}
+                                    label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
+                                        const RADIAN = Math.PI / 180;
+                                        // Calculate position outside the donut
+                                        const radius = innerRadius + (outerRadius - innerRadius) + 15;
+                                        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                                        
+                                        const item = stats.pieData[index];
+                                        const labelName = filter === '전체' ? t(`bodyParts.${item.name}`, { defaultValue: item.name }) : item.name;
+                                        
+                                        // Only show label if percent is >= 5% to avoid clutter
+                                        if (item.percent < 5) return null;
+
+                                        const parts = labelName.split(' (');
+                                        const mainText = parts[0];
+                                        const subText = parts[1] ? `(${parts[1]}` : '';
+
+                                        return (
+                                            <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="11" fontWeight="bold">
+                                                {subText ? (
+                                                    <>
+                                                        <tspan x={x} dy="-0.6em">{mainText}</tspan>
+                                                        <tspan x={x} dy="1.2em" fill="#94a3b8" fontSize="10">{subText}</tspan>
+                                                    </>
+                                                ) : (
+                                                    <tspan x={x} dy="0">{mainText}</tspan>
+                                                )}
+                                            </text>
+                                        );
+                                    }}
                                 >
                                     {stats.pieData.map((entry, index) => (
                                         <Cell key={index} fill={COLORS[index % COLORS.length]} />
@@ -220,22 +252,27 @@ const AnalysisScreen = () => {
                 </div>
 
                 {/* 차트 범례 리스트 */}
-                <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-3 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
                     {stats.pieData.map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-2 rounded-xl hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-3">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                                <span className="text-sm font-bold text-slate-200">
+                        <div key={idx} className="flex items-center justify-between p-2 rounded-xl hover:bg-white/5 transition-colors gap-2">
+                            <div className="flex items-start gap-3 flex-1 min-w-0 pr-2">
+                                <div className="w-3 h-3 rounded-full shrink-0 mt-1" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                                <span className="text-sm font-bold text-slate-200 break-words leading-tight">
                                     {filter === '전체' ? t(`bodyParts.${item.name}`, { defaultValue: item.name }) : item.name}
                                 </span>
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4 shrink-0">
                                 <span className="text-xs font-black text-slate-400 w-8 text-right">{item.percent}%</span>
                                 <span className="text-xs font-medium text-slate-500 w-16 text-right">{item.value.toLocaleString()}kg</span>
                             </div>
                         </div>
                     ))}
                 </div>
+            </div>
+
+            {/* 레이더 차트 영역 */}
+            <div className="mb-6">
+                <VolumeRadarChart category={filter} />
             </div>
 
             {/* AI 훈련 분석 컨테이너 */}

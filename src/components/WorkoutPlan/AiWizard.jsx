@@ -6,6 +6,7 @@ import { getGlobalExerciseCache, getLocalizedNameByKo, setGlobalExerciseCache } 
 import { fetchAllExercises } from '../../api/exerciseApi';
 import { toast } from 'sonner';
 import { useWindowSize } from '../../hooks/useWindowSize';
+import { trackEvent } from '../../utils/analytics';
 
 const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLogs }) => {
     const { t, i18n } = useTranslation();
@@ -120,6 +121,7 @@ const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLo
                 setCount: setCount,
                 lastBodyParts: lastBodyParts
             });
+            trackEvent('ai_coach_request', { type: 'ai_recommendation', targetBodyPart: selectedBodyPart, userId: user?.id });
             setPreviewRoutine(result);
             setStep(4); // Move to preview step
         } catch (error) {

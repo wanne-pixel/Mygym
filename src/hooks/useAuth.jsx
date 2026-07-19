@@ -72,7 +72,10 @@ export const useAuth = () => {
                 setProfile(null);
                 setIsInitializing(false);
                 clearBetaModalFlag();
-                navigate('/', { replace: true });
+                const path = window.location.pathname;
+                if (path !== '/' && path !== '/login') {
+                    navigate('/', { replace: true });
+                }
             }
         });
         return () => subscription.unsubscribe();

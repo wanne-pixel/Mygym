@@ -10,6 +10,7 @@ import LoginScreen from './components/Auth/LoginScreen';
 import DayDetailView from './components/Calendar/DayDetailView';
 import ExerciseNameEditor from './components/Admin/ExerciseNameEditor';
 import MainLayout from './components/Layout/MainLayout';
+import LandingPage from './pages/LandingPage';
 
 // 커스텀 훅 import
 import { useAuth, isOnboardingComplete } from './hooks/useAuth';
@@ -41,6 +42,12 @@ const AppContent = () => {
             <Routes>
                 <Route
                     path="/"
+                    element={
+                        <LandingPage session={session} />
+                    }
+                />
+                <Route
+                    path="/login"
                     element={
                         <LoginScreen
                             session={session}

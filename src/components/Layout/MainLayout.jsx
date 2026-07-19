@@ -9,6 +9,7 @@ import WorkoutPlanScreen from '../WorkoutPlan/WorkoutPlanScreen';
 import AnalysisScreen from '../Common/AnalysisScreen';
 import FeedbackModal from '../Common/FeedbackModal';
 import BetaNoticeModal, { shouldShowBetaModal } from '../Common/BetaNoticeModal';
+import CoachPage from '../../pages/CoachPage';
 
 // 언어 전환 컴포넌트 (레이아웃에 종속적이므로 함께 이동)
 const LangSwitcher = () => {
@@ -70,6 +71,7 @@ const MainLayout = () => {
                 {activeTab === '달력' && <CalendarScreen onSelectedDateChange={(date) => setIsCalendarDetail(!!date)} />}
                 {activeTab === '운동' && <WorkoutPlanScreen />}
                 {activeTab === 'analysis' && <AnalysisScreen />}
+                {activeTab === '코치' && <CoachPage />}
             </main>
 
             {/* 모바일: 하단 탭바 */}

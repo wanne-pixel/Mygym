@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { supabase } from '../../api/supabase';
+import { trackEvent } from '../../utils/analytics';
 
 export default function FeedbackModal({ isOpen, onClose }) {
   const { t } = useTranslation();
@@ -47,6 +48,8 @@ export default function FeedbackModal({ isOpen, onClose }) {
         },
       });
       if (error) throw error;
+
+      trackEvent('feedback_submitted', { type, userId: session.user.id });
       toast.success(t('feedback.success'));
       onClose();
     } catch {

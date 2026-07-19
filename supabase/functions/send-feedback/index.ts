@@ -74,9 +74,14 @@ serve(async (req) => {
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: CORS_HEADERS,
+    console.error('[send-feedback Error]:', error);
+    return new Response(JSON.stringify({ 
+      error: true, 
+      message: error.message || '피드백 전송 중 오류가 발생했습니다.', 
+      fallback: { success: false } 
+    }), {
+      status: 200,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 });
