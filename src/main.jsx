@@ -14,6 +14,7 @@ import LandingPage from './pages/LandingPage';
 
 // 커스텀 훅 import
 import { useAuth, isOnboardingComplete } from './hooks/useAuth';
+import { AiChatProvider } from './hooks/useAiChat';
 
 const AppContent = () => {
     const navigate = useNavigate();
@@ -101,7 +102,13 @@ const AppContent = () => {
     );
 };
 
-const App = () => (<BrowserRouter><AppContent /></BrowserRouter>);
+const App = () => (
+    <BrowserRouter>
+        <AiChatProvider>
+            <AppContent />
+        </AiChatProvider>
+    </BrowserRouter>
+);
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);
 

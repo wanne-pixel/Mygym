@@ -7,9 +7,12 @@ import BottomNav from '../BottomNav';
 import CalendarScreen from '../Calendar/CalendarScreen';
 import WorkoutPlanScreen from '../WorkoutPlan/WorkoutPlanScreen';
 import AnalysisScreen from '../Common/AnalysisScreen';
-import FeedbackModal from '../Common/FeedbackModal';
+
 import BetaNoticeModal, { shouldShowBetaModal } from '../Common/BetaNoticeModal';
 import CoachPage from '../../pages/CoachPage';
+import AiBottomSheet from '../AiCoach/AiBottomSheet';
+import { useAiChat } from '../../hooks/useAiChat';
+import { Bot } from 'lucide-react';
 
 // 언어 전환 컴포넌트 (레이아웃에 종속적이므로 함께 이동)
 const LangSwitcher = () => {
@@ -34,9 +37,10 @@ const MainLayout = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || '달력';
     const handleTabChange = (tab) => setSearchParams({ tab });
-    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+
     const [isBetaModalOpen, setIsBetaModalOpen] = useState(shouldShowBetaModal);
     const [isCalendarDetail, setIsCalendarDetail] = useState(false);
+    const { openChat } = useAiChat();
 
     return (
         <div className="relative min-h-screen bg-slate-950">
@@ -77,22 +81,21 @@ const MainLayout = () => {
             {/* 모바일: 하단 탭바 */}
             <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 
-            {/* 플로팅 건의/문의 버튼 - 달력 탭에서만 표시 */}
-            {activeTab === '달력' && !isCalendarDetail && (
-            <button
-                onClick={() => setIsFeedbackOpen(true)}
-                className="fixed bottom-24 lg:bottom-8 right-4 z-50 flex items-center gap-2 px-4 py-3 bg-slate-800/90 backdrop-blur-sm border border-white/10 text-slate-300 hover:text-white hover:border-white/20 hover:bg-slate-700/90 rounded-2xl text-xs font-bold shadow-lg transition-all active:scale-95 break-keep"
-                title={t('feedback.floatingButton')}
-            >
-                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-                <span className="hidden sm:inline">{t('feedback.floatingButton')}</span>
-            </button>
-            )}
 
-            {/* 건의/문의 모달 */}
-            <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
+
+            {/* AI 코치 FAB 및 Bottom Sheet (코치 탭에서는 숨김) */}
+            {activeTab !== '코치' && (
+                <>
+                    <button
+                        onClick={openChat}
+                        className="fixed bottom-24 lg:bottom-8 right-4 z-50 flex items-center justify-center w-14 h-14 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-[0_0_20px_rgba(79,70,229,0.5)] transition-all active:scale-95 border border-indigo-400/30"
+                        title="AI 코치"
+                    >
+                        <Bot size={28} />
+                    </button>
+                    <AiBottomSheet />
+                </>
+            )}
 
             {/* 베타 공지 모달 */}
             <BetaNoticeModal isOpen={isBetaModalOpen} onClose={() => setIsBetaModalOpen(false)} />

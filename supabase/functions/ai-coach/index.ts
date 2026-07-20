@@ -7,6 +7,120 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// ── 로컬 파인튜닝 코치 (서브PC Ollama, Cloudflare Tunnel 경유) ──────────────
+// 운동기록 기반 코치 질문(chat)은 자체 학습 모델을 우선 사용하고,
+// 서브PC가 꺼져 있거나 응답이 없으면 자동으로 Gemini로 폴백한다.
+const LOCAL_COACH_URL = Deno.env.get("LOCAL_COACH_URL") || "https://ai.my-gyms.com";
+const LOCAL_COACH_MODEL = Deno.env.get("LOCAL_COACH_MODEL") || "my-gym-coach";
+const LOCAL_COACH_TIMEOUT_MS = 90_000; // CPU 추론이라 여유 있게
+
+async function callLocalCoach(systemInfo: string, question: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LOCAL_COACH_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${LOCAL_COACH_URL}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: LOCAL_COACH_MODEL,
+        stream: false,
+        messages: [
+          { role: "user", content: `[시스템 정보]\n${systemInfo}\n\n[질문]\n${question}` },
+        ],
+      }),
+      signal: controller.signal,
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text = data?.message?.content?.trim();
+    return text && text.length > 0 ? text : null;
+  } catch (_e) {
+    return null; // 서브PC 미응답 → Gemini 폴백
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ── 교육모델용 시스템 정보 생성 헬퍼 (학습 데이터 표준 형식 정합화) ──────────
+// @AI_MODELS.md §3 "학습된 [시스템 정보] 표준 형식"과 100% 일치시켜야
+// 교육모델의 답변 품질이 보장된다.
+
+function buildProgressiveOverloadStatus(recentWorkouts: any[]): string {
+  if (!recentWorkouts || recentWorkouts.length === 0) {
+    return '기록 없음 (신규 사용자)';
+  }
+
+  // 가장 최근 운동 세션에서 대표 운동 추출
+  const latest = recentWorkouts[0];
+  const exerciseName = latest.exercise || '운동명 불명';
+  const setsData = latest.sets_data;
+
+  if (!Array.isArray(setsData) || setsData.length === 0) {
+    return `${exerciseName} → 세트 데이터 없음`;
+  }
+
+  // 드롭세트 제외한 메인 세트만 필터링
+  const mainSets = setsData.filter((s: any) => !s.isDropSet);
+  const effectiveSets = mainSets.length > 0 ? mainSets : setsData;
+  const setCount = effectiveSets.length;
+
+  // 대표 중량 (메인 세트 중 최대값)
+  const weights = effectiveSets.map((s: any) => Number(s.kg) || 0);
+  const mainWeight = Math.max(...weights);
+
+  // rep 범위
+  const reps = effectiveSets.map((s: any) => Number(s.reps) || 0);
+  const minRep = Math.min(...reps);
+  const maxRep = Math.max(...reps);
+  const repDisplay = minRep === maxRep ? `${maxRep}rep` : `${minRep}~${maxRep}rep`;
+
+  // 성공 여부 판단 (최소 6rep 이상이면 전 세트 수행 완료로 간주)
+  const allAboveMin = reps.every((r: number) => r >= 6);
+  const status = allAboveMin
+    ? `전 세트 ${repDisplay} 수행 완료`
+    : `일부 세트 목표 미달 (최소 ${minRep}rep)`;
+
+  return `${exerciseName} ${mainWeight}kg × ${setCount}세트 × ${repDisplay} → ${status}`;
+}
+
+function buildWeeklyVolumeBySets(recentWorkouts: any[]): string {
+  const partOrder = ['가슴', '등', '하체', '어깨', '팔', '복근'];
+  const partMap: Record<string, number> = {};
+  partOrder.forEach(p => partMap[p] = 0);
+
+  if (!recentWorkouts || recentWorkouts.length === 0) {
+    return partOrder.map(p => `${p} 0세트`).join(' / ');
+  }
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  for (const w of recentWorkouts) {
+    const workoutDate = new Date(w.created_at);
+    if (workoutDate < sevenDaysAgo) continue;
+
+    let part = w.exercise_body_part || w.bodyPart || '';
+    // DB의 '복부' → 학습 데이터의 '복근'으로 통일
+    if (part === '복부') part = '복근';
+
+    if (part in partMap) {
+      const sets = Array.isArray(w.sets_data) ? w.sets_data.length : 0;
+      partMap[part] += sets;
+    }
+  }
+
+  return partOrder.map(p => `${p} ${partMap[p]}세트`).join(' / ');
+}
+
+function buildConditionText(condition: any): string {
+  if (!condition) return '정보 없음 (기본 상태로 판단)';
+
+  const sleep = condition.sleep ? `수면 ${condition.sleep}시간` : '수면 정보 없음';
+  const fatigue = condition.fatigue || '보통';
+  const note = condition.note || '특이사항 없음';
+
+  return `${sleep}, 피로도 ${fatigue}, ${note}`;
+}
+
 /**
  * 규칙 기반 운동 추천 엔진 (Rule-based Recommendation Engine)
  */
@@ -102,6 +216,7 @@ serve(async (req) => {
       workoutFrequency = { totalDays: 30, workedOutDays: 0 },
       bodyPartVolume = {},
       neverDoneExercises = [],
+      condition = null,
     } = body;
 
     // 규칙 기반 엔진 실행
@@ -307,6 +422,31 @@ Training data (last ${period_days} days):
 
     if (type === "chat") {
       isJsonOutput = false;
+
+      // ── 1차: 자체 학습 코치 모델 시도 (한국어 대화만, 실패 시 Gemini 폴백) ──
+      if (!isEn && userPrompt) {
+        const systemInfo = [
+          `- 점진적 과부하 상태: ${buildProgressiveOverloadStatus(recentWorkouts)}`,
+          `- 주간 볼륨: ${buildWeeklyVolumeBySets(recentWorkouts)}`,
+          `- 컨디션: ${buildConditionText(condition)}`,
+        ].join('\n');
+
+        const localReply = await callLocalCoach(systemInfo, userPrompt);
+        if (localReply) {
+          return new Response(
+            JSON.stringify({
+              reply: localReply,
+              content: localReply,
+              parsedData: null,
+              engineConfig: recommendation,
+              source: "local-coach",
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        // localReply가 null이면 아래 기존 Gemini 경로로 계속 진행
+      }
+
       const allExercisesDb = exercises
         .map((ex: any) => `- ${ex.name} (부위: ${ex.body_part || ex.bodyPart})`)
         .join('\n');
