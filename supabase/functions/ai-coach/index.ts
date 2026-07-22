@@ -217,6 +217,7 @@ serve(async (req) => {
       bodyPartVolume = {},
       neverDoneExercises = [],
       condition = null,
+      currentTab = '운동',
     } = body;
 
     // 규칙 기반 엔진 실행
@@ -297,6 +298,88 @@ Training data (last ${period_days} days):
       const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
       return new Response(
         JSON.stringify({ content, reply: content }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ── routine_generator 타입 별도 처리 ────────────────────────────────────
+    if (type === 'routine_generator') {
+      const { determinedBodyPart, conditionDesc, exerciseCount, setCount, simplifiedExercises, condition } = body;
+      const routinePrompt = `
+당신은 최고 수준의 퍼스널 트레이너이자 피트니스 프로그램 설계 AI입니다.
+사용자는 오늘 **[${determinedBodyPart}]** 부위의 운동을 집중적으로 수행하고자 합니다.
+오늘 사용자가 수행할 운동 수는 정확히 **${exerciseCount}개**의 종목이어야 하며, 각 운동당 기본 **${setCount}세트**를 진행해야 합니다.
+
+[오늘의 루틴 설계 지침]
+1. 오늘 타깃 부위: ${determinedBodyPart}
+2. 운동 개수: 정확히 ${exerciseCount}개
+3. 각 운동당 세트 수: ${setCount}세트
+4. 컨디션 반영 사항: ${conditionDesc}
+
+[사용자의 대표 루틴 템플릿 참고]
+- 가슴: 머신 펙덱플라이, 바벨 인클라인 프레스, 덤벨 플랫 프레스, 케이블 크로스오버 등
+- 등: 랫풀다운, 바벨 벤트오버 로우, 시티드 로우, 케이블 풀오버 등
+- 하체: 레그 익스텐션, 바벨 스쿼트, 파나타 스쿼트, 레그프레스, 레그 컬 등
+- 어깨: 펙덱플라이(리어), 숄더 프레스, 사이드 레터럴 레이즈, 프론트 레이즈 등
+- 팔: 바벨 컬, 덤벨 컬, 케이블 푸시다운, 오버헤드 익스텐션 등
+
+[AI 추천 및 매칭 지침]
+1. 세션 구성 및 작명 규칙:
+   - 결과물에는 단 1개의 세션(오늘 수행할 루틴)만 포함되어야 합니다.
+   - 세션의 \`dayId\`는 반드시 "${determinedBodyPart}"로 출력하십시오.
+   - 세션의 \`target\`은 "${determinedBodyPart} 루틴 (${condition})"으로 기입하십시오.
+2. 운동 개수 및 세트 규칙:
+   - 운동(\`exercises\`) 목록은 **정확히 ${exerciseCount}개**로만 채워야 합니다.
+   - 모든 추천 운동의 \`targetSets\`는 반드시 ${setCount}로 배정하십시오.
+3. 운동 순서 및 배치 규칙:
+   - 핵심적인 **메인 프리웨이트 운동**은 초반보다는 **2번째 또는 3번째**에 오도록 선피로 웜업을 앞단에 배치해 주십시오. (단, 컨디션이 '가볍게'인 경우는 머신 위주로 구성)
+4. 운동 목록 매칭 규칙:
+   - 아래 제공된 <AVAILABLE_EXERCISES> 목록 내에 존재하는 운동 중, 오늘의 타깃 부위 [${determinedBodyPart}]와 가장 잘 어울리는 실제 등록된 운동을 찾아 매핑하십시오.
+   - 임의의 운동을 지어내면 절대 안 됩니다. 정확히 목록에 있는 id를 사용하십시오.
+5. 출력은 반드시 JSON 객체 포맷이어야 합니다. 마크다운(\`\`\`json ...) 없이 순수 JSON 텍스트로만 반환하십시오.
+
+<AVAILABLE_EXERCISES>
+${JSON.stringify(simplifiedExercises)}
+</AVAILABLE_EXERCISES>
+
+{
+  "sessions": [
+    {
+      "dayId": "${determinedBodyPart}",
+      "target": "${determinedBodyPart} 루틴 (${condition})",
+      "exercises": [
+        {
+          "id": "matching_exercise_id",
+          "name": "운동이름",
+          "name_en": "Exercise Name",
+          "body_part": "${determinedBodyPart}",
+          "equipment": "장비명",
+          "targetSets": ${setCount},
+          "targetReps": 15
+        }
+      ]
+    }
+  ]
+}
+`;
+
+      const aiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: 'You are a fitness routine generator that only outputs valid JSON.' }]
+          },
+          contents: [{ role: 'user', parts: [{ text: routinePrompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+          },
+        }),
+      });
+      const aiData = await aiRes.json();
+      const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+      return new Response(
+        content,
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -426,6 +509,7 @@ Training data (last ${period_days} days):
       // ── 1차: 자체 학습 코치 모델 시도 (한국어 대화만, 실패 시 Gemini 폴백) ──
       if (!isEn && userPrompt) {
         const systemInfo = [
+          `- 현재 탭: ${currentTab === 'analysis' ? '분석' : currentTab}`,
           `- 점진적 과부하 상태: ${buildProgressiveOverloadStatus(recentWorkouts)}`,
           `- 주간 볼륨: ${buildWeeklyVolumeBySets(recentWorkouts)}`,
           `- 컨디션: ${buildConditionText(condition)}`,
