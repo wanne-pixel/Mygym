@@ -384,6 +384,85 @@ ${JSON.stringify(simplifiedExercises)}
       );
     }
 
+    // ── routine_modifier 타입 별도 처리 ────────────────────────────────────
+    if (type === 'routine_modifier') {
+      const { currentRoutine, userMessage, recentWorkoutSummary = '', simplifiedExercises = [], chatHistory = [] } = body;
+      
+      const historyText = chatHistory.length > 0
+        ? chatHistory.map((m: any) => `${m.role === 'user' ? '사용자' : 'AI 코치'}: ${m.content}`).join('\n')
+        : '(첫 번째 수정 요청)';
+
+      const currentRoutineText = JSON.stringify(currentRoutine, null, 2);
+      const availableExText = JSON.stringify(simplifiedExercises);
+
+      const modifierPrompt = `당신은 10년 경력의 전문 퍼스널 트레이너입니다. 사용자의 현재 운동 루틴을 보고, 사용자의 요청에 따라 전문적으로 수정해 주세요.
+
+[현재 루틴]
+${currentRoutineText}
+
+[사용자의 최근 운동 기록 요약]
+${recentWorkoutSummary || '기록 없음'}
+
+[이전 대화 내역]
+${historyText}
+
+[사용자의 새 요청]
+${userMessage}
+
+[사용 가능한 운동 목록 (반드시 이 목록에서만 선택)]
+${availableExText}
+
+[지침]
+1. 사용자 요청을 반영하여 현재 루틴을 수정하세요.
+2. 운동 개수와 세트 수는 기존과 동일하게 유지하세요 (사용자가 명시적으로 변경을 요청한 경우만 변경).
+3. 반드시 AVAILABLE_EXERCISES 목록에 있는 운동의 id, name, name_en, equipment만 사용하세요. 임의로 운동을 지어내지 마세요.
+4. reply 필드에는 트레이너답게 친근하고 전문적인 한국어로 수정 이유와 팁을 2-3문장으로 설명하세요.
+5. 출력은 반드시 아래 JSON 포맷으로만 반환하세요. 마크다운 없이 순수 JSON만.
+
+{
+  "reply": "수정 이유와 트레이너 팁 (2-3문장)",
+  "updatedRoutine": {
+    "sessions": [
+      {
+        "dayId": "부위명",
+        "target": "루틴 설명",
+        "exercises": [
+          {
+            "id": "운동id",
+            "name": "운동이름",
+            "name_en": "Exercise Name",
+            "body_part": "부위",
+            "equipment": "장비",
+            "targetSets": 4,
+            "targetReps": 15
+          }
+        ]
+      }
+    ]
+  }
+}`;
+
+      const aiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: 'You are a professional personal trainer. Output only valid JSON.' }]
+          },
+          contents: [{ role: 'user', parts: [{ text: modifierPrompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+          },
+        }),
+      });
+      const aiData = await aiRes.json();
+      const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '{"reply":"죄송합니다, 잠시 후 다시 시도해주세요.","updatedRoutine":null}';
+      return new Response(
+        content,
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // 추천사유(서론) 생성을 위한 유저 컨텍스트 요약
     const profileLevel = userProfile.level || userProfile.experienceLevel || 'beginner';
     const profileGoal = Array.isArray(userProfile.goals) && userProfile.goals.length > 0

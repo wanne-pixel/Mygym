@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dumbbell, ArrowRight, ArrowLeft, Check, Wand2 } from 'lucide-react';
 import { generateAiRoutine } from '../../api/aiRoutineApi';
@@ -8,6 +8,14 @@ import { toast } from 'sonner';
 import { useWindowSize } from '../../hooks/useWindowSize';
 import { trackEvent } from '../../utils/analytics';
 
+const QUICK_CHIPS = {
+    '가슴': ['미는 동작 위주로 바꿔줘', '인클라인 동작 추가해줘', '케이블로 마무리하고 싶어', '플랫 프레스를 덤벨로 바꿔줘'],
+    '등': ['당기는 동작 위주로 바꿔줘', '광배근 집중으로 바꿔줘', '로우 동작을 더 넣어줘', '데드리프트 계열 추가해줘'],
+    '하체': ['전면 허벅지 위주로 바꿔줘', '햄스트링 운동 추가해줘', '스쿼트 계열 빼줘', '레그프레스 꼭 넣어줘'],
+    '어깨': ['측면 어깨 위주로 바꿔줘', '리어델트 꼭 넣어줘', '프레스 운동 위주로 바꿔줘', '케이블로만 구성해줘'],
+    '팔': ['이두 위주로 바꿔줘', '삼두 위주로 바꿔줘', '케이블 운동 위주로', '바벨 컬 꼭 넣어줘'],
+};
+const DEFAULT_CHIPS = ['머신 운동만으로 바꿔줘', '운동 강도를 낮춰줘', '마지막 운동을 고중량으로', '운동 순서를 바꿔줘'];
 const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLogs }) => {
     const { t, i18n } = useTranslation();
     const { isMobile } = useWindowSize();
@@ -23,6 +31,12 @@ const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLo
     const [exerciseCount, setExerciseCount] = useState(5);
     const [setCount, setSetCount] = useState(4);
     const [recommendedHint, setRecommendedHint] = useState('');
+
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [chatMessages, setChatMessages] = useState([]);
+    const [chatInput, setChatInput] = useState('');
+    const [isModifying, setIsModifying] = useState(false);
+    const chatEndRef = React.useRef(null);
 
     const bodyParts = ['가슴', '등', '하체', '어깨', '팔', 'AI추천'];
     const conditions = ['가볍게', '보통', '최상(고강도)'];
@@ -135,6 +149,83 @@ const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLo
     const handleSave = () => {
         if (!previewRoutine) return;
         onSave(previewRoutine);
+    };
+
+    const handleModify = async (messageText) => {
+        const text = messageText || chatInput.trim();
+        if (!text || isModifying) return;
+
+        const userMsg = { role: 'user', content: text };
+        const newHistory = [...chatMessages, userMsg];
+        setChatMessages(newHistory);
+        setChatInput('');
+        setIsModifying(true);
+
+        // 최근 운동 기록 요약 생성
+        let recentWorkoutSummary = '';
+        if (workoutLogs && workoutLogs.length > 0) {
+            const partVolume = {};
+            workoutLogs.slice(0, 30).forEach(log => {
+                const part = log.part || log.exercise_body_part || '';
+                if (part) partVolume[part] = (partVolume[part] || 0) + 1;
+            });
+            recentWorkoutSummary = Object.entries(partVolume)
+                .map(([part, count]) => `${part}: 최근 ${count}회`)
+                .join(', ');
+        }
+
+        // 사용 가능한 운동 목록 (현재 부위 필터링)
+        const allExercises = getGlobalExerciseCache();
+        const bodyPart = previewRoutine?.sessions?.[0]?.dayId || selectedBodyPart;
+        const filteredExercises = allExercises
+            .filter(ex => {
+                if (bodyPart === '전신') return true;
+                if (bodyPart === '팔') return ['팔', '이두', '삼두'].includes(ex.bodyPart || ex.body_part);
+                return (ex.bodyPart || ex.body_part) === bodyPart;
+            })
+            .map(ex => ({ id: ex.id, name: ex.name, name_en: ex.name_en, bodyPart: ex.bodyPart || ex.body_part, equipment: ex.equipment }));
+
+        try {
+            const { supabase } = await import('../../api/supabase');
+            const { data, error } = await supabase.functions.invoke('ai-coach', {
+                body: {
+                    type: 'routine_modifier',
+                    currentRoutine: previewRoutine,
+                    userMessage: text,
+                    recentWorkoutSummary,
+                    simplifiedExercises: filteredExercises,
+                    chatHistory: chatMessages.slice(-6), // 최근 6개 메시지만
+                }
+            });
+
+            if (error) throw new Error(error.message);
+
+            let result;
+            if (typeof data === 'string') {
+                result = JSON.parse(data);
+            } else {
+                result = data;
+            }
+
+            const aiReply = result?.reply || '루틴을 수정했습니다.';
+            const updatedRoutine = result?.updatedRoutine;
+
+            const aiMsg = { role: 'ai', content: aiReply };
+            setChatMessages(prev => [...prev, aiMsg]);
+
+            if (updatedRoutine?.sessions?.length > 0) {
+                setPreviewRoutine(prev => ({
+                    ...prev,
+                    sessions: updatedRoutine.sessions
+                }));
+            }
+        } catch (err) {
+            console.error('[RoutineModifier] Error:', err);
+            setChatMessages(prev => [...prev, { role: 'ai', content: '죄송합니다, 오류가 발생했습니다. 다시 시도해주세요.' }]);
+        } finally {
+            setIsModifying(false);
+            setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+        }
     };
 
     if (isLoadingExercises) {
@@ -321,10 +412,11 @@ const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLo
                 </div>
             )}
 
-            {/* Step 4: Preview (After generation) */}
+            {/* Step 4: Preview + AI 코치 채팅 */}
             {step === 4 && previewRoutine && (
-                <div className="space-y-6 animate-fade-in">
-                    <div className="flex items-center justify-between mb-4">
+                <div className="space-y-4 animate-fade-in">
+                    {/* 루틴 프리뷰 헤더 */}
+                    <div className="flex items-center justify-between">
                         <h3 className="text-2xl font-black italic text-white uppercase">Today's Routine</h3>
                         <button 
                             onClick={() => setStep(1)}
@@ -334,9 +426,10 @@ const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLo
                         </button>
                     </div>
                     
-                    <div className="grid gap-4">
+                    {/* 운동 목록 */}
+                    <div className="grid gap-3">
                         {previewRoutine.sessions.map((session, idx) => (
-                            <div key={idx} className="p-6 bg-slate-900 border-2 border-indigo-900/30 rounded-3xl flex flex-col justify-between gap-4 transition-all shadow-xl shadow-indigo-900/10">
+                            <div key={idx} className="p-5 bg-slate-900 border-2 border-indigo-900/30 rounded-3xl flex flex-col justify-between gap-4 transition-all shadow-xl shadow-indigo-900/10">
                                 <div>
                                     <div className="flex items-center gap-3 mb-4">
                                         <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
@@ -347,7 +440,7 @@ const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLo
                                             <p className="text-xs font-bold text-indigo-400">{session.target}</p>
                                         </div>
                                     </div>
-                                    <div className="mt-4 space-y-2 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                                    <div className="mt-2 space-y-1 bg-slate-950 p-4 rounded-2xl border border-slate-800">
                                         {(session.exercises || []).map((ex, exIdx) => (
                                             <div key={exIdx} className="flex justify-between items-center py-2 border-b border-slate-800/50 last:border-0">
                                                 <div className="flex flex-col">
@@ -369,9 +462,101 @@ const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLo
                         ))}
                     </div>
 
+                    {/* AI 코치 채팅 패널 */}
+                    <div className="bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden">
+                        {/* 토글 헤더 */}
+                        <button
+                            onClick={() => setIsChatOpen(prev => !prev)}
+                            className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-800/50 transition-colors"
+                        >
+                            <div className="flex items-center gap-2">
+                                <span className="text-xl">🤖</span>
+                                <div className="text-left">
+                                    <p className="text-sm font-black text-white">AI 코치에게 수정 요청</p>
+                                    <p className="text-xs text-slate-400">루틴이 마음에 안 드시나요? 대화로 수정해보세요</p>
+                                </div>
+                            </div>
+                            <span className={`text-slate-400 transition-transform duration-200 ${isChatOpen ? 'rotate-180' : ''}`}>▼</span>
+                        </button>
+
+                        {/* 채팅 내용 (토글) */}
+                        {isChatOpen && (
+                            <div className="border-t border-slate-700">
+                                {/* 빠른 요청 칩 */}
+                                {chatMessages.length === 0 && (
+                                    <div className="px-4 pt-4 pb-2">
+                                        <p className="text-xs text-slate-500 font-bold mb-2 uppercase tracking-wider">빠른 요청</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {(QUICK_CHIPS[previewRoutine?.sessions?.[0]?.dayId] || DEFAULT_CHIPS).map((chip, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => handleModify(chip)}
+                                                    disabled={isModifying}
+                                                    className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 hover:border-indigo-500/60 text-indigo-300 text-xs font-bold rounded-full transition-all disabled:opacity-40"
+                                                >
+                                                    {chip}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* 메시지 목록 */}
+                                {chatMessages.length > 0 && (
+                                    <div className="px-4 py-3 max-h-60 overflow-y-auto space-y-3">
+                                        {chatMessages.map((msg, i) => (
+                                            <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                                {msg.role === 'ai' && <span className="text-lg flex-shrink-0">🤖</span>}
+                                                <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
+                                                    msg.role === 'user'
+                                                        ? 'bg-indigo-600 text-white rounded-br-sm'
+                                                        : 'bg-slate-800 text-slate-200 rounded-bl-sm'
+                                                }`}>
+                                                    {msg.content}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {isModifying && (
+                                            <div className="flex gap-2 justify-start">
+                                                <span className="text-lg">🤖</span>
+                                                <div className="bg-slate-800 px-4 py-3 rounded-2xl rounded-bl-sm flex gap-1 items-center">
+                                                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{animationDelay:'0ms'}}/>
+                                                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{animationDelay:'150ms'}}/>
+                                                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{animationDelay:'300ms'}}/>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div ref={chatEndRef} />
+                                    </div>
+                                )}
+
+                                {/* 입력창 */}
+                                <div className="px-4 pb-4 pt-2 flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={chatInput}
+                                        onChange={e => setChatInput(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleModify(); }}}
+                                        placeholder="수정 요청을 입력하세요... (예: 미는 동작 위주로 바꿔줘)"
+                                        disabled={isModifying}
+                                        className="flex-1 bg-slate-800 border border-slate-700 focus:border-indigo-500 text-white placeholder-slate-500 text-sm rounded-xl px-4 py-2.5 outline-none transition-colors disabled:opacity-50"
+                                    />
+                                    <button
+                                        onClick={() => handleModify()}
+                                        disabled={!chatInput.trim() || isModifying}
+                                        className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-bold rounded-xl transition-all text-sm"
+                                    >
+                                        전송
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 운동 시작 버튼 */}
                     <button
                         onClick={handleSave}
-                        className="w-full py-4 mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl text-lg transition-all active:scale-[0.98] shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl text-lg transition-all active:scale-[0.98] shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2"
                     >
                         <Check className="w-6 h-6" /> 운동 시작하기
                     </button>
