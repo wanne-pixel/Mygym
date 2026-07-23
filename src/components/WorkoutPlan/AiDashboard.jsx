@@ -154,7 +154,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
 
     const handleMoveExercise = (exIdx, direction) => {
         if (direction === 'up' && exIdx === 0) return;
-        if (direction === 'down' && exIdx === activeWorkout.exercises.length - 1) return;
+        if (direction === 'down' && exIdx === (activeWorkout.exercises || []).length - 1) return;
 
         setActiveWorkout(prev => {
             const exercises = [...prev.exercises];
@@ -221,7 +221,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
     const handleSaveWorkoutSession = async () => {
         if (!activeWorkout) return;
 
-        const logsToSave = activeWorkout.exercises.map(item => {
+        const logsToSave = (activeWorkout.exercises || []).map(item => {
             const completedSets = item.sets.filter(s => s.completed);
             return { ...item, sets: completedSets };
         }).filter(item => item.sets.length > 0);
@@ -425,7 +425,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                                         </button>
                                         <button 
                                             onClick={() => handleMoveExercise(exIdx, 'down')} 
-                                            disabled={exIdx === activeWorkout.exercises.length - 1}
+                                            disabled={exIdx === (activeWorkout.exercises || []).length - 1}
                                             className="px-2 py-1.5 text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 transition-colors border-l border-slate-700"
                                         >
                                             ▼
