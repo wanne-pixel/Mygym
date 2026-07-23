@@ -334,14 +334,14 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                 <div>
                     <h2 className="font-black italic uppercase flex flex-col gap-1">
                         <span className="text-3xl text-indigo-400">
-                            {activeWorkout.dayId} ({activeWorkout.target.split(': ')[0] || ''})
+                            {activeWorkout.dayId} {(activeWorkout.target || '').split(': ')[0] ? `(${(activeWorkout.target || '').split(': ')[0]})` : ''}
                         </span>
                         <span className="text-xl text-slate-200">
-                            {activeWorkout.target.split(': ').slice(1).join(': ') || activeWorkout.target}
+                            {(activeWorkout.target || '').split(': ').slice(1).join(': ') || activeWorkout.target || ''}
                         </span>
                     </h2>
                     <p className="text-rose-450 font-bold text-xs uppercase tracking-wider mt-3 text-rose-400">
-                        {activeWorkout.exercises.length} Exercises Today
+                        {(activeWorkout.exercises || []).length} Exercises Today
                     </p>
                 </div>
                 
@@ -389,7 +389,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             <>
 
             <div className="space-y-6">
-                {activeWorkout.exercises.map((item, exIdx) => {
+                {(activeWorkout.exercises || []).map((item, exIdx) => {
                     const pr = getPR(item.name, item.equipment, item.exercise);
                     const isCardio = item.body_part === '유산소' || item.body_part === 'cardio' || item.body_part === 'Cardio';
                     const isHiking = isCardio && (item.name?.includes('등산') || item.name_en?.toLowerCase()?.includes('hiking'));
