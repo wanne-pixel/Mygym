@@ -214,9 +214,45 @@ const AiWizard = ({ onSave, personalRecords, workoutPreferences, user, workoutLo
             setChatMessages(prev => [...prev, aiMsg]);
 
             if (updatedRoutine?.sessions?.length > 0) {
+                // AI가 반환한 exercises에 sets 배열 생성 (AiDashboard 렌더링에 필요)
+                const baseRepScheme = [15, 15, 13, 13, 10, 10, 8];
+                const sessionsWithSets = updatedRoutine.sessions.map(session => ({
+                    ...session,
+                    exercises: (session.exercises || []).map(ex => {
+                        // 이미 sets가 있으면 그대로 사용
+                        if (ex.sets && ex.sets.length > 0) return ex;
+
+                        const targetSets = ex.targetSets || setCount;
+                        const repScheme = Array.from({ length: targetSets }, (_, i) => baseRepScheme[i] || 10);
+
+                        const sets = Array.from({ length: targetSets }, (_, i) => ({
+                            kg: '',
+                            reps: repScheme[i] || 10,
+                            completed: false
+                        }));
+
+                        // personalRecords에서 해당 운동 PR 찾아서 중량 채우기
+                        if (personalRecords) {
+                            const equipment = ex.equipment || '';
+                            const nameKey = equipment ? `${ex.name}(${equipment})` : ex.name;
+                            const pr = personalRecords[nameKey] || personalRecords[ex.name];
+                            if (pr && pr.kg > 0 && targetSets >= 2) {
+                                const step = pr.predictedStep || 5;
+                                sets[targetSets - 1].kg = pr.kg;
+                                for (let i = targetSets - 2; i >= 0; i--) {
+                                    const rec = sets[i + 1].kg - step;
+                                    sets[i].kg = rec > 0 ? rec : '';
+                                }
+                            }
+                        }
+
+                        return { ...ex, sets };
+                    })
+                }));
+
                 setPreviewRoutine(prev => ({
                     ...prev,
-                    sessions: updatedRoutine.sessions
+                    sessions: sessionsWithSets
                 }));
             }
         } catch (err) {
