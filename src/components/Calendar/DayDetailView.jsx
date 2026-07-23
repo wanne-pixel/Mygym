@@ -28,6 +28,8 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [draftExercise, setDraftExercise] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [editingLogId, setEditingLogId] = useState(null);
+    const [editingLogData, setEditingLogData] = useState(null);
 
     const fetchLogs = async () => {
         setIsLoading(true);
@@ -123,6 +125,112 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
             ...prev,
             sets: prev.sets.filter((_, i) => i !== idx)
         }));
+    };
+
+
+    const handleEditLog = (log) => {
+        let sets = [];
+        try {
+            sets = typeof log.sets_data === 'string' ? JSON.parse(log.sets_data) : (log.sets_data || []);
+        } catch (e) { sets = []; }
+        sets = sets.map(s => ({
+            ...s,
+            kg: s.kg ?? '',
+            reps: s.reps ?? '',
+            dropKgs: s.dropKgs || ['', '', '']
+        }));
+        setEditingLogData({ ...log, sets });
+        setEditingLogId(log.id);
+    };
+
+    const updateEditingSet = (idx, field, value) => {
+        setEditingLogData(prev => {
+            const newSets = [...prev.sets];
+            newSets[idx] = { ...newSets[idx], [field]: value };
+            return { ...prev, sets: newSets };
+        });
+    };
+
+    const addEditingSet = () => {
+        setEditingLogData(prev => {
+            const lastSet = prev.sets[prev.sets.length - 1];
+            return { ...prev, sets: [...prev.sets, { kg: lastSet?.kg || '', reps: lastSet?.reps || '', isDropSet: lastSet?.isDropSet || false, dropKgs: lastSet?.dropKgs ? [...lastSet.dropKgs] : ['', '', ''] }] };
+        });
+    };
+
+    const removeEditingSet = (idx) => setEditingLogData(prev => ({ ...prev, sets: prev.sets.filter((_, i) => i !== idx) }));
+
+    const handleSaveEdit = async () => {
+        if (!editingLogData) return;
+        setIsSaving(true);
+        try {
+            const isCardio = editingLogData.part === '유산소' || editingLogData.part === 'cardio' || editingLogData.part === 'Cardio';
+            const isHiking = isCardio && (editingLogData.exercise?.includes('등산') || editingLogData.exercise?.toLowerCase()?.includes('hiking'));
+            const validSets = editingLogData.sets.filter(s => {
+                if (isHiking) return s.kg && s.reps;
+                if (s.isDropSet) return s.dropKgs && s.dropKgs.some(v => v !== '') && s.reps !== '';
+                return (s.kg !== '' && s.reps !== '');
+            });
+            if (validSets.length === 0) {
+                toast.error(t('workout.noValidSets', '입력된 세트 정보가 없습니다.'));
+                setIsSaving(false); return;
+            }
+            const setsData = validSets.map(s => ({ kg: s.isDropSet ? '' : s.kg, reps: s.reps, isDropSet: !!s.isDropSet, dropKgs: s.isDropSet ? (s.dropKgs || ['', '', '']) : ['', '', ''] }));
+            const { error } = await supabase.from('workout_logs').update({ sets_data: JSON.stringify(setsData) }).eq('id', editingLogId);
+            if (error) throw error;
+            toast.success(t('dayDetail.editSuccess', { defaultValue: '수정되었습니다.' }));
+            fetchLogs();
+            setEditingLogId(null); setEditingLogData(null);
+        } catch (error) {
+            console.error('[DayDetailView Edit Error]:', error);
+            toast.error(t('dayDetail.editFailed', { defaultValue: '수정에 실패했습니다.' }));
+        } finally { setIsSaving(false); }
+    };
+
+    const renderSetInputs = (data, updateFn, removeFn) => {
+        return data.sets.map((set, idx) => {
+            const isCardio = data.body_part === '유산소' || data.body_part === 'cardio' || data.body_part === 'Cardio' || data.part === '유산소' || data.part === 'cardio' || data.part === 'Cardio';
+            const isHiking = isCardio && (data.name?.includes('등산') || data.name_en?.toLowerCase()?.includes('hiking') || data.exercise?.includes('등산'));
+            return (
+                <div key={idx} className="flex flex-col gap-1">
+                    <div className="flex gap-2 items-center">
+                        <span className="text-xs font-black text-slate-500 w-4">{idx + 1}</span>
+                        <div className="flex-[3] relative">
+                            {!set.isDropSet ? (
+                                <div className="relative">
+                                    <input type={isHiking ? "text" : "number"} value={set.kg || ''} onChange={e => updateFn(idx, 'kg', e.target.value)} className={`${inputCls} pr-8 text-xs sm:text-sm`} placeholder={isHiking ? "산 이름" : (isCardio ? "거리" : "무게")} />
+                                    <span className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">{isHiking ? "" : (isCardio ? "km" : "kg")}</span>
+                                </div>
+                            ) : (
+                                <div className="flex gap-1 relative">
+                                    {[0, 1, 2].map(dropIdx => (
+                                        <div key={dropIdx} className="relative flex-1">
+                                            <input type="number" value={set.dropKgs?.[dropIdx] || ''} onChange={e => { const newDropKgs = [...(set.dropKgs || ['', '', ''])]; newDropKgs[dropIdx] = e.target.value; updateFn(idx, 'dropKgs', newDropKgs); }} className={`${inputCls} pl-1 pr-5 text-center text-xs sm:text-sm`} placeholder="" />
+                                            <span className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">kg</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-1 relative">
+                            <input type="number" value={set.reps} onChange={e => updateFn(idx, 'reps', e.target.value)} className={`${inputCls} pr-7 text-xs sm:text-sm`} placeholder={isCardio ? "시간" : ""} />
+                            <span className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">{isCardio ? "분" : "회"}</span>
+                        </div>
+                        {data.sets.length > 1 && (
+                            <button onClick={() => removeFn(idx)} className="p-2 text-slate-500 hover:text-rose-400 transition-colors"><Trash2 size={16} /></button>
+                        )}
+                    </div>
+                    {!isCardio && (
+                        <div className="pl-6">
+                            <label className="flex items-center gap-1.5 text-[10px] text-slate-400 cursor-pointer w-max select-none">
+                                <input type="checkbox" checked={set.isDropSet || false} onChange={e => updateFn(idx, 'isDropSet', e.target.checked)} className="w-3 h-3 rounded border-slate-700 bg-slate-900/50 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900" />
+                                드롭세트
+                            </label>
+                        </div>
+                    )}
+                </div>
+            );
+        });
     };
 
     const handleSaveDraft = async () => {
@@ -394,6 +502,11 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                                             </h5>
                                         </div>
                                         <div className="flex items-center gap-2">
+                                            {editingLogId !== log.id && (
+                                                <button onClick={(e) => { e.stopPropagation(); handleEditLog(log); }} className="p-1.5 bg-slate-800/50 hover:bg-indigo-500/20 text-slate-500 hover:text-indigo-400 rounded-lg transition-colors" title="Edit">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                </button>
+                                            )}
                                             <button 
                                                 onClick={(e) => handleDeleteLog(log.id, e)}
                                                 className="p-1.5 bg-slate-800/50 hover:bg-red-500/20 text-slate-500 hover:text-red-400 rounded-lg transition-colors"
@@ -404,7 +517,19 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                                         </div>
                                     </div>
 
-                                    {sets.length > 0 && (() => {
+                                    {editingLogId === log.id && editingLogData ? (
+                                        <div className="mt-4 space-y-4">
+                                            <div className="space-y-3 bg-slate-950/30 p-3 rounded-2xl border border-white/5">
+                                                {renderSetInputs(editingLogData, updateEditingSet, removeEditingSet)}
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button onClick={addEditingSet} className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-colors">+ 세트 추가</button>
+                                                <button onClick={handleSaveEdit} disabled={isSaving} className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-lg transition-colors">{isSaving ? '저장 중...' : '저장'}</button>
+                                                <button onClick={() => { setEditingLogId(null); setEditingLogData(null); }} className="py-2 px-4 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-colors">취소</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        sets.length > 0 && (() => {
                                         const isCardio = log.part === '유산소' || log.part === 'cardio' || log.part === 'Cardio';
                                         const isHiking = isCardio && (log.exercise?.includes('등산') || log.exercise?.toLowerCase()?.includes('hiking'));
                                         
@@ -453,7 +578,8 @@ const DayDetailView = ({ date, onBack, onGoToRoutine, isMobile }) => {
                                                 </div>
                                             </div>
                                         );
-                                    })()}
+                                    })()
+                                    )}
                                     
                                     {/* Subtle background icon */}
                                     <div className="absolute -bottom-2 -right-2 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
