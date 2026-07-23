@@ -53,43 +53,37 @@ export const generateAiRoutine = async ({
     });
 
     try {
-                    parts: [{ text: 'You are a fitness routine generator that only outputs valid JSON.' }]
-                },
-                contents: [
-                    {
-                        role: "user",
-                        parts: [{ text: prompt }]
-                    }
-                ],
-                generationConfig: {
-                    responseMimeType: "application/json"
-                }
-            })
+        const { data, error } = await supabase.functions.invoke('ai-coach', {
+            body: {
+                type: 'routine_generator',
+                determinedBodyPart,
+                conditionDesc,
+                exerciseCount,
+                setCount,
+                condition,
+                simplifiedExercises: filteredExercises
+            }
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Gemini API 호출 실패: ${response.status} ${errorText}`);
+        if (error) {
+            console.error('[Edge Function] Error:', error);
+            throw new Error(`AI 서버 호출 실패: ${error.message}`);
         }
 
-        const data = await response.json();
-        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (!responseText) {
-            console.error('[Gemini] Empty response:', JSON.stringify(data));
-            throw new Error('AI가 응답을 생성하지 못했습니다. 잠시 후 다시 시도해주세요.');
-        }
-        
         let routineData;
-        try {
-            routineData = JSON.parse(responseText);
-        } catch (parseErr) {
-            console.error('[Gemini] JSON parse error. Raw response:', responseText);
-            throw new Error('AI 응답을 파싱하는 데 실패했습니다. 다시 시도해주세요.');
+        if (typeof data === 'string') {
+            try {
+                routineData = JSON.parse(data);
+            } catch (e) {
+                console.error('[Edge Function] JSON parse error. Raw:', data);
+                throw new Error('AI 응답을 파싱하는 데 실패했습니다. 다시 시도해주세요.');
+            }
+        } else {
+            routineData = data;
         }
-        
-        if (!routineData.sessions || !Array.isArray(routineData.sessions)) {
-            console.error('[Gemini] Unexpected structure:', routineData);
+
+        if (!routineData || !routineData.sessions || !Array.isArray(routineData.sessions)) {
+            console.error('[Edge Function] Unexpected structure:', routineData);
             throw new Error('AI 응답 포맷이 올바르지 않습니다.');
         }
 
