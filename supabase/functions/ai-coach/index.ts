@@ -502,8 +502,28 @@ ${availableExText}
       .join(', ') || (isEn ? 'None' : '없음');
 
     const recentExerciseNames = [...new Set(
-      (recentWorkouts as any[]).slice(0, 10).map((w: any) => w.exercise).filter(Boolean)
+      (recentWorkouts as any[]).slice(0, 30).map((w: any) => w.exercise).filter(Boolean)
     )].join(', ') || (isEn ? 'No recent records' : '최근 운동 기록 없음');
+
+    const exerciseVolumeContext = (() => {
+      const volMap: Record<string, number> = {};
+      (recentWorkouts as any[]).forEach(w => {
+        if (!w.exercise) return;
+        let totalKgReps = 0;
+        if (Array.isArray(w.sets_data)) {
+          w.sets_data.forEach((s: any) => {
+            totalKgReps += (Number(s.kg) || 0) * (Number(s.reps) || 0);
+          });
+        }
+        volMap[w.exercise] = (volMap[w.exercise] || 0) + totalKgReps;
+      });
+      return Object.entries(volMap)
+        .filter(([, vol]) => vol > 0)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 20)
+        .map(([ex, vol]) => `${ex}: ${Math.round(vol)}kg·회`)
+        .join(', ');
+    })();
 
     // 하드모드 selectedMode별 서론 톤 지시문
     const getModeReplyInstruction = (mode: string): string => {
@@ -558,8 +578,9 @@ ${availableExText}
     - Split Preference: ${profileSplit}
     - Workout Frequency: ${frequencyComment}
     - Recently Trained Parts (last 10 logs): ${recentPartsText}
-    - Recent Exercises (last 10 workouts): ${recentExerciseNames}
+    - Recent Exercises (last 30 workouts): ${recentExerciseNames}
     - Body Part Volume (kg×reps, last 10 workouts): ${volumeContext}
+    - Detailed Exercise Volume (last 30 days): ${exerciseVolumeContext || 'None'}
     - Never Done Exercises (sample): ${neverDoneContext}
     - Today's Target Parts: ${targets.join(', ')}
 
@@ -585,8 +606,8 @@ ${availableExText}
     if (type === "chat") {
       isJsonOutput = false;
 
-      // ── 1차: 자체 학습 코치 모델 시도 (한국어 대화만, 실패 시 Gemini 폴백) ──
-      if (!isEn && userPrompt) {
+      // ── 1차: 자체 학습 코치 모델 시도 (한국어 대화만, 분석 탭 제외, 실패 시 Gemini 폴백) ──
+      if (!isEn && userPrompt && currentTab !== 'analysis') {
         const systemInfo = [
           `- 현재 탭: ${currentTab === 'analysis' ? '분석' : currentTab}`,
           `- 점진적 과부하 상태: ${buildProgressiveOverloadStatus(recentWorkouts)}`,
@@ -652,8 +673,9 @@ userProfile과 recentWorkouts는 참고용이며, 사용자 요청을 절대 ove
 - Goal: ${profileGoal}
 - Available Time: ${profileTime}
 - Workout Frequency: ${frequencyComment}
-- Recent Exercises (last 10 workouts): ${recentExerciseNames}
+- Recent Exercises (last 30 workouts): ${recentExerciseNames}
 - Body Part Volume (kg×reps, last 10 workouts): ${volumeContext}
+- Detailed Exercise Volume (last 30 days): ${exerciseVolumeContext || 'None'}
 - Never Done Exercises (sample): ${neverDoneContext}
 
 [AVAILABLE EXERCISE DATABASE]
