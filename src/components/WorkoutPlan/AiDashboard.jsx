@@ -222,9 +222,9 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
         if (!activeWorkout) return;
 
         const logsToSave = (activeWorkout.exercises || []).map(item => {
-            const completedSets = item.sets.filter(s => s.completed);
+            const completedSets = (item.sets || []).filter(s => s.completed);
             return { ...item, sets: completedSets };
-        }).filter(item => item.sets.length > 0);
+        }).filter(item => (item.sets || []).length > 0);
 
         if (logsToSave.length === 0) {
             toast.error(t('workout.noValidSets', 'No completed sets to save'));
@@ -237,7 +237,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
             const savedAt = new Date(`${todayStr}T12:00:00`).toISOString();
             
             const payload = logsToSave.map(item => {
-                const setsData = item.sets.map(s => ({
+                const setsData = (item.sets || []).map(s => ({
                     kg: s.isDropSet ? '' : s.kg,
                     reps: s.reps,
                     isDropSet: !!s.isDropSet,
@@ -441,7 +441,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                             </div>
 
                             <div className="space-y-3 pt-4 border-t border-slate-800">
-                                {item.sets.map((set, setIdx) => {
+                                {(item.sets || []).map((set, setIdx) => {
                                     return (
                                         <div
                                             key={setIdx}
@@ -526,7 +526,7 @@ const AiDashboard = ({ activeProgram, user, personalRecords, setActiveProgram })
                                                         </svg>
                                                     </button>
                                                     
-                                                    {item.sets.length > 1 && (
+                                                    {(item.sets || []).length > 1 && (
                                                         <button
                                                             type="button"
                                                             onClick={() => removeSetActiveWorkout(exIdx, setIdx)}
